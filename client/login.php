@@ -2,34 +2,57 @@
 
 session_start();
 
-include __DIR__ . "/../server/config/database.php";
+require_once __DIR__ . "/../server/config/database.php";
 
-$username=$_POST['username'];
-$password=$_POST['password'];
+// Check if the form was submitted
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: index.php");
+    exit();
+}
 
-$sql="SELECT * FROM users WHERE username='$username'";
+$username = trim($_POST['username']);
+$password = $_POST['password'];
 
-$result=mysqli_query($conn,$sql);
+// Prepare SQL statement
+$stmt = mysqli_prepare($conn, "SELECT id, username, password, role FROM users WHERE username = ?");
 
-if (mysqli_num_rows($result)>0) {
+mysqli_stmt_bind_param($stmt, "s", $username);
 
-    $user=mysqli_fetch_assoc($result);
-    if(password_verify($password,$user['password'])){
-        $_SESSION['username']=$username;
-        header("Location: dashboard.php");
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_get_result($stmt);
+
+if ($user = mysqli_fetch_assoc($result)) {
+
+    if (password_verify($password, $user['password'])) {
+
+        // Store user information in the session
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role'];
+
+        header("Location: modules/dashboard/index.php");
         exit();
+
     } else {
+
         echo "<script>
-        alert('Wrong Password');
-        window.location='index.php';
+            alert('Wrong Password');
+            window.location='index.php';
         </script>";
+
     }
 
 } else {
+
     echo "<script>
-    alert('Username not found');
-    window.location='index.php';
+        alert('Username not found');
+        window.location='index.php';
     </script>";
+
 }
+
+mysqli_stmt_close($stmt);
+mysqli_close($conn);
 
 ?>

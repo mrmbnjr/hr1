@@ -13,7 +13,7 @@
 <div class="login-page">
     <div class="login-container">
 
-        <img src="images/logo.png" class="logo">
+        <img src="assets/images/logo.png" class="logo">
         <h1>RAM-YUM Store</h1>
         <h2>LOGIN</h2>
 
@@ -42,7 +42,7 @@
 
         </form>
     </div>
-    <footer></footer>
+<?php require 'includes/footer.php'; ?>
 </div>
 
 <script src="assets/js/script.js"></script>

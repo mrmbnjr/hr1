@@ -27,8 +27,14 @@ future functions
 
 3. Plan the Features
 Authentication
-├── Login
-├── Logout
+├── Login ✅
+├── Logout✅
+├── Sessions✅
+├── Roles Authorization
+    ├── Admin
+    ├── Hr Staff
+    ├── Manager
+    └──  Employees
 
 Resume Module
 ├── Upload PDF/DOCX
@@ -79,13 +85,31 @@ Storage: local storage
 hr1/
 │
 ├── client/
-│   ├── css/
-│   ├── js/
-│   ├── images/
+│   ├── assets/
+│   │   ├── header.php
+│   │   ├── css/
+│   │   ├── js/
+│   │   └──  images/
+│   │
 │   ├── includes/
 │   │   ├── header.php
 │   │   ├── footer.php
 │   │   └── navbar.php
+│   │
+│   ├── includes/
+│   │   ├── header.php
+│   │   ├── sidebar.php
+│   │   ├── footer.php
+│   │   └── auth.php
+│   │
+│   └── pages/
+│   │   ├── dashboard.php
+│   │   ├── applicants.php
+│   │   ├── ai_screening.php
+│   │   ├── employees.php
+│   │   ├── departments.php
+│   │   ├── settings.php
+│   │   └── profile.php
 │   ├── login.php
 │   ├── dashboard.php
 │   └── index.php
@@ -113,6 +137,4 @@ hr1/
 └── database/
 │   └── hrms.sql
 │
-├── database/
-│    └── hrms.sql
 │
