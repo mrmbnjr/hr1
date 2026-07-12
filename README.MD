@@ -4,7 +4,7 @@
 - Goal: Automatically analyze resumes and rank candidates.
 
 2. Requirements
-<h2>What the system can do.</h2>
+<h3>What the system can do.</h3>
 
 important
 - Upload resume
@@ -17,7 +17,7 @@ future functions
 - Rankings
 - sent email automatically
 
-<h2>How the system should perform.</h2>
+<h3>How the system should perform.</h3>
 
 - Fast processing
 - Secure data
@@ -76,17 +76,43 @@ Storage: local storage
 
 6. Project Structure
 
-resume-screening-ai/
-
-client/
-    src/
-    public/
-
-server/
-    controllers/
-    models/
-    routes/
-    middleware/
-    config/
-
-README.md
+hr1/
+│
+├── client/
+│   ├── css/
+│   ├── js/
+│   ├── images/
+│   ├── includes/
+│   │   ├── header.php
+│   │   ├── footer.php
+│   │   └── navbar.php
+│   ├── login.php
+│   ├── dashboard.php
+│   └── index.php
+│
+├── server/
+│   ├── config/
+│   │   └── database.php
+│   ├── controllers/
+│   │   ├── AuthController.php
+│   │   ├── EmployeeController.php
+│   │   └── ApplicantController.php
+│   ├── models/
+│   │   ├── User.php
+│   │   ├── Employee.php
+│   │   └── Applicant.php
+│   ├── middleware/
+│   │   └── auth.php
+│   └── helpers/
+│       └── functions.php
+│
+├── uploads/
+│   ├── resumes/
+│   └── profile_pictures/
+│
+└── database/
+│   └── hrms.sql
+│
+├── database/
+│    └── hrms.sql
+│
