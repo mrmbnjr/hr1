@@ -1,4 +1,5 @@
 <?php
+
 require_once "../../../server/bootstrap.php";
 require_once "../../../server/middleware/auth.php";
 require_once "../../../server/middleware/role.php";
@@ -12,7 +13,15 @@ requireRole([
     'accountant'
 ]);
 
+$pageTitle = "Dashboard";
+
+$pageStyles = [
+    "layout.css",
+    "dashboard.css"
+];
+
 include "../../includes/header.php";
+
 ?>
 
 <div class="layout">
@@ -23,8 +32,7 @@ include "../../includes/header.php";
 
         <?php include "../../includes/navbar.php"; ?>
 
-    <h1>Welcome <?php echo $_SESSION['username']; ?></h1>
-
+        <h1>Welcome <?= htmlspecialchars($_SESSION['username']) ?></h1>
 
     </main>
 

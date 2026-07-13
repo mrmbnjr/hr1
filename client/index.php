@@ -1,51 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAM-YUM Login</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
-</head>
+<?php
 
-<body>
+require_once "../server/bootstrap.php";
+
+$pageTitle = "RAM-YUM Login";
+
+$pageStyles = [
+    "login.css"
+];
+
+include "includes/header.php";
+
+?>
 
 <div class="login-page">
+
     <div class="login-container">
 
-        <img src="assets/images/logo.png" class="logo">
+        <img src="<?= BASE_URL ?>/assets/images/logo.png" class="logo">
+
         <h1>RAM-YUM Store</h1>
+
         <h2>LOGIN</h2>
 
-        <form action="login.php" method="POST">
+        <form action="<?= BASE_URL ?>/login.php" method="POST">
 
             <label>Username</label>
-                <input
+
+            <input
                 type="text"
                 name="username"
-                placeholder=""
                 required>
+
             <label>Password</label>
 
             <div class="password-box">
+
                 <input
-                type="password"
-                id="password"
-                name="password"
-                required>
+                    type="password"
+                    id="password"
+                    name="password"
+                    required>
+
                 <span id="togglePassword">👁</span>
+
             </div>
 
             <button type="submit">
+
                 LOGIN
+
             </button>
 
         </form>
+
     </div>
-<?php require 'includes/footer.php'; ?>
+
 </div>
 
-<script src="assets/js/script.js"></script>
+<script src="<?= BASE_URL ?>/assets/js/script.js"></script>
 
-</body>
-</html>
+<?php include "includes/footer.php"; ?>

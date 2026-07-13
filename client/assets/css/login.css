@@ -1,0 +1,153 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("../images/bg.png") center/cover no-repeat;
+}
+
+header {
+    position:fixed;
+    top:0;
+    right:0;
+    width:100%;
+    height:45px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    background:linear-gradient(#a90d0d,#7f0000);
+    font-size:17px;
+}
+
+.darkmode {
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+}
+
+
+.login-container {
+    width:430px;
+    background:rgba(255,255,255,.92);
+    border:4px solid #5c2929;
+    border-radius:18px;
+    padding:75px 40px 40px;
+    position:relative;
+    box-shadow:0 12px 25px rgba(0,0,0,.25);
+}
+
+.logo {
+    width:130px;
+    position:absolute;
+    left:50%;
+    top:-65px;
+    transform:translateX(-50%);
+}
+
+h1 {
+    font-family:'Luckiest Guy', cursive;
+    text-align:center;
+    color:#e22020;
+    font-size:41px;
+    letter-spacing:2px;
+    text-shadow:
+    2px 2px 0 #000,
+    4px 4px 6px rgba(0,0,0,.25);
+}
+
+h2 {
+    text-align:center;
+    font-size:24px;
+    margin:8px 0 30px;
+}
+
+label {
+    display:block;
+    margin-top:18px;
+    margin-bottom:8px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+input {
+    width:100%;
+    height:48px;
+    padding:0 15px;
+    border:2px solid #d9a3a3;
+    border-radius:5px;
+    background:#ffecec;
+    font-size:17px;
+    outline:none;
+    transition:.25s;
+}
+
+input:focus {
+    border-color:#b60000;
+    box-shadow:0 0 10px rgba(182,0,0,.35);
+}
+
+.password-box {
+    position:relative;
+}
+
+.password-box span {
+    position:absolute;
+    right:15px;
+    top:12px;
+    cursor:pointer;
+    font-size:22px;
+}
+
+button {
+    width:100%;
+    height:48px;
+    margin-top:28px;
+    background: url("../images/loginbtn.png") center no-repeat;
+    border: solid 1px #000000;
+    border-radius: 6px;
+    cursor:pointer;
+    color:#fff;
+    font-size:30px;
+    font-weight:bold;
+    transition:.25s;
+    text-shadow:1px 1px 3px black;
+}
+
+button:hover {
+    transform:translateY(-2px);
+    filter:brightness(1.08);
+}
+
+button:active {
+    transform:scale(.98);
+}
+
+@media(max-width:500px){
+
+    .login-container {
+
+        width:95%;
+        padding:65px 25px 35px;
+
+    }
+
+    .logo {
+
+        width:100px;
+
+    }
+
+    h1 {
+
+        font-size:35px;
+
+    }
+
+}
