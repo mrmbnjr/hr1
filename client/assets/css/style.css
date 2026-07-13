@@ -151,6 +151,60 @@ footer  {
     font-size:17px;
 }
 
+/* Layout */
+.layout{
+    display:flex;
+    min-height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+    width:260px;
+    background:#2c3e50;
+    color:#fff;
+    padding:20px;
+}
+
+.sidebar-header{
+    margin-bottom:40px;
+}
+
+.sidebar-header h2{
+    font-size:24px;
+}
+
+.sidebar-header p{
+    font-size:14px;
+    opacity:.8;
+}
+
+.sidebar-menu{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.sidebar-menu a{
+    color:#fff;
+    text-decoration:none;
+    padding:12px;
+    border-radius:8px;
+    transition:.3s;
+}
+
+.sidebar-menu a:hover{
+    background:rgba(255,255,255,.15);
+}
+
+/* Main Content */
+.main-content{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+
+
 @media(max-width:500px){
 
     .login-container {

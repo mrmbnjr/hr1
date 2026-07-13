@@ -4,7 +4,6 @@ session_start();
 
 require_once __DIR__ . "/../server/config/database.php";
 
-// Check if the form was submitted
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: index.php");
     exit();
@@ -12,12 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $username = trim($_POST['username']);
 $password = $_POST['password'];
-
-// Prepare SQL statement
 $stmt = mysqli_prepare($conn, "SELECT id, username, password, role FROM users WHERE username = ?");
 
 mysqli_stmt_bind_param($stmt, "s", $username);
-
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
@@ -26,7 +22,6 @@ if ($user = mysqli_fetch_assoc($result)) {
 
     if (password_verify($password, $user['password'])) {
 
-        // Store user information in the session
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];

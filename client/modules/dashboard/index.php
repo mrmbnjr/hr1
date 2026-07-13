@@ -1,24 +1,33 @@
 <?php
-
 require_once "../../../server/bootstrap.php";
 require_once "../../../server/middleware/auth.php";
 require_once "../../../server/middleware/role.php";
 
-requireRole(['admin', 'hr', 'manager', 'cashier', 'warehouse', 'accountant']);
+requireRole([
+    'admin',
+    'hr',
+    'manager',
+    'cashier',
+    'warehouse',
+    'accountant'
+]);
 
+include "../../includes/header.php";
 ?>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Dashboard</title>
-    </head>
+<div class="layout">
 
-    <body>
+    <?php include "../../includes/sidebar.php"; ?>
+
+    <main class="main-content">
+
+        <?php include "../../includes/navbar.php"; ?>
 
     <h1>Welcome <?php echo $_SESSION['username']; ?></h1>
 
-    <a href="../../logout.php">Logout</a>
 
-    </body>
-</html>
+    </main>
+
+</div>
+
+<?php include "../../includes/footer.php"; ?>
