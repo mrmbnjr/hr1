@@ -30,7 +30,7 @@ Authentication
 ├── Login ✅
 ├── Logout✅
 ├── Sessions✅
-├── Roles Authorization
+├── Roles Authorization✅
     ├── Admin
     ├── Hr Staff
     ├── Manager
