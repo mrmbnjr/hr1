@@ -1,9 +1,9 @@
-### 1. Define the Problem
+# 1. Define the Problem
 - Problem: HR spends too much time reviewing resumes manually.
 - Users: Admin, Hr and Manager
 - Goal: Automatically analyze resumes and rank candidates.
 
-### 2. Requirements
+# 2. Requirements
 <h3>What the system can do.</h3>
 
 important
@@ -25,7 +25,7 @@ future functions
 - Easy to use
 - User Friendly
 
-### 3. Plan the Features
+# 3. Plan the Features
 Authentication
 ├── Login ✅
 ├── Logout✅
@@ -47,32 +47,26 @@ Results
 ├── Missing Skills
 ├── Download Report
 
-### 4. Database Design
------
-Users
------
+# 4. Database Design
+### Users
 id
 name
 email
 password
 
--------
-Resumes
--------
+### Resumes
 id
 user_id
 filename
 upload_date
 
--------
-Results
--------
+### Results
 id
 resume_id
 score
 recommendation
 
-### 5. Tech stack
+# 5. Tech stack
 UI/UX Design: Figma
 Frontend: html, css, js
 backend: js and php
@@ -80,10 +74,9 @@ Database: mysql
 AI: Gemini
 Storage: local storage
 
-### 6. Project Structure
+# 6. Project Structure
 
-
-hr1/
+``` hr1/
 │
 ├── client/
 │   ├── assets/
@@ -139,3 +132,4 @@ hr1/
 │   └── hrms.sql
 │
 │
+```
