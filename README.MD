@@ -1,23 +1,23 @@
-# 1. Define the Problem
+## 1. Define the Problem
 - Problem: HR spends too much time reviewing resumes manually.
 - Users: Admin, Hr and Manager
 - Goal: Automatically analyze resumes and rank candidates.
 
-# 2. Requirements
-<h3>What the system can do.</h3>
+## 2. Requirements
+### What the system can do.
 
-important
+##### Important
 - Upload resume
 - Analyze resume
 - Compare with job description
 - Display matching score
 - Generate recommendations
 
-future functions
+##### Future functions
 - Rankings
 - sent email automatically
 
-<h3>How the system should perform.</h3>
+### How the system should perform.
 
 - Fast processing
 - Secure data
@@ -25,8 +25,9 @@ future functions
 - Easy to use
 - User Friendly
 
-# 3. Plan the Features
-Authentication
+## 3. Plan the Features
+```
+- Authentication
 ├── Login ✅
 ├── Logout✅
 ├── Sessions✅
@@ -36,47 +37,82 @@ Authentication
     ├── Manager
     └──  Employees
 
-Resume Module
+- Users View
+Admin
+├── Dashboard
+├── Job Managements
+├── Manage Users
+├── Roles & Permissions
+├── Reports
+├── System Settings
+
+Manager
+├── Dashboard
+├── Job Managements
+├── Applications
+├── Interviews
+    ├── Schedule Interview
+├── Hiring Decisions
+├── Reports
+
+
+HR Staff
+├── Dashboard
+├── Job Management
+├── Applications
+├── Interviews
+├── Onboarding
+
+Applicant
+├── Home
+├── Job Vacancies
+    └── Application Form
+├── About Us
+├── Contacts
+
+- Resume Module
 ├── Upload PDF/DOCX
 ├── Extract text
 ├── AI Analysis
 
-Results
+- Results
 ├── Match Score
 ├── Skills Found
 ├── Missing Skills
 ├── Download Report
+```
 
-# 4. Database Design
+## 4. Database Design
 ### Users
-id
-name
-email
-password
+- id
+- name
+- email
+- password
 
 ### Resumes
-id
-user_id
-filename
-upload_date
+- id
+- user_id
+- filename
+- upload_date
 
 ### Results
-id
-resume_id
-score
-recommendation
+- id
+- resume_id
+- score
+- recommendation
 
-# 5. Tech stack
-UI/UX Design: Figma
-Frontend: html, css, js
-backend: js and php
-Database: mysql
-AI: Gemini
-Storage: local storage
+## 5. Tech stack
+- UI/UX Design: Figma
+- Frontend: html, css, js
+- backend: js and php
+- Database: mysql
+- AI: Gemini
+- Storage: local storage
 
-# 6. Project Structure
+## 6. Project Structure
 
-``` hr1/
+``` 
+hr1/
 │
 ├── client/
 │   ├── assets/
