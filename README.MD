@@ -35,7 +35,7 @@
     ├── Admin
     ├── Hr Staff
     ├── Manager
-    └──  Employees
+    └── Employees
 
 - Users View
 Admin
@@ -51,7 +51,7 @@ Manager
 ├── Job Managements
 ├── Applications
 ├── Interviews
-    ├── Schedule Interview
+    └── Schedule Interview
 ├── Hiring Decisions
 ├── Reports
 

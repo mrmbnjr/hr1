@@ -1,18 +1,47 @@
+/* ==========================
+   Login - Show/Hide Password
+========================== */
+
 const password = document.getElementById("password");
-const toggle = document.getElementById("togglePassword");
+const passwordToggle = document.getElementById("togglePassword");
 
-toggle.onclick = function(){
+if (password && passwordToggle) {
 
-    if(password.type==="password"){
+    passwordToggle.addEventListener("click", () => {
 
-        password.type="text";
-        toggle.innerHTML="🙈";
+        if (password.type === "password") {
+            password.type = "text";
+            passwordToggle.innerHTML = "🙈";
+        } else {
+            password.type = "password";
+            passwordToggle.innerHTML = "👁";
+        }
 
-    }else{
-
-        password.type="password";
-        toggle.innerHTML="👁";
-
-    }
+    });
 
 }
+
+
+/* ==========================
+   Sidebar
+========================== */
+
+const sidebar = document.querySelector(".sidebar");
+const toggle = document.querySelector(".menu-toggle");
+const overlay = document.querySelector(".sidebar-overlay");
+
+toggle.addEventListener("click", () => {
+
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle("active");
+        overlay.classList.toggle("active");
+    } else {
+        sidebar.classList.toggle("collapsed");
+    }
+
+});
+
+overlay.addEventListener("click", () => {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+});
