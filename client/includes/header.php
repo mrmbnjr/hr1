@@ -18,6 +18,7 @@
       <!-- Global CSS -->
       <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/variables.css">
       <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+      <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/layout.css">
 
       <?php
       if (isset($pageStyles) && is_array($pageStyles)) {

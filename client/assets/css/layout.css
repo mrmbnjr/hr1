@@ -5,80 +5,154 @@
     min-height:100vh;
 }
 
-/* Sidebar */
+/* ==========================
+   Sidebar
+========================== */
 
 .sidebar{
     width:270px;
     background:#1e293b;
     color:#fff;
-    transition:all .3s ease;
-    overflow:hidden;
     flex-shrink:0;
+
+    display:flex;
+    flex-direction:column;
+
+    transition:.3s ease;
+    overflow-y:auto;
+
+    position:sticky;
+    top:0;
+    height:100vh;
 }
 
-.sidebar.collapsed{
-    width:80px;
+/* Scrollbar */
+
+.sidebar::-webkit-scrollbar{
+    width:6px;
 }
+
+.sidebar::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.15);
+    border-radius:20px;
+}
+
+/* ==========================
+   Header
+========================== */
 
 .sidebar-header{
-    padding:25px 20px;
+    padding:24px 20px;
     text-align:center;
     border-bottom:1px solid rgba(255,255,255,.08);
 }
 
 .sidebar-header h2{
     font-size:24px;
-    margin-bottom:5px;
+    margin-bottom:4px;
+    font-weight:700;
 }
 
 .sidebar-header p{
     font-size:13px;
-    opacity:.8;
+    opacity:.7;
 }
+
+/* ==========================
+   Menu
+========================== */
 
 .sidebar-menu{
     display:flex;
     flex-direction:column;
-    padding:15px;
-    gap:8px;
+    padding:18px 12px;
 }
+
+/* Section title */
+
+.sidebar-title{
+    margin:18px 14px 8px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#94a3b8;
+}
+
+/* Links */
 
 .sidebar-menu a{
     display:flex;
     align-items:center;
-    gap:15px;
+    gap:14px;
 
-    color:#fff;
+    padding:13px 15px;
+    margin-bottom:4px;
+
+    color:#e2e8f0;
     text-decoration:none;
-
-    padding:14px 16px;
 
     border-radius:10px;
 
-    transition:.3s;
+    transition:all .25s ease;
 }
 
 .sidebar-menu a:hover{
-    background:rgba(255,255,255,.1);
+    background:#334155;
+    color:#ffffff;
+    transform:translateX(4px);
+}
+
+/* Active Page */
+
+.sidebar-menu a.active{
+    background:#2563eb;
+    color:#fff;
+    font-weight:600;
 }
 
 .sidebar-menu i{
-    width:20px;
+    width:22px;
     text-align:center;
-    font-size:18px;
+    font-size:17px;
 }
 
-/* Collapsed Sidebar */
+/* ==========================
+   Collapsed
+========================== */
 
-.sidebar.collapsed .sidebar-header p,
+.sidebar.collapsed{
+    width:82px;
+}
+
 .sidebar.collapsed .sidebar-header h2,
+.sidebar.collapsed .sidebar-header p,
+.sidebar.collapsed .sidebar-title,
 .sidebar.collapsed .sidebar-menu span{
     display:none;
 }
 
+.sidebar.collapsed .sidebar-menu{
+    padding:18px 10px;
+}
+
 .sidebar.collapsed .sidebar-menu a{
     justify-content:center;
-    padding:16px;
+    padding:15px;
+}
+
+.sidebar.collapsed .sidebar-menu a:hover{
+    transform:none;
+}
+
+.sidebar-menu a:last-child{
+    margin-top:auto;
+    color:#fca5a5;
+}
+
+.sidebar-menu a:last-child:hover{
+    background:#dc2626;
+    color:#fff;
 }
 
 /* Main Content */
@@ -88,6 +162,20 @@
     display:flex;
     flex-direction:column;
     min-width:0;
+}
+
+.app-footer {
+    position: flex;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(#a90d0d, #7f0000);
+    color: white;
+    font-size: 17px;
 }
 
 /* Topbar */
@@ -101,9 +189,6 @@
     justify-content:space-between;
     padding:0 25px;
     box-shadow:0 2px 8px rgba(0,0,0,.05);
-    position:sticky;
-    top:0;
-    z-index:500;
 }
 
 /* Left */
@@ -229,12 +314,18 @@
 
     .sidebar.collapsed .sidebar-header h2,
     .sidebar.collapsed .sidebar-header p,
+    .sidebar.collapsed .sidebar-title,
     .sidebar.collapsed .sidebar-menu span{
         display:block;
     }
 
+    .sidebar.collapsed .sidebar-menu{
+        padding:18px 12px;
+    }
+
     .sidebar.collapsed .sidebar-menu a{
         justify-content:flex-start;
+        padding:13px 15px;
     }
 
     .sidebar-overlay{
@@ -248,7 +339,6 @@
     .sidebar-overlay.active{
         display:block;
     }
-
         .topbar{
         padding:0 15px;
     }
