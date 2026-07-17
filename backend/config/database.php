@@ -1,19 +1,19 @@
 <?php
 
-$host="localhost";
-$user="root";
-$pass="";
-$db="hr1_db";
+    $config = require __DIR__ . '/env.php';
 
-$conn = mysqli_connect(
-    $host, 
-    $user, 
-    $pass, 
-    $db
-);
+    $db = $config['db'];
 
-    if(!$conn){
-        die("Connection Failed");
-    }
+    $dsn = sprintf(
+        'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+        $db['host'],
+        $db['port'],
+        $db['dbname'],
+        $db['charset']
+    );
 
-?>
+    $pdo = new PDO(
+        $dsn,
+        $db['username'],
+        $db['password']
+    );
