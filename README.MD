@@ -16,6 +16,7 @@
 ##### Future functions
 - Rankings
 - sent email automatically
+- validate the resume immediately when upload by applicant
 
 ### How the system should perform.
 

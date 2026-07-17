@@ -2,7 +2,7 @@
 
 session_start();
 
-require_once __DIR__ . "/../server/config/database.php";
+require_once __DIR__ . "/../backend/config/database.php";
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
