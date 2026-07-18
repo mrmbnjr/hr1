@@ -1,0 +1,130 @@
+/* =========================================================
+   RAM-YUM Store — Login page behaviour
+   - Light / dark theme toggle (persisted)
+   - Decorative footer corner-icons (rendered once, responsive-safe)
+   - Front-end only form handling (validation + simulated submit)
+     Replace the block marked TODO with a real API call.
+   ========================================================= */
+
+(function () {
+  "use strict";
+
+  /* ---------- Theme toggle ---------- */
+  var THEME_KEY = "ramyum-theme";
+  var root = document.documentElement;
+  var themeToggle = document.getElementById("themeToggle");
+
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      root.setAttribute("data-theme", "dark");
+      themeToggle.setAttribute("aria-pressed", "true");
+    } else {
+      root.removeAttribute("data-theme");
+      themeToggle.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  function getStoredTheme() {
+    try {
+      return localStorage.getItem(THEME_KEY);
+    } catch (err) {
+      return null; // storage unavailable (private browsing, etc.)
+    }
+  }
+
+  function storeTheme(theme) {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (err) {
+      /* ignore — theme just won't persist */
+    }
+  }
+
+  var initialTheme =
+    getStoredTheme() ||
+    (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light");
+  applyTheme(initialTheme);
+
+  themeToggle.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    applyTheme(next);
+    storeTheme(next);
+  });
+
+  /* ---------- Footer corner icons ---------- */
+  var CORNER_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" aria-hidden="true">' +
+    '<path d="M4 9V6a2 2 0 0 1 2-2h3M20 9V6a2 2 0 0 1-2-2h-3' +
+    'M4 15v3a2 2 0 0 0 2 2h3M20 15v3a2 2 0 0 1-2 2h-3"/>' +
+    "</svg>";
+
+  function renderFooterIcons(count) {
+    var left = document.getElementById("footerIconsLeft");
+    var right = document.getElementById("footerIconsRight");
+    if (!left || !right) return;
+    var html = new Array(count).fill(CORNER_ICON).join("");
+    left.innerHTML = html;
+    right.innerHTML = html;
+  }
+  renderFooterIcons(4);
+
+  /* ---------- Login form ---------- */
+  var form = document.getElementById("loginForm");
+  var usernameField = document.getElementById("username");
+  var passwordField = document.getElementById("password");
+  var message = document.getElementById("formMessage");
+  var loginBtn = document.getElementById("loginBtn");
+
+  function setError(text) {
+    message.textContent = text || "";
+    message.classList.remove("is-success");
+  }
+
+  function clearFieldError(input) {
+    input.closest(".field").classList.remove("has-error");
+  }
+
+  [usernameField, passwordField].forEach(function (input) {
+    input.addEventListener("input", function () {
+      clearFieldError(input);
+      setError("");
+    });
+  });
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    var username = usernameField.value.trim();
+    var password = passwordField.value;
+    var firstInvalid = null;
+
+    [usernameField, passwordField].forEach(clearFieldError);
+
+    if (!username) firstInvalid = firstInvalid || usernameField;
+    if (!password) firstInvalid = firstInvalid || passwordField;
+
+    if (firstInvalid) {
+      usernameField.closest(".field").classList.toggle("has-error", !username);
+      passwordField.closest(".field").classList.toggle("has-error", !password);
+      setError("Please fill in both your username and password.");
+      firstInvalid.focus();
+      return;
+    }
+
+    setError("");
+    loginBtn.disabled = true;
+    loginBtn.classList.add("is-loading");
+
+    // TODO: replace this simulated delay with a real authentication request, e.g.
+    // fetch("/api/login", { method: "POST", body: JSON.stringify({ username, password }) })
+    window.setTimeout(function () {
+      loginBtn.disabled = false;
+      loginBtn.classList.remove("is-loading");
+      message.textContent = "Welcome back, " + username + "!";
+      message.classList.add("is-success");
+    }, 900);
+  });
+})();

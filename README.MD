@@ -115,58 +115,62 @@ Applicant
 ``` 
 hr1/
 │
-├── client/
-│   ├── assets/
-│   │   ├── header.php
-│   │   ├── css/
-│   │   ├── js/
-│   │   └──  images/
-│   │
-│   ├── includes/
-│   │   ├── header.php
-│   │   ├── footer.php
-│   │   └── navbar.php
-│   │
-│   ├── includes/
-│   │   ├── header.php
-│   │   ├── sidebar.php
-│   │   ├── footer.php
-│   │   └── auth.php
-│   │
-│   └── pages/
-│   │   ├── dashboard.php
-│   │   ├── applicants.php
-│   │   ├── ai_screening.php
-│   │   ├── employees.php
-│   │   ├── departments.php
-│   │   ├── settings.php
-│   │   └── profile.php
-│   ├── login.php
-│   ├── dashboard.php
-│   └── index.php
+├── src/
+│   ├── App/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
+│   │   ├── Models/
+│   │   └── Services/
+│   ├── Core/
+│   └── Config/
 │
-├── server/
-│   ├── config/
-│   │   └── database.php
-│   ├── controllers/
-│   │   ├── AuthController.php
-│   │   ├── EmployeeController.php
-│   │   └── ApplicantController.php
-│   ├── models/
-│   │   ├── User.php
-│   │   ├── Employee.php
-│   │   └── Applicant.php
-│   ├── middleware/
-│   │   └── auth.php
-│   └── helpers/
-│       └── functions.php
+├── resources/
+│   ├── views/
+│   │   └── auth/
+│   │       └── login.php
+│   ├── auth/
+│   │   └── login.php
+│   ├── modules/
+│   │   ├── dashboard/
+│   │   │   └── index.php
+│   │   ├── applicants/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── view.php
+│   │   ├── job_positions/
+│   │   ├── ai_screening/
+│   │   ├── interviews/
+│   │   ├── job_offers/
+│   │   ├── onboarding/
+│   │   ├── employees/
+│   │   ├── users/
+│   │   ├── reports/
+│   │   └── includes/
+│   │       ├── footer.php
+│   │       ├── sidebar.php
+│   │       ├── navbar.php
+│   │       └── header.php
+│   └── assets/
+│       ├── css/
+│       │   ├── style.css
+│       │   ├── login.css
+│       │   ├── dashboard.css
+│       │   └── layout.css
+│       ├── images/
+│       └── js/
+│           ├── login.js
+│           └── script.js
 │
-├── uploads/
-│   ├── resumes/
-│   └── profile_pictures/
+├── public/
+│   ├── index.php
+│   └── assets/
 │
-└── database/
-│   └── hrms.sql
-│
-│
+├── tests/
+├── database/
+│   ├── seeds/
+│   └── migration/
+├── vendor/
+├── composer.json
+├── .gitignore
+└── README.md
 ```
