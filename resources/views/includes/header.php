@@ -18,10 +18,10 @@
       <link rel="stylesheet" href="/hr1/public/assets/css/variables.css">
       <link rel="stylesheet" href="/hr1/public/assets/css/style.css">
       <link rel="stylesheet" href="/hr1/public/assets/css/layout.css">
-      <link rel="stylesheet" href="/hr1/public/assets/css/login.css" />
-      <link rel="stylesheet" href="/hr1/public/assets/css/index.css" />
-      <link rel="stylesheet" href="/hr1/public/assets/css/dashboard.css" />
 
+      <?php if (!empty($pageCSS)): ?>
+            <link rel="stylesheet" href="/hr1/public/assets/css/<?= $pageCSS ?>">
+      <?php endif; ?>
 </head>
 
 <body>

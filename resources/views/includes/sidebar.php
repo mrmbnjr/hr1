@@ -21,7 +21,7 @@
         </button>
 
         <h2>RAM-YUM</h2>
-        <p>Human Resource Management</p>
+        <p>Korean & Japanese Store</p>
 
     </div>
 

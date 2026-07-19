@@ -1,20 +1,57 @@
 <?php
-    namespace App\Controllers;
 
-    class RecruitmentController
+namespace App\Controllers;
+
+use App\Models\Recruitment;
+
+class RecruitmentController
+{
+    public function recruitment()
     {
-        public function applicants()
-        {
-            require '../resources/views/applicants/index.php';
-        }
+        $recruitment = new Recruitment();
 
-        public function recruitment()
-        {
-            require '../resources/views/recruitment/index.php';
-        }
+        $jobs = $recruitment->getAllJobs();
 
-        public function onboarding()
-        {
-            require '../resources/views/onboarding/index.php';
-        }
+        require '../resources/views/recruitment/index.php';
     }
+
+    public function create()
+    {
+        $recruitment = new Recruitment();
+
+        // Load all departments for the dropdown
+        $departments = $recruitment->getDepartments();
+
+        require '../resources/views/recruitment/create.php';
+    }
+
+    public function store()
+    {
+        $recruitment = new Recruitment();
+
+        $recruitment->createJob($_POST);
+
+        header("Location: ?page=recruitment");
+        exit;
+    }
+
+    public function close()
+    {
+        $recruitment = new Recruitment();
+
+        $recruitment->close($_POST['position_id']);
+
+        header("Location:?page=recruitment");
+        exit;
+    }
+    
+    public function applicants()
+    {
+        require '../resources/views/applicants/index.php';
+    }
+
+    public function onboarding()
+    {
+        require '../resources/views/onboarding/index.php';
+    }
+}

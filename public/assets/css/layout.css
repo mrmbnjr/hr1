@@ -7,18 +7,6 @@
    page that includes this partial, same as the login page.
    ========================================================= */
 
-:root {
-  --ry-maroon: #6f1414;
-  --ry-maroon-dark: #480d0d;
-  --ry-red: #e0362c;
-  --ry-gold: #f2c14e;
-  --ry-gold-dark: #cf9a2c;
-  --ry-cream: #fbf3e6;
-  --ry-white: #fffaf3;
-
-  --sidebar-width: 264px;
-}
-
 /* ---------- sidebar shell ---------- */
 .sidebar {
   position: fixed;
@@ -264,6 +252,7 @@
 .navbar-search {
   position: relative;
   width: 360px;
+  top: 10;
 }
 
 .navbar-search i {
@@ -617,6 +606,29 @@ gap:10px;
 }
 
 }
+@media (max-width:480px){
+  .footer-text { 
+    font-size: 11px;
+  }
+  .footer-icons { 
+    gap: 6px; 
+  }
+
+  .footer-icons svg {
+     width: 13px; height: 13px; 
+    }
+
+  .site-footer { 
+    gap: 8px; padding: 8px 10px; 
+  }
+}
+
+@media (max-width: 360px) {
+  .footer-icons { 
+    display: none; 
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .sidebar-overlay, .sidebar-menu a { transition: none; }

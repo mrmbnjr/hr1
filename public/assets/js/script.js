@@ -241,3 +241,92 @@ overlay.addEventListener("click", () => {
     });
 
 })();
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const searchInput = document.getElementById("searchApplicant");
+    const statusFilter = document.getElementById("filterStatus");
+    const scoreFilter = document.getElementById("filterScore");
+
+    const applicantCards = document.querySelectorAll(".applicant-card");
+
+    function filterApplicants() {
+
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const statusValue = statusFilter.value.toLowerCase();
+        const scoreValue = scoreFilter.value;
+
+        applicantCards.forEach(card => {
+
+            const name =
+                card.querySelector(".profile-header h2")
+                ?.textContent
+                .toLowerCase() || "";
+
+            const position =
+                card.querySelector(".profile-header p")
+                ?.textContent
+                .toLowerCase() || "";
+
+            const status =
+                card.querySelector(".status")
+                ?.textContent
+                .trim()
+                .toLowerCase() || "";
+
+            const scoreText =
+                card.querySelector(".score")
+                ?.textContent
+                .replace("%", "") || "0";
+
+            const score = parseInt(scoreText);
+
+            let visible = true;
+
+            /* --------------------------
+               Search
+            --------------------------- */
+
+            if (
+                searchValue !== "" &&
+                !name.includes(searchValue) &&
+                !position.includes(searchValue)
+            ) {
+                visible = false;
+            }
+
+            /* --------------------------
+               Status
+            --------------------------- */
+
+            if (
+                statusValue !== "" &&
+                status !== statusValue
+            ) {
+                visible = false;
+            }
+
+            /* --------------------------
+               AI Score
+            --------------------------- */
+
+            if (
+                scoreValue !== "" &&
+                score < parseInt(scoreValue)
+            ) {
+                visible = false;
+            }
+
+            card.style.display = visible ? "block" : "none";
+
+        });
+
+    }
+
+    searchInput.addEventListener("keyup", filterApplicants);
+
+    statusFilter.addEventListener("change", filterApplicants);
+
+    scoreFilter.addEventListener("change", filterApplicants);
+
+});

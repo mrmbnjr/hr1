@@ -28,15 +28,27 @@ switch ($page) {
     case 'dashboard':
         (new DashboardController())->index();
         break;
+
     case 'applicants':
         (new RecruitmentController())->applicants();
         break;
+
     case 'recruitment':
         (new RecruitmentController())->recruitment();
         break;
+
+    case 'create':
+        (new RecruitmentController())->create();
+        break;
+
+    case 'close':
+        (new RecruitmentController())->close();
+        break;
+
     case 'onboarding':
         (new RecruitmentController())->onboarding();
         break;
+
     case 'logout':
         (new LogoutController())->logout();
         break;

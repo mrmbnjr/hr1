@@ -6,68 +6,6 @@
      --font-body     Nunito        -> footer, small print, form text
    ========================================================= */
 
-:root {
-  /* --- palette --- */
-  --bg: #f2dd9c;
-  --bg-wave-color: #b5822f;
-  --bg-wave-opacity-1: 0.30;
-  --bg-wave-opacity-2: 0.16;
-
-  --card-bg: #fbf3e6;
-  --card-border: #6f1414;
-  --card-shadow: rgba(74, 15, 15, 0.28);
-
-  --maroon: #6f1414;
-  --maroon-dark: #4a0d0d;
-  --red: #e0362c;
-  --red-bright: #ff5c50;
-
-  --gold: #f2c14e;
-  --gold-dark: #cf9a2c;
-  --badge-seal: var(--maroon);
-
-  --pink: #f8d9de;
-  --pink-border: #f0c0c7;
-  --pink-border-focus: var(--red);
-
-  --ink: #241311;
-  --ink-soft: #6b4a44;
-  --white: #fffaf3;
-
-  --radius-card: 26px;
-  --radius-field: 12px;
-  --radius-btn: 14px;
-
-  --shadow-soft: 0 10px 30px rgba(74, 15, 15, 0.16);
-  --transition: 180ms cubic-bezier(.4, 0, .2, 1);
-
-  --font-display: 'Luckiest Guy', 'Baloo 2', cursive;
-  --font-heading: 'Baloo 2', 'Nunito', sans-serif;
-  --font-body: 'Nunito', 'Baloo 2', sans-serif;
-}
-
-[data-theme="dark"] {
-  --bg: #241511;
-  --bg-wave-color: #4a2f1e;
-  --bg-wave-opacity-1: 0.55;
-  --bg-wave-opacity-2: 0.35;
-
-  --card-bg: #2f1c17;
-  --card-border: #e0362c;
-  --card-shadow: rgba(0, 0, 0, 0.45);
-
-  --maroon: #4a1212;
-  --maroon-dark: #2a0a0a;
-  --badge-seal: #e0362c;
-  --pink: #4a2a2c;
-  --pink-border: #6b3338;
-
-  --ink: #f6e9e2;
-  --ink-soft: #d8b9ae;
-  --white: #fff7f0;
-
-  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.5);
-}
 
 /* --- reset --- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -339,12 +277,7 @@ body {
   .badge-bowl { font-size: 34px; }
   .brand { font-size: 27px; }
   .page-title { font-size: 19px; }
-  .footer-text { font-size: 11px; }
-  .footer-icons { gap: 6px; }
-  .footer-icons svg { width: 13px; height: 13px; }
-  .site-footer { gap: 8px; padding: 8px 10px; }
 }
-
 @media (max-width: 360px) {
   .footer-icons { display: none; }
 }
