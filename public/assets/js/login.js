@@ -118,13 +118,44 @@
     loginBtn.disabled = true;
     loginBtn.classList.add("is-loading");
 
-    // TODO: replace this simulated delay with a real authentication request, e.g.
-    // fetch("/api/login", { method: "POST", body: JSON.stringify({ username, password }) })
-    window.setTimeout(function () {
-      loginBtn.disabled = false;
-      loginBtn.classList.remove("is-loading");
-      message.textContent = "Welcome back, " + username + "!";
-      message.classList.add("is-success");
-    }, 900);
+    fetch("/hr1/public/?page=login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        loginBtn.disabled = false;
+        loginBtn.classList.remove("is-loading");
+
+        if (data.success) {
+            message.textContent = "Login successful!";
+            message.classList.add("is-success");
+
+            // redirect to dashboard
+            window.location.href = "/hr1/public/?page=dashboard";
+
+        } else {
+            message.textContent = data.message;
+            message.classList.add("is-error");
+        }
+
+    })
+    .catch(error => {
+
+        loginBtn.disabled = false;
+        loginBtn.classList.remove("is-loading");
+
+        message.textContent = "Server error.";
+        message.classList.add("is-error");
+
+        console.error(error);
+    });
   });
 })();

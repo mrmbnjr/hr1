@@ -331,52 +331,6 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* --- footer --- */
-.site-footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-height: 40px;
-  padding: 8px 16px;
-  background: var(--maroon);
-  flex-wrap: wrap;
-}
-.footer-text {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 12.5px;
-  letter-spacing: 0.2px;
-  color: var(--white);
-  text-align: center;
-}
-.footer-text .sep { color: var(--gold); margin: 0 2px; opacity: 0.8; }
-.footer-icons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.footer-icons svg {
-  width: 16px;
-  height: 16px;
-  color: var(--gold);
-  opacity: 0.85;
-}
-
-/* --- focus visibility (keyboard) --- */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible {
-  outline: 3px solid var(--gold);
-  outline-offset: 2px;
-}
-
 /* --- responsive --- */
 @media (max-width: 480px) {
   .page { padding: 84px 14px 100px; }

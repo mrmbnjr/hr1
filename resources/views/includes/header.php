@@ -20,14 +20,7 @@
       <link rel="stylesheet" href="/hr1/public/assets/css/layout.css">
       <link rel="stylesheet" href="/hr1/public/assets/css/login.css" />
       <link rel="stylesheet" href="/hr1/public/assets/css/index.css" />
-
-      <?php
-      if (isset($pageStyles) && is_array($pageStyles)) {
-            foreach ($pageStyles as $style) {
-            echo '<link rel="stylesheet" href="/hr1/public/assets/css/' . htmlspecialchars($style) . '">';
-        }
-      }
-      ?>
+      <link rel="stylesheet" href="/hr1/public/assets/css/dashboard.css" />
 
 </head>
 

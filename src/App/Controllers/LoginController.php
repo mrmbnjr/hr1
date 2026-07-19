@@ -9,8 +9,13 @@ class LoginController
 {
     public function login()
     {
+        header("Content-Type: application/json");
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header("Location: /hr1/public/?page=login");
+            echo json_encode([
+                "success" => false,
+                "message" => "Invalid request method."
+            ]);
             exit;
         }
 
@@ -19,9 +24,10 @@ class LoginController
 
         if ($username === '' || $password === '') {
 
-            $_SESSION['error'] = "Username and Password are required.";
-
-            header("Location: /hr1/public/?page=login");
+            echo json_encode([
+                "success" => false,
+                "message" => "Username and Password are required."
+            ]);
             exit;
         }
 
@@ -29,33 +35,42 @@ class LoginController
 
         if (!$user) {
 
-            $_SESSION['error'] = "Invalid username or password.";
-
-            header("Location: /hr1/public/?page=login");
+            echo json_encode([
+                "success" => false,
+                "message" => "Invalid username or password."
+            ]);
             exit;
         }
 
         if ($user['status'] != 'Active') {
 
-            $_SESSION['error'] = "Account is inactive.";
-
-            header("Location: /hr1/public/?page=login");
+            echo json_encode([
+                "success" => false,
+                "message" => "Account is inactive."
+            ]);
             exit;
         }
 
         if (!password_verify($password, $user['password'])) {
 
-            $_SESSION['error'] = "Invalid username or password.";
-
-            header("Location: /hr1/public/?page=login");
+            echo json_encode([
+                "success" => false,
+                "message" => "Invalid username or password."
+            ]);
             exit;
         }
 
+        // Create login session
         Auth::login($user);
 
-        header("Location: /hr1/public/?page=dashboard");
+        echo json_encode([
+            "success" => true,
+            "message" => "Login successful."
+        ]);
+
         exit;
     }
+
 
     public function logout()
     {

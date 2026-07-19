@@ -117,7 +117,17 @@ hr1/
 │
 ├── src/
 │   ├── App/
+├── src/
+│   └── App/
 │   │   ├── Controllers/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── ApplicantController.php
+│   │   │   ├── RecruitmentController.php
+│   │   │   ├── OnboardingController.php
+│   │   │   ├── EmployeeController.php
+│   │   │   ├── UserController.php
+│   │   │   ├── ReportController.php
+│   │   │   └── ProfileController.php
 │   │   ├── Middleware/
 │   │   ├── Models/
 │   │   └── Services/
@@ -125,9 +135,54 @@ hr1/
 │   └── Config/
 │
 ├── resources/
-│   ├── views/
-│   │   └── auth/
-│   │       └── login.php
+│   │── layouts/
+│   │   ├── header.php
+│   │   ├── sidebar.php
+│   │   ├── navbar.php
+│   │   ├── footer.php
+│   │   └── app.php          # Main layout
+│   │
+│   │── dashboard/
+│   │   └── index.php
+│   │
+│   │── applicants/
+│   │   ├── index.php
+│   │   ├── create.php
+│   │   ├── edit.php
+│   │   └── view.php
+│   │
+│   │── recruitment/
+│   │   ├── index.php
+│   │   ├── create.php
+│   │   └── edit.php
+│   │
+│   │── onboarding/
+│   │   ├── index.php
+│   │   └── view.php
+│   │
+│   │── employees/
+│   │   ├── index.php
+│   │   ├── profile.php
+│   │   └── records.php
+│   │
+│   │── users/
+│   │   ├── index.php
+│   │   ├── create.php
+│   │   └── edit.php
+│   │
+│   │── reports/
+│   │   └── index.php
+│   │
+│   │── settings/
+│   │   └── index.php
+│   │
+│   │── profile/
+│   │   └── index.php
+│   │
+│   │── assets/
+│   │    ├── css/
+│   │    └── js/
+│   │
 │   ├── auth/
 │   │   └── login.php
 │   ├── modules/
