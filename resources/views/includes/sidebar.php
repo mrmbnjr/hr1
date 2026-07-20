@@ -36,14 +36,14 @@
             Recruitment &amp; Onboarding
         </p>
 
-        <a href="?page=applicants">
-            <i class="fa-solid fa-file-lines"></i>
-            <span>Applicant Management</span>
-        </a>
-
         <a href="?page=recruitment">
             <i class="fa-solid fa-briefcase"></i>
             <span>Recruitment Management</span>
+        </a>
+
+        <a href="?page=applicants">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Applicant Management</span>
         </a>
 
         <a href="?page=onboarding">
@@ -55,7 +55,7 @@
             Core HR
         </p>
 
-        <a href="?page=human-capital-management">
+        <a href="?page=human-capital">
             <i class="fa-solid fa-id-card"></i>
             <span>Human Capital Management</span>
         </a>

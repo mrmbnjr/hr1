@@ -1,0 +1,1085 @@
+/* ==========================================================
+   RAM-YUM HRM
+   Human Capital Management
+========================================================== */
+
+.main-content{
+    margin-left:var(--sidebar-width);
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--ink);
+}
+
+@media (max-width:960px){
+    .main-content{
+        margin-left:0;
+    }
+}
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.page-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:24px;
+
+    margin:28px;
+    margin-bottom:24px;
+
+    padding:32px;
+
+    background:linear-gradient(
+        135deg,
+        var(--maroon),
+        var(--maroon-dark)
+    );
+
+    border:3px solid var(--gold);
+
+    border-radius:var(--radius-card);
+
+    color:var(--white);
+
+    box-shadow:var(--shadow-soft);
+
+}
+
+.page-header h1{
+
+    margin:0;
+
+    font-family:var(--font-heading);
+
+    font-size:36px;
+
+}
+
+.page-header p{
+
+    margin-top:10px;
+
+    max-width:620px;
+
+    line-height:1.7;
+
+    color:rgba(255,255,255,.82);
+
+}
+
+/* ==========================================================
+   PRIMARY BUTTON
+========================================================== */
+
+.btn-primary{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    padding:14px 24px;
+
+    border:none;
+
+    border-radius:var(--radius-btn);
+
+    background:var(--gold);
+
+    color:var(--maroon-dark);
+
+    font-family:var(--font-heading);
+
+    font-size:15px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+}
+
+.btn-primary:hover{
+
+    background:var(--gold-dark);
+
+    color:var(--white);
+
+    transform:translateY(-3px);
+
+}
+
+/* ==========================================================
+   STATISTICS
+========================================================== */
+
+.stats-grid{
+
+    margin:0 28px 28px;
+
+    display:grid;
+
+    grid-template-columns:repeat(
+        auto-fit,
+        minmax(230px,1fr)
+    );
+
+    gap:22px;
+
+}
+
+.stat-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:24px;
+
+    background:var(--card-bg);
+
+    border:2px solid var(--card-border);
+
+    border-radius:22px;
+
+    box-shadow:var(--shadow-soft);
+
+    transition:var(--transition);
+
+}
+
+.stat-card:hover{
+
+    transform:translateY(-5px);
+
+    border-color:var(--gold);
+
+}
+
+.stat-icon{
+
+    width:64px;
+
+    height:64px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:18px;
+
+    background:linear-gradient(
+        180deg,
+        var(--maroon),
+        var(--maroon-dark)
+    );
+
+    color:var(--gold);
+
+    font-size:24px;
+
+}
+
+/* Optional accent colors */
+
+.stat-icon.blue{
+    background:linear-gradient(180deg,#2563eb,#1d4ed8);
+}
+
+.stat-icon.green{
+    background:linear-gradient(180deg,#16a34a,#15803d);
+}
+
+.stat-icon.orange{
+    background:linear-gradient(180deg,#ea580c,#c2410c);
+}
+
+.stat-icon.purple{
+    background:linear-gradient(180deg,#7c3aed,#6d28d9);
+}
+
+.stat-card h2{
+
+    margin:0;
+
+    font-size:32px;
+
+    color:var(--maroon-dark);
+
+    font-family:var(--font-heading);
+
+}
+
+.stat-card span{
+
+    display:block;
+
+    margin-top:4px;
+
+    color:var(--ink-soft);
+
+    font-size:14px;
+
+}
+
+/* ==========================================================
+   CONTENT CARD
+========================================================== */
+
+.content-card{
+
+    margin:0 28px 28px;
+
+    background:var(--card-bg);
+
+    border:2px solid var(--card-border);
+
+    border-radius:var(--radius-card);
+
+    box-shadow:var(--shadow-soft);
+
+    overflow:hidden;
+
+}
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:22px 28px;
+
+    border-bottom:2px dashed rgba(111,20,20,.15);
+
+}
+
+.card-header h2{
+
+    margin:0;
+
+    font-size:24px;
+
+    color:var(--maroon-dark);
+
+    font-family:var(--font-heading);
+
+}
+
+/* ==========================================================
+   DATA TABLE
+========================================================== */
+
+.data-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    font-family:var(--font-body);
+
+}
+
+.data-table thead{
+
+    background:linear-gradient(
+        180deg,
+        var(--maroon),
+        var(--maroon-dark)
+    );
+
+}
+
+.data-table thead th{
+
+    padding:18px 20px;
+
+    text-align:left;
+
+    color:var(--gold);
+
+    font-family:var(--font-heading);
+
+    font-size:15px;
+
+    letter-spacing:.4px;
+
+}
+
+.data-table tbody tr{
+
+    transition:var(--transition);
+
+    border-bottom:1px solid rgba(111,20,20,.08);
+
+}
+
+.data-table tbody tr:last-child{
+
+    border-bottom:none;
+
+}
+
+.data-table tbody tr:hover{
+
+    background:rgba(242,193,78,.08);
+
+}
+
+.data-table tbody td{
+
+    padding:18px 20px;
+
+    color:var(--ink);
+
+    font-size:14px;
+
+    vertical-align:middle;
+
+    line-height:1.6;
+
+}
+
+/* ==========================================================
+   STATUS BADGES
+========================================================== */
+
+.status{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:90px;
+
+    padding:8px 16px;
+
+    border-radius:999px;
+
+    font-family:var(--font-heading);
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.status.open{
+
+    background:#daf6df;
+
+    color:#239b56;
+
+}
+
+.status.closed{
+
+    background:#ffe0de;
+
+    color:#b71c1c;
+
+}
+
+.status.pending{
+
+    background:#fff1c7;
+
+    color:#9a7300;
+
+}
+
+.status.inactive{
+
+    background:#ececec;
+
+    color:#666;
+
+}
+
+/* ==========================================================
+   ACTION BUTTONS
+========================================================== */
+
+.btn-action{
+
+    width:40px;
+
+    height:40px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin-right:8px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:rgba(111,20,20,.08);
+
+    color:var(--maroon);
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+}
+
+.btn-action:hover{
+
+    background:var(--gold);
+
+    color:var(--maroon-dark);
+
+    transform:translateY(-2px);
+
+}
+
+.btn-action.danger{
+
+    background:rgba(224,54,44,.12);
+
+    color:var(--red);
+
+}
+
+.btn-action.danger:hover{
+
+    background:var(--red);
+
+    color:var(--white);
+
+}
+
+/* ==========================================================
+   TABLE UTILITIES
+========================================================== */
+
+.data-table td:last-child{
+
+    white-space:nowrap;
+
+}
+
+.data-table td:first-child{
+
+    font-weight:700;
+
+    color:var(--maroon-dark);
+
+}
+
+.data-table tbody td:nth-child(2){
+
+    color:var(--ink-soft);
+
+}
+
+/* ==========================================================
+   TABLE SCROLL
+========================================================== */
+
+.content-card{
+
+    overflow-x:auto;
+
+}
+
+.content-card::-webkit-scrollbar{
+
+    height:8px;
+
+}
+
+.content-card::-webkit-scrollbar-thumb{
+
+    background:var(--gold);
+
+    border-radius:999px;
+
+}
+
+.content-card::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+/* ==========================================================
+   CARD ANIMATION
+========================================================== */
+
+.content-card{
+
+    animation:fadeUp .45s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(18px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:none;
+
+    }
+
+}
+
+/* ==========================================================
+   EMPLOYMENT TYPES
+========================================================== */
+
+.employment-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+    gap:22px;
+
+    padding:28px;
+
+}
+
+.employment-card{
+
+    position:relative;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    gap:12px;
+
+    min-height:190px;
+
+    padding:28px 22px;
+
+    background:var(--card-bg);
+
+    border:2px solid var(--card-border);
+
+    border-radius:22px;
+
+    box-shadow:var(--shadow-soft);
+
+    transition:var(--transition);
+
+}
+
+.employment-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0 0 auto 0;
+
+    height:6px;
+
+    background:linear-gradient(
+        90deg,
+        var(--gold),
+        var(--gold-dark)
+    );
+
+}
+
+.employment-card:hover{
+
+    transform:translateY(-6px);
+
+    border-color:var(--gold);
+
+}
+
+.employment-card i{
+
+    width:74px;
+
+    height:74px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:20px;
+
+    background:linear-gradient(
+        180deg,
+        var(--maroon),
+        var(--maroon-dark)
+    );
+
+    color:var(--gold);
+
+    font-size:30px;
+
+}
+
+.employment-card h3{
+
+    margin:0;
+
+    font-family:var(--font-heading);
+
+    font-size:22px;
+
+    color:var(--maroon-dark);
+
+}
+
+.employment-card span{
+
+    color:var(--ink-soft);
+
+    font-size:14px;
+
+}
+
+/* ==========================================================
+   ORGANIZATION STRUCTURE
+========================================================== */
+
+.organization-preview{
+
+    padding:36px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:28px;
+
+}
+
+.org-box{
+
+    min-width:180px;
+
+    padding:18px 28px;
+
+    text-align:center;
+
+    background:linear-gradient(
+        180deg,
+        var(--maroon),
+        var(--maroon-dark)
+    );
+
+    border:2px solid var(--gold);
+
+    border-radius:18px;
+
+    color:var(--white);
+
+    font-family:var(--font-heading);
+
+    font-size:17px;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.18);
+
+}
+
+.org-arrow{
+
+    font-size:38px;
+
+    color:var(--gold-dark);
+
+    line-height:1;
+
+}
+
+.org-row{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:22px;
+
+    flex-wrap:wrap;
+
+}
+
+.org-row .org-box{
+
+    background:var(--card-bg);
+
+    border:2px solid var(--card-border);
+
+    color:var(--maroon-dark);
+
+    box-shadow:var(--shadow-soft);
+
+    transition:var(--transition);
+
+}
+
+.org-row .org-box:hover{
+
+    transform:translateY(-5px);
+
+    border-color:var(--gold);
+
+    background:linear-gradient(
+        180deg,
+        rgba(242,193,78,.14),
+        var(--card-bg)
+    );
+
+}
+
+/* ==========================================================
+   ACCESSIBILITY
+========================================================== */
+
+.btn-primary:focus-visible,
+.btn-action:focus-visible{
+
+    outline:3px solid var(--gold);
+
+    outline-offset:3px;
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width:1200px){
+
+    .page-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .card-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+}
+
+@media (max-width:992px){
+
+    .stats-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .employment-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .organization-preview{
+
+        padding:24px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .page-header,
+    .content-card{
+
+        margin:18px;
+
+    }
+
+    .page-header{
+
+        padding:24px;
+
+    }
+
+    .page-header h1{
+
+        font-size:30px;
+
+    }
+
+    .stats-grid{
+
+        margin:0 18px 18px;
+
+        grid-template-columns:1fr;
+
+    }
+
+    .stat-card{
+
+        padding:20px;
+
+    }
+
+    .employment-grid{
+
+        padding:20px;
+
+        grid-template-columns:1fr;
+
+    }
+
+    .card-header{
+
+        padding:18px 20px;
+
+    }
+
+    .data-table{
+
+        min-width:760px;
+
+    }
+
+    .org-row{
+
+        flex-direction:column;
+
+        align-items:center;
+
+    }
+
+    .org-box{
+
+        width:100%;
+
+        max-width:320px;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    .page-header{
+
+        text-align:center;
+
+        align-items:center;
+
+    }
+
+    .page-header p{
+
+        max-width:none;
+
+    }
+
+    .btn-primary{
+
+        width:100%;
+
+    }
+
+    .stat-card{
+
+        flex-direction:column;
+
+        text-align:center;
+
+    }
+
+    .stat-icon{
+
+        width:60px;
+        height:60px;
+
+        font-size:22px;
+
+    }
+
+    .employment-card{
+
+        min-height:170px;
+
+    }
+
+    .employment-card i{
+
+        width:64px;
+        height:64px;
+
+        font-size:26px;
+
+    }
+
+}
+
+/* ==========================================================
+   DARK MODE
+========================================================== */
+
+[data-theme="dark"] .status.open{
+
+    background:rgba(46,204,113,.18);
+
+    color:#7dffb1;
+
+}
+
+[data-theme="dark"] .status.closed{
+
+    background:rgba(224,54,44,.18);
+
+    color:#ff8d82;
+
+}
+
+[data-theme="dark"] .status.pending{
+
+    background:rgba(242,193,78,.18);
+
+    color:#ffd76d;
+
+}
+
+[data-theme="dark"] .status.inactive{
+
+    background:rgba(255,255,255,.08);
+
+    color:#cfcfcf;
+
+}
+
+[data-theme="dark"] .org-row .org-box{
+
+    background:var(--card-bg);
+
+}
+
+[data-theme="dark"] .btn-action{
+
+    background:rgba(255,255,255,.08);
+
+    color:var(--gold);
+
+}
+
+[data-theme="dark"] .btn-action:hover{
+
+    background:var(--gold);
+
+    color:var(--maroon-dark);
+
+}
+
+[data-theme="dark"] .data-table tbody tr:hover{
+
+    background:rgba(242,193,78,.08);
+
+}
+
+/* ==========================================================
+   MICRO ANIMATIONS
+========================================================== */
+
+.stat-card,
+.employment-card,
+.org-box,
+.content-card{
+
+    animation:rise .45s ease;
+
+}
+
+@keyframes rise{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(14px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:none;
+
+    }
+
+}
+
+.btn-primary,
+.btn-action,
+.employment-card,
+.stat-card,
+.org-row .org-box{
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease,
+        background .18s ease,
+        color .18s ease;
+
+}
+
+.stat-card:hover,
+.employment-card:hover,
+.org-row .org-box:hover{
+
+    box-shadow:
+        0 18px 34px rgba(0,0,0,.12);
+
+}

@@ -4,8 +4,10 @@ use App\Controllers\LoginController;
 use App\Controllers\DashboardController;
 use App\Controllers\LogoutController;
 use App\Controllers\RecruitmentController;
-use App\Controllers\EmployeeController;
-use App\Controllers\AdminController;
+use App\Controllers\OnboardingController;
+use App\Controllers\HumanCapitalController;
+use App\Controllers\EmployeeRecordsController;
+use App\Controllers\EmployeeSelfServiceController;
 use App\Controllers\ProfileController;
 
 session_start();
@@ -46,7 +48,19 @@ switch ($page) {
         break;
 
     case 'onboarding':
-        (new RecruitmentController())->onboarding();
+        (new OnboardingController())->onboarding();
+        break;
+
+    case 'human-capital':
+        (new HumanCapitalController())->humanCapital();
+        break;
+
+    case 'employee-records':
+        (new EmployeeRecordsController())->employeeRecords();
+        break;
+
+    case 'employee-self-service':
+        (new EmployeeSelfServiceController())->employeeSelfService();
         break;
 
     case 'logout':

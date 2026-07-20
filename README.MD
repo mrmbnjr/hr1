@@ -116,109 +116,80 @@ Applicant
 hr1/
 │
 ├── src/
-│   ├── App/
-├── src/
 │   └── App/
 │   │   ├── Controllers/
 │   │   │   ├── DashboardController.php
 │   │   │   ├── ApplicantController.php
 │   │   │   ├── RecruitmentController.php
 │   │   │   ├── OnboardingController.php
-│   │   │   ├── EmployeeController.php
-│   │   │   ├── UserController.php
+│   │   │   ├── EmployeeRecordsController.php
+│   │   │   ├── EmployeeSelfServiceController.php
+│   │   │   ├── LoginController.php
+│   │   │   ├── LogoutController.php
 │   │   │   ├── ReportController.php
 │   │   │   └── ProfileController.php
 │   │   ├── Middleware/
 │   │   ├── Models/
 │   │   └── Services/
+│   ├── Routes/
+│   │   └── router.php
 │   ├── Core/
+│   │   └── Database.php
 │   └── Config/
+│       ├── app.php
+│       ├── database.php
+│       ├── env.php
+│       ├── path.php
+│       └── session.php
 │
 ├── resources/
-│   │── layouts/
-│   │   ├── header.php
-│   │   ├── sidebar.php
-│   │   ├── navbar.php
-│   │   ├── footer.php
-│   │   └── app.php          # Main layout
 │   │
-│   │── dashboard/
-│   │   └── index.php
-│   │
-│   │── applicants/
-│   │   ├── index.php
-│   │   ├── create.php
-│   │   ├── edit.php
-│   │   └── view.php
-│   │
-│   │── recruitment/
-│   │   ├── index.php
-│   │   ├── create.php
-│   │   └── edit.php
-│   │
-│   │── onboarding/
-│   │   ├── index.php
-│   │   └── view.php
-│   │
-│   │── employees/
-│   │   ├── index.php
-│   │   ├── profile.php
-│   │   └── records.php
-│   │
-│   │── users/
-│   │   ├── index.php
-│   │   ├── create.php
-│   │   └── edit.php
-│   │
-│   │── reports/
-│   │   └── index.php
-│   │
-│   │── settings/
-│   │   └── index.php
-│   │
-│   │── profile/
-│   │   └── index.php
-│   │
-│   │── assets/
-│   │    ├── css/
-│   │    └── js/
-│   │
-│   ├── auth/
-│   │   └── login.php
-│   ├── modules/
+│   ├── views/
 │   │   ├── dashboard/
 │   │   │   └── index.php
 │   │   ├── applicants/
 │   │   │   ├── index.php
 │   │   │   ├── create.php
 │   │   │   └── view.php
-│   │   ├── job_positions/
-│   │   ├── ai_screening/
-│   │   ├── interviews/
-│   │   ├── job_offers/
-│   │   ├── onboarding/
-│   │   ├── employees/
-│   │   ├── users/
-│   │   ├── reports/
-│   │   └── includes/
-│   │       ├── footer.php
-│   │       ├── sidebar.php
-│   │       ├── navbar.php
-│   │       └── header.php
+│   │   ├── includes/
+│   │   │   ├── footer.php
+│   │   │   ├── sidebar.php
+│   │   │   ├── navbar.php
+│   │   │   └── header.php
+│   │   │── applicants/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   ├── edit.php
+│   │   │   └── view.php
+│   │   │── recruitment/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── edit.php
+│   │   │── onboarding/
+│   │   │   └── index.php
+│   │   │── employees/
+│   │   │   ├── index.php
+│   │   │   ├── profile.php
+│   │   │   └── records.php
+│   │   │── users/
+│   │   │   ├── index.php
+│   │   │   ├── create.php
+│   │   │   └── edit.php
+│   │   │── reports/
+│   │   │   └── index.php
+│   │   │── settings/
+│   │   │   └── index.php
+│   │   └── profile/
+│   │       └── index.php
+│   │   
 │   └── assets/
-│       ├── css/
-│       │   ├── style.css
-│       │   ├── login.css
-│       │   ├── dashboard.css
-│       │   └── layout.css
-│       ├── images/
-│       └── js/
-│           ├── login.js
-│           └── script.js
 │
 ├── public/
 │   ├── index.php
 │   └── assets/
+│       ├── js
+│       ├── css
+│       └── images
 │
 ├── tests/
 ├── database/
