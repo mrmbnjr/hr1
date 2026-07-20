@@ -56,26 +56,8 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
         <p class="form-message" id="formMessage" role="alert" aria-live="polite"></p>
 
         <button type="submit" class="login-btn" id="loginBtn">
-          <span class="btn-label">Login</span>
-          <span class="mascot" aria-hidden="true">
-            <svg viewBox="0 0 44 44">
-              <circle cx="22" cy="22" r="21" fill="#ff5c50"></circle>
-              <circle cx="22" cy="22" r="21" fill="url(#mascotShine)" opacity="0.5"></circle>
-              <ellipse class="mascot-cheek" cx="9.5" cy="27" rx="3.4" ry="2.4" fill="#ff8f83"></ellipse>
-              <ellipse class="mascot-cheek" cx="34.5" cy="27" rx="3.4" ry="2.4" fill="#ff8f83"></ellipse>
-              <g class="mascot-eyes" stroke="#3a0d0d" stroke-width="2.6" stroke-linecap="round" fill="none">
-                <path d="M11.5 20.5c1.3-1.6 4-1.6 5.3 0"></path>
-                <path d="M27.2 20.5c1.3-1.6 4-1.6 5.3 0"></path>
-              </g>
-              <defs>
-                <radialGradient id="mascotShine" cx="35%" cy="25%" r="60%">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"></stop>
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
-                </radialGradient>
-              </defs>
-            </svg>
-          </span>
-        </button>
+            <span class="btn-label">LOGIN</span>
+        </button>      
       </form>
     </section>
   </main>
