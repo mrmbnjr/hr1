@@ -19,7 +19,6 @@ class RecruitmentController
     {
         $recruitment = new Recruitment();
 
-        // Load all departments for the dropdown
         $departments = $recruitment->getDepartments();
 
         require '../resources/views/recruitment/create.php';
@@ -35,6 +34,39 @@ class RecruitmentController
         exit;
     }
 
+    // Display Edit Form
+    public function edit()
+    {
+        $recruitment = new Recruitment();
+
+        if (!isset($_GET['id'])) {
+            header("Location:?page=recruitment");
+            exit;
+        }
+
+        $job = $recruitment->getJobById($_GET['id']);
+
+        if (!$job) {
+            header("Location:?page=recruitment");
+            exit;
+        }
+
+        $departments = $recruitment->getDepartments();
+
+        require '../resources/views/recruitment/edit.php';
+    }
+
+    // Update Job Posting
+    public function update()
+    {
+        $recruitment = new Recruitment();
+
+        $recruitment->updateJob($_POST);
+
+        header("Location:?page=recruitment");
+        exit;
+    }
+
     public function close()
     {
         $recruitment = new Recruitment();
@@ -43,15 +75,5 @@ class RecruitmentController
 
         header("Location:?page=recruitment");
         exit;
-    }
-    
-    public function applicants()
-    {
-        require '../resources/views/applicants/index.php';
-    }
-
-    public function onboarding()
-    {
-        require '../resources/views/onboarding/index.php';
     }
 }

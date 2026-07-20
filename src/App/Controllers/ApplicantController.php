@@ -6,11 +6,11 @@ use App\Models\Applicant;
 
 class ApplicantController
 {
-    private Applicant $applicant;
+    private Applicant $applicants;
 
     public function __construct()
     {
-        $this->applicant = new Applicant();
+        $this->applicants = new Applicant();
     }
 
     /**
@@ -18,8 +18,8 @@ class ApplicantController
      */
     public function index()
     {
-        $applicants = $this->applicant->getAllApplicants();
-        $positions = $this->applicant->getAllPositions();
+        $applicants = $this->applicants->getAllApplicants();
+        $positions = $this->applicants->getAllPositions();
 
         require '../resources/views/applicants/index.php';
     }
@@ -34,7 +34,7 @@ class ApplicantController
             exit;
         }
 
-        $applicant = $this->applicant->getApplicantById($_GET['id']);
+        $applicant = $this->applicants->getApplicantById($_GET['id']);
 
         if (!$applicant) {
             header("Location: ?page=applicants");
@@ -54,8 +54,8 @@ class ApplicantController
             exit;
         }
 
-        $applicant = $this->applicant->getApplicantById($_GET['id']);
-        $positions = $this->applicant->getAllPositions();
+        $applicant = $this->applicants->getApplicantById($_GET['id']);
+        $positions = $this->applicants->getAllPositions();
 
         require '../resources/views/applicants/edit.php';
     }

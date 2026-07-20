@@ -127,14 +127,54 @@ class Recruitment
     }
 
     public function close(int $id)
-    {
-        $stmt = $this->db->prepare("
-            UPDATE job_positions
-            SET status = 'Closed'
-            WHERE position_id = ?
-        ");
+        {
+            $stmt = $this->db->prepare("
+                UPDATE job_positions
+                SET status = 'Closed'
+                WHERE position_id = ?
+            ");
 
-        return $stmt->execute([$id]);
+            return $stmt->execute([$id]);
+        }
+
+        public function getJobById(int $id)
+    {
+        $sql = "SELECT *
+                FROM job_positions
+                WHERE position_id = ?";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id]);
+
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function updateJob(array $data)
+    {
+        $sql = "UPDATE job_positions
+                SET department_id = ?,
+                    title = ?,
+                    description = ?,
+                    requirements = ?,
+                    employment_type = ?,
+                    salary = ?,
+                    vacancies = ?,
+                    application_deadline = ?
+                WHERE position_id = ?";
+
+        $stmt = $this->db->prepare($sql);
+
+        return $stmt->execute([
+            $data['department_id'],
+            $data['title'],
+            $data['description'],
+            $data['requirements'],
+            $data['employment_type'],
+            $data['salary'],
+            $data['vacancies'],
+            $data['application_deadline'],
+            $data['position_id']
+        ]);
     }
 }
 

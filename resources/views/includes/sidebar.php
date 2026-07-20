@@ -44,26 +44,26 @@ $currentPage = $_GET['page'] ?? 'dashboard';
 
         <a href="?page=recruitment" class="<?= $currentPage == 'recruitment' ? 'active' : '' ?>">
             <i class="fa-solid fa-briefcase"></i>
-            <span>Recruitment Management</span>
+            <span>Job Postings</span>
         </a>
 
         <a href="?page=applicants" class="<?= $currentPage == 'applicants' ? 'active' : '' ?>">
             <i class="fa-solid fa-file-lines"></i>
-            <span>Applicant Management</span>
+            <span>Applicants</span>
+        </a>
+
+        <a href="?page=onboarding" class="<?= $currentPage == 'onboarding' ? 'active' : '' ?>">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Employee Onboarding</span>
         </a>
 
         <p class="sidebar-title">
             Core HR
         </p>
 
-        <a href="?page=onboarding" class="<?= $currentPage == 'onboarding' ? 'active' : '' ?>">
-            <i class="fa-solid fa-user-check"></i>
-            <span>New Hire Onboarding</span>
-        </a>
-
         <a href="?page=human-capital" class="<?= $currentPage == 'human-capital' ? 'active' : '' ?>">
             <i class="fa-solid fa-id-card"></i>
-            <span>Human Capital Management</span>
+            <span>Company Structure</span>
         </a>
 
         <a href="?page=employee-records" class="<?= $currentPage == 'employee-records' ? 'active' : '' ?>">
@@ -73,7 +73,7 @@ $currentPage = $_GET['page'] ?? 'dashboard';
 
         <a href="?page=employee-self-service" class="<?= $currentPage == 'employee-self-service' ? 'active' : '' ?>">
             <i class="fa-solid fa-user"></i>
-            <span>Employee Self-Service</span>
+            <span>Employee Requests</span>
         </a>
 
         <p class="sidebar-title">

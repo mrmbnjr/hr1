@@ -4,6 +4,7 @@ use App\Controllers\LoginController;
 use App\Controllers\DashboardController;
 use App\Controllers\LogoutController;
 use App\Controllers\RecruitmentController;
+use App\Controllers\ApplicantController;
 use App\Controllers\OnboardingController;
 use App\Controllers\HumanCapitalController;
 use App\Controllers\EmployeeRecordsController;
@@ -32,7 +33,7 @@ switch ($page) {
         break;
 
     case 'applicants':
-        (new RecruitmentController())->applicants();
+        (new ApplicantController())->index();
         break;
 
     case 'recruitment':
@@ -45,6 +46,10 @@ switch ($page) {
 
     case 'close':
         (new RecruitmentController())->close();
+        break;
+
+    case 'edit':
+        (new RecruitmentController())->edit();
         break;
 
     case 'onboarding':
