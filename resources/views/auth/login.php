@@ -20,23 +20,7 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
     <section class="login-card" aria-labelledby="brandTitle">
 
       <div class="badge" aria-hidden="true">
-        <svg class="badge-svg" viewBox="0 0 200 200">
-          <polygon class="badge-seal" points="100.0,4.0 113.3,16.0 129.7,8.7 138.6,24.3 156.4,22.3 160.1,39.9 177.7,43.6 175.7,61.4 191.3,70.3 184.0,86.7 196.0,100.0 184.0,113.3 191.3,129.7 175.7,138.6 177.7,156.4 160.1,160.1 156.4,177.7 138.6,175.7 129.7,191.3 113.3,184.0 100.0,196.0 86.7,184.0 70.3,191.3 61.4,175.7 43.6,177.7 39.9,160.1 22.3,156.4 24.3,138.6 8.7,129.7 16.0,113.3 4.0,100.0 16.0,86.7 8.7,70.3 24.3,61.4 22.3,43.6 39.9,39.9 43.6,22.3 61.4,24.3 70.3,8.7 86.7,16.0" />
-          <circle class="badge-gold-ring" cx="100" cy="100" r="80" />
-          <circle class="badge-face" cx="100" cy="100" r="72" />
-          <circle class="badge-inner-line" cx="100" cy="100" r="45" />
-
-          <path id="badgeTopArc" d="M 44.0,85.0 A 58,58 0 0 1 156.0,85.0" fill="none" />
-          <path id="badgeBottomArc" d="M 43.8,126.2 A 62,62 0 0 0 156.2,126.2" fill="none" />
-
-          <text class="badge-text-top">
-            <textPath href="#badgeTopArc" startOffset="50%" text-anchor="middle">RAM-YUM</textPath>
-          </text>
-          <text class="badge-text-bottom">
-            <textPath href="#badgeBottomArc" startOffset="50%" text-anchor="middle" letter-spacing="0.5">KOREAN &amp; JAPANESE STORE</textPath>
-          </text>
-        </svg>
-        <div class="badge-bowl" role="img" aria-label="Bowl of ramen">🍜</div>
+        <img src="../public/assets/images/logo.png">
       </div>
 
       <h1 class="brand" id="brandTitle">RAM-YUM <span>Store</span></h1>
