@@ -1,3 +1,6 @@
+<?php
+$currentPage = $_GET['page'] ?? 'dashboard';
+?>
 <button type="button"
         class="sidebar-toggle"
         id="sidebarToggle"
@@ -20,52 +23,55 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <h2>RAM-YUM</h2>
-        <p>Korean & Japanese Store</p>
+        <img src="../public/assets/images/logo.png" alt="RAM-YUM Logo" class="sidebar-logo">
+
+        <div class="sidebar-header-text">
+            <h2 class="brand" id="brandTitle">RAM-YUM <span>Store</span></h2>
+            <p>Korean & Japanese Store</p>
+        </div>
 
     </div>
 
     <nav class="sidebar-menu">
-
-        <a href="?page=dashboard" class="active">
+        <a href="?page=dashboard" class="<?= $currentPage == 'dashboard' ? 'active' : '' ?>">
             <i class="fa-solid fa-house"></i>
             <span>Dashboard</span>
         </a>
-
+        
         <p class="sidebar-title">
             Recruitment &amp; Onboarding
         </p>
 
-        <a href="?page=recruitment">
+        <a href="?page=recruitment" class="<?= $currentPage == 'recruitment' ? 'active' : '' ?>">
             <i class="fa-solid fa-briefcase"></i>
             <span>Recruitment Management</span>
         </a>
 
-        <a href="?page=applicants">
+        <a href="?page=applicants" class="<?= $currentPage == 'applicants' ? 'active' : '' ?>">
             <i class="fa-solid fa-file-lines"></i>
             <span>Applicant Management</span>
-        </a>
-
-        <a href="?page=onboarding">
-            <i class="fa-solid fa-user-check"></i>
-            <span>New Hire Onboarding</span>
         </a>
 
         <p class="sidebar-title">
             Core HR
         </p>
 
-        <a href="?page=human-capital">
+        <a href="?page=onboarding" class="<?= $currentPage == 'onboarding' ? 'active' : '' ?>">
+            <i class="fa-solid fa-user-check"></i>
+            <span>New Hire Onboarding</span>
+        </a>
+
+        <a href="?page=human-capital" class="<?= $currentPage == 'human-capital' ? 'active' : '' ?>">
             <i class="fa-solid fa-id-card"></i>
             <span>Human Capital Management</span>
         </a>
 
-        <a href="?page=employee-records">
+        <a href="?page=employee-records" class="<?= $currentPage == 'employee-records' ? 'active' : '' ?>">
             <i class="fa-solid fa-address-book"></i>
             <span>Employee Records</span>
         </a>
 
-        <a href="?page=employee-self-service">
+        <a href="?page=employee-self-service" class="<?= $currentPage == 'employee-self-service' ? 'active' : '' ?>">
             <i class="fa-solid fa-user"></i>
             <span>Employee Self-Service</span>
         </a>
@@ -74,33 +80,30 @@
             Administration
         </p>
 
-        <a href="?page=user-management">
+        <a href="?page=user-management" class="<?= $currentPage == 'user-management' ? 'active' : '' ?>">
             <i class="fa-solid fa-users"></i>
             <span>User Management</span>
         </a>
 
-        <a href="?page=system-settings">
+        <a href="?page=system-settings" class="<?= $currentPage == 'system-settings' ? 'active' : '' ?>">
             <i class="fa-solid fa-gear"></i>
             <span>System Settings</span>
         </a>
 
-        <a href="?page=reports">
+        <a href="?page=reports" class="<?= $currentPage == 'reports' ? 'active' : '' ?>">
             <i class="fa-solid fa-chart-column"></i>
             <span>Reports</span>
         </a>
 
-        <div class="sidebar-spacer"></div>
-
-        <a href="?page=profile">
+        <a href="?page=profile" class="<?= $currentPage == 'profile' ? 'active' : '' ?>">
             <i class="fa-solid fa-circle-user"></i>
             <span>Profile</span>
         </a>
 
-        <a href="?page=logout" class="sidebar-logout">
+        <a href="?page=logout" class="<?= $currentPage == 'logout' ? 'active sidebar-logout' : 'sidebar-logout' ?>">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
         </a>
-
     </nav>
 
 </aside>
