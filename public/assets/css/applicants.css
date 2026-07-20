@@ -1,1098 +1,357 @@
-/* ==========================================================
-   RAM-YUM HRM
-   Applicant Management
-========================================================== */
+/* ==========================================
+   APPLICANTS.CSS
+   RAM-YUM Theme
+========================================== */
 
-.main-content{
-    margin-left:var(--sidebar-width);
-    min-height:100vh;
-    background:var(--bg);
-    color:var(--ink);
-}
-
-@media (max-width:960px){
-    .main-content{
-        margin-left:0;
-    }
-}
-
-/* ==========================================================
-   HERO
-========================================================== */
-
-.applicant-hero{
-
-    margin:28px;
-
-    padding:34px;
-
+.page-hero{
     display:flex;
     justify-content:space-between;
     align-items:center;
-
-    background:linear-gradient(
-        135deg,
-        var(--maroon),
-        var(--maroon-dark)
-    );
-
-    color:var(--white);
-
-    border:3px solid var(--gold);
-
-    border-radius:var(--radius-card);
-
-    box-shadow:var(--shadow-soft);
-
+    gap:2rem;
+    margin-bottom:2rem;
 }
 
 .hero-tag{
-
     display:inline-flex;
-
     align-items:center;
-
-    gap:8px;
-
-    padding:8px 16px;
-
+    gap:.45rem;
+    padding:.45rem 1rem;
+    background:rgba(242,193,78,.18);
+    border:2px solid var(--gold);
+    color:var(--maroon);
     border-radius:999px;
+    font-weight:800;
+    font-size:.85rem;
+    margin-bottom:.8rem;
+}
 
-    background:rgba(255,255,255,.12);
-
-    border:1px solid rgba(255,255,255,.18);
-
-    font-size:13px;
-
+.page-hero h1{
     font-family:var(--font-heading);
-
+    color:var(--maroon);
+    font-size:2rem;
+    margin-bottom:.35rem;
 }
 
-.applicant-hero h1{
-
-    margin:16px 0 10px;
-
-    font-family:var(--font-heading);
-
-    font-size:36px;
-
-}
-
-.applicant-hero p{
-
-    max-width:620px;
-
-    color:rgba(255,255,255,.82);
-
-    line-height:1.7;
-
-}
-
-/* ==========================================================
-   STATS
-========================================================== */
-
-.applicant-stats{
-
-    margin:0 28px 28px;
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-
-    gap:22px;
-
-}
-
-.mini-card{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-    padding:24px;
-
-    background:var(--card-bg);
-
-    border:2px solid var(--card-border);
-
-    border-radius:22px;
-
-    box-shadow:var(--shadow-soft);
-
-    transition:var(--transition);
-
-}
-
-.mini-card:hover{
-
-    transform:translateY(-5px);
-
-    border-color:var(--gold);
-
-}
-
-.mini-card i{
-
-    width:64px;
-
-    height:64px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    border-radius:18px;
-
-    background:linear-gradient(
-        180deg,
-        var(--maroon),
-        var(--maroon-dark)
-    );
-
-    color:var(--gold);
-
-    font-size:24px;
-
-}
-
-.mini-card h2{
-
-    margin:0;
-
-    color:var(--maroon-dark);
-
-    font-size:32px;
-
-    font-family:var(--font-heading);
-
-}
-
-.mini-card span{
-
-    display:block;
-
-    margin-top:4px;
-
+.page-hero p{
     color:var(--ink-soft);
-
-    font-size:14px;
-
+    max-width:720px;
 }
 
-/* ==========================================================
-   FILTERS
-========================================================== */
+/* ==========================================
+   STATS
+========================================== */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:1.2rem;
+    margin-bottom:2rem;
+}
+
+.stat-card{
+    background:var(--card-bg);
+    border:3px solid var(--card-border);
+    border-radius:22px;
+    padding:1.6rem;
+    box-shadow:var(--shadow-soft);
+    transition:.25s;
+    position:relative;
+    overflow:hidden;
+}
+
+.stat-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:6px;
+    height:100%;
+    background:linear-gradient(var(--gold),var(--red));
+}
+
+.stat-card:hover{
+    transform:translateY(-6px);
+}
+
+.stat-card h2{
+    font-size:2rem;
+    color:var(--red);
+    margin-bottom:.3rem;
+}
+
+.stat-card span{
+    color:var(--ink-soft);
+    font-weight:700;
+}
+
+/* ==========================================
+   FILTER
+========================================== */
 
 .filter-card{
-
-    margin:0 28px 28px;
-
-    padding:24px;
-
     background:var(--card-bg);
-
-    border:2px solid var(--card-border);
-
+    border:3px solid var(--card-border);
     border-radius:22px;
-
+    padding:1.4rem;
+    margin-bottom:2rem;
     box-shadow:var(--shadow-soft);
-
 }
 
 .filter-group{
-
     display:grid;
-
     grid-template-columns:2fr 1fr 1fr;
-
-    gap:18px;
-
+    gap:1rem;
 }
 
 .filter-group input,
 .filter-group select{
-
     width:100%;
-
-    height:52px;
-
-    padding:0 18px;
-
+    padding:.95rem 1rem;
     border:2px solid var(--pink-border);
-
-    border-radius:var(--radius-field);
-
+    border-radius:14px;
     background:var(--white);
-
     color:var(--ink);
-
-    font-size:15px;
-
-    font-family:var(--font-body);
-
-    transition:var(--transition);
-
-}
-
-.filter-group select{
-
-    cursor:pointer;
-
-}
-
-.filter-group input::placeholder{
-
-    color:var(--ink-soft);
-
+    font-size:.95rem;
+    transition:.2s;
 }
 
 .filter-group input:focus,
 .filter-group select:focus{
-
     outline:none;
-
-    border-color:var(--gold);
-
-    box-shadow:0 0 0 4px rgba(242,193,78,.18);
-
+    border-color:var(--red);
+    box-shadow:0 0 0 4px rgba(224,54,44,.12);
 }
 
-.filter-group input:hover,
-.filter-group select:hover{
+/* ==========================================
+   KANBAN
+========================================== */
 
-    border-color:var(--gold);
-
-}
-
-/* ==========================================================
-   GRID
-========================================================== */
-
-.applicant-grid{
-
-    margin:0 28px 32px;
-
+.kanban-board{
     display:grid;
-
-    grid-template-columns:repeat(auto-fill,minmax(420px,1fr));
-
-    gap:26px;
-
-}
-
-/* ==========================================================
-   APPLICANT CARD
-========================================================== */
-
-.applicant-card{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:22px;
-
-    padding:26px;
-
-    background:var(--card-bg);
-
-    border:2px solid var(--card-border);
-
-    border-radius:var(--radius-card);
-
-    box-shadow:var(--shadow-soft);
-
-    transition:var(--transition);
-
-}
-
-.applicant-card:hover{
-
-    transform:translateY(-6px);
-
-    border-color:var(--gold);
-
-    box-shadow:
-        0 16px 34px rgba(74,15,15,.18);
-
-}
-
-/* ==========================================================
-   PROFILE
-========================================================== */
-
-.profile-header{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-}
-
-.profile-header img{
-
-    width:82px;
-
-    height:82px;
-
-    border-radius:50%;
-
-    object-fit:cover;
-
-    border:4px solid var(--gold);
-
-    background:var(--white);
-
-    box-shadow:0 6px 18px rgba(0,0,0,.12);
-
-}
-
-.profile-header h2{
-
-    margin:0;
-
-    font-family:var(--font-heading);
-
-    color:var(--maroon-dark);
-
-    font-size:24px;
-
-}
-
-.profile-header p{
-
-    margin:6px 0 10px;
-
-    color:var(--ink-soft);
-
-}
-
-/* ==========================================================
-   STATUS
-========================================================== */
-
-.status{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:7px 14px;
-
-    border-radius:999px;
-
-    font-size:12px;
-
-    font-weight:700;
-
-    font-family:var(--font-body);
-
-}
-
-.status.pending{
-
-    background:#fff1c7;
-
-    color:#9a7300;
-
-}
-
-.status.interview{
-
-    background:#dfeeff;
-
-    color:#1565c0;
-
-}
-
-.status.hired{
-
-    background:#daf6df;
-
-    color:#239b56;
-
-}
-
-.status.rejected{
-
-    background:#ffe0de;
-
-    color:#b71c1c;
-
-}
-
-/* ==========================================================
-   PROFILE INFORMATION
-========================================================== */
-
-.profile-info{
-
-    display:grid;
-
-    grid-template-columns:1fr;
-
-    gap:16px;
-
-    padding:20px;
-
-    background:rgba(242,193,78,.08);
-
-    border:1px dashed rgba(111,20,20,.18);
-
-    border-radius:18px;
-
-}
-
-.profile-info div{
-
-    display:flex;
-
-    justify-content:space-between;
-
+    grid-template-columns:repeat(4,1fr);
+    gap:1.5rem;
     align-items:flex-start;
-
-    gap:16px;
-
 }
 
-.profile-info strong{
-
-    color:var(--maroon-dark);
-
-    font-size:14px;
-
-    font-family:var(--font-heading);
-
+.kanban-column{
+    background:var(--card-bg);
+    border:3px solid var(--card-border);
+    border-radius:24px;
+    padding:1rem;
+    min-height:520px;
+    box-shadow:var(--shadow-soft);
 }
 
-.profile-info span{
-
-    text-align:right;
-
-    color:var(--ink-soft);
-
-    font-size:14px;
-
-    word-break:break-word;
-
+.kanban-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--card-bg);
+    padding-bottom:1rem;
+    margin-bottom:1rem;
+    border-bottom:2px dashed rgba(111,20,20,.15);
 }
 
-/* ==========================================================
-   RESUME BOX
-========================================================== */
+.kanban-header h2{
+    text-align:center;
+    color:var(--maroon);
+    font-size:1.15rem;
+}
 
-.resume-box{
+/* ==========================================
+   CANDIDATE CARD
+========================================== */
 
-    padding:20px;
-
-    border:2px solid rgba(111,20,20,.08);
-
-    border-radius:18px;
-
+.candidate-card{
     background:var(--white);
-
+    border:2px solid var(--pink-border);
+    border-radius:18px;
+    padding:1rem;
+    margin-bottom:1rem;
+    transition:.25s;
+    cursor:pointer;
 }
 
-.resume-box h3{
+.candidate-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--gold);
+    box-shadow:0 10px 24px rgba(111,20,20,.14);
+}
 
-    margin:0 0 18px;
-
+.candidate-header{
     display:flex;
-
+    gap:.85rem;
     align-items:center;
-
-    gap:10px;
-
-    font-size:18px;
-
-    font-family:var(--font-heading);
-
-    color:var(--maroon-dark);
-
+    margin-bottom:1rem;
 }
 
-.resume-box h3 i{
+.candidate-header img{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid var(--gold);
+}
 
+.candidate-header h3{
+    color:var(--maroon);
+    font-size:1rem;
+    margin-bottom:.2rem;
+}
+
+.candidate-header span{
+    color:var(--ink-soft);
+    font-size:.85rem;
+}
+
+.candidate-score{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1rem;
+    background:rgba(242,193,78,.14);
+    padding:.75rem .9rem;
+    border-radius:12px;
+}
+
+.candidate-score strong{
+    color:var(--maroon);
+}
+
+.candidate-score span{
     color:var(--red);
-
-    font-size:20px;
-
+    font-size:1.1rem;
+    font-weight:900;
 }
 
-/* ==========================================================
-   BUTTONS
-========================================================== */
+/* ==========================================
+   ACTIONS
+========================================== */
+
+.candidate-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.6rem;
+}
+
+.candidate-actions a{
+    flex:1;
+    min-width:110px;
+    text-align:center;
+    text-decoration:none;
+    font-weight:800;
+    border-radius:12px;
+    padding:.72rem;
+    transition:.25s;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:.45rem;
+}
 
 .btn-outline{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:10px;
-
-    padding:12px 18px;
-
-    border:2px solid var(--gold);
-
-    border-radius:var(--radius-btn);
-
+    border:2px solid var(--maroon);
+    color:var(--maroon);
     background:transparent;
-
-    color:var(--maroon-dark);
-
-    text-decoration:none;
-
-    font-family:var(--font-heading);
-
-    font-size:14px;
-
-    font-weight:700;
-
-    transition:var(--transition);
-
 }
 
 .btn-outline:hover{
-
-    background:var(--gold);
-
-    color:var(--maroon-dark);
-
+    background:var(--maroon);
+    color:white;
 }
 
-.btn-outline i{
-
-    font-size:14px;
-
+.btn-primary{
+    background:var(--red);
+    color:white;
+    border:none;
 }
 
-/* ==========================================================
-   EMPTY TEXT
-========================================================== */
-
-.empty-text{
-
-    display:inline-block;
-
-    color:var(--ink-soft);
-
-    font-style:italic;
-
-    font-size:14px;
-
+.btn-primary:hover{
+    background:var(--maroon);
 }
 
-/* ==========================================================
-   AI SCREENING
-========================================================== */
-
-.screening-box{
-
-    padding:22px;
-
-    background:var(--white);
-
-    border:2px solid rgba(111,20,20,.08);
-
-    border-radius:20px;
-
+.btn-success{
+    background:#2f9d57;
+    color:white;
+    border:none;
 }
 
-.screening-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:16px;
-
+.btn-success:hover{
+    filter:brightness(.92);
 }
 
-.screening-header h3{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin:0;
-
-    font-size:18px;
-
-    font-family:var(--font-heading);
-
-    color:var(--maroon-dark);
-
-}
-
-.screening-header i{
-
-    color:var(--gold-dark);
-
-}
-
-.score{
-
-    padding:8px 16px;
-
-    border-radius:999px;
-
-    background:var(--gold);
-
-    color:var(--maroon-dark);
-
-    font-weight:700;
-
-    font-family:var(--font-heading);
-
-}
-
-.progress{
-
-    width:100%;
-
-    height:12px;
-
-    overflow:hidden;
-
-    border-radius:999px;
-
-    background:#ece3d6;
-
-    margin-bottom:16px;
-
-}
-
-.progress-bar{
-
-    height:100%;
-
-    border-radius:999px;
-
-    background:linear-gradient(
-        90deg,
-        var(--gold),
-        var(--red)
-    );
-
-    transition:width .45s ease;
-
-}
-
-.screening-box p{
-
-    margin:0;
-
-    color:var(--ink-soft);
-
-    line-height:1.7;
-
-    font-size:14px;
-
-}
-
-/* ==========================================================
-   INTERVIEW
-========================================================== */
-
-.interview-box{
-
-    padding:20px;
-
-    border-radius:20px;
-
-    background:rgba(242,193,78,.08);
-
-    border:1px dashed rgba(111,20,20,.18);
-
-}
-
-.interview-box h3{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin:0 0 14px;
-
-    color:var(--maroon-dark);
-
-    font-size:18px;
-
-    font-family:var(--font-heading);
-
-}
-
-.interview-box i{
-
-    color:var(--gold-dark);
-
-}
-
-.interview-box span{
-
-    color:var(--ink-soft);
-
-    font-size:15px;
-
-}
-
-/* ==========================================================
-   DECISION
-========================================================== */
-
-.decision-box{
-
-    padding:20px;
-
-    border-radius:20px;
-
-    background:var(--white);
-
-    border:2px solid rgba(111,20,20,.08);
-
-}
-
-.decision-box h3{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin:0 0 14px;
-
-    font-family:var(--font-heading);
-
-    color:var(--maroon-dark);
-
-}
-
-.decision{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:9px 18px;
-
-    border-radius:999px;
-
-    font-size:13px;
-
-    font-weight:700;
-
-}
-
-.decision.pending{
-
-    background:#fff1c7;
-
-    color:#9a7300;
-
-}
-
-.decision.interview{
-
-    background:#dfeeff;
-
-    color:#1565c0;
-
-}
-
-.decision.hired{
-
-    background:#daf6df;
-
-    color:#239b56;
-
-}
-
-.decision.rejected{
-
-    background:#ffe0de;
-
-    color:#b71c1c;
-
-}
-
-/* ==========================================================
-   ACTIONS
-========================================================== */
-
-.applicant-actions{
-
-    display:flex;
-
-    gap:14px;
-
-    margin-top:auto;
-
-}
-
-.applicant-actions .btn-outline{
-
-    flex:1;
-
-}
-
-/* ==========================================================
-   EMPTY STATE
-========================================================== */
-
-.empty-state{
-
-    grid-column:1/-1;
-
+/* ==========================================
+   EMPTY COLUMN
+========================================== */
+
+.empty-column{
+    border:2px dashed var(--pink-border);
+    border-radius:18px;
     text-align:center;
-
-    padding:70px 30px;
-
-    background:var(--card-bg);
-
-    border:2px dashed var(--gold);
-
-    border-radius:var(--radius-card);
-
     color:var(--ink-soft);
-
-    font-size:17px;
-
-    box-shadow:var(--shadow-soft);
-
+    padding:2rem 1rem;
+    margin-top:1rem;
+    font-style:italic;
 }
 
-/* ==========================================================
-   ANIMATION
-========================================================== */
+/* ==========================================
+   SCROLLBAR
+========================================== */
 
-.applicant-card{
-
-    animation:fadeUp .45s ease;
-
+.kanban-column{
+    max-height:78vh;
+    overflow-y:auto;
 }
 
-@keyframes fadeUp{
-
-    from{
-
-        opacity:0;
-
-        transform:translateY(18px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:none;
-
-    }
-
+.kanban-column::-webkit-scrollbar{
+    width:8px;
 }
 
-/* ==========================================================
+.kanban-column::-webkit-scrollbar-thumb{
+    background:var(--gold);
+    border-radius:10px;
+}
+
+.kanban-column::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+/* ==========================================
+   DARK MODE
+========================================== */
+
+[data-theme="dark"] .candidate-card{
+    background:#37211b;
+}
+
+[data-theme="dark"] .candidate-score{
+    background:rgba(242,193,78,.1);
+}
+
+[data-theme="dark"] .hero-tag{
+    color:var(--gold);
+}
+
+/* ==========================================
    RESPONSIVE
-========================================================== */
+========================================== */
 
-@media (max-width:1100px){
+@media(max-width:1400px){
+
+    .kanban-board{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:900px){
+
+    .kanban-board{
+        grid-template-columns:1fr;
+    }
 
     .filter-group{
-
         grid-template-columns:1fr;
-
     }
-
-}
-
-@media (max-width:900px){
-
-    .applicant-grid{
-
-        grid-template-columns:1fr;
-
-    }
-
-}
-
-@media (max-width:768px){
-
-    .applicant-hero{
-
-        padding:26px;
-
-    }
-
-    .applicant-hero h1{
-
-        font-size:30px;
-
-    }
-
-    .profile-header{
-
-        flex-direction:column;
-
-        text-align:center;
-
-    }
-
-    .profile-info div{
-
-        flex-direction:column;
-
-        gap:6px;
-
-    }
-
-    .profile-info span{
-
-        text-align:left;
-
-    }
-
-    .screening-header{
-
-        flex-direction:column;
-
-        align-items:flex-start;
-
-        gap:12px;
-
-    }
-
-    .applicant-actions{
-
-        flex-direction:column;
-
-    }
-
-}
-
-@media (max-width:480px){
-
-    .applicant-hero,
-    .applicant-stats,
-    .filter-card,
-    .applicant-grid{
-
-        margin-left:16px;
-        margin-right:16px;
-
-    }
-
-    .mini-card{
-
-        padding:18px;
-
-    }
-
-    .mini-card i{
-
-        width:54px;
-        height:54px;
-
-        font-size:20px;
-
-    }
-
-    .profile-header img{
-
-        width:72px;
-        height:72px;
-
-    }
-
-}
-
-/* ==========================================================
-   DARK MODE
-========================================================== */
-
-[data-theme="dark"] .mini-card,
-[data-theme="dark"] .filter-card,
-[data-theme="dark"] .applicant-card,
-[data-theme="dark"] .resume-box,
-[data-theme="dark"] .screening-box,
-[data-theme="dark"] .decision-box{
-
-    background:var(--card-bg);
-
-}
-
-[data-theme="dark"] .profile-header h2,
-[data-theme="dark"] .profile-info strong,
-[data-theme="dark"] .resume-box h3,
-[data-theme="dark"] .screening-header h3,
-[data-theme="dark"] .decision-box h3,
-[data-theme="dark"] .interview-box h3{
-
-    color:var(--ink);
-
-}
-
-[data-theme="dark"] .filter-group input,
-[data-theme="dark"] .filter-group select{
-
-    background:#241511;
-
-    border-color:#5b3b34;
-
-    color:var(--ink);
-
-}
-
-[data-theme="dark"] .progress{
-
-    background:#3a2a25;
-
-}
-
-[data-theme="dark"] .interview-box{
-
-    background:rgba(242,193,78,.08);
-
-}
-
-[data-theme="dark"] .btn-outline{
-
-    color:var(--gold);
-
-    border-color:var(--gold);
-
-}
-
-[data-theme="dark"] .btn-outline:hover{
-
-    background:var(--gold);
-
-    color:var(--maroon-dark);
-
-}
-
-[data-theme="dark"] .empty-state{
-
-    background:var(--card-bg);
 
 }

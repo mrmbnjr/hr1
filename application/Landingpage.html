@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Application Prototype</title>
+    <link rel="stylesheet" href="variables.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Employee Application Prototype</h1>
+
+<form action="submit_application.php" method="post" enctype="multipart/form-data">
+
+<!-- Position -->
+<label for="position">Position You're Applying For *</label>
+<select id="position" name="position_id" required>
+    <option value="">-- Select a Job --</option>
+    <option value="1">Web Developer</option>
+    <option value="2">HR Assistant</option>
+    <option value="3">Accounting Staff</option>
+</select>
+
+
+<!-- First Name, Middle Name & Last Name -->
+<div class="row">
+
+    <div class="field">
+        <label for="firstname">First Name *</label>
+        <input type="text" id="firstname" name="first_name" required>
+    </div>
+
+    <div class="field">
+        <label for="middlename">Middle Name</label>
+        <input type="text" id="middlename" name="middle_name">
+    </div>
+
+    <div class="field">
+        <label for="lastname">Last Name *</label>
+        <input type="text" id="lastname" name="last_name" required>
+    </div>
+
+</div>
+
+
+<!-- Email -->
+<label for="email">Email *</label>
+<input type="email" id="email" name="email" required>
+
+
+<!-- Phone & LinkedIn -->
+<div class="row">
+
+    <div class="field">
+        <label for="phone">Phone</label>
+        <input type="text" id="phone" name="phone">
+    </div>
+
+    <div class="field">
+        <label for="linkedin">LinkedIn (Optional)</label>
+        <input type="url" id="linkedin" name="linkedin">
+    </div>
+
+</div>
+
+
+<!-- Application Date -->
+<label for="application_date">Application Date</label>
+<input 
+    type="date" 
+    id="application_date" 
+    name="application_date">
+
+
+<!-- Address -->
+<label for="address">Address</label>
+<textarea id="address" name="address"></textarea>
+
+
+<!-- Resume -->
+<label for="resume">Resume (PDF, DOC, DOCX — max 5MB) *</label>
+<input type="file" id="resume" name="resume" required>
+
+
+<!-- Cover Letter -->
+<label for="cover_letter">Cover Letter (Optional)</label>
+<textarea id="cover_letter" name="cover_letter"></textarea>
+
+
+<button type="submit">Submit Application</button>
+
+
+</form>
+
+</body>
+</html>

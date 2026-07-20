@@ -34,7 +34,6 @@ class RecruitmentController
         exit;
     }
 
-    // Display Edit Form
     public function edit()
     {
         $recruitment = new Recruitment();

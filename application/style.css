@@ -1,0 +1,121 @@
+body{
+    margin:0;
+    padding:40px;
+    background:var(--bg);
+    font-family:var(--font-body);
+    color:var(--ink);
+}
+h1{
+    text-align:center;
+    color:var(--maroon);
+    font-family:var(--font-heading);
+    margin-bottom:35px;
+}
+form{
+    max-width:650px;
+    margin:auto;
+    background:var(--card-bg);
+    border:3px solid var(--card-border);
+    border-radius:var(--radius-card);
+    padding:35px;
+    box-shadow:var(--shadow-soft);
+}
+label{
+    display:block;
+    margin-top:18px;
+    margin-bottom:8px;
+    color:var(--maroon);
+    font-weight:bold;
+}
+input,
+textarea{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    font-family:var(--font-body);
+
+    background:var(--white);
+    color:var(--ink);
+
+    border:2px solid var(--pink-border);
+    border-radius:var(--radius-field);
+
+    box-sizing:border-box;
+
+    transition:var(--transition);
+}
+
+input:focus,
+textarea:focus{
+    outline:none;
+    border-color:var(--pink-border-focus);
+    box-shadow:0 0 8px rgba(224,54,44,.25);
+}
+textarea{
+    resize:vertical;
+    min-height:120px;
+}
+input[type=file]{
+    background:var(--white);
+    padding:10px;
+}
+button{
+    width:100%;
+    margin-top:30px;
+    padding:14px;
+
+    background:var(--maroon);
+    color:white;
+
+    border:none;
+    border-radius:var(--radius-btn);
+
+    font-size:17px;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:var(--transition);
+}
+button:hover{
+    background:var(--red);
+}
+button:active{
+    transform:scale(.98);
+}
+
+/* Select box styling */
+select{
+    width:100%;
+    padding:12px;
+
+    font-size:16px;
+    font-family:var(--font-body);
+
+    background:var(--white);
+    color:var(--ink);
+
+    border:2px solid var(--pink-border);
+    border-radius:var(--radius-field);
+
+    box-sizing:border-box;
+}
+.row{
+    display:flex;
+    gap:20px;
+    width:100%;
+}
+.field{
+    flex:1;
+}
+input[type=file]{
+    width:100%;
+}
+@media(max-width:700px){
+
+    .row{
+        flex-direction:column;
+        gap:0;
+    }
+
+}

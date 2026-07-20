@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Success!</title>
+
+    <link rel="stylesheet" href="variables.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .success-box{
+            max-width:650px;
+            margin:auto;
+            background:var(--card-bg);
+            border:3px solid var(--card-border);
+            border-radius:var(--radius-card);
+            padding:35px;
+            box-shadow:var(--shadow-soft);
+            text-align:center;
+        }
+
+        .success-box h2{
+            color:var(--maroon);
+            font-family:var(--font-heading);
+            margin-bottom:20px;
+        }
+
+        .success-box p{
+            color:var(--ink);
+            font-size:17px;
+            line-height:1.6;
+        }
+
+        .status{
+            margin-top:25px;
+            padding:15px;
+            background:var(--white);
+            border:2px solid var(--pink-border);
+            border-radius:var(--radius-field);
+            color:var(--maroon);
+            font-weight:bold;
+        }
+
+        .back-btn{
+            display:block;
+            margin-top:30px;
+            padding:14px;
+            background:var(--maroon);
+            color:white;
+            text-decoration:none;
+            border-radius:var(--radius-btn);
+            font-size:17px;
+            font-weight:bold;
+            transition:var(--transition);
+        }
+
+        .back-btn:hover{
+            background:var(--red);
+        }
+    </style>
+
+</head>
+
+<body>
+
+<h1>Employee Application Prototype</h1>
+
+<div class="success-box">
+
+    <h2>Resume Submitted!</h2>
+
+    <p>
+        Your resume has been sent and is now being evaluated by Human Resources.
+    </p>
+
+    <div class="status">
+        Application Status:
+        <br><br>
+        Please wait while we review your application.
+    </div>
+</div>
+
+</body>
+</html>

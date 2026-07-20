@@ -1,12 +1,14 @@
 <?php
-$pageTitle = "Applicant Management";
+
+$pageTitle = "Applicants";
 $pageCSS = "applicants.css";
-$pageDescription = "Manage applicant profiles, resumes, AI screening results, interview schedules, and hiring decisions.";
+$pageDescription = "Review applicants and manage the hiring process.";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: /hr1/public/?page=login");
     exit;
 }
+
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -14,285 +16,267 @@ if (!isset($_SESSION['user_id'])) {
 
 <div class="main-content">
 
-    <?php require '../resources/views/includes/navbar.php'; ?>
+<?php require '../resources/views/includes/navbar.php'; ?>
 
-    <!-- ==========================================
-        HERO
-    =========================================== -->
+<!-- ==========================================
+    HERO
+========================================== -->
 
-    <section class="applicant-hero">
+<section class="page-hero">
 
-        <div>
-            <span class="hero-tag">
-                <i class="fa-solid fa-users"></i>
-                Applicant Management
-            </span>
+    <div>
+        <span class="hero-tag">
+            👥 Recruitment
+        </span>
 
-            <h1>Applicant Profiles</h1>
+        <h1>Applicants</h1>
 
-            <p>
-                Manage applicant information, uploaded resumes,
-                AI screening results, interview schedules,
-                and hiring decisions.
-            </p>
-        </div>
+        <p>
+            Review applicants, schedule interviews, and move candidates
+            through the hiring process.
+        </p>
+    </div>
 
-    </section>
+</section>
 
-    <!-- ==========================================
-        SEARCH & FILTER
-    =========================================== -->
+<!-- ==========================================
+    STATISTICS
+========================================== -->
 
-    <section class="filter-card">
+<section class="stats-grid">
 
-        <div class="filter-group">
+    <article class="stat-card">
+        <h2><?= $stats['total'] ?? 0 ?></h2>
+        <span>Total Applicants</span>
+    </article>
 
-            <input
-                type="text"
-                id="searchApplicant"
-                placeholder="Search applicant...">
+    <article class="stat-card">
+        <h2><?= $stats['submitted'] ?? 0 ?></h2>
+        <span>Applied</span>
+    </article>
 
-            <select id="filterPosition">
-                <option value="">All Positions</option>
+    <article class="stat-card">
+        <h2><?= $stats['interview'] ?? 0 ?></h2>
+        <span>Interview</span>
+    </article>
 
-                <?php if (!empty($positions)): ?>
-                    <?php foreach ($positions as $position): ?>
-                        <option value="<?= htmlspecialchars($position['title']); ?>">
-                            <?= htmlspecialchars($position['title']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="empty-state">
-                        No Positions found.
-                    </div>
-                 <?php endif; ?>
+    <article class="stat-card">
+        <h2><?= $stats['offered'] ?? 0 ?></h2>
+        <span>Job Offers</span>
+    </article>
 
-            </select>
+</section>
 
-            <select id="filterStatus">
-                <option value="">Application Status</option>
-                <option value="Submitted">Submitted</option>
-                <option value="AI Screened">AI Screened</option>
-                <option value="Shortlisted">Shortlisted</option>
-                <option value="Interview">Interview</option>
-                <option value="Job Offer">Job Offer</option>
-                <option value="Hired">Hired</option>
-                <option value="Rejected">Rejected</option>
-            </select>
+<!-- ==========================================
+    FILTERS
+========================================== -->
 
-        </div>
+<section class="filter-card">
 
-    </section>
+    <div class="filter-group">
 
-    <!-- ==========================================
-        APPLICANT LIST
-    =========================================== -->
+        <input
+            type="text"
+            placeholder="Search applicant...">
 
-    <section class="applicant-grid">
+        <?php $positions = $positions ?? []; ?>
+        <select>
 
-        <?php if (!empty($applicants)): ?>
+            <option>All Job Postings</option>
 
-            <?php foreach ($applicants as $applicant): ?>
+            <?php foreach($positions as $position): ?>
 
-                <article class="applicant-card">
-
-                    <!-- Applicant Profile -->
-
-                    <div class="profile-header">
-
-                        <img
-                            src="<?= !empty($applicant['photo'])
-                                ? htmlspecialchars($applicant['photo'])
-                                : '/hr1/public/assets/images/default-user.png'; ?>"
-                            alt="Applicant">
-
-                        <div>
-
-                            <h2>
-                                <?= htmlspecialchars($applicant['fullname']); ?>
-                            </h2>
-
-                            <p>
-                                <?= htmlspecialchars($applicant['position']); ?>
-                            </p>
-
-                            <span class="status <?= strtolower(str_replace(' ','-',$applicant['application_status'])); ?>">
-                                <?= htmlspecialchars($applicant['application_status']); ?>
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Personal Information -->
-
-                    <div class="profile-info">
-
-                        <div>
-                            <strong>Email</strong>
-                            <span><?= htmlspecialchars($applicant['email']); ?></span>
-                        </div>
-
-                        <div>
-                            <strong>Phone</strong>
-                            <span><?= htmlspecialchars($applicant['phone']); ?></span>
-                        </div>
-
-                        <div>
-                            <strong>Applied</strong>
-                            <span>
-                                <?= date("F d, Y", strtotime($applicant['application_date'])); ?>
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <!-- Resume -->
-
-                    <div class="resume-box">
-
-                        <h3>
-                            <i class="fa-solid fa-file-pdf"></i>
-                            Resume
-                        </h3>
-
-                        <?php if (!empty($applicant['resume'])): ?>
-
-                            <a
-                                href="<?= htmlspecialchars($applicant['resume']); ?>"
-                                target="_blank"
-                                class="btn-outline">
-
-                                <i class="fa-solid fa-download"></i>
-                                View Resume
-
-                            </a>
-
-                        <?php else: ?>
-
-                            <span class="empty-text">
-                                No resume uploaded.
-                            </span>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <!-- AI Screening -->
-
-                    <div class="screening-box">
-
-                        <div class="screening-header">
-
-                            <h3>
-                                <i class="fa-solid fa-robot"></i>
-                                AI Screening
-                            </h3>
-
-                            <span class="score">
-                                <?= $applicant['ai_score']; ?>%
-                            </span>
-
-                        </div>
-
-                        <div class="progress">
-                            <div
-                                class="progress-bar"
-                                style="width:<?= $applicant['ai_score']; ?>%;">
-                            </div>
-                        </div>
-
-                        <p>
-                            <?= htmlspecialchars($applicant['screening_summary']); ?>
-                        </p>
-
-                    </div>
-
-                    <!-- Interview -->
-
-                    <div class="interview-box">
-
-                        <h3>
-                            <i class="fa-solid fa-calendar-days"></i>
-                            Interview Schedule
-                        </h3>
-
-                        <?php if (!empty($applicant['interview_date'])): ?>
-
-                            <span>
-                                <?= date("F d, Y", strtotime($applicant['interview_date'])); ?>
-                            </span>
-
-                        <?php else: ?>
-
-                            <span class="empty-text">
-                                Not yet scheduled
-                            </span>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <!-- Hiring Decision -->
-
-                    <div class="decision-box">
-
-                        <h3>
-                            <i class="fa-solid fa-scale-balanced"></i>
-                            Hiring Decision
-                        </h3>
-
-                        <span class="decision <?= strtolower($applicant['hiring_decision']); ?>">
-                            <?= htmlspecialchars($applicant['hiring_decision']); ?>
-                        </span>
-
-                    </div>
-
-                    <!-- Actions -->
-
-                    <div class="applicant-actions">
-
-                        <a
-                            href="?page=view-applicant&id=<?= $applicant['applicant_id']; ?>"
-                            class="btn-outline">
-
-                            <i class="fa-solid fa-eye"></i>
-                            View
-
-                        </a>
-
-                        <a
-                            href="?page=edit-applicant&id=<?= $applicant['applicant_id']; ?>"
-                            class="btn-outline">
-
-                            <i class="fa-solid fa-pen"></i>
-                            Edit
-
-                        </a>
-
-                    </div>
-
-                </article>
+                <option>
+                    <?= htmlspecialchars($position['title']) ?>
+                </option>
 
             <?php endforeach; ?>
 
-        <?php else: ?>
+        </select>
 
-            <div class="empty-state">
+        <select>
 
-                <i class="fa-solid fa-users-slash"></i>
+            <option>All AI Recommendations</option>
+            <option>Highly Recommended</option>
+            <option>Recommended</option>
+            <option>Consider</option>
+            <option>Not Recommended</option>
 
-                <h3>No Applicants Found</h3>
+        </select>
 
-                <p>
-                    There are currently no applicants in the system.
-                </p>
+    </div>
+
+</section>
+
+<!-- ==========================================
+    KANBAN BOARD
+========================================== -->
+
+<section class="kanban-board">
+
+<?php
+
+$applicants = $applicants ?? [];
+
+$columns = [
+
+    "Submitted" => "Applied",
+
+    "Interview" => "Interview",
+
+    "Job Offer" => "Offered",
+
+    "Rejected" => "Rejected"
+
+];
+
+?>
+
+<?php foreach($columns as $status => $title): ?>
+
+<div class="kanban-column">
+
+    <div class="kanban-header">
+
+        <h2><?= $title ?></h2>
+
+    </div>
+
+    <?php
+
+    $found = false;
+
+    foreach($applicants as $applicant):
+
+        if($applicant['application_status'] != $status){
+            continue;
+        }
+
+        $found = true;
+
+    ?>
+
+    <article class="candidate-card">
+
+        <div class="candidate-header">
+
+            <img
+                src="<?= !empty($applicant['photo'])
+                    ? htmlspecialchars($applicant['photo'])
+                    : '/hr1/public/assets/images/default-user.png'; ?>">
+
+            <div>
+
+                <h3>
+                    <?= htmlspecialchars($applicant['fullname']) ?>
+                </h3>
+
+                <span>
+                    <?= htmlspecialchars($applicant['position']) ?>
+                </span>
 
             </div>
 
-        <?php endif; ?>
+        </div>
 
-    </section>
+        <div class="candidate-score">
+
+            <strong>
+                AI Match
+            </strong>
+
+            <span>
+                <?= $applicant['ai_score'] ?>%
+            </span>
+
+        </div>
+
+        <div class="candidate-actions">
+
+            <a
+                href="?page=view-applicant&id=<?= $applicant['applicant_id'] ?>"
+                class="btn-outline">
+
+                <i class="fa-solid fa-eye"></i>
+
+                View
+
+            </a>
+
+            <?php if(!empty($applicant['resume'])): ?>
+
+            <a
+                href="<?= htmlspecialchars($applicant['resume']) ?>"
+                target="_blank"
+                class="btn-outline">
+
+                <i class="fa-solid fa-file-pdf"></i>
+
+                Resume
+
+            </a>
+
+            <?php endif; ?>
+
+            <?php if($status == "Submitted"): ?>
+
+                <a
+                    href="?page=schedule-interview&id=<?= $applicant['application_id'] ?>"
+                    class="btn-primary">
+
+                    <i class="fa-solid fa-calendar-days"></i>
+
+                    Schedule
+
+                </a>
+
+            <?php elseif($status == "Interview"): ?>
+
+                <a
+                    href="?page=job-offer&id=<?= $applicant['application_id'] ?>"
+                    class="btn-success">
+
+                    <i class="fa-solid fa-handshake"></i>
+
+                    Offer
+
+                </a>
+
+            <?php elseif($status == "Job Offer"): ?>
+
+                <a
+                    href="?page=onboarding&id=<?= $applicant['application_id'] ?>"
+                    class="btn-success">
+
+                    <i class="fa-solid fa-user-check"></i>
+
+                    Onboard
+
+                </a>
+
+            <?php endif; ?>
+
+        </div>
+
+    </article>
+
+    <?php endforeach; ?>
+
+    <?php if(!$found): ?>
+
+        <div class="empty-column">
+
+            No applicants.
+
+        </div>
+
+    <?php endif; ?>
+
+</div>
+
+<?php endforeach; ?>
+
+</section>
 
 </div>
 
