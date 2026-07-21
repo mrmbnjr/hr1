@@ -28,7 +28,7 @@ $pageDescription = "Complete your onboarding process for your RAM-YUM Store acco
             <i class="fa-solid fa-user-plus"></i>
             <div>
                 <h3><?= $totalNewHires ?? 0 ?></h3>
-                <p>New Hires</p>
+                <span>New Hires</span>
             </div>
         </div>
 
@@ -37,7 +37,7 @@ $pageDescription = "Complete your onboarding process for your RAM-YUM Store acco
             <i class="fa-solid fa-clock"></i>
             <div>
                 <h3><?= $pending ?? 0 ?></h3>
-                <p>Pending</p>
+                <span>Pending</span>
             </div>
         </div>
 
@@ -46,7 +46,7 @@ $pageDescription = "Complete your onboarding process for your RAM-YUM Store acco
             <i class="fa-solid fa-spinner"></i>
             <div>
                 <h3><?= $ongoing ?? 0 ?></h3>
-                <p>Ongoing</p>
+                <span>Ongoing</span>
             </div>
         </div>
 
@@ -55,7 +55,7 @@ $pageDescription = "Complete your onboarding process for your RAM-YUM Store acco
             <i class="fa-solid fa-circle-check"></i>
             <div>
                 <h3><?= $completed ?? 0 ?></h3>
-                <p>Completed</p>
+                <span>Completed</span>
             </div>
         </div>
 

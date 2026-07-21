@@ -140,16 +140,16 @@ STATISTICS
     display:flex;
     align-items:center;
     justify-content:center;
-    background:linear-gradient(135deg,var(--gold),var(--gold-dark));
-    color:var(--maroon-dark);
+    background:linear-gradient(180deg, var(--maroon), var(--maroon-dark));
+    color:var(--gold);
     font-size:24px;
 }
 
 .stat-card h2{
     margin:0;
-    font-family:var(--font-display);
-    color:var(--maroon);
-    font-size:2rem;
+    font-family:var(--font-heading);
+    color:var(--maroon-dark);
+    font-size:32px;
 }
 
 .stat-card span{

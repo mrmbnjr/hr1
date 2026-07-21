@@ -35,47 +35,24 @@
 
 
 .page-header{
-
     margin:28px;
-
     padding:32px;
-
     background:linear-gradient(
         135deg,
         var(--maroon),
         var(--maroon-dark)
     );
-
     border:3px solid var(--gold);
-
     border-radius:var(--radius-card);
-
-    color:var(--white);
-
+    color:var(--maroon-dark);
     box-shadow:var(--shadow-soft);
-
 }
 
 
 .page-header h1{
-
     margin:0;
-
     font-family:var(--font-heading);
-
     font-size:36px;
-
-}
-
-
-.page-header p{
-
-    margin-top:10px;
-
-    color:rgba(255,255,255,.82);
-
-    font-size:16px;
-
 }
 
 
@@ -183,38 +160,16 @@
 
 
 .status-card h3{
-
-
     margin:0;
-
-
     font-family:var(--font-heading);
-
-
     font-size:32px;
-
-
     color:var(--maroon-dark);
-
-
 }
 
-
-
-.status-card p{
-
-
-    margin:4px 0 0;
-
-
+.status-card span{
     color:var(--ink-soft);
-
-
-    font-size:14px;
-
-
+    font-weight:700;
 }
-
 
 
 /* ==========================================================

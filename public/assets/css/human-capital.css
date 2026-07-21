@@ -191,23 +191,6 @@
 
 }
 
-/* Optional accent colors */
-
-.stat-icon.blue{
-    background:linear-gradient(180deg,#2563eb,#1d4ed8);
-}
-
-.stat-icon.green{
-    background:linear-gradient(180deg,#16a34a,#15803d);
-}
-
-.stat-icon.orange{
-    background:linear-gradient(180deg,#ea580c,#c2410c);
-}
-
-.stat-icon.purple{
-    background:linear-gradient(180deg,#7c3aed,#6d28d9);
-}
 
 .stat-card h2{
 
@@ -222,15 +205,11 @@
 }
 
 .stat-card span{
-
     display:block;
-
     margin-top:4px;
-
     color:var(--ink-soft);
-
+    font-weight:700;
     font-size:14px;
-
 }
 
 /* ==========================================================

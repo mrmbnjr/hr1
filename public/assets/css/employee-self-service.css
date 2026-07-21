@@ -105,7 +105,7 @@
 
 }
 
-.profile-avatar{
+.profile-card .profile-avatar{
 
     width:110px;
     height:110px;
@@ -133,13 +133,13 @@
 
 }
 
-.profile-info{
+.profile-card .profile-info{
 
     flex:1;
 
 }
 
-.profile-info h2{
+.profile-card .profile-info h2{
 
     margin:0;
 
@@ -151,7 +151,7 @@
 
 }
 
-.profile-info p{
+.profile-card .profile-info p{
 
     margin:8px 0;
 
@@ -161,7 +161,7 @@
 
 }
 
-.profile-info span{
+.profile-card .profile-info span{
 
     display:inline-flex;
 
@@ -228,47 +228,15 @@
 }
 
 .stat-icon{
-
     width:66px;
     height:66px;
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     border-radius:18px;
-
+    background:linear-gradient(180deg, var(--maroon), var(--maroon-dark));
     color:var(--gold);
-
-    background:
-        linear-gradient(
-            180deg,
-            var(--maroon),
-            var(--maroon-dark)
-        );
-
     font-size:26px;
-
-}
-
-/* Accent colors */
-
-.stat-icon.blue{
-    background:linear-gradient(180deg,#2563eb,#1d4ed8);
-}
-
-.stat-icon.green{
-    background:linear-gradient(180deg,#16a34a,#15803d);
-}
-
-.stat-icon.orange{
-    background:linear-gradient(180deg,#ea580c,#c2410c);
-}
-
-.stat-icon.purple{
-    background:linear-gradient(180deg,#7c3aed,#6d28d9);
 }
 
 .stat-card h2{
@@ -290,6 +258,7 @@
     margin-top:4px;
 
     color:var(--ink-soft);
+    font-weight:700;
 
     font-size:14px;
 

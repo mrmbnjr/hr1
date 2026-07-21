@@ -82,30 +82,16 @@ STATISTICS
     align-items:center;
     justify-content:center;
     font-size:26px;
-    color:var(--white);
+    background:linear-gradient(180deg, var(--maroon), var(--maroon-dark));
+    color:var(--gold);
 }
 
-.stat-icon.blue{
-    background:linear-gradient(135deg,#4776ff,#2149d6);
-}
-
-.stat-icon.green{
-    background:linear-gradient(135deg,#29b46e,#0d8650);
-}
-
-.stat-icon.orange{
-    background:linear-gradient(135deg,#ffaf37,#ff7d0d);
-}
-
-.stat-icon.purple{
-    background:linear-gradient(135deg,#8d5eff,#6235dd);
-}
 
 .stat-card h2{
     margin:0;
-    color:var(--maroon);
-    font-family:var(--font-display);
-    font-size:2rem;
+    font-family:var(--font-heading);
+    color:var(--maroon-dark);
+    font-size:32px;
 }
 
 .stat-card span{
