@@ -26,15 +26,15 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
       <h1 class="brand" id="brandTitle">RAM-YUM <span>Store</span></h1>
       <h2 class="page-title">Login</h2>
 
-      <form class="login-form" id="loginForm" method="POST" action="/hr1/public/index.php?page=login" novalidate>
+      <form class="login-form" id="loginForm" method="POST" action="/hr1/public/index.php?page=login"novalidate>
         <div class="field">
           <label for="username">Username</label>
-          <input type="text" id="username" name="username" autocomplete="username" spellcheck="false" required />
+          <input type="text" id="username" name="username" autocomplete="username" spellcheck="false" minlength="3" maxlength="32" required />
         </div>
 
         <div class="field">
           <label for="password">Password</label>
-          <input type="password" id="password" name="password" autocomplete="current-password" required />
+          <input type="password" id="password" name="password" autocomplete="current-password" minlength="3" maxlength="18" required />
         </div>
 
         <p class="form-message" id="formMessage" role="alert" aria-live="polite"></p>

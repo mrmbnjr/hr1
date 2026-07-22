@@ -174,7 +174,8 @@
 }
 
 .form-message {
-  min-height: 8px;
+  min-height: 18px;
+  margin-bottom: 5px;
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 13px;

@@ -22,7 +22,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
     <section class="dashboard-hero">
         <div class="hero-content">
             <span class="hero-tag">
-                🍜 RAM-YUM HR Management
+                🍜 RAM-YUM Administration
             </span>
             <h1>Welcome back, <?= htmlspecialchars($_SESSION['username']) ?>!</h1>
             <p>Here's a quick overview of today's recruitment and employee activities.</p>

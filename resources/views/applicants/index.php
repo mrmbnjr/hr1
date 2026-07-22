@@ -40,34 +40,6 @@ if (!isset($_SESSION['user_id'])) {
 </section>
 
 <!-- ==========================================
-    STATISTICS
-========================================== -->
-
-<section class="stats-grid">
-
-    <article class="stat-card">
-        <h2><?= $stats['total'] ?? 0 ?></h2>
-        <span>Total Applicants</span>
-    </article>
-
-    <article class="stat-card">
-        <h2><?= $stats['submitted'] ?? 0 ?></h2>
-        <span>Applied</span>
-    </article>
-
-    <article class="stat-card">
-        <h2><?= $stats['interview'] ?? 0 ?></h2>
-        <span>Interview</span>
-    </article>
-
-    <article class="stat-card">
-        <h2><?= $stats['offered'] ?? 0 ?></h2>
-        <span>Job Offers</span>
-    </article>
-
-</section>
-
-<!-- ==========================================
     FILTERS
 ========================================== -->
 
@@ -109,175 +81,243 @@ if (!isset($_SESSION['user_id'])) {
 </section>
 
 <!-- ==========================================
-    KANBAN BOARD
+    APPLICANT MANAGER
 ========================================== -->
-
-<section class="kanban-board">
 
 <?php
 
 $applicants = $applicants ?? [];
 
-$columns = [
+$statusCounts = [];
 
-    "Submitted" => "Applied",
+foreach ($applicants as $applicant) {
 
-    "Interview" => "Interview",
+    $status = $applicant['application_status'];
 
-    "Job Offer" => "Offered",
+    if (!isset($statusCounts[$status])) {
+        $statusCounts[$status] = 0;
+    }
 
-    "Rejected" => "Rejected"
+    $statusCounts[$status]++;
+}
 
-];
+$currentStatus = $_GET['status'] ?? 'All';
 
 ?>
 
-<?php foreach($columns as $status => $title): ?>
+<section class="applicant-manager">
 
-<div class="kanban-column">
+    <aside class="pipeline-sidebar">
 
-    <div class="kanban-header">
+        <h2>Hiring Pipeline</h2>
 
-        <h2><?= $title ?></h2>
+        <a
+            href="?page=applicants"
+            class="<?= $currentStatus == 'All' ? 'active' : '' ?>">
 
-    </div>
+            All Applicants
 
-    <?php
+            <span><?= count($applicants) ?></span>
 
-    $found = false;
+        </a>
 
-    foreach($applicants as $applicant):
+        <?php
 
-        if($applicant['application_status'] != $status){
-            continue;
-        }
+        $statuses = [
 
-        $found = true;
+            "Submitted",
+            "AI Screened",
+            "Shortlisted",
+            "Interview",
+            "Job Offer",
+            "Hired",
+            "Rejected"
 
-    ?>
+        ];
 
-    <article class="candidate-card">
+        foreach($statuses as $status):
 
-        <div class="candidate-header">
+        ?>
 
-            <img
-                src="<?= !empty($applicant['photo'])
-                    ? htmlspecialchars($applicant['photo'])
-                    : '/hr1/public/assets/images/default-user.png'; ?>">
+        <a
 
-            <div>
+            href="?page=applicants&status=<?= urlencode($status) ?>"
 
-                <h3>
+            class="<?= $currentStatus == $status ? 'active' : '' ?>">
+
+            <?= htmlspecialchars($status) ?>
+
+            <span><?= $statusCounts[$status] ?? 0 ?></span>
+
+        </a>
+
+        <?php endforeach; ?>
+
+    </aside>
+
+    <div class="applicant-list">
+
+        <div class="list-header">
+
+            <div class="col-name">Applicant</div>
+
+            <div class="col-position">Position</div>
+
+            <div class="col-score">AI Match</div>
+
+            <div class="col-status">Status</div>
+
+            <div class="col-actions">Actions</div>
+
+        </div>
+
+        <?php
+
+        $found = false;
+
+        foreach($applicants as $applicant):
+
+            if(
+
+                $currentStatus != "All"
+
+                &&
+
+                $applicant['application_status'] != $currentStatus
+
+            ){
+
+                continue;
+
+            }
+
+            $found = true;
+
+        ?>
+
+        <div class="applicant-row">
+
+            <div class="col-name">
+
+                <strong>
+
                     <?= htmlspecialchars($applicant['fullname']) ?>
-                </h3>
 
-                <span>
-                    <?= htmlspecialchars($applicant['position']) ?>
+                </strong>
+
+            </div>
+
+            <div class="col-position">
+
+                <?= htmlspecialchars($applicant['position']) ?>
+
+            </div>
+
+            <div class="col-score">
+
+                <?= (int)$applicant['ai_score'] ?>%
+
+            </div>
+
+            <div class="col-status">
+
+                <span class="status-badge">
+
+                    <?= htmlspecialchars($applicant['application_status']) ?>
+
                 </span>
+
+            </div>
+
+            <div class="col-actions">
+
+                <a
+
+                    href="?page=view-applicant&id=<?= $applicant['applicant_id'] ?>"
+
+                    class="btn-outline">
+
+                    <i class="fa-solid fa-eye"></i>
+
+                    View
+
+                </a>
+
+                <?php if(!empty($applicant['resume'])): ?>
+
+                <a
+
+                    href="<?= htmlspecialchars($applicant['resume']) ?>"
+
+                    target="_blank"
+
+                    class="btn-outline">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                    Resume
+
+                </a>
+
+                <?php endif; ?>
+
+                <?php if($applicant['application_status']=="Submitted"): ?>
+
+                    <a
+
+                        href="?page=schedule-interview&id=<?= $applicant['application_id'] ?>"
+
+                        class="btn-primary">
+
+                        Schedule
+
+                    </a>
+
+                <?php elseif($applicant['application_status']=="Interview"): ?>
+
+                    <a
+
+                        href="?page=job-offer&id=<?= $applicant['application_id'] ?>"
+
+                        class="btn-success">
+
+                        Offer
+
+                    </a>
+
+                <?php elseif($applicant['application_status']=="Job Offer"): ?>
+
+                    <a
+
+                        href="?page=onboarding&id=<?= $applicant['application_id'] ?>"
+
+                        class="btn-success">
+
+                        Onboard
+
+                    </a>
+
+                <?php endif; ?>
 
             </div>
 
         </div>
 
-        <div class="candidate-score">
+        <?php endforeach; ?>
 
-            <strong>
-                AI Match
-            </strong>
-
-            <span>
-                <?= $applicant['ai_score'] ?>%
-            </span>
-
-        </div>
-
-        <div class="candidate-actions">
-
-            <a
-                href="?page=view-applicant&id=<?= $applicant['applicant_id'] ?>"
-                class="btn-outline">
-
-                <i class="fa-solid fa-eye"></i>
-
-                View
-
-            </a>
-
-            <?php if(!empty($applicant['resume'])): ?>
-
-            <a
-                href="<?= htmlspecialchars($applicant['resume']) ?>"
-                target="_blank"
-                class="btn-outline">
-
-                <i class="fa-solid fa-file-pdf"></i>
-
-                Resume
-
-            </a>
-
-            <?php endif; ?>
-
-            <?php if($status == "Submitted"): ?>
-
-                <a
-                    href="?page=schedule-interview&id=<?= $applicant['application_id'] ?>"
-                    class="btn-primary">
-
-                    <i class="fa-solid fa-calendar-days"></i>
-
-                    Schedule
-
-                </a>
-
-            <?php elseif($status == "Interview"): ?>
-
-                <a
-                    href="?page=job-offer&id=<?= $applicant['application_id'] ?>"
-                    class="btn-success">
-
-                    <i class="fa-solid fa-handshake"></i>
-
-                    Offer
-
-                </a>
-
-            <?php elseif($status == "Job Offer"): ?>
-
-                <a
-                    href="?page=onboarding&id=<?= $applicant['application_id'] ?>"
-                    class="btn-success">
-
-                    <i class="fa-solid fa-user-check"></i>
-
-                    Onboard
-
-                </a>
-
-            <?php endif; ?>
-
-        </div>
-
-    </article>
-
-    <?php endforeach; ?>
-
-    <?php if(!$found): ?>
+        <?php if(!$found): ?>
 
         <div class="empty-column">
 
-            No applicants.
+            No applicants found.
 
         </div>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
-</div>
-
-<?php endforeach; ?>
+    </div>
 
 </section>
-
 </div>
 
 <?php require '../resources/views/includes/footer.php'; ?>
