@@ -147,5 +147,7 @@ $pageDescription = "Complete your onboarding process for your RAM-YUM Store acco
         </table>
 
     </div>
+    <?php require '../resources/views/includes/footer.php'; ?>
 </div>
-<?php require '../resources/views/includes/footer.php'; ?>
+
+<?php require '../resources/views/includes/scripts.php'?>

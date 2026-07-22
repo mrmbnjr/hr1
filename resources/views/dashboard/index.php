@@ -271,5 +271,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
             Your assigned modules will appear here as they become available.
         </p>
     </section>
+    <?php require '../resources/views/includes/footer.php'; ?>
 </div>
-<?php require '../resources/views/includes/footer.php'; ?>
+
+<?php require '../resources/views/includes/scripts.php'?>

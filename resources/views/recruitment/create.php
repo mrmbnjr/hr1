@@ -184,6 +184,7 @@ if (!isset($_SESSION['user_id'])) {
 
 </form>
 
+    <?php require '../resources/views/includes/footer.php'; ?>
 </div>
 
-<?php require '../resources/views/includes/footer.php'; ?>
+<?php require '../resources/views/includes/scripts.php'?>

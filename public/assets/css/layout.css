@@ -1,12 +1,3 @@
-/* =========================================================
-   RAM-YUM HRM — Sidebar
-   Same brand tokens as the storefront login page: maroon
-   card/panel colour, gold accents, cream highlights.
-   Fonts: Luckiest Guy (wordmark), Baloo 2 (nav labels/titles),
-   Nunito (base). Load these three from Google Fonts on the
-   page that includes this partial, same as the login page.
-   ========================================================= */
-
 /* ==========================================================
    SIDEBAR
 ========================================================== */
@@ -254,20 +245,14 @@
   top: 0;
   width: auto;
   height: 73px;
-
   display:flex;
   justify-content:space-between;
   align-items:center;
-
   padding:0 26px;
-
   background: linear-gradient(190deg, var(--ry-maroon) 0%, var(--ry-maroon-dark) 100%);
   border-bottom:3px solid var(--ry-gold);
-
   box-shadow:0 4px 18px rgba(20,6,6,.08);
-
   z-index:30;
-
   font-family:"Nunito",sans-serif;
 }
 
@@ -336,37 +321,6 @@
   line-height: 1.4;
   color: var(--ry-gold);
 }
-
-/* ==========================================
-   Tablet
-========================================== */
-
-@media (max-width: 768px) {
-  .navbar-title h2 {
-    font-size: 1.15rem;
-  }
-
-  .page-subtitle {
-    font-size: 0.8rem;
-  }
-}
-
-/* ==========================================
-   Mobile
-========================================== */
-
-@media (max-width: 480px) {
-  .navbar-title h2 {
-    font-size: 1rem;
-    line-height: 1.2;
-  }
-
-  .page-subtitle {
-    font-size: 0.75rem;
-    line-height: 1.3;
-  }
-}
-
 /* ---------- Right ---------- */
 
 .navbar-search {
@@ -503,18 +457,13 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
-  width: 100%;
+  width: auto;
   min-height: 40px;
   padding: 10px 16px;
-  background: var(--maroon);
+  background: linear-gradient(190deg, var(--ry-maroon) 0%, var(--ry-maroon-dark) 100%);
+  border-top:3px solid var(--ry-gold);
   flex-wrap: wrap;
   margin-top: 0;
-  margin-left: var(--sidebar-width);
-  transition: margin-left .35s ease;
-}
-
-body.sidebar-hidden .site-footer {
-    margin-left: 0;
 }
 
 .footer-text {
@@ -597,6 +546,16 @@ body.sidebar-hidden .main-content {
 
 }
 
+@media (max-width: 768px) {
+  .navbar-title h2 {
+    font-size: 1.15rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width:640px){
 
 .navbar{
@@ -633,6 +592,16 @@ gap:10px;
   .site-footer { 
     gap: 8px; padding: 8px 10px; 
   }
+
+  .navbar-title h2 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
 }
 
 @media (max-width: 360px) {
@@ -645,13 +614,3 @@ gap:10px;
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .sidebar-overlay, .sidebar-menu a { transition: none; }
 }
-
-/* ---------------------------------------------------------
-   Add to your layout's main content wrapper so it doesn't
-   sit underneath the fixed sidebar:
-
-     .main-content { margin-left: var(--sidebar-width); }
-     @media (max-width: 960px) {
-       .main-content { margin-left: 0; }
-     }
---------------------------------------------------------- */

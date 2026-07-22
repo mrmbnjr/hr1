@@ -324,4 +324,7 @@ $pageDescription = "Manage the Organization for your RAM-YUM Store account — K
 
     </div>
 
+    <?php require '../resources/views/includes/footer.php'; ?>
 </div>
+
+<?php require '../resources/views/includes/scripts.php'?>

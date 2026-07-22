@@ -46,4 +46,6 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
     </section>
   </main>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+    <?php require '../resources/views/includes/footer.php'; ?>
+
+<?php require '../resources/views/includes/scripts.php'?>
