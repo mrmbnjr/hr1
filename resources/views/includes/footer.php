@@ -4,6 +4,6 @@
     <div class="footer-icons" id="footerIconsRight"></div>
   </footer>
 
-  <script src="assets/js/index.js"></script>
-  <script src="assets/js/login.js"></script>
+  <script src="../public/assets/js/script.js"></script>
+  <script src="../public/assets/js/login.js"></script>
 </body>

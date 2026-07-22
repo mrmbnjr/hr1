@@ -11,11 +11,23 @@
                 aria-controls="ramyumSidebar">
 
             <i class="fa-solid fa-bars"></i>
-
         </button>
 
-        <form class="navbar-search" action="#" method="GET">
+        <div class="navbar-title">
+            <h2>
+                <?= htmlspecialchars($pageTitle); ?> for
+                <strong><?= $_SESSION['username'] ?? 'User'; ?></strong>
+            </h2>
 
+            <p class="page-subtitle">
+                <?= htmlspecialchars($pageDescription); ?>
+            </p>
+        </div>
+    </div>
+
+    <!-- Right -->
+    <div class="navbar-right">
+        <form class="navbar-search" action="#" method="GET">
             <i class="fa-solid fa-magnifying-glass"></i>
 
             <input
@@ -23,13 +35,15 @@
                 name="search"
                 placeholder="Search employees, applicants..."
                 autocomplete="off">
-
         </form>
 
-    </div>
-
-    <!-- Right -->
-    <div class="navbar-right">
+        <!-- Notification -->
+        <button class="navbar-icon-btn notification-btn">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge">
+                3
+            </span>
+        </button>
 
         <!-- Theme Toggle -->
         <button type="button"
@@ -73,73 +87,7 @@
                  stroke-linejoin="round">
 
                 <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>
-
             </svg>
-
         </button>
-
-        <!-- Notification -->
-        <button class="navbar-icon-btn notification-btn">
-
-            <i class="fa-solid fa-bell"></i>
-
-            <span class="notification-badge">
-                3
-            </span>
-
-        </button>
-
-        <!-- Profile -->
-        <div class="navbar-profile" id="profileDropdown">
-
-            <button class="profile-btn">
-
-                <div class="profile-avatar">
-
-                    <i class="fa-solid fa-user"></i>
-
-                </div>
-
-                <div class="profile-info">
-
-                    <span class="profile-name">
-                        <?= $_SESSION['username'] ?? 'User'; ?>
-                    </span>
-
-                    <span class="profile-role">
-                        <?= $_SESSION['username'] ?? 'User'; ?>
-                    </span>
-
-                </div>
-
-                <i class="fa-solid fa-chevron-down profile-arrow"></i>
-
-            </button>
-
-            <div class="profile-menu">
-
-                <a href="#">
-                    <i class="fa-solid fa-user"></i>
-                    Profile
-                </a>
-
-                <a href="#">
-                    <i class="fa-solid fa-gear"></i>
-                    Settings
-                </a>
-
-                <a href="?page=logout">
-
-                    <i class="fa-solid fa-right-from-bracket"></i>
-
-                    Logout
-
-                </a>
-
-            </div>
-
-        </div>
-
     </div>
-
 </nav>

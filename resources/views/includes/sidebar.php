@@ -1,14 +1,6 @@
 <?php
 $currentPage = $_GET['page'] ?? 'dashboard';
 ?>
-<button type="button"
-        class="sidebar-toggle"
-        id="sidebarToggle"
-        aria-label="Open menu"
-        aria-expanded="false"
-        aria-controls="ramyumSidebar">
-    <i class="fa-solid fa-bars"></i>
-</button>
 
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 

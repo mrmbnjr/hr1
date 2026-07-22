@@ -26,7 +26,7 @@
 
   --ink: #241311;
   --ink-soft: #6b4a44;
-  --white: #fffaf3;
+  --white: #fff;
 
   --badge-seal: var(--maroon);
 
@@ -48,6 +48,16 @@
   ========================== */
 
   --sidebar-width: 264px;
+
+    /* ==========================
+     Navbar
+  ========================== */
+
+    --navbar-bg: var(--ry-white);
+    --navbar-surface: var(--ry-cream);
+    --navbar-border: #ecd8bc;
+    --navbar-text: var(--ink);
+    --navbar-text-soft: var(--ink-soft);
 
   /* ==========================
      Border Radius
@@ -71,6 +81,28 @@
   --font-display: "Luckiest Guy", "Baloo 2", cursive;
   --font-heading: "Baloo 2", "Nunito", sans-serif;
   --font-body: "Nunito", "Baloo 2", sans-serif;
+
+/* ==========================
+   Buttons
+========================== */
+
+--button-bg: linear-gradient(180deg, #f7cf67 0%, #f2c14e 100%);
+--button-bg-hover: linear-gradient(180deg, #ffd978 0%, #f5c84d 100%);
+--button-bg-active: #cf9a2c;
+
+--button-text: #4a0d0d;
+
+--button-border: 2px solid #b67f1f;
+
+--button-shadow:
+  0 5px 0 #9a6915,
+  0 10px 20px rgba(74,15,15,.18);
+
+--button-shadow-hover:
+  0 6px 0 #9a6915,
+  0 14px 24px rgba(74,15,15,.25);
+
+--button-radius: 14px;
 }
 
 [data-theme="dark"] {
@@ -98,7 +130,7 @@
 
   --ink: #f6e9e2;
   --ink-soft: #d8b9ae;
-  --white: #fff7f0;
+  --white: rgba(255,250,243,.75);
 
   --badge-seal: var(--red);
 
