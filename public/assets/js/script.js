@@ -94,3 +94,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+// Graph
+const canvas = document.getElementById("applicantChart");
+
+if (canvas && window.applicantChartData) {
+new Chart(canvas, {
+    type: "bar",
+    data: {
+        labels: window.applicantChartData.labels,
+        datasets: [{
+            label: "Applicants",
+            data: window.applicantChartData.data,
+            backgroundColor: "#4CAF50",
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        indexAxis: "y", // Horizontal bars
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+}

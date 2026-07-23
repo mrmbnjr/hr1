@@ -3,6 +3,14 @@ $pageTitle = "Dashboard";
 $pageCSS = "dashboard.css";
 $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
+// Ensure chart variables are defined to avoid undefined variable errors
+if (!isset($labels) || !is_array($labels)) {
+    $labels = [];
+}
+if (!isset($data) || !is_array($data)) {
+    $data = [];
+}
+
     if (!isset($_SESSION['user_id'])) {
         header("Location: /hr1/public/?page=login");
         exit;
@@ -16,78 +24,65 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
     <?php require '../resources/views/includes/navbar.php'; ?>
 
     <!-- ======================================================
-        HERO
-    ======================================================= -->
-
-    <section class="dashboard-hero">
-        <div class="hero-content">
-            <span class="hero-tag">
-                🍜 RAM-YUM Administration
-            </span>
-            <h1>Welcome back, <?= htmlspecialchars($_SESSION['username']) ?>!</h1>
-            <p>Here's a quick overview of today's recruitment and employee activities.</p>
-        </div>
-
-        <div class="hero-badge">
-            <div class="hero-circle">👋</div>
-        </div>
-    </section>
-
-    <!-- ======================================================
         QUICK STATS
     ======================================================= -->
 
     <section class="stats-grid">
-        <article class="stat-card">
-            <div class="stat-icon">
-                <i class="fa-solid fa-users"></i>
-            </div>
+        <a href="/hr1/public/?page=applicants" class="stat-card-link">
+            <article class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <small>Total Applicants</small>
+                    <h2>245</h2>
+                    <span class="increase">
+                        <i class="fa-solid fa-arrow-trend-up"></i>+18 this week
+                    </span>
+                </div>
+            </article>
+        </a>
 
-            <div>
-                <small>Total Applicants</small>
-                <h2>245</h2>
+        <a href="/hr1/public/?page=recruitment" class="stat-card-link">
+            <article class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
 
-                <span class="increase">
-                    <i class="fa-solid fa-arrow-trend-up"></i>+18 this week
-                </span>
-            </div>
-        </article>
+                <div>
+                    <small>Open Positions</small>
+                    <h2>12</h2>
+                    <span>Across all branches</span>
+                </div>
+            </article>
+        </a>
 
-        <article class="stat-card">
-            <div class="stat-icon">
-                <i class="fa-solid fa-briefcase"></i>
-            </div>
+        <a href="/hr1/public/?page=employee-records" class="stat-card-link">
+            <article class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
 
-            <div>
-                <small>Open Positions</small>
-                <h2>12</h2>
-                <span>Across all branches</span>
-            </div>
-        </article>
+                <div>
+                    <small>Employees</small>
+                    <h2>18</h2>
+                    <span class="warning">Active employees only</span>
+                </div>
+            </article>
+        </a>
 
-        <article class="stat-card">
-            <div class="stat-icon">
-                <i class="fa-solid fa-user-clock"></i>
-            </div>
-
-            <div>
-                <small>Pending Review</small>
-                <h2>18</h2>
-                <span class="warning">Needs HR review</span>
-            </div>
-        </article>
-
-        <article class="stat-card">
-            <div class="stat-icon">
-                <i class="fa-solid fa-calendar-days"></i>
-            </div>
-
-            <div>
-                <small>Interviews Today</small>
-                <h2>7</h2>
-                <span>Scheduled</span>
-            </div>
-        </article>
+        <a href="/hr1/public/?page=employee-self-service" class="stat-card-link">
+            <article class="stat-card">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+                <div>
+                    <small>Requests</small>
+                    <h2>7</h2>
+                    <span>Recent employee requests</span>
+                </div>
+            </article>
+        </a>
     </section>
 
     <!-- ======================================================
@@ -190,44 +185,19 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
         <article class="dashboard-card">
             <div class="card-header">
                 <div>
-                    <h2>Upcoming Interviews</h2>
-
-                    <p>Next scheduled interviews</p>
+                    <h2>Applicant Statistics</h2>
+                    <p>Number of applicants per position</p>
                 </div>
             </div>
 
-            <table class="dashboard-table">
+            <canvas id="applicantChart" height="120"></canvas>
 
-                <thead>
-                    <tr>
-                        <th>Applicant</th>
-                        <th>Position</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <tr>
-                        <td>John Cruz</td>
-
-                        <td>Cashier</td>
-
-                        <td>July 20</td>
-                    </tr>
-
-                    <tr>
-                        <td>Maria Santos</td>
-                        <td>Warehouse Staff</td>
-                        <td>July 21</td>
-                    </tr>
-
-                    <tr>
-                        <td>Kevin Reyes</td>
-                        <td>Cook</td>
-                        <td>July 22</td>
-                    </tr>
-                </tbody>
-            </table>
+            <script>
+            window.applicantChartData = {
+                labels: <?= json_encode($labels) ?>,
+                data: <?= json_encode($data) ?>
+            };
+            </script>
         </article>
 
         <article class="dashboard-card">

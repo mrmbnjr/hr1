@@ -15,6 +15,7 @@ CREATE TABLE users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     status ENUM('Active','Inactive') DEFAULT 'Active',
+    must_change_password BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(role_id)
     REFERENCES roles(role_id)
@@ -26,8 +27,8 @@ CREATE TABLE departments (
     description TEXT
 );
 
-CREATE TABLE job_positions (
-    position_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE job_postings (
+    posting_id INT AUTO_INCREMENT PRIMARY KEY,
     department_id INT NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT,
@@ -38,7 +39,6 @@ CREATE TABLE job_positions (
         'Contract',
         'Internship'
     ) NOT NULL,
-    salary DECIMAL(10,2),
     vacancies INT DEFAULT 1,
     status ENUM('Open','Closed') DEFAULT 'Open',
     application_deadline DATE NOT NULL,
@@ -54,11 +54,11 @@ CREATE TABLE job_positions (
 
 CREATE TABLE applicants (
     applicant_id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(100),
+    first_name VARCHAR(100) NOT NULL,
     middle_name VARCHAR(100),
-    last_name VARCHAR(100),
-    email VARCHAR(150),
-    phone VARCHAR(30),
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    phone VARCHAR(30) UNIQUE NOT NULL,
     address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -66,30 +66,28 @@ CREATE TABLE applicants (
 CREATE TABLE applications (
     application_id INT AUTO_INCREMENT PRIMARY KEY,
     applicant_id INT NOT NULL,
-    position_id INT NOT NULL,
+    posting_id INT NOT NULL,
 
     resume_file VARCHAR(255) NOT NULL,
     cover_letter_file VARCHAR(255),
 
     application_status ENUM(
         'Submitted',
-        'AI Screened',
-        'Shortlisted',
+        'Under Review',
         'Interview',
-        'Job Offer',
         'Hired',
         'Rejected'
     ) DEFAULT 'Submitted',
 
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE(applicant_id, position_id),
+    UNIQUE(applicant_id, posting_id),
 
     FOREIGN KEY (applicant_id)
         REFERENCES applicants(applicant_id),
 
-    FOREIGN KEY (position_id)
-        REFERENCES job_positions(position_id)
+    FOREIGN KEY (posting_id)
+        REFERENCES job_postings(posting_id)
 );
 
 CREATE TABLE ai_screening (
@@ -109,6 +107,7 @@ CREATE TABLE ai_screening (
     processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(application_id)
     REFERENCES applications(application_id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE interviews (
@@ -132,21 +131,6 @@ CREATE TABLE interviews (
     REFERENCES applications(application_id),
     FOREIGN KEY(interviewer_id)
     REFERENCES users(user_id)
-);
-
-CREATE TABLE job_offers (
-    offer_id INT AUTO_INCREMENT PRIMARY KEY,
-    application_id INT UNIQUE,
-    offered_salary DECIMAL(10,2),
-    start_date DATE,
-    status ENUM(
-        'Pending',
-        'Accepted',
-        'Declined'
-    ) DEFAULT 'Pending',
-    offered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(application_id)
-    REFERENCES applications(application_id)
 );
 
 CREATE TABLE onboarding (
@@ -181,7 +165,7 @@ CREATE TABLE employees (
     employee_id INT AUTO_INCREMENT PRIMARY KEY,
     application_id INT UNIQUE,
     employee_number VARCHAR(30) UNIQUE,
-    hire_date DATE,
+    hire_date DATE NOT NULL,
     employment_status ENUM(
         'Probationary',
         'Regular',
@@ -190,4 +174,3 @@ CREATE TABLE employees (
     FOREIGN KEY(application_id)
     REFERENCES applications(application_id)
 );
-

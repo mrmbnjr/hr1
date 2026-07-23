@@ -144,25 +144,52 @@ class Applicant
             ':id' => $id
         ]);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+        public function getAllPositions()
+        {
+            $sql = "
+                SELECT
+                    position_id,
+                    title
+                FROM job_positions
+                WHERE status = 'Open'
+                ORDER BY title ASC
+            ";
 
-    /**
-     * Get all job positions
-     */
-    public function getAllPositions()
+            return $this->db
+                ->query($sql)
+                ->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+    public function getApplicantsPerPosition()
     {
         $sql = "
             SELECT
-                position_id,
-                title
-            FROM job_positions
-            WHERE status = 'Open'
-            ORDER BY title ASC
+                jp.title AS position,
+                COUNT(*) AS total
+            FROM applications ap
+            INNER JOIN job_positions jp
+                ON ap.position_id = jp.position_id
+            GROUP BY jp.position_id, jp.title
+            ORDER BY total DESC
         ";
 
-        return $this->db
+        $result = $this->db
             ->query($sql)
             ->fetchAll(PDO::FETCH_ASSOC);
+
+        $labels = [];
+        $data = [];
+
+        foreach ($result as $row) {
+            $labels[] = $row['position'];
+            $data[] = (int)$row['total'];
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => $data
+        ];
     }
 }
