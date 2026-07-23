@@ -3,14 +3,6 @@ $pageTitle = "Dashboard";
 $pageCSS = "dashboard.css";
 $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
-// Ensure chart variables are defined to avoid undefined variable errors
-if (!isset($labels) || !is_array($labels)) {
-    $labels = [];
-}
-if (!isset($data) || !is_array($data)) {
-    $data = [];
-}
-
     if (!isset($_SESSION['user_id'])) {
         header("Location: /hr1/public/?page=login");
         exit;
@@ -90,90 +82,61 @@ if (!isset($data) || !is_array($data)) {
     ======================================================= -->
 
     <section class="dashboard-grid">
-
-        <!-- Recent Applicants -->
+        <!-- Employee Growth -->
         <article class="dashboard-card">
-
             <div class="card-header">
                 <div>
-                    <h2>Recent Applications</h2>
-                    <p>Latest submitted applicants</p>
+                    <h2>Employee Growth</h2>
+                    <p>Total employees hired over time</p>
                 </div>
-                <a href="../applications/index.php">View All</a>
+
+                <select id="growthFilter">
+                    <option value="12">Last 12 Months</option>
+                    <option value="6">Last 6 Months</option>
+                </select>
             </div>
 
-            <table class="dashboard-table">
-                <thead>
-                    <tr>
-                        <th>Applicant</th>
-                        <th>Position</th>
-                        <th>AI Match</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+            <canvas id="employeeGrowthChart" height="120"></canvas>
 
-                <tbody>
-                    <tr>
-                        <td>Juan Dela Cruz</td>
-                        <td>Cashier</td>
-                        <td>92%</td>
-                        <td>
-                            <span class="status pending">Pending</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Maria Santos</td>
-                        <td>Warehouse Staff</td>
-                        <td>88%</td>
-                        <td>
-                            <span class="status interview">Interview</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>John Cruz</td>
-                        <td>Accountant</td>
-                        <td>95%</td>
-                        <td>
-                            <span class="status hired">Hired</span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <script>
+                window.employeeGrowthData = {
+                    labels: <?= json_encode($growthLabels ?? []) ?>,
+                    data: <?= json_encode($growthData ?? []) ?>
+                };
+            </script>
         </article>
 
-        <!-- AI -->
-
+        <!-- Calendar -->
         <article class="dashboard-card">
             <div class="card-header">
-                <div>
-                    <h2>AI Screening</h2>
-                    <p>Today's recruitment analytics</p>
+                <button class="calendar-nav" id="prevMonth">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <div class="calendar-title">
+                    <h2 id="calendarTitle"></h2>
                 </div>
+
+                <button class="calendar-nav" id="nextMonth">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
             </div>
 
-            <div class="summary-list">
-                <div class="summary-item">
-                    <span>Processed Today</span>
-                    <strong>18</strong>
-                </div>
-
-                <div class="summary-item">
-                    <span>Average Match</span>
-                    <strong>86%</strong>
-                </div>
-
-                <div class="summary-item">
-                    <span>Shortlisted</span>
-                    <strong>12</strong>
-                </div>
-
-                <div class="summary-item">
-                    <span>Needs Review</span>
-                    <strong>6</strong>
-                </div>
-            </div>
+            <table class="calendar">
+                <thead>
+                    <tr>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                        <th>Sun</th>
+                    </tr>
+                </thead>
+                <tbody id="calendarBody"></tbody>
+            </table>
         </article>
     </section>
 
@@ -182,65 +145,162 @@ if (!isset($data) || !is_array($data)) {
     ======================================================= -->
 
     <section class="dashboard-grid">
+
+        <!-- New Employees -->
         <article class="dashboard-card">
+
             <div class="card-header">
                 <div>
-                    <h2>Applicant Statistics</h2>
-                    <p>Number of applicants per position</p>
+                    <h2>New Employees</h2>
+                    <p>Recently onboarded employees</p>
                 </div>
+
+                <a href="/hr1/public/?page=employee-records">
+                    View All
+                </a>
             </div>
 
-            <canvas id="applicantChart" height="120"></canvas>
 
-            <script>
-            window.applicantChartData = {
-                labels: <?= json_encode($labels) ?>,
-                data: <?= json_encode($data) ?>
-            };
-            </script>
+            <div class="employee-list">
+
+            <?php if (!empty($newEmployees)): ?>
+
+                <?php foreach ($newEmployees as $employee): ?>
+
+                    <div class="employee-item">
+
+                        <div class="employee-info">
+
+                            <h3>
+                                <?= htmlspecialchars($employee['employee_name']) ?>
+                            </h3>
+
+                            <p>
+                                <?= htmlspecialchars($employee['title']) ?>
+                            </p>
+
+                            <div class="employee-meta">
+
+                                <span class="employment <?= strtolower($employee['employment_status']) ?>">
+                                    <?= htmlspecialchars($employee['employment_status']) ?>
+                                </span>
+
+                                <span class="status <?= strtolower($employee['onboarding_status']) ?>">
+                                    <?= htmlspecialchars($employee['onboarding_status']) ?>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <span class="employee-date">
+                            <?= date('M d', strtotime($employee['hire_date'])) ?>
+                        </span>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            <?php else: ?>
+
+                <p>No new employees found.</p>
+
+            <?php endif; ?>
+
+            </div>
         </article>
 
+        <!-- Quick Actions -->
         <article class="dashboard-card">
+
             <div class="card-header">
                 <div>
-                    <h2>Recent Activity</h2>
-
-                    <p>Latest HR actions</p>
+                    <h2>Quick Actions</h2>
+                    <p>Frequently used functions</p>
                 </div>
             </div>
 
-            <ul class="activity-list">
-                <li>
-                    <i class="fa-solid fa-circle-check"></i>
-                    Maria Santos submitted an application.
-                </li>
-                <li>
-                    <i class="fa-solid fa-circle-check"></i>
-                    AI screened Juan Dela Cruz.
-                </li>
-                <li>
-                    <i class="fa-solid fa-circle-check"></i>
-                    HR scheduled an interview.
-                </li>
-                <li>
-                    <i class="fa-solid fa-circle-check"></i>
-                    Manager approved a hiring request.
-                </li>
-            </ul>
+
+            <div class="shortcut-grid">
+
+                <a href="/hr1/public/?page=recruitment">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Create Job Post</span>
+                </a>
+
+
+                <a href="/hr1/public/?page=applicants">
+                    <i class="fa-solid fa-user-check"></i>
+                    <span>Review Applicants</span>
+                </a>
+
+
+                <a href="/hr1/public/?page=onboarding">
+                    <i class="fa-solid fa-file-signature"></i>
+                    <span>Onboarding</span>
+                </a>
+
+
+                <a href="/hr1/public/?page=employee-records">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Employees</span>
+                </a>
+            </div>
         </article>
     </section>
+
+    <!-- ======================================================
+        TOTAL ACTIVITIES
+    ======================================================= -->
 
     <section class="dashboard-card">
+
         <div class="card-header">
-            <h2>Dashboard</h2>
+            <div>
+                <h2>Total Activities</h2>
+                <p>Recent HR system activities</p>
+            </div>
+
+            <a href="#">
+                View History
+            </a>
         </div>
-        <p>
-            Welcome to the RAM-YUM HR Management System.
-        </p>
-        <p>
-            Your assigned modules will appear here as they become available.
-        </p>
-    </section>
+
+
+        <div class="activity-list">
+
+        <?php if (!empty($recentActivities)): ?>
+
+            <?php foreach ($recentActivities as $activity): ?>
+
+                <div class="activity-item">
+                    <div>
+
+                        <h3>
+                            <?= htmlspecialchars($activity['activity_title']) ?>
+                        </h3>
+
+                        <p>
+                            <?= htmlspecialchars($activity['activity_description']) ?>
+                        </p>
+
+                    </div>
+
+                    <span>
+                        <?= date('M d, Y', strtotime($activity['activity_date'])) ?>
+                    </span>
+
+                </div>
+
+            <?php endforeach; ?>
+
+        <?php else: ?>
+
+            <p>No recent activities found.</p>
+
+        <?php endif; ?>
+
+        </div>
     <?php require '../resources/views/includes/footer.php'; ?>
 </div>
 

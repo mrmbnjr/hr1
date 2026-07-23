@@ -13,9 +13,6 @@ class ApplicantController
         $this->applicant = new Applicant();
     }
 
-    /**
-     * Applicant Management Page
-     */
     public function index()
     {
         $applicants = $this->applicant->getAllApplicants();

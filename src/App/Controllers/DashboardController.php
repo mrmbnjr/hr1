@@ -2,18 +2,35 @@
 
 namespace App\Controllers;
 
-use App\Models\Applicant;
+use App\Models\Dashboard;
 
-class DashboardController
-{
+class DashboardController {
+
+    private Dashboard $dashboard;
+
+    public function __construct()
+    {
+        $this->dashboard = new Dashboard();
+    }
+
     public function index()
     {
-        $applicantModel = new Applicant();
+        $growth = $this->dashboard->getEmployeeGrowth();
 
-        $chart = $applicantModel->getApplicantsPerPosition();
+        $growthLabels = [];
+        $growthData = [];
 
-        $labels = $chart['labels'];
-        $data = $chart['data'];
+        $total = 0;
+
+        foreach ($growth as $row) {
+            $growthLabels[] = $row['month'];
+            $total += $row['total'];
+            $growthData[] = $total;
+        }
+
+        $newEmployees = $this->dashboard->getNewEmployees(5);
+
+        $recentActivities = $this->dashboard->getRecentActivities(5);
 
         require '../resources/views/dashboard/index.php';
     }
