@@ -19,7 +19,7 @@ class ApplicantController
     public function index()
     {
         $applicants = $this->applicant->getAllApplicants();
-        $positions = $this->applicant->getAllPositions();
+        $positions = $this->applicant->getAllJobPostings();
 
         require '../resources/views/applicants/index.php';
     }
@@ -55,7 +55,7 @@ class ApplicantController
         }
 
         $applicant = $this->applicant->getApplicantById($_GET['id']);
-        $positions = $this->applicant->getAllPositions();
+        $positions = $this->applicant->getAllJobPostings();
 
         require '../resources/views/applicants/edit.php';
     }

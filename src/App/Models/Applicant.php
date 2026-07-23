@@ -14,9 +14,6 @@ class Applicant
         $this->db = Database::connection();
     }
 
-    /**
-     * Get all applicants with application details
-     */
     public function getAllApplicants()
     {
         $sql = "
@@ -46,24 +43,21 @@ class Applicant
 
                 i.interview_date,
 
-                COALESCE(jo.status, 'Pending') AS hiring_decision
+                ap.application_status AS hiring_decision
 
             FROM applicants a
 
             INNER JOIN applications ap
                 ON a.applicant_id = ap.applicant_id
 
-            INNER JOIN job_positions jp
-                ON ap.position_id = jp.position_id
+            INNER JOIN job_postings jp
+                ON ap.posting_id = jp.posting_id
 
             LEFT JOIN ai_screening ai
                 ON ap.application_id = ai.application_id
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
-
-            LEFT JOIN job_offers jo
-                ON ap.application_id = jo.application_id
 
             ORDER BY ap.applied_at DESC
         ";
@@ -73,9 +67,6 @@ class Applicant
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Get applicant by ID
-     */
     public function getApplicantById(int $id)
     {
         $sql = "
@@ -94,7 +85,7 @@ class Applicant
                 a.phone,
                 a.address,
 
-                jp.position_id,
+                jp.posting_id,
                 jp.title AS position,
 
                 ap.application_id,
@@ -115,26 +106,21 @@ class Applicant
                 i.remarks,
                 i.result,
 
-                jo.offered_salary,
-                jo.start_date,
-                jo.status AS hiring_decision
+                ap.application_status AS hiring_decision
 
             FROM applicants a
 
             INNER JOIN applications ap
                 ON a.applicant_id = ap.applicant_id
 
-            INNER JOIN job_positions jp
-                ON ap.position_id = jp.position_id
+            INNER JOIN job_postings jp
+                ON ap.posting_id = jp.posting_id
 
             LEFT JOIN ai_screening ai
                 ON ap.application_id = ai.application_id
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
-
-            LEFT JOIN job_offers jo
-                ON ap.application_id = jo.application_id
 
             WHERE a.applicant_id = :id
         ";
@@ -144,23 +130,25 @@ class Applicant
             ':id' => $id
         ]);
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-        public function getAllPositions()
-        {
-            $sql = "
-                SELECT
-                    position_id,
-                    title
-                FROM job_positions
-                WHERE status = 'Open'
-                ORDER BY title ASC
-            ";
 
-            return $this->db
-                ->query($sql)
-                ->fetchAll(PDO::FETCH_ASSOC);
-        }
+    public function getAllJobPostings()
+    {
+        $sql = "
+            SELECT
+                posting_id,
+                title
+            FROM job_postings
+            WHERE status = 'Open'
+            ORDER BY title ASC
+        ";
+
+        return $this->db
+            ->query($sql)
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     public function getApplicantsPerPosition()
     {
@@ -169,9 +157,14 @@ class Applicant
                 jp.title AS position,
                 COUNT(*) AS total
             FROM applications ap
-            INNER JOIN job_positions jp
-                ON ap.position_id = jp.position_id
-            GROUP BY jp.position_id, jp.title
+
+            INNER JOIN job_postings jp
+                ON ap.posting_id = jp.posting_id
+
+            GROUP BY
+                jp.posting_id,
+                jp.title
+
             ORDER BY total DESC
         ";
 
@@ -184,7 +177,7 @@ class Applicant
 
         foreach ($result as $row) {
             $labels[] = $row['position'];
-            $data[] = (int)$row['total'];
+            $data[] = (int) $row['total'];
         }
 
         return [
