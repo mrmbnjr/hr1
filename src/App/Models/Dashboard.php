@@ -4,29 +4,427 @@ namespace App\Models;
 
 use Core\Database;
 use PDO;
+use DateTime;
 
-class Dashboard {
-
+class Dashboard
+{
     private PDO $db;
-    
+
     public function __construct()
     {
         $this->db = Database::connection();
     }
 
-    public function getEmployeeGrowth()
+
+    /*
+    |--------------------------------------------------------------------------
+    | QUICK STATS
+    |--------------------------------------------------------------------------
+    */
+
+    public function getQuickStats()
+    {
+        return [
+
+            'applicants' => $this->db->query("
+                SELECT COUNT(*)
+                FROM applicants
+            ")->fetchColumn(),
+
+
+            'postings' => $this->db->query("
+                SELECT COUNT(*)
+                FROM job_postings
+                WHERE status = 'Open'
+            ")->fetchColumn(),
+
+
+            'employees' => $this->db->query("
+                SELECT COUNT(*)
+                FROM employees
+            ")->fetchColumn(),
+
+
+            'requests' => $this->db->query("
+                SELECT COUNT(*)
+                FROM onboarding
+                WHERE onboarding_status = 'Pending'
+            ")->fetchColumn()
+
+        ];
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | APPLICATION SUBMISSION CHART
+    |--------------------------------------------------------------------------
+    */
+
+    public function getApplicantChart(
+        string $view,
+        int $year,
+        ?int $month = null,
+        ?string $weekStart = null
+    ) {
+
+        switch ($view) {
+
+            case 'month':
+
+                return $this->getMonthChart(
+                    $year,
+                    $month ?? date('n')
+                );
+
+
+            case 'week':
+
+                return $this->getWeekChart(
+                    $weekStart ?? date('Y-m-d')
+                );
+
+
+            case 'year':
+
+            default:
+
+                return $this->getYearChart($year);
+
+        }
+
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | YEAR VIEW
+    | January - December
+    |--------------------------------------------------------------------------
+    */
+
+    private function getYearChart(int $year)
     {
         $sql = "
             SELECT
-                DATE_FORMAT(hire_date,'%b %y') AS month,
+                MONTH(applied_at) AS month_number,
                 COUNT(*) AS total
-            FROM employees
-            GROUP BY YEAR(hire_date), MONTH(hire_date)
-            ORDER BY hire_date
+
+            FROM applications
+
+            WHERE YEAR(applied_at) = :year
+
+            GROUP BY MONTH(applied_at)
+
+            ORDER BY month_number
         ";
 
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bindValue(
+            ':year',
+            $year,
+            PDO::PARAM_INT
+        );
+
+        $stmt->execute();
+
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+        $data = array_fill(1, 12, 0);
+
+
+        foreach ($results as $row) {
+
+            $data[(int)$row['month_number']] =
+                (int)$row['total'];
+
+        }
+
+
+        return [
+
+            'labels' => [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec'
+            ],
+
+            'data' => array_values($data),
+
+            'period' => $year,
+
+            'subtitle' =>
+                "Applications submitted throughout the year"
+
+        ];
     }
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MONTH VIEW
+    | 1 - Last day of month
+    |--------------------------------------------------------------------------
+    */
+
+    private function getMonthChart(
+        int $year,
+        int $month
+    ) {
+
+        $sql = "
+            SELECT
+                DAY(applied_at) AS day_number,
+                COUNT(*) AS total
+
+            FROM applications
+
+            WHERE YEAR(applied_at) = :year
+            AND MONTH(applied_at) = :month
+
+            GROUP BY DAY(applied_at)
+
+            ORDER BY day_number
+        ";
+
+
+        $stmt = $this->db->prepare($sql);
+
+
+        $stmt->bindValue(
+            ':year',
+            $year,
+            PDO::PARAM_INT
+        );
+
+
+        $stmt->bindValue(
+            ':month',
+            $month,
+            PDO::PARAM_INT
+        );
+
+
+        $stmt->execute();
+
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        $daysInMonth = cal_days_in_month(
+            CAL_GREGORIAN,
+            $month,
+            $year
+        );
+
+
+        $data = array_fill(
+            1,
+            $daysInMonth,
+            0
+        );
+
+
+
+        foreach ($results as $row) {
+
+            $data[(int)$row['day_number']] =
+                (int)$row['total'];
+
+        }
+
+
+
+        $labels = [];
+
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+
+            $labels[] = $i;
+
+        }
+
+
+
+        return [
+
+            'labels' => $labels,
+
+            'data' => array_values($data),
+
+            'period' =>
+                date(
+                    'F Y',
+                    strtotime("$year-$month-01")
+                ),
+
+            'subtitle' =>
+                "Applications submitted this month"
+
+        ];
+
+    }
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | WEEK VIEW
+    | Monday - Sunday
+    |--------------------------------------------------------------------------
+    */
+
+    private function getWeekChart(
+        string $weekStart
+    ) {
+
+
+        $start = new DateTime($weekStart);
+
+
+        $start->modify('monday this week');
+
+
+        $end = clone $start;
+
+
+        $end->modify('+6 days');
+
+
+
+        $sql = "
+            SELECT
+
+                DATE(applied_at) AS application_date,
+
+                COUNT(*) AS total
+
+
+            FROM applications
+
+
+            WHERE applied_at BETWEEN :start AND :end
+
+
+            GROUP BY DATE(applied_at)
+
+
+            ORDER BY application_date
+
+        ";
+
+
+
+        $stmt = $this->db->prepare($sql);
+
+
+
+        $stmt->bindValue(
+            ':start',
+            $start->format('Y-m-d')
+        );
+
+
+        $stmt->bindValue(
+            ':end',
+            $end->format('Y-m-d')
+        );
+
+
+        $stmt->execute();
+
+
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        $data = [];
+
+
+        $labels = [];
+
+
+
+        for ($i = 0; $i < 7; $i++) {
+
+
+            $current = clone $start;
+
+
+            $current->modify("+$i days");
+
+
+
+            $date = $current->format('Y-m-d');
+
+
+            $labels[] =
+                $current->format('D');
+
+
+
+            $data[$date] = 0;
+
+
+        }
+
+
+
+        foreach ($results as $row) {
+
+            $data[$row['application_date']] =
+                (int)$row['total'];
+
+        }
+
+
+
+        return [
+
+            'labels' => $labels,
+
+            'data' => array_values($data),
+
+            'period' =>
+                $start->format('M d')
+                ." - ".
+                $end->format('M d Y'),
+
+
+            'subtitle' =>
+                "Applications submitted this week"
+
+        ];
+
+    }
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NEW EMPLOYEES
+    |--------------------------------------------------------------------------
+    */
 
     public function getNewEmployees($limit = 5)
     {
@@ -53,15 +451,34 @@ class Dashboard {
                 ON app.application_id = o.application_id
 
             ORDER BY e.hire_date DESC
+
             LIMIT ?
         ";
 
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(1, (int) $limit, PDO::PARAM_INT);
+
+        $stmt->bindValue(
+            1,
+            (int)$limit,
+            PDO::PARAM_INT
+        );
+
         $stmt->execute();
+
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECENT ACTIVITIES
+    |--------------------------------------------------------------------------
+    */
 
     public function getRecentActivities($limit = 10)
     {
@@ -74,8 +491,10 @@ class Dashboard {
                     app.applied_at AS activity_date
 
                 FROM applications app
+
                 INNER JOIN applicants a
                     ON app.applicant_id = a.applicant_id
+
                 INNER JOIN job_postings jp
                     ON app.posting_id = jp.posting_id
             )
@@ -84,56 +503,76 @@ class Dashboard {
 
             (
                 SELECT
-                    'job' AS activity_type,
-                    'Job posting created' AS activity_title,
-                    CONCAT(jp.title, ' was posted.') AS activity_description,
-                    jp.created_at AS activity_date
+                    'job',
+                    'Job posting created',
+                    CONCAT(jp.title, ' was posted.'),
+                    jp.created_at
 
                 FROM job_postings jp
             )
 
+
             UNION ALL
+
 
             (
                 SELECT
-                    'employee' AS activity_type,
-                    'New employee hired' AS activity_title,
-                    CONCAT(a.first_name, ' ', a.last_name, ' joined as ', jp.title) AS activity_description,
-                    e.hire_date AS activity_date
+                    'employee',
+                    'New employee hired',
+                    CONCAT(a.first_name, ' ', a.last_name, ' joined as ', jp.title),
+                    e.hire_date
 
                 FROM employees e
+
                 INNER JOIN applications app
                     ON e.application_id = app.application_id
+
                 INNER JOIN applicants a
                     ON app.applicant_id = a.applicant_id
+
                 INNER JOIN job_postings jp
                     ON app.posting_id = jp.posting_id
             )
 
+
             UNION ALL
+
 
             (
                 SELECT
-                    'onboarding' AS activity_type,
-                    'Onboarding updated' AS activity_title,
-                    CONCAT(a.first_name, ' ', a.last_name, ' onboarding is ', o.onboarding_status) AS activity_description,
-                    o.orientation_date AS activity_date
+                    'onboarding',
+                    'Onboarding updated',
+                    CONCAT(a.first_name, ' ', a.last_name, ' onboarding is ', o.onboarding_status),
+                    o.orientation_date
 
                 FROM onboarding o
+
                 INNER JOIN applications app
                     ON o.application_id = app.application_id
+
                 INNER JOIN applicants a
                     ON app.applicant_id = a.applicant_id
             )
 
+
             ORDER BY activity_date DESC
+
             LIMIT ?
         ";
 
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+
+        $stmt->bindValue(
+            1,
+            (int)$limit,
+            PDO::PARAM_INT
+        );
+
         $stmt->execute();
+
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 }

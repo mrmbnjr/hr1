@@ -209,6 +209,185 @@
     box-shadow: 0 0 0 3px rgba(111, 20, 20, 0.15);
 }
 
+/* ================
+    Chart Header
+ ================== */
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--maroon);
+}
+
+.card-header p {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ===== Controls ===== */
+
+.chart-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* ===== Navigation ===== */
+
+.chart-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+}
+
+#currentPeriod {
+    min-width: 120px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--maroon);
+}
+
+.nav-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: var(--bg);
+}
+
+.nav-btn i {
+    color: var(--maroon);
+    font-size: 0.9rem;
+}
+
+/* ===== Select ===== */
+
+#growthFilter {
+    height: 36px;
+    padding: 0 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--ink);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* =====================
+    Chart Canvas
+===================== */
+
+#applicantGrowthChart {
+    width: 100% !important;
+    max-height: 350px;
+}
+
+
+/* =====================
+    Navigation States
+===================== */
+
+.nav-btn:active {
+    transform: scale(0.95);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-btn:disabled:hover {
+    background: transparent;
+}
+
+
+/* =====================
+    Chart Period Display
+===================== */
+
+#currentPeriod {
+    white-space: nowrap;
+}
+
+
+/* =====================
+    Mobile Chart Controls
+===================== */
+
+@media (max-width: 480px) {
+
+    .chart-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+
+    .chart-navigation {
+        width: 100%;
+    }
+
+
+    #growthFilter {
+        width: 100%;
+    }
+
+
+    #applicantGrowthChart {
+        max-height: 280px;
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chart-controls {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .chart-navigation {
+        flex: 1;
+        justify-content: space-between;
+    }
+
+    #currentPeriod {
+        min-width: auto;
+        flex: 1;
+    }
+
+    #growthFilter {
+        width: 110px;
+    }
+
+}
+
 /* ==========================================================
    SECOND GRID
 ========================================================== */

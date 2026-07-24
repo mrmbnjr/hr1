@@ -8,6 +8,15 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
         exit;
     }
 
+    // Initialize stats array with default values
+    if (!isset($stats) || !is_array($stats)) {
+        $stats = [
+            'applicants' => 0,
+            'postings' => 0,
+            'employees' => 0,
+            'requests' => 0
+        ];
+    }
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -27,7 +36,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
                 </div>
                 <div>
                     <small>Total Applicants</small>
-                    <h2>245</h2>
+                    <h2><?= $stats['applicants']; ?></h2>
                     <span class="increase">
                         <i class="fa-solid fa-arrow-trend-up"></i>+18 this week
                     </span>
@@ -43,7 +52,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
                 <div>
                     <small>Open Positions</small>
-                    <h2>12</h2>
+                    <h2><?= $stats['postings']; ?></h2>
                     <span>Across all branches</span>
                 </div>
             </article>
@@ -57,7 +66,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
                 <div>
                     <small>Employees</small>
-                    <h2>18</h2>
+                    <h2><?= $stats['employees']; ?></h2>
                     <span class="warning">Active employees only</span>
                 </div>
             </article>
@@ -70,7 +79,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
                 </div>
                 <div>
                     <small>Requests</small>
-                    <h2>7</h2>
+                    <h2><?= $stats['requests']; ?></h2>
                     <span>Recent employee requests</span>
                 </div>
             </article>
@@ -82,26 +91,65 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
     ======================================================= -->
 
     <section class="dashboard-grid">
-        <!-- Employee Growth -->
+        <!-- Applicant Submissions -->
         <article class="dashboard-card">
             <div class="card-header">
                 <div>
-                    <h2>Employee Growth</h2>
-                    <p>Total employees hired over time</p>
+                    <h2>Application Submissions</h2>
+                    <p id="growthSubtitle">
+                        Applications submitted throughout the year
+                    </p>
                 </div>
 
-                <select id="growthFilter">
-                    <option value="12">Last 12 Months</option>
-                    <option value="6">Last 6 Months</option>
-                </select>
+                <div class="chart-controls">
+
+                    <div class="chart-navigation">
+                        <button id="prevPeriod" class="nav-btn" type="button">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <span id="currentPeriod">
+                            <?= date('Y') ?>
+                        </span>
+
+                        <button id="nextPeriod" class="nav-btn" type="button">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <select id="growthFilter">
+                        <option value="year"
+                            <?= ($view ?? 'year') === 'year' ? 'selected' : '' ?>>
+                            Year
+                        </option>
+
+                        <option value="month"
+                            <?= ($view ?? '') === 'month' ? 'selected' : '' ?>>
+                            Month
+                        </option>
+
+                        <option value="week"
+                            <?= ($view ?? '') === 'week' ? 'selected' : '' ?>>
+                            Week
+                        </option>
+                    </select>
+                </div>
             </div>
 
-            <canvas id="employeeGrowthChart" height="120"></canvas>
+            <canvas id="applicantGrowthChart" height="120"></canvas>
 
             <script>
-                window.employeeGrowthData = {
+                window.applicantGrowthData = {
                     labels: <?= json_encode($growthLabels ?? []) ?>,
-                    data: <?= json_encode($growthData ?? []) ?>
+                    data: <?= json_encode($growthData ?? []) ?>,
+
+                    view: "<?= $view ?? 'year' ?>",
+                    year: <?= $year ?? date('Y') ?>,
+                    month: <?= $month ?? date('n') ?>,
+                    weekStart: "<?= $weekStart ?? date('Y-m-d') ?>",
+
+                    period: "<?= $chartPeriod ?? date('Y') ?>",
+                    subtitle: "<?= $chartSubtitle ?? 'Applications submitted throughout the year' ?>"
                 };
             </script>
         </article>
@@ -301,6 +349,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
         <?php endif; ?>
 
         </div>
+    </section>
     <?php require '../resources/views/includes/footer.php'; ?>
 </div>
 

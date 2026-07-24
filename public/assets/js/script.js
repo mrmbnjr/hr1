@@ -95,69 +95,366 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// Graph
-const employeeChart = document.getElementById("employeeGrowthChart");
+// ===============================
+// Applicant Submission Chart
+// ===============================
 
-if (employeeChart && window.employeeGrowthData) {
+const applicantChartCanvas = document.getElementById(
+    "applicantGrowthChart"
+);
 
-    new Chart(employeeChart, {
+const growthFilter = document.getElementById(
+    "growthFilter"
+);
 
-        type: "line",
+const prevPeriod = document.getElementById(
+    "prevPeriod"
+);
 
-        data: {
+const nextPeriod = document.getElementById(
+    "nextPeriod"
+);
 
-            labels: window.employeeGrowthData.labels,
+const currentPeriod = document.getElementById(
+    "currentPeriod"
+);
 
-            datasets: [{
+const growthSubtitle = document.getElementById(
+    "growthSubtitle"
+);
 
-                data: window.employeeGrowthData.data,
 
-                borderColor: "#3b82f6",
+let applicantChart;
 
-                backgroundColor: "rgba(59,130,246,.15)",
 
-                fill: true,
+let chartState = {
 
-                tension: .4,
+    view:
+        window.applicantGrowthData?.view ?? "year",
 
-                pointRadius: 4,
+    year:
+        window.applicantGrowthData?.year ?? new Date().getFullYear(),
 
-                pointHoverRadius: 6
+    month:
+        window.applicantGrowthData?.month ?? new Date().getMonth() + 1,
 
-            }]
+    weekStart:
+        window.applicantGrowthData?.weekStart ?? null
 
-        },
+};
 
-        options: {
 
-            responsive: true,
 
-            plugins: {
+// Create chart first
 
-                legend: {
-                    display: false
-                }
+if (applicantChartCanvas) {
+
+
+    applicantChart = new Chart(
+        applicantChartCanvas,
+        {
+
+            type: "line",
+
+
+            data: {
+
+                labels:
+                    window.applicantGrowthData?.labels ?? [],
+
+
+                datasets: [{
+
+                    label: "Applications",
+
+                    data:
+                        window.applicantGrowthData?.data ?? [],
+
+
+                    tension: 0.4,
+
+                    fill: true,
+
+                    pointRadius: 4,
+
+                    pointHoverRadius: 6
+
+                }]
 
             },
 
-            scales: {
 
-                x: {
-                    grid: {
+            options: {
+
+                responsive: true,
+
+
+                maintainAspectRatio: false,
+
+
+                plugins: {
+
+                    legend: {
                         display: false
                     }
+
                 },
 
-                y: {
-                    beginAtZero: false
+
+                scales: {
+
+                    x: {
+
+                        grid: {
+                            display: false
+                        }
+
+                    },
+
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            precision: 0
+
+                        }
+
+                    }
+
                 }
 
             }
 
         }
 
-    });
+    );
+
 }
+
+
+
+// Update chart
+
+function updateApplicantChart(data) {
+
+
+    if (!applicantChart) {
+        return;
+    }
+
+
+    applicantChart.data.labels =
+        data.labels;
+
+
+    applicantChart.data.datasets[0].data =
+        data.data;
+
+
+    applicantChart.update();
+
+
+}
+
+
+
+
+// Load chart data
+
+async function loadApplicantChart() {
+
+
+    const params = new URLSearchParams({
+
+        view: chartState.view,
+
+        year: chartState.year,
+
+        month: chartState.month,
+
+        weekStart: chartState.weekStart ?? ""
+
+    });
+
+
+
+    try {
+
+
+            const response = await fetch(
+                `/hr1/public/?page=dashboard-growth&${params}`
+            );
+
+        const data = await response.json();
+
+
+
+        updateApplicantChart(data);
+
+
+
+        currentPeriod.textContent =
+            data.period;
+
+
+
+        growthSubtitle.textContent =
+            data.subtitle;
+
+
+
+    } catch(error) {
+
+
+        console.error(
+            "Chart loading error:",
+            error
+        );
+
+
+    }
+
+}
+
+
+
+// Change Year / Month / Week
+
+growthFilter?.addEventListener(
+    "change",
+    () => {
+
+
+        chartState.view =
+            growthFilter.value;
+
+
+        loadApplicantChart();
+
+
+    }
+);
+
+
+
+// Previous button
+
+prevPeriod?.addEventListener(
+    "click",
+    () => {
+
+
+        if (chartState.view === "year") {
+
+            chartState.year--;
+
+        }
+
+
+        else if (chartState.view === "month") {
+
+
+            chartState.month--;
+
+
+            if (chartState.month < 1) {
+
+                chartState.month = 12;
+
+                chartState.year--;
+
+            }
+
+        }
+
+
+        else if (chartState.view === "week") {
+
+
+            const date =
+                new Date(chartState.weekStart);
+
+
+            date.setDate(
+                date.getDate() - 7
+            );
+
+
+            chartState.weekStart =
+                date.toISOString().split("T")[0];
+
+        }
+
+
+
+        loadApplicantChart();
+
+
+    }
+);
+
+
+
+// Next button
+
+nextPeriod?.addEventListener(
+    "click",
+    () => {
+
+
+        if (chartState.view === "year") {
+
+
+            chartState.year++;
+
+
+        }
+
+
+        else if (chartState.view === "month") {
+
+
+            chartState.month++;
+
+
+            if (chartState.month > 12) {
+
+                chartState.month = 1;
+
+                chartState.year++;
+
+            }
+
+        }
+
+
+        else if (chartState.view === "week") {
+
+
+            const date =
+                new Date(chartState.weekStart);
+
+
+            date.setDate(
+                date.getDate() + 7
+            );
+
+
+            chartState.weekStart =
+                date.toISOString().split("T")[0];
+
+        }
+
+
+
+        loadApplicantChart();
+
+
+    }
+);
 
 // Calendar
 const calendarTitle = document.getElementById("calendarTitle");

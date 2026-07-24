@@ -32,6 +32,10 @@ switch ($page) {
         (new DashboardController())->index();
         break;
 
+    case 'dashboard-growth':
+        (new DashboardController())->growthData();
+        break;
+
     case 'applicants':
         (new ApplicantController())->index();
         break;
