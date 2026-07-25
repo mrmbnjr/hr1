@@ -95,54 +95,43 @@
 ========================================================== */
 
 .dashboard-grid{
-
     margin:0 28px 28px;
-
     display:grid;
-
     grid-template-columns:2fr 1fr;
-
     gap:22px;
-
+    align-items: start;
 }
 
 .dashboard-card{
+    background: var(--card-bg);
+    border: 1px solid rgba(111,20,20,.12);
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    overflow: hidden;
+    transition: .25s ease;
+}
 
-    background:white;
-
-    border-radius:20px;
-
-    border:2px solid #eddcc2;
-
-    overflow:hidden;
-
-    box-shadow:0 8px 22px rgba(0,0,0,.05);
-
+.dashboard-card:hover{
+    box-shadow: 0 12px 28px rgba(0,0,0,.08);
 }
 
 /* ==========================================================
    HEADER
 ========================================================== */
 
-.card-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:22px 24px;
-
-    border-bottom:2px dashed rgba(242,193,78,.35);
-
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #ece5d8;
 }
 
 .card-header h2{
 
     margin:0;
 
-    color:var(--ry-maroon-dark);
+    color:var(--maroon-dark-white);
 
     font-family:"Baloo 2",sans-serif;
 
@@ -176,21 +165,75 @@
 
 
 /* ==========================================================
-   calendar
+   CALENDAR
 ========================================================== */
 
-.calendar-nav {
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
+.calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 8px;
+    padding: 20px;
+    table-layout: fixed;
+}
+
+.calendar th {
+    padding: 12px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ry-maroon);
+}
+
+.calendar td {
+    width: 42px;
+    height: 42px;
+    text-align: center;
+    vertical-align: middle;
+    border-radius: 12px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: .25s ease;
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.calendar td.empty {
+    cursor: default;
+    background: transparent;
+}
+
+.calendar td.today {
+    background: var(--ry-maroon);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 6px 18px rgba(111,20,20,.25);
+}
+
+.calendar td.weekend {
+    color: #a5a5a5;
+}
+
+.calendar-nav {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ece5d8;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: .25s ease;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .calendar-nav:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: #f8edd6;
+    border-color: var(--ry-gold);
+}
+
+.calendar-nav i {
+    color: var(--ry-maroon);
+    font-size: 15px;
 }
 
 .calendar-title {
@@ -200,38 +243,15 @@
 
 .calendar-title h2 {
     margin: 0;
-    font-size: 1rem;
-}
-.calendar .today {
-    background: var(--maroon);
-    color: #fff;
-    font-weight: 600;
-    box-shadow: 0 0 0 3px rgba(111, 20, 20, 0.15);
+    font-size: 18px;
+    font-weight: 700;
+    color:var(--maroon-dark-white);
 }
 
-/* ================
-    Chart Header
- ================== */
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
-}
-
-.card-header h2 {
-    margin: 0;
-    font-size: 1.15rem;
-    color: var(--maroon);
-}
-
-.card-header p {
-    margin: 0.35rem 0 0;
-    color: var(--muted);
-    font-size: 0.9rem;
+.calendar-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 }
 
 /* ===== Controls ===== */
@@ -255,11 +275,16 @@
     padding: 0.35rem 0.5rem;
 }
 
+.chart-body{
+    padding:20px;
+}
+
 #currentPeriod {
     min-width: 120px;
     text-align: center;
     font-weight: 600;
     color: var(--maroon);
+    white-space: nowrap;
 }
 
 .nav-btn {
@@ -321,157 +346,122 @@
     background: transparent;
 }
 
-
-/* =====================
-    Chart Period Display
-===================== */
-
-#currentPeriod {
-    white-space: nowrap;
-}
-
-
-/* =====================
-    Mobile Chart Controls
-===================== */
-
-@media (max-width: 480px) {
-
-    .chart-controls {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-    }
-
-
-    .chart-navigation {
-        width: 100%;
-    }
-
-
-    #growthFilter {
-        width: 100%;
-    }
-
-
-    #applicantGrowthChart {
-        max-height: 280px;
-    }
-
-}
-
-@media (max-width: 768px) {
-
-    .card-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .chart-controls {
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    .chart-navigation {
-        flex: 1;
-        justify-content: space-between;
-    }
-
-    #currentPeriod {
-        min-width: auto;
-        flex: 1;
-    }
-
-    #growthFilter {
-        width: 110px;
-    }
-
-}
-
 /* ==========================================================
-   SECOND GRID
+   NEW EMPLOYEES
 ========================================================== */
 
-.employee-item {
+.employee-list{
+    padding: 10px 24px 22px;
+}
+
+.employee-item{
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 16px 0;
-    border-bottom: 1px solid #ececec;
+    align-items: center;
+
+    padding: 18px 20px;
+    margin-bottom: 14px;
+
+    background: linear-gradient(
+        135deg,
+        #fffdf8 0%,
+        #fff8ec 100%
+    );
+
+    border: 1px solid #efe1c6;
+    border-radius: 18px;
+
+    transition: all .25s ease;
 }
 
-.employee-item:last-child {
-    border-bottom: none;
+.employee-item:last-child{
+    margin-bottom: 0;
 }
 
-.employee-info h3 {
+.employee-info{
+    flex: 1;
+}
+
+.employee-info h3{
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ink);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ry-maroon-dark);
 }
 
-.employee-info p {
-    margin: 4px 0 10px;
-    font-size: 0.9rem;
-    color: #777;
+.employee-info p{
+    margin: 6px 0 14px;
+    font-size: 14px;
+    color: #8a766d;
 }
 
-.employee-meta {
+.employee-meta{
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
-.employee-meta span {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
+.employee-meta span{
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .2px;
 }
 
 /* Employment */
 
-.employment.probationary {
-    background: #eef3ff;
-    color: #3656d4;
+.employment.probationary{
+    background: #edf4ff;
+    color: #285bb5;
 }
 
-.employment.regular {
-    background: #e8f8ec;
-    color: #2e7d32;
+.employment.regular{
+    background: #e9f8ef;
+    color: #22884d;
 }
 
-.employment.contract {
-    background: #f3e8ff;
+.employment.contract{
+    background: #f3ebff;
     color: #7b2cbf;
 }
 
 /* Status */
 
-.status.onboarding {
-    background: #e8f6ff;
+.status.onboarding{
+    background: #e8f5ff;
     color: #0077b6;
 }
 
-.status.completed {
+.status.completed{
     background: #e7f8ed;
     color: #2e7d32;
 }
 
-.status.pending {
-    background: #fff4db;
+.status.pending{
+    background: #fff6df;
     color: #b7791f;
 }
 
-.employee-date {
-    font-size: 0.85rem;
-    color: #888;
-    font-weight: 500;
-    white-space: nowrap;
-    margin-left: 20px;
-}
+.employee-date{
+    min-width: 72px;
 
+    text-align: center;
+
+    padding: 10px 12px;
+
+    background: var(--ry-maroon);
+    color: var(--ry-gold);
+
+    border-radius: 14px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    line-height: 1.3;
+
+    box-shadow: 0 6px 16px rgba(111,20,20,.18);
+}
 
 /* ==========================================================
    QUICK ACTIONS
@@ -574,41 +564,24 @@
 /* ==========================================================
    TOTAL ACTIVITIES
 ========================================================== */
+.activity-card {
+    border-radius: 0;
+}
 
 .activity-list{
-    padding:20px 24px;
+    padding:28px 28px;
 }
 
 .activity-item{
     display:flex;
     align-items:center;
     gap:16px;
-    padding:16px 0;
+    padding: 11px 0;
     border-bottom:1px dashed #ecd8bc;
 }
 
 .activity-item:last-child{
     border-bottom:none;
-}
-
-.activity-item i{
-    width:48px;
-    height:48px;
-    border-radius:14px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    background:linear-gradient(
-        180deg,
-        var(--ry-maroon),
-        var(--ry-maroon-dark)
-    );
-
-    color:var(--ry-gold);
-    font-size:18px;
-
-    flex-shrink:0;
 }
 
 .activity-item div{
@@ -623,7 +596,6 @@
 }
 
 .activity-item p{
-    margin:4px 0 0;
     font-size:13px;
     color:#87746e;
 }
@@ -636,7 +608,7 @@
 }
 
 /* ==========================================================
-   SECOND GRID RESPONSIVE
+    RESPONSIVE
 ========================================================== */
 
 
@@ -671,62 +643,95 @@
 
     }
 
-}
+        .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-/* ==========================================================
-   RESPONSIVE
-========================================================== */
+    .chart-controls {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .chart-navigation {
+        flex: 1;
+        justify-content: space-between;
+    }
+
+    #currentPeriod {
+        min-width: auto;
+        flex: 1;
+    }
+
+    #growthFilter {
+        width: 110px;
+    }
+
+    .stats-grid{
+    grid-template-columns:1fr;
+    }
+
+    .card-header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
+    }
+
+    .calendar{
+        border-spacing:4px;
+        padding:14px;
+    }
+
+    .calendar td{
+        height:36px;
+        font-size:14px;
+    }
+
+    .calendar-nav{
+        width:36px;
+        height:36px;
+    }
+
+    .card-header:not(.calendar-header){
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .calendar-header{
+        flex-direction:row;
+        align-items:center;
+        justify-content:space-between;
+    }
+}
 
 @media(max-width:1100px){
-
-.dashboard-grid{
-
-grid-template-columns:1fr;
-
+    .dashboard-grid{
+    grid-template-columns:1fr;
+    }
 }
 
-}
+@media (max-width: 480px) {
 
-@media(max-width:768px){
+    .chart-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
 
-.dashboard-hero{
 
-flex-direction:column;
+    .chart-navigation {
+        width: 100%;
+    }
 
-text-align:center;
 
-gap:25px;
+    #growthFilter {
+        width: 100%;
+    }
 
-}
 
-.stats-grid{
-
-grid-template-columns:1fr;
-
-}
-
-.hero-circle{
-
-width:90px;
-height:90px;
-
-font-size:40px;
-
-}
-
-.card-header{
-
-flex-direction:column;
-align-items:flex-start;
-gap:12px;
-
-}
-
-.dashboard-table{
-
-display:block;
-overflow:auto;
-
-}
+    #applicantGrowthChart {
+        max-height: 280px;
+    }
 
 }

@@ -156,7 +156,7 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
         <!-- Calendar -->
         <article class="dashboard-card">
-            <div class="card-header">
+            <div class="card-header calendar-header">
                 <button class="calendar-nav" id="prevMonth">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
@@ -168,7 +168,6 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
                 <button class="calendar-nav" id="nextMonth">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
-
             </div>
 
             <table class="calendar">
@@ -301,17 +300,13 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
         TOTAL ACTIVITIES
     ======================================================= -->
 
-    <section class="dashboard-card">
+    <section class="dashboard-card activity-card">
 
         <div class="card-header">
             <div>
                 <h2>Total Activities</h2>
                 <p>Recent HR system activities</p>
             </div>
-
-            <a href="#">
-                View History
-            </a>
         </div>
 
 
