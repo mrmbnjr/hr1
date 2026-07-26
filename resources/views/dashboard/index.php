@@ -193,6 +193,34 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
     <section class="dashboard-grid">
 
+        <!-- Applicants Per Job -->
+        <article class="dashboard-card">
+
+            <div class="card-header">
+                <div>
+                    <h2>Top 5 Most Applied Jobs</h2>
+                    <p>Open positions with the highest number of applicants</p>
+                </div>
+                <a href="/hr1/public/?page=recruitment" class="view-all-btn">
+                    View All
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            
+            <div class="job-chart-wrapper">
+                <canvas id="jobApplicantsChart"></canvas>
+            </div>
+            
+            <script>
+                window.jobApplicantsChart = {
+                    labels: <?= json_encode($jobLabels ?? []) ?>,
+                    data: <?= json_encode($jobData ?? []) ?>
+                };
+            </script>
+
+        </article>
+
         <!-- New Employees -->
         <article class="dashboard-card">
 
@@ -206,7 +234,6 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
                     View All
                 </a>
             </div>
-
 
             <div class="employee-list">
 
@@ -255,45 +282,9 @@ $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
             <?php endif; ?>
 
             </div>
+
         </article>
 
-        <!-- Quick Actions -->
-        <article class="dashboard-card">
-
-            <div class="card-header">
-                <div>
-                    <h2>Quick Actions</h2>
-                    <p>Frequently used functions</p>
-                </div>
-            </div>
-
-
-            <div class="shortcut-grid">
-
-                <a href="/hr1/public/?page=recruitment">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Create Job Post</span>
-                </a>
-
-
-                <a href="/hr1/public/?page=applicants">
-                    <i class="fa-solid fa-user-check"></i>
-                    <span>Review Applicants</span>
-                </a>
-
-
-                <a href="/hr1/public/?page=onboarding">
-                    <i class="fa-solid fa-file-signature"></i>
-                    <span>Onboarding</span>
-                </a>
-
-
-                <a href="/hr1/public/?page=employee-records">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Employees</span>
-                </a>
-            </div>
-        </article>
     </section>
 
     <!-- ======================================================

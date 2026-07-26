@@ -170,6 +170,8 @@ if (applicantChartCanvas) {
                     data:
                         window.applicantGrowthData?.data ?? [],
 
+                    backgroundColor: "#b5822fa4",
+                    borderColor: "#6F1414",
 
                     tension: 0.4,
 
@@ -304,155 +306,83 @@ async function loadApplicantChart() {
         growthSubtitle.textContent =
             data.subtitle;
 
-
-
     } catch(error) {
-
-
         console.error(
             "Chart loading error:",
             error
         );
-
-
     }
-
 }
-
-
 
 // Change Year / Month / Week
 
 growthFilter?.addEventListener(
     "change",
     () => {
-
-
         chartState.view =
             growthFilter.value;
-
-
         loadApplicantChart();
-
-
     }
 );
 
-
-
 // Previous button
-
 prevPeriod?.addEventListener(
     "click",
     () => {
 
-
         if (chartState.view === "year") {
-
             chartState.year--;
-
-        }
-
-
-        else if (chartState.view === "month") {
-
-
+        } else if (chartState.view === "month") {
             chartState.month--;
-
-
             if (chartState.month < 1) {
-
                 chartState.month = 12;
-
                 chartState.year--;
-
             }
-
-        }
-
-
-        else if (chartState.view === "week") {
-
-
+        } else if (chartState.view === "week") {
             const date =
                 new Date(chartState.weekStart);
-
 
             date.setDate(
                 date.getDate() - 7
             );
 
-
             chartState.weekStart =
                 date.toISOString().split("T")[0];
-
         }
 
-
-
         loadApplicantChart();
-
-
     }
 );
 
-
-
 // Next button
-
 nextPeriod?.addEventListener(
     "click",
     () => {
 
-
         if (chartState.view === "year") {
-
-
             chartState.year++;
-
-
-        }
-
-
-        else if (chartState.view === "month") {
-
-
+        } else if (chartState.view === "month") {
             chartState.month++;
 
-
             if (chartState.month > 12) {
-
                 chartState.month = 1;
-
                 chartState.year++;
-
             }
-
         }
 
-
         else if (chartState.view === "week") {
-
-
             const date =
                 new Date(chartState.weekStart);
-
 
             date.setDate(
                 date.getDate() + 7
             );
 
-
             chartState.weekStart =
                 date.toISOString().split("T")[0];
-
         }
 
-
-
         loadApplicantChart();
-
-
     }
 );
 
@@ -546,3 +476,52 @@ nextBtn.addEventListener("click", () => {
     renderCalendar();
 
 });
+
+// Bar Graph
+const jobCanvas = document.getElementById("jobApplicantsChart");
+
+if (jobCanvas && window.jobApplicantsChart) {
+
+    new Chart(jobCanvas, {
+        type: "bar",
+        data: {
+            labels: window.jobApplicantsChart.labels,
+            datasets: [{
+                label: "Applicants",
+                data: window.jobApplicantsChart.data,
+
+                borderRadius: 8,
+                borderWidth: 1,
+
+                backgroundColor: "#b5822fc1",
+                borderColor: "#6F1414",
+
+                categoryPercentage: 0.7,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            title: {
+                display: true,
+                text: "Applicants by Job Position"
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+}

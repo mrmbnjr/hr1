@@ -575,4 +575,22 @@ class Dashboard
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getApplicantsPerJob()
+    {
+        $sql = "
+            SELECT
+                jp.title,
+                COUNT(a.application_id) AS total_applicants
+            FROM job_postings jp
+            LEFT JOIN applications a
+                ON jp.posting_id = a.posting_id
+            GROUP BY jp.posting_id, jp.title
+            ORDER BY total_applicants DESC
+            LIMIT 5
+        ";
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
