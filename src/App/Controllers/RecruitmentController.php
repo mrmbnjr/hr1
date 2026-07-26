@@ -11,6 +11,7 @@ class RecruitmentController
         $recruitment = new Recruitment();
 
         $jobs = $recruitment->getAllJobs();
+        $departments = $recruitment->getDepartments();
 
         require '../resources/views/recruitment/index.php';
     }
@@ -28,7 +29,10 @@ class RecruitmentController
     {
         $recruitment = new Recruitment();
 
-        $recruitment->createJob($_POST);
+        $data = $_POST;
+        $data['created_by'] = $_SESSION['user_id'];
+
+        $recruitment->createJob($data);
 
         header("Location: ?page=recruitment");
         exit;
@@ -55,12 +59,11 @@ class RecruitmentController
         require '../resources/views/recruitment/edit.php';
     }
 
-    // Update Job Posting
     public function update()
     {
         $recruitment = new Recruitment();
 
-        $recruitment->updateJob($_POST);
+        $recruitment->update($_POST);
 
         header("Location:?page=recruitment");
         exit;
@@ -70,7 +73,27 @@ class RecruitmentController
     {
         $recruitment = new Recruitment();
 
-        $recruitment->close($_POST['position_id']);
+        if (!isset($_POST['posting_id'])) {
+            header("Location:?page=recruitment");
+            exit;
+        }
+
+        $recruitment->close($_POST['posting_id']);
+
+        header("Location:?page=recruitment");
+        exit;
+    }
+
+        public function delete()
+    {
+        $recruitment = new Recruitment();
+
+        if (!isset($_POST['posting_id'])) {
+            header("Location:?page=recruitment");
+            exit;
+        }
+
+        $recruitment->delete((int)$_POST['posting_id']);
 
         header("Location:?page=recruitment");
         exit;

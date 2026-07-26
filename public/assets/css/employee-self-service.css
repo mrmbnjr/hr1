@@ -3,19 +3,6 @@
    Employee Self-Service
 ========================================================== */
 
-.main-content{
-    margin-left:var(--sidebar-width);
-    min-height:100vh;
-    background:var(--bg);
-    color:var(--ink);
-}
-
-@media (max-width:960px){
-    .main-content{
-        margin-left:0;
-    }
-}
-
 /* ==========================================================
    PAGE HEADER
 ========================================================== */

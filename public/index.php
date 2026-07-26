@@ -48,8 +48,19 @@ switch ($page) {
         (new RecruitmentController())->create();
         break;
 
+    case 'store':
+        (new RecruitmentController())->store();
+        break;
+
     case 'close':
         (new RecruitmentController())->close();
+
+    case 'delete':
+        (new RecruitmentController())->delete();
+        break;
+
+    case 'update':
+        (new RecruitmentController())->update();
         break;
 
     case 'edit':

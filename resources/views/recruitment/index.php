@@ -1,8 +1,8 @@
 <?php
 
-$pageTitle = "Job Postings";
-$pageCSS = "recruitment.css";
-$pageDescription = "Create and manage job postings.";
+$pageTitle       = "Recruitment Management";
+$pageCSS         = "recruitment.css";
+$pageDescription = "Create and manage job postings";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: /hr1/public/?page=login");
@@ -22,153 +22,224 @@ if (!isset($_SESSION['user_id'])) {
         FILTERS
     =========================================== -->
 
-    <section class="filter-card">
+    <section class="recruitment-toolbar">
+        <div class="toolbar-filters">
+            <select id="jobFilter">
+                <option value="">Job Title</option>
 
-        <div class="filter-group">
+                <?php if (!empty($jobs)): ?>
+                    <?php foreach ($jobs as $job): ?>
+                        <option value="<?= htmlspecialchars($job['title']) ?>">
+                            <?= htmlspecialchars($job['title']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
 
-            <select>
-                <option>All Departments</option>
-                <option>Human Resources</option>
-                <option>Finance</option>
-                <option>IT</option>
-                <option>Warehouse</option>
             </select>
 
-            <select>
-                <option>All Status</option>
-                <option>Open</option>
-                <option>Draft</option>
-                <option>Closed</option>
+            <select id="departmentFilter">
+
+                <option value="">All Departments</option>
+
+                <?php if (!empty($departments)): ?>
+                    <?php foreach ($departments as $department): ?>
+
+                        <option value="<?= htmlspecialchars($department['department_name']) ?>">
+                            <?= htmlspecialchars($department['department_name']) ?>
+                        </option>
+
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
             </select>
 
-            <select>
-                <option>All Employment Types</option>
-                <option>Full-Time</option>
-                <option>Part-Time</option>
-                <option>Contract</option>
-                <option>Internship</option>
+            <select id="employmentFilter">
+                <option value="">All Employment Types</option>
+                <option value="Full-Time">Full-Time</option>
+                <option value="Part-Time">Part-Time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
             </select>
 
         </div>
 
+        <a href="?page=create" class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            Add Post
+        </a>
+
     </section>
+
 
     <!-- ==========================================
         JOB TABLE
     =========================================== -->
 
     <section class="table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>(<?= !empty($jobs) ? count($jobs) : 0 ?>) Job Title</th>
-                    <th>Department</th>
-                    <th>Employment</th>
-                    <th>Vacancies</th>
-                    <th>Deadline</th>
-                    <th>Status</th>
-                    <th width="260">Actions</th>
-                </tr>
-            </thead>
+        <div class="table-content">
+            <table class="data-table">
 
-            <tbody>
-
-            <?php if(!empty($jobs)): ?>
-
-                <?php foreach($jobs as $job): ?>
+                <thead>
 
                     <tr>
-
-                        <td>
-                            <strong><?= htmlspecialchars($job['title']); ?></strong>
-                        </td>
-
-                        <td><?= htmlspecialchars($job['department_name']); ?></td>
-
-                        <td><?= htmlspecialchars($job['employment_type']); ?></td>
-
-                        <td><?= htmlspecialchars($job['vacancies']); ?></td>
-
-                        <td><?= htmlspecialchars($job['application_deadline']); ?></td>
-
-                        <td>
-                            <span class="status <?= strtolower($job['status']); ?>">
-                                <?= htmlspecialchars($job['status']); ?>
-                            </span>
-                        </td>
-
-                        <td>
-
-                            <a href="?page=view&id=<?= $job['position_id']; ?>" class="btn-outline">
-                                <i class="fa-solid fa-eye"></i>
-                            </a>
-
-                            <a href="?page=edit&id=<?= $job['position_id']; ?>" class="btn-outline">
-                                <i class="fa-solid fa-pen"></i>
-                            </a>
-
-                            <?php if($job['status'] == 'Draft'): ?>
-
-                                <form method="POST" action="?page=publish-job">
-
-                                    <input
-                                        type="hidden"
-                                        name="position_id"
-                                        value="<?= $job['position_id']; ?>">
-
-                                    <button class="btn-success">
-                                        <i class="fa-solid fa-bullhorn"></i>
-                                    </button>
-
-                                </form>
-
-                            <?php endif; ?>
-
-                            <?php if($job['status'] == 'Open'): ?>
-
-                                <form
-                                    method="POST"
-                                    action="?page=close"
-                                    onsubmit="return confirm('Close this job posting?');">
-
-                                    <input
-                                        type="hidden"
-                                        name="position_id"
-                                        value="<?= $job['position_id']; ?>">
-
-                                    <button class="btn-danger">
-                                        <i class="fa-solid fa-lock"></i>
-                                    </button>
-
-                                </form>
-
-                            <?php endif; ?>
-
-                        </td>
-
+                        <th>JOB TITLE</th>
+                        <th>DEPARTMENT</th>
+                        <th>EMPLOYMENT TYPE</th>
+                        <th>APPLICATIONS</th>
+                        <th>DEADLINE</th>
+                        <th>STATUS</th>
+                        <th width="170">ACTIONS</th>
                     </tr>
 
-                <?php endforeach; ?>
+                </thead>
 
-            <?php else: ?>
+                <tbody>
 
-                <tr>
+                <?php if (!empty($jobs)): ?>
 
-                    <td colspan="7" class="empty-state">
-                        No job postings available.
-                    </td>
+                    <?php foreach ($jobs as $job): ?>
 
-                </tr>
+                        <tr>
 
-            <?php endif; ?>
+                            <td>
+                                <?= htmlspecialchars($job['title']) ?>
+                            </td>
 
-            </tbody>
+                            <td>
+                                <?= htmlspecialchars($job['department_name']) ?>
+                            </td>
 
-        </table>
+                            <td>
+                                <span class="badge employment">
+                                    <?= htmlspecialchars($job['employment_type']) ?>
+                                </span>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($job['applicants']) ?>
+                            </td>
+
+                            <td>
+                                <i class="fa-regular fa-calendar"></i>
+                                <?= htmlspecialchars($job['application_deadline']) ?>
+                            </td>
+
+                            <td>
+
+                                <span class="badge status <?= strtolower($job['status']) ?>">
+                                    <?= htmlspecialchars($job['status']) ?>
+                                </span>
+
+                            </td>
+
+                            <td class="actions">
+                                <!-- View -->
+                                <a href="?page=view&id=<?= $job['posting_id'] ?>" class="action-btn">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                                <!-- Edit -->
+                                <a href="?page=edit&id=<?= $job['posting_id'] ?>" class="action-btn">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+
+                                <!-- Close -->
+                                <?php if ($job['status'] === 'Open'): ?>
+                                    <form method="POST"
+                                        action="?page=close"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('Close this job posting?');">
+
+                                        <input
+                                            type="hidden"
+                                            name="posting_id"
+                                            value="<?= $job['posting_id'] ?>">
+
+                                        <button type="submit" class="action-btn warning">
+                                            <i class="fa-solid fa-lock"></i>
+                                        </button>
+
+                                    </form>
+                                <?php endif; ?>
+
+                                <!-- Archive -->
+                                <form method="POST"
+                                    action="?page=delete"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Archive this job posting?');">
+
+                                    <input
+                                        type="hidden"
+                                        name="posting_id"
+                                        value="<?= $job['posting_id'] ?>">
+
+                                    <button type="submit" class="action-btn delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            No job postings found.
+                        </td>
+                    </tr>
+
+                <?php endif; ?>
+
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- ==========================================
+            TABLE FOOTER
+        =========================================== -->
+        <div class="table-footer">
+            <?php
+            $totalJobs = !empty($jobs) ? count($jobs) : 0;
+            ?>
+
+            <span>
+                Showing
+                <?= $totalJobs ? 1 : 0 ?>
+                to
+                <?= $totalJobs ?>
+                of
+                <?= $totalJobs ?>
+            </span>
+
+            <div class="pagination">
+
+                <button class="page-btn">
+                    <i class="fa-solid fa-angle-left"></i>
+                </button>
+
+                <button class="page-btn active">
+                    1
+                </button>
+
+                <button class="page-btn">
+                    <i class="fa-solid fa-angle-right"></i>
+                </button>
+
+            </div>
+
+        </div>
 
     </section>
-
     <?php require '../resources/views/includes/footer.php'; ?>
 </div>
 
-<?php require '../resources/views/includes/scripts.php'?>
+<?php require '../resources/views/includes/scripts.php'; ?>

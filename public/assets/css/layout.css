@@ -1,7 +1,20 @@
 /* ==========================================================
    SIDEBAR
 ========================================================== */
+.main-content{
+    margin-left:var(--sidebar-width);
+    min-height:100vh;
+    width: auto;
+    background:var(--bg);
+    color:var(--ink);
+    transition: margin-left .35s ease;
+}
 
+@media (max-width:960px){
+    .main-content{
+        margin-left:0;
+    }
+}
 .sidebar {
   position: fixed;
   top: 0;
@@ -496,12 +509,6 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-.main-content {
-    margin-left: var(--sidebar-width);
-    transition: margin-left .35s ease;
-    min-height: auto;
-}
-
 body.sidebar-hidden .main-content {
     margin-left: 0;
 }
@@ -539,11 +546,6 @@ body.sidebar-hidden .main-content {
   .profile-info {
     display:none;
   }
-
-    .main-content{
-      margin-left:0;
-  }
-
 }
 
 @media (max-width: 768px) {

@@ -14,7 +14,7 @@ class Recruitment
         $this->db = Database::connection();
     }
 
-    public function getAllJobs()
+    public function getAllJobs(): array
     {
         $sql = "
             SELECT
@@ -26,7 +26,7 @@ class Recruitment
                 jp.application_deadline,
                 d.department_name,
 
-                COUNT(a.application_id) AS applicants,
+                COALESCE(COUNT(a.application_id),0) AS applicants,
 
                 SUM(
                     CASE
@@ -51,12 +51,14 @@ class Recruitment
 
             FROM job_postings jp
 
-            JOIN departments d
+            LEFT JOIN departments d
                 ON d.department_id = jp.department_id
 
             LEFT JOIN applications a
                 ON a.posting_id = jp.posting_id
 
+            WHERE jp.status <> 'Archived'
+            
             GROUP BY
                 jp.posting_id,
                 jp.title,
@@ -124,7 +126,7 @@ class Recruitment
             ':employment_type' => $data['employment_type'],
             ':vacancies' => $data['vacancies'],
             ':application_deadline' => $data['application_deadline'],
-            ':created_by' => $_SESSION['user_id']
+            ':created_by' => $data['created_by']
         ]);
     }
 
@@ -134,6 +136,7 @@ class Recruitment
             UPDATE job_postings
             SET status = 'Closed'
             WHERE posting_id = ?
+            AND status = 'Open'
         ");
 
         return $stmt->execute([$id]);
@@ -142,9 +145,13 @@ class Recruitment
     public function getJobById(int $id)
     {
         $sql = "
-            SELECT *
-            FROM job_postings
-            WHERE posting_id = ?
+            SELECT
+                jp.*,
+                d.department_name
+            FROM job_postings jp
+            LEFT JOIN departments d
+                ON jp.department_id = d.department_id
+            WHERE jp.posting_id = ?
         ";
 
         $stmt = $this->db->prepare($sql);
@@ -153,7 +160,7 @@ class Recruitment
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateJob(array $data)
+    public function update(array $data)
     {
         $sql = "
             UPDATE job_postings
@@ -163,6 +170,7 @@ class Recruitment
                 requirements = ?,
                 employment_type = ?,
                 vacancies = ?,
+                status = ?,
                 application_deadline = ?
             WHERE posting_id = ?
         ";
@@ -176,9 +184,31 @@ class Recruitment
             $data['requirements'],
             $data['employment_type'],
             $data['vacancies'],
+            $data['status'],
             $data['application_deadline'],
             $data['posting_id']
         ]);
+    }
+    public function delete(int $id): bool
+    {
+        $stmt = $this->db->prepare("
+            UPDATE job_postings
+            SET status='Archived'
+            WHERE posting_id = ?
+        ");
+
+        return $stmt->execute([$id]);
+    }
+
+    public function changeStatus(int $id, string $status): bool
+    {
+        $stmt = $this->db->prepare("
+            UPDATE job_postings
+            SET status = ?
+            WHERE posting_id = ?
+        ");
+
+        return $stmt->execute([$status, $id]);
     }
 }
 
