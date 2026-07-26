@@ -18,26 +18,6 @@ if (!isset($_SESSION['user_id'])) {
 
 <?php require '../resources/views/includes/navbar.php'; ?>
 
-<!-- ==========================================
-    HERO
-========================================== -->
-
-<section class="page-hero">
-
-    <div>
-        <span class="hero-tag">
-            👥 Recruitment
-        </span>
-
-        <h1>Applicants</h1>
-
-        <p>
-            Review applicants, schedule interviews, and move candidates
-            through the hiring process.
-        </p>
-    </div>
-
-</section>
 
 <!-- ==========================================
     FILTERS

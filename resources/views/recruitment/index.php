@@ -19,75 +19,12 @@ if (!isset($_SESSION['user_id'])) {
     <?php require '../resources/views/includes/navbar.php'; ?>
 
     <!-- ==========================================
-        HERO
-    =========================================== -->
-
-    <section class="page-hero">
-
-        <div>
-            <span class="hero-tag">📢 Recruitment</span>
-            <h1>Job Postings</h1>
-            <p>Create, publish, and manage job openings across all departments.</p>
-        </div>
-
-        <a href="?page=create" class="btn-primary">
-            <i class="fa-solid fa-plus"></i>
-            Create Job Posting
-        </a>
-
-    </section>
-
-    <!-- ==========================================
-        QUICK STATS
-    =========================================== -->
-
-    <section class="stats-grid">
-
-        <article class="stat-card">
-            <i class="fa-solid fa-briefcase"></i>
-            <div>
-                <h2>12</h2>
-                <span>Open Jobs</span>
-            </div>
-        </article>
-
-        <article class="stat-card">
-            <i class="fa-solid fa-file"></i>
-            <div>
-                <h2>3</h2>
-                <span>Draft Jobs</span>
-            </div>
-        </article>
-
-        <article class="stat-card">
-            <i class="fa-solid fa-lock"></i>
-            <div>
-                <h2>18</h2>
-                <span>Closed Jobs</span>
-            </div>
-        </article>
-
-        <article class="stat-card">
-            <i class="fa-solid fa-building"></i>
-            <div>
-                <h2>6</h2>
-                <span>Departments Hiring</span>
-            </div>
-        </article>
-
-    </section>
-
-    <!-- ==========================================
         FILTERS
     =========================================== -->
 
     <section class="filter-card">
 
         <div class="filter-group">
-
-            <input
-                type="text"
-                placeholder="Search job title...">
 
             <select>
                 <option>All Departments</option>
@@ -121,20 +58,10 @@ if (!isset($_SESSION['user_id'])) {
     =========================================== -->
 
     <section class="table-card">
-
-        <?php if (!empty($jobs)): ?>
-            <div class="table-header">
-                <h2>Job Listings</h2>
-                <span><?= count($jobs); ?> Job(s) Found</span>
-            </div>
-        <?php endif; ?>
-
         <table class="data-table">
-
             <thead>
-
                 <tr>
-                    <th>Job Title</th>
+                    <th>(<?= !empty($jobs) ? count($jobs) : 0 ?>) Job Title</th>
                     <th>Department</th>
                     <th>Employment</th>
                     <th>Vacancies</th>
@@ -142,7 +69,6 @@ if (!isset($_SESSION['user_id'])) {
                     <th>Status</th>
                     <th width="260">Actions</th>
                 </tr>
-
             </thead>
 
             <tbody>
