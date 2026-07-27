@@ -33,19 +33,6 @@
     color: var(--ink);
 }
 
-.page-heading h1 {
-    font-family: "Baloo 2", sans-serif;
-    color: var(--maroon-dark);
-    font-size: 28px;
-    margin: 0 0 4px;
-}
-
-.page-heading p {
-    margin: 0 0 24px;
-    color: var(--ink-soft);
-    font-size: 14.5px;
-}
-
 /* ---------------- Summary cards ---------------- */
 
 .summary-grid {

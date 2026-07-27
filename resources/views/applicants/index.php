@@ -59,14 +59,6 @@ foreach ($applicants as $a) {
     <?php require '../resources/views/includes/navbar.php'; ?>
 
     <div class="applicants-page">
-
-        <div class="page-heading">
-            <div>
-                <h1>Applicant Management</h1>
-                <p>Track every applicant from submission through AI screening, interviews, and hiring decisions.</p>
-            </div>
-        </div>
-
         <!-- ==========================================================
             SUMMARY CARDS
         ========================================================== -->
@@ -216,7 +208,7 @@ foreach ($applicants as $a) {
                             data-app-id="<?= htmlspecialchars($applicant['application_id'] ?? '') ?>"
                             data-fullname="<?= htmlspecialchars($applicant['fullname'] ?? '') ?>"
                             data-email="<?= htmlspecialchars($applicant['email'] ?? '') ?>"
-                            data-contact="<?= htmlspecialchars($applicant['contact_number'] ?? '') ?>"
+                            data-phone="<?= htmlspecialchars($applicant['phone'] ?? '') ?>"
                             data-applied-date="<?= htmlspecialchars($applicant['date_applied'] ?? '') ?>"
                             data-resume="<?= htmlspecialchars($applicant['resume'] ?? '') ?>"
                             data-resume-name="<?= htmlspecialchars($applicant['resume_filename'] ?? 'resume.pdf') ?>"
@@ -319,7 +311,7 @@ foreach ($applicants as $a) {
                 <div class="info-grid">
                     <div><span class="info-label">Applicant Name</span><span class="info-value" id="dpFullname">-</span></div>
                     <div><span class="info-label">Email Address</span><span class="info-value" id="dpEmail">-</span></div>
-                    <div><span class="info-label">Contact Number</span><span class="info-value" id="dpContact">-</span></div>
+                    <div><span class="info-label">Phone Number</span><span class="info-value" id="dpPhone">-</span></div>
                     <div><span class="info-label">Applied Position</span><span class="info-value" id="dpPosition">-</span></div>
                     <div><span class="info-label">Date Applied</span><span class="info-value" id="dpDate">-</span></div>
                     <div><span class="info-label">Application Status</span><span class="info-value" id="dpStatusText">-</span></div>
@@ -648,7 +640,7 @@ foreach ($applicants as $a) {
 
             document.getElementById('dpFullname').textContent = d.fullname || '-';
             document.getElementById('dpEmail').textContent = d.email || '-';
-            document.getElementById('dpContact').textContent = d.contact || '-';
+            document.getElementById('dpPhone').textContent = d.phone || '-';
             document.getElementById('dpPosition').textContent = d.position || '-';
             document.getElementById('dpDate').textContent = d.appliedDate || '-';
             document.getElementById('dpStatusText').textContent = statusLabel[d.status] || d.status;
