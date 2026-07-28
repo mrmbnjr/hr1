@@ -258,7 +258,7 @@
 
 /* ---------------- Buttons ---------------- */
 
-.btn-view,
+.btn-review,
 .btn-outline,
 .btn-primary,
 .btn-success,
@@ -276,13 +276,13 @@
     text-decoration: none;
 }
 
-.btn-view:hover,
+.btn-review:hover,
 .btn-outline:hover,
 .btn-primary:hover,
 .btn-success:hover,
 .btn-danger:hover { transform: translateY(-1px); }
 
-.btn-view {
+.btn-review {
     background: var(--maroon);
     color: #fff;
 }

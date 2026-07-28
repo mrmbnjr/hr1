@@ -187,9 +187,25 @@ hr1/
 ├── public/
 │   ├── index.php
 │   └── assets/
-│       ├── js
-│       ├── css
-│       └── images
+public/
+└── assets/
+│   ├── js/
+│   │   ├── script.js          // Shared (sidebar, navbar, helpers)
+│   │   ├── dashboard.js
+│   │   ├── applicants.js
+│   │   ├── recruitment.js
+│   │   ├── onboarding.js
+│   │   ├── employee.js
+│   │   └── login.js│       
+│   ├── css
+│   │   ├── style.css          // Shared (sidebar, navbar, helpers)
+│   │   ├── dashboard.css
+│   │   ├── applicants.css
+│   │   ├── recruitment.css
+│   │   ├── onboarding.css
+│   │   ├── employee.css
+│   │   └── login.css│       
+│   └── images
 │
 ├── tests/
 ├── database/

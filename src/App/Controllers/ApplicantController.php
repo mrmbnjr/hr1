@@ -24,7 +24,7 @@ class ApplicantController
     /**
      * View Single Applicant
      */
-    public function view()
+    public function review()
     {
         if (!isset($_GET['id'])) {
             header("Location: ?page=applicants");
@@ -38,7 +38,7 @@ class ApplicantController
             exit;
         }
 
-        require '../resources/views/applicants/view.php';
+        require '../resources/views/applicants/review.php';
     }
 
     /**

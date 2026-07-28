@@ -40,6 +40,10 @@ switch ($page) {
         (new ApplicantController())->index();
         break;
 
+    case 'review':
+        (new ApplicantController())->review();
+        break;
+
     case 'recruitment':
         (new RecruitmentController())->recruitment();
         break;

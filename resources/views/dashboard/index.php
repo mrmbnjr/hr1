@@ -1,6 +1,7 @@
 <?php
 $pageTitle = "Dashboard";
 $pageCSS = "dashboard.css";
+$pageJS = "dashboard.js";
 $pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
     if (!isset($_SESSION['user_id'])) {
