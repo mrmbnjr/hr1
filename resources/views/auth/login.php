@@ -5,7 +5,6 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
 ?>
 
 <?php require_once __DIR__ . '/../includes/header.php'; ?>
-
   <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" aria-pressed="false">
     <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="4.2"></circle>
@@ -47,5 +46,4 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
   </main>
 
     <?php require '../resources/views/includes/footer.php'; ?>
-
 <?php require '../resources/views/includes/scripts.php'?>

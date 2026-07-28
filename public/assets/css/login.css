@@ -34,11 +34,12 @@
 
 /* --- page layout --- */
 .page {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 90px 20px;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 90px 20px;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='100'%20viewBox='0%200%20200%20100'%3E%3Cg%20fill='none'%20stroke='%23b5822f'%20stroke-opacity='0.30'%20stroke-width='2.2'%20stroke-linecap='round'%3E%3Cpath%20d='M-10,30%20C15,10%2065,10%2090,30%20C115,50%20165,50%20190,30%20C215,10%20240,10%20240,10'/%3E%3Cpath%20d='M-10,80%20C15,100%2065,100%2090,80%20C115,60%20165,60%20190,80%20C215,100%20240,100%20240,100'/%3E%3C/g%3E%3Cg%20fill='none'%20stroke='%23b5822f'%20stroke-opacity='0.16'%20stroke-width='1.6'%20stroke-linecap='round'%3E%3Cpath%20d='M-10,38%20C15,20%2065,20%2090,38%20C115,56%20165,56%20190,38%20C215,20%20240,20%20240,20'/%3E%3Cpath%20d='M-10,72%20C15,90%2065,90%2090,72%20C115,54%20165,54%20190,72%20C215,90%20240,90%20240,90'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* --- login card --- */

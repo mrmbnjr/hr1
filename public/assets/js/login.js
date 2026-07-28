@@ -3,7 +3,6 @@
    - Light / dark theme toggle (persisted)
    - Decorative footer corner-icons (rendered once, responsive-safe)
    - Front-end only form handling (validation + simulated submit)
-     Replace the block marked TODO with a real API call.
    ========================================================= */
 
 (function () {
