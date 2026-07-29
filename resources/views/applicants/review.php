@@ -8,37 +8,20 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$applicants = $applicants ?? [];
-$positions  = $positions  ?? [];
+$applicant = $applicant ?? [];
 
-/**
- * Canonical status set for RAM-YUM Applicant Management.
- * Keys are the values stored in applications.application_status.
- */
-$statusMeta = [
-    "Submitted"  => ["label" => "Submitted",           "class" => "badge-gray"],
-    "Review"     => ["label" => "Under Review",         "class" => "badge-blue"],
-    "Interview"  => ["label" => "Interview Scheduled",  "class" => "badge-orange"],
-    "Hired"      => ["label" => "Hired",                "class" => "badge-green"],
-    "Rejected"   => ["label" => "Rejected",              "class" => "badge-red"],
-];
-
-/* Summary counts for the dashboard cards */
-$summary = [
-    "Total"     => count($applicants),
-    "Submitted" => 0,
-    "Review"    => 0,
-    "Interview" => 0,
-    "Hired"     => 0,
-    "Rejected"  => 0,
-];
-
-foreach ($applicants as $a) {
-    $status = $a['application_status'] ?? 'Submitted';
-    if (isset($summary[$status])) {
-        $summary[$status]++;
-    }
+if (!$applicant) {
+    header("Location: ?page=applicants");
+    exit;
 }
+
+$statusMeta = [
+    "Submitted"    => ["label" => "Submitted", "class" => "badge-gray"],
+    "Under Review" => ["label" => "Under Review", "class" => "badge-blue"],
+    "Interview"    => ["label" => "Interview Scheduled", "class" => "badge-orange"],
+    "Hired"        => ["label" => "Hired", "class" => "badge-green"],
+    "Rejected"     => ["label" => "Rejected", "class" => "badge-red"],
+];
 
 ?>
 
@@ -53,35 +36,39 @@ foreach ($applicants as $a) {
         APPLICANT DETAILS PANEL
     ========================================================== -->
 
-    <div class="overlay" id="detailsOverlay"></div>
-
-    <aside class="details-panel" id="detailsPanel" aria-hidden="true">
-
-        <div class="details-header">
-            <div class="details-header-left">
-                <div class="avatar-circle avatar-large" id="dpAvatar">?</div>
-                <div>
-                    <h2 id="dpName">&nbsp;</h2>
-                    <span class="badge" id="dpStatusBadge">&nbsp;</span>
-                </div>
-            </div>
-            <button class="close-btn" id="closeDetails" type="button" aria-label="Close">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
         <div class="details-body">
 
             <!-- Applicant Information -->
             <section class="detail-section">
                 <h3><i class="fa-solid fa-id-card"></i> Applicant Information</h3>
                 <div class="info-grid">
-                    <div><span class="info-label">Applicant Name</span><span class="info-value" id="dpFullname">-</span></div>
-                    <div><span class="info-label">Email Address</span><span class="info-value" id="dpEmail">-</span></div>
-                    <div><span class="info-label">Phone Number</span><span class="info-value" id="dpPhone">-</span></div>
-                    <div><span class="info-label">Applied Position</span><span class="info-value" id="dpPosition">-</span></div>
-                    <div><span class="info-label">Date Applied</span><span class="info-value" id="dpDate">-</span></div>
-                    <div><span class="info-label">Application Status</span><span class="info-value" id="dpStatusText">-</span></div>
+                    <div>
+                        <span class="info-label">Applicant Name</span>
+                        <span class="info-value"><?= htmlspecialchars($applicant['fullname']) ?></span>
+                    </div>
+                    <div>
+                        <span class="info-label">Email Address</span>
+                        <span class="info-value"><?= htmlspecialchars($applicant['email']) ?></span>
+                    </div>
+                    <div>
+                        <span class="info-label">Phone Number</span>
+                        <span class="info-value"><?= htmlspecialchars($applicant['phone']) ?></span>
+                    </div>
+                    <div>
+                        <span class="info-label">Applied Position</span>
+                        <span class="info-value"><?= htmlspecialchars($applicant['position']) ?></span>
+                    </div>
+                    <div>
+                        <span class="info-label">Date Applied</span>
+                        <span class="info-value"><?= date('F d, Y', strtotime($applicant['applied_at'])) ?></span>
+                    </div>
+                    <div>
+                        <span class="info-label">Application Status</span>
+                        <span class="badge">
+                            <?= $statusMeta[$applicant['application_status']]['class'] ?>
+                            <?= $statusMeta[$applicant['application_status']]['label'] ?>
+                        </span>
+                    </div>
                 </div>
             </section>
 
@@ -91,13 +78,15 @@ foreach ($applicants as $a) {
                 <div class="resume-row">
                     <div class="resume-file">
                         <i class="fa-solid fa-file-pdf"></i>
-                        <span id="dpResumeName">resume.pdf</span>
+                        <span>
+                            <?= basename($applicant['resume_file']) ?>
+                        </span>
                     </div>
                     <div class="resume-actions">
-                        <a href="#" id="dpViewResume" target="_blank" class="btn-outline">
+                        <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" target="_blank" target="_blank" class="btn-outline">
                             <i class="fa-solid fa-eye"></i> View Resume
                         </a>
-                        <a href="#" id="dpDownloadResume" download class="btn-outline">
+                        <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" download class="btn-outline">
                             <i class="fa-solid fa-download"></i> Download
                         </a>
                     </div>
@@ -109,30 +98,34 @@ foreach ($applicants as $a) {
                 <h3><i class="fa-solid fa-robot"></i> AI Screening Results</h3>
 
                 <div class="ai-score-row">
-                    <div class="ai-score-circle" id="dpAiScoreCircle">
-                        <span id="dpAiScoreText">0%</span>
+                    <div class="ai-score-circle">
+                        <span>
+                            <?= (int)$applicant['ai_score'] ?>%
+                        </span>
                     </div>
                     <div class="ai-recommendation">
                         <span class="info-label">Recommendation</span>
-                        <span class="rec-badge" id="dpRecommendation">-</span>
+                        <span class="rec-badge">
+                            <?= htmlspecialchars($applicant['recommendation']) ?>
+                        </span>
                     </div>
                 </div>
 
                 <div class="match-bars">
                     <div class="match-row">
                         <span class="match-label">Skills Match</span>
-                        <div class="progress-track"><div class="progress-fill" id="dpSkillsBar"></div></div>
-                        <span class="match-value" id="dpSkillsValue">0%</span>
+                        <div class="progress-track"><div class="progress-fill"></div></div>
+                        <span class="match-value">0%</span>
                     </div>
                     <div class="match-row">
                         <span class="match-label">Experience Match</span>
-                        <div class="progress-track"><div class="progress-fill" id="dpExperienceBar"></div></div>
-                        <span class="match-value" id="dpExperienceValue">0%</span>
+                        <div class="progress-track"><div class="progress-fill"></div></div>
+                        <span class="match-value">0%</span>
                     </div>
                     <div class="match-row">
                         <span class="match-label">Education Match</span>
-                        <div class="progress-track"><div class="progress-fill" id="dpEducationBar"></div></div>
-                        <span class="match-value" id="dpEducationValue">0%</span>
+                        <div class="progress-track"><div class="progress-fill"></div></div>
+                        <span class="match-value">0%</span>
                     </div>
                 </div>
             </section>
@@ -141,25 +134,29 @@ foreach ($applicants as $a) {
             <section class="detail-section">
                 <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
 
-                <div id="dpInterviewNotScheduled" class="interview-empty">
+                <?php if (empty($applicant['interview_date'])): ?>
+                <div class="interview-empty">
                     <span class="badge badge-gray">Not Scheduled</span>
                     <button type="button" class="btn-primary" id="openScheduleModal">
                         <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
                     </button>
                 </div>
+                <?php endif; ?>
 
-                <div id="dpInterviewScheduled" class="interview-scheduled" style="display:none;">
+                <?php if (!empty($applicant['interview_date'])): ?>
+                <div class="interview-scheduled" style="display:none;">
                     <div class="info-grid">
-                        <div><span class="info-label">Interview Date</span><span class="info-value" id="dpInterviewDate">-</span></div>
-                        <div><span class="info-label">Interview Time</span><span class="info-value" id="dpInterviewTime">-</span></div>
-                        <div><span class="info-label">Manager</span><span class="info-value" id="dpInterviewManager">-</span></div>
-                        <div><span class="info-label">Location</span><span class="info-value" id="dpInterviewLocation">-</span></div>
-                        <div><span class="info-label">Interview Status</span><span class="badge badge-orange" id="dpInterviewStatus">Scheduled</span></div>
+                        <div><span class="info-label">Interview Date</span><span class="info-value"><?= htmlspecialchars($applicant['interview_date'] ?? '-') ?></span></div>
+                        <div><span class="info-label">Interview Time</span><span class="info-value"><?= htmlspecialchars($applicant['interview_time'] ?? '-') ?></span></div>
+                        <div><span class="info-label">Manager</span><span class="info-value"><?= htmlspecialchars($applicant['manager_name'] ?? '-') ?></span></div>
+                        <div><span class="info-label">Location</span><span class="info-value"><?= htmlspecialchars($applicant['location'] ?? '-') ?></span></div>
+                        <div><span class="info-label">Interview Status</span><span class="badge badge-orange">Scheduled</span></div>
                     </div>
                     <button type="button" class="btn-outline" id="editScheduleBtn">
                         <i class="fa-solid fa-pen"></i> Edit Schedule
                     </button>
                 </div>
+                <?php endif; ?>
             </section>
 
             <!-- Manager Decision -->
@@ -168,11 +165,11 @@ foreach ($applicants as $a) {
                 <div class="info-grid">
                     <div>
                         <span class="info-label">Recommendation</span>
-                        <span class="rec-badge" id="dpMgrRecommendation">Pending</span>
+                        <span class="rec-badge">Pending</span>
                     </div>
                     <div class="full-width">
                         <span class="info-label">Interview Remarks</span>
-                        <p class="remarks-text" id="dpMgrRemarks">No remarks yet.</p>
+                        <p class="remarks-text"><?= nl2br(htmlspecialchars($applicant['remarks'])) ?></p>
                     </div>
                 </div>
             </section>
@@ -191,8 +188,6 @@ foreach ($applicants as $a) {
             </section>
 
         </div>
-
-    </aside>
 
     <!-- ==========================================================
         SCHEDULE INTERVIEW MODAL
@@ -244,7 +239,7 @@ foreach ($applicants as $a) {
             </div>
             <div class="modal-body">
                 <p class="confirm-text">
-                    You are about to hire <strong id="hireApplicantName">this applicant</strong>. This will:
+                    You are about to hire <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>. This will:
                 </p>
                 <ul class="confirm-list">
                     <li><i class="fa-solid fa-check"></i> Change application status to <strong>Hired</strong></li>
@@ -282,3 +277,8 @@ foreach ($applicants as $a) {
             </form>
         </div>
     </div>
+
+    <?php require '../resources/views/includes/footer.php'; ?>
+</div>
+
+<?php require '../resources/views/includes/scripts.php'?>

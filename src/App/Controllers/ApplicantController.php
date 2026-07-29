@@ -27,14 +27,16 @@ class ApplicantController
     public function review()
     {
         if (!isset($_GET['id'])) {
-            header("Location: ?page=applicants");
+            header("Location:?page=applicants");
             exit;
         }
 
-        $applicant = $this->applicant->getApplicantById($_GET['id']);
+        $applicantModel = new Applicant();
+
+        $applicant = $applicantModel->getApplicantById($_GET['id']);
 
         if (!$applicant) {
-            header("Location: ?page=applicants");
+            header("Location:?page=applicants");
             exit;
         }
 
