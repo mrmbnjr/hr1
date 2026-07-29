@@ -94,3 +94,54 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+
+// Dark mode
+(function () {
+    "use strict";
+
+    const THEME_KEY = "ramyum-theme";
+    const root = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+
+    function applyTheme(theme) {
+        if (theme === "dark") {
+            root.setAttribute("data-theme", "dark");
+            themeToggle?.setAttribute("aria-pressed", "true");
+        } else {
+            root.removeAttribute("data-theme");
+            themeToggle?.setAttribute("aria-pressed", "false");
+        }
+    }
+
+    function getStoredTheme() {
+        try {
+            return localStorage.getItem(THEME_KEY);
+        } catch {
+            return null;
+        }
+    }
+
+    function storeTheme(theme) {
+        try {
+            localStorage.setItem(THEME_KEY, theme);
+        } catch {}
+    }
+
+    const initialTheme =
+        getStoredTheme() ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+
+    applyTheme(initialTheme);
+
+    themeToggle?.addEventListener("click", () => {
+        const next =
+            root.getAttribute("data-theme") === "dark"
+                ? "light"
+                : "dark";
+
+        applyTheme(next);
+        storeTheme(next);
+    });
+})();

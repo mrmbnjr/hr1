@@ -45,17 +45,51 @@
     }
 
     function renderPagination(totalPages) {
-        pageNumbers.innerHTML = '';
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'page-num' + (i === currentPage ? ' active' : '');
-            btn.textContent = i;
-            btn.addEventListener('click', () => { currentPage = i; applyFilters(); });
+        pageNumbers.innerHTML = "";
+
+        const addButton = (page) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "page-num" + (page === currentPage ? " active" : "");
+            btn.textContent = page;
+
+            btn.addEventListener("click", () => {
+                currentPage = page;
+                applyFilters();
+            });
+
             pageNumbers.appendChild(btn);
+        };
+
+        const addDots = () => {
+            const span = document.createElement("span");
+            span.textContent = "...";
+            pageNumbers.appendChild(span);
+        };
+
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                addButton(i);
+            }
+        } else {
+            addButton(1);
+
+            if (currentPage > 3) addDots();
+
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+
+            for (let i = start; i <= end; i++) {
+                addButton(i);
+            }
+
+            if (currentPage < totalPages - 2) addDots();
+
+            addButton(totalPages);
         }
-        prevPageBtn.disabled = currentPage <= 1;
-        nextPageBtn.disabled = currentPage >= totalPages;
+
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages;
     }
 
     prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; applyFilters(); } });

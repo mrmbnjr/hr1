@@ -26,21 +26,21 @@ $positions  = $positions  ?? [];
  * Keys are the values stored in applications.application_status.
  */
 $statusMeta = [
-    "Submitted"  => ["label" => "Submitted",           "class" => "badge-gray"],
-    "Review"     => ["label" => "Under Review",         "class" => "badge-blue"],
-    "Interview"  => ["label" => "Interview Scheduled",  "class" => "badge-orange"],
-    "Hired"      => ["label" => "Hired",                "class" => "badge-green"],
-    "Rejected"   => ["label" => "Rejected",              "class" => "badge-red"],
+    "Submitted"    => ["label" => "Submitted",           "class" => "badge-gray"],
+    "Under Review" => ["label" => "Under Review",         "class" => "badge-blue"],
+    "Interview"    => ["label" => "Interview Scheduled",  "class" => "badge-orange"],
+    "Hired"        => ["label" => "Hired",                "class" => "badge-green"],
+    "Rejected"     => ["label" => "Rejected",              "class" => "badge-red"],
 ];
 
 /* Summary counts for the dashboard cards */
 $summary = [
-    "Total"     => count($applicants),
-    "Submitted" => 0,
-    "Review"    => 0,
-    "Interview" => 0,
-    "Hired"     => 0,
-    "Rejected"  => 0,
+    "Total"        => count($applicants),
+    "Submitted"    => 0,
+    "Under Review" => 0,
+    "Interview"    => 0,
+    "Hired"        => 0,
+    "Rejected"     => 0,
 ];
 
 foreach ($applicants as $a) {
@@ -82,10 +82,10 @@ foreach ($applicants as $a) {
                 </div>
             </div>
 
-            <div class="summary-card" data-filter="Review">
+            <div class="summary-card" data-filter="Under Review">
                 <div class="summary-icon icon-review"><i class="fa-solid fa-magnifying-glass"></i></div>
                 <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Review'] ?></span>
+                    <span class="summary-count"><?= (int)$summary['Under Review'] ?></span>
                     <span class="summary-label">Under Review</span>
                 </div>
             </div>
@@ -210,7 +210,7 @@ foreach ($applicants as $a) {
                             data-fullname="<?= htmlspecialchars($applicant['fullname'] ?? '') ?>"
                             data-email="<?= htmlspecialchars($applicant['email'] ?? '') ?>"
                             data-phone="<?= htmlspecialchars($applicant['phone'] ?? '') ?>"
-                            data-applied-date="<?= htmlspecialchars($applicant['date_applied'] ?? '') ?>"
+                            data-applied-date="<?= htmlspecialchars($applicant['applied_at'] ?? '') ?>"
                             data-resume="<?= htmlspecialchars($applicant['resume'] ?? '') ?>"
                             data-resume-name="<?= htmlspecialchars($applicant['resume_filename'] ?? 'resume.pdf') ?>"
                             data-ai-score="<?= $aiScore ?>"
@@ -250,7 +250,7 @@ foreach ($applicants as $a) {
                                 <span class="badge <?= $meta['class'] ?>"><?= $meta['label'] ?></span>
                             </td>
 
-                            <td><?= htmlspecialchars($applicant['date_applied'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($applicant['applied_at'] ?? '') ?></td>
 
                             <td class="col-actions">
                                 <a href="?page=review&id=<?= $applicant['applicant_id'] ?>" class="btn-review">

@@ -1,6 +1,7 @@
 <?php
 $pageTitle = "Login";
 $pageCSS = "login.css";
+$pageJS = "login.js";
 $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese Store.";
 ?>
 
