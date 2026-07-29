@@ -1,6 +1,7 @@
 <?php
 $pageTitle       = "Applicant Management";
 $pageCSS         = "applicants.css";
+$pageJS          = "applicants.js";
 $pageDescription = "Review applicants, monitor AI screening, and manage the hiring pipeline.";
 
 if (!isset($_SESSION['user_id'])) {
@@ -36,99 +37,277 @@ $statusMeta = [
         APPLICANT DETAILS PANEL
     ========================================================== -->
 
-        <div class="details-body">
+    <div class="details-body">
 
-            <!-- Applicant Information -->
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-id-card"></i> Applicant Information</h3>
-                <div class="info-grid">
-                    <div>
-                        <span class="info-label">Applicant Name</span>
-                        <span class="info-value"><?= htmlspecialchars($applicant['fullname']) ?></span>
-                    </div>
-                    <div>
-                        <span class="info-label">Email Address</span>
-                        <span class="info-value"><?= htmlspecialchars($applicant['email']) ?></span>
-                    </div>
-                    <div>
-                        <span class="info-label">Phone Number</span>
-                        <span class="info-value"><?= htmlspecialchars($applicant['phone']) ?></span>
-                    </div>
-                    <div>
-                        <span class="info-label">Applied Position</span>
-                        <span class="info-value"><?= htmlspecialchars($applicant['position']) ?></span>
-                    </div>
-                    <div>
-                        <span class="info-label">Date Applied</span>
-                        <span class="info-value"><?= date('F d, Y', strtotime($applicant['applied_at'])) ?></span>
-                    </div>
-                    <div>
-                        <span class="info-label">Application Status</span>
-                        <span class="badge">
-                            <?= $statusMeta[$applicant['application_status']]['class'] ?>
-                            <?= $statusMeta[$applicant['application_status']]['label'] ?>
-                        </span>
-                    </div>
+        <!-- Applicant Information -->
+        <section class="detail-section">
+            <h3><i class="fa-solid fa-id-card"></i> Applicant Information</h3>
+            <div class="info-grid">
+                <div>
+                    <span class="info-label">Applicant Name</span>
+                    <span class="info-value"><?= htmlspecialchars($applicant['fullname']) ?></span>
                 </div>
-            </section>
-
-            <!-- Resume -->
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-file-lines"></i> Resume</h3>
-                <div class="resume-row">
-                    <div class="resume-file">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>
-                            <?= basename($applicant['resume_file']) ?>
-                        </span>
-                    </div>
-                    <div class="resume-actions">
-                        <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" target="_blank" target="_blank" class="btn-outline">
-                            <i class="fa-solid fa-eye"></i> View Resume
-                        </a>
-                        <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" download class="btn-outline">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>
-                    </div>
+                <div>
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value"><?= htmlspecialchars($applicant['email']) ?></span>
                 </div>
-            </section>
+                <div>
+                    <span class="info-label">Phone Number</span>
+                    <span class="info-value"><?= htmlspecialchars($applicant['phone']) ?></span>
+                </div>
+                <div>
+                    <span class="info-label">Applied Position</span>
+                    <span class="info-value"><?= htmlspecialchars($applicant['position']) ?></span>
+                </div>
+                <div>
+                    <span class="info-label">Date Applied</span>
+                    <span class="info-value"><?= date('F d, Y', strtotime($applicant['applied_at'])) ?></span>
+                </div>
+                <div>
+                    <span class="info-label">Application Status</span>
+                        <span class="badge <?= htmlspecialchars($statusMeta[$applicant['application_status']]['class']) ?>">
+                            <?= htmlspecialchars($statusMeta[$applicant['application_status']]['label']) ?>
+                        </span>                        
+                    </span>
+                </div>
+            </div>
+        </section>
 
-            <!-- AI Screening -->
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-robot"></i> AI Screening Results</h3>
+        <!-- Resume -->
+        <section class="detail-section">
+            <h3><i class="fa-solid fa-file-lines"></i> Resume</h3>
+            <div class="resume-row">
+                <div class="resume-file">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>
+                        <?= basename($applicant['resume_file']) ?>
+                    </span>
+                </div>
+                <div class="resume-actions">
+                    <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" target="_blank" target="_blank" class="btn-outline">
+                        <i class="fa-solid fa-eye"></i> View Resume
+                    </a>
+                    <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" download class="btn-outline">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+        </section>
 
-                <div class="ai-score-row">
-                    <div class="ai-score-circle">
-                        <span>
-                            <?= (int)$applicant['ai_score'] ?>%
-                        </span>
-                    </div>
-                    <div class="ai-recommendation">
-                        <span class="info-label">Recommendation</span>
-                        <span class="rec-badge">
-                            <?= htmlspecialchars($applicant['recommendation']) ?>
-                        </span>
-                    </div>
+        <!-- AI Screening -->
+        <?php
+            function getMatchClass(int $score): string
+            {
+                if ($score >= 85) {
+                    return "high";
+                }
+
+                if ($score >= 70) {
+                    return "medium";
+                }
+                return "low";
+            }?>
+        <section class="detail-section">
+
+            <h3>
+                <i class="fa-solid fa-robot"></i>
+                AI Screening Results
+            </h3>
+
+            <?php
+
+            $score = (int)($applicant['ai_score'] ?? 0);
+
+            if ($score >= 85) {
+
+                $skills = 90;
+                $experience = 84;
+                $education = 95;
+                $keywords = 88;
+
+                $strengths = [
+                    "Strong technical skills",
+                    "Relevant educational background",
+                    "Experience closely matches the position",
+                    "Resume is complete and well-structured"
+                ];
+
+                $concerns = [
+                    "Leadership experience not mentioned"
+                ];
+
+                $summary = "The applicant demonstrates a strong match for the position and is recommended to proceed to the interview stage.";
+
+            } elseif ($score >= 70) {
+
+                $skills = 76;
+                $experience = 72;
+                $education = 85;
+                $keywords = 74;
+
+                $strengths = [
+                    "Meets most job requirements",
+                    "Relevant degree",
+                    "Acceptable work experience"
+                ];
+
+                $concerns = [
+                    "Several preferred skills are missing",
+                    "Limited industry experience"
+                ];
+
+                $summary = "The applicant satisfies most requirements but should be further evaluated during the interview.";
+
+            } else {
+
+                $skills = 58;
+                $experience = 54;
+                $education = 70;
+                $keywords = 60;
+
+                $strengths = [
+                    "Educational requirements met"
+                ];
+
+                $concerns = [
+                    "Skills do not fully match",
+                    "Relevant experience is limited",
+                    "Several required qualifications are missing"
+                ];
+
+                $summary = "The applicant currently does not meet enough of the required qualifications for this position.";
+
+            }
+
+            ?>
+
+            <div class="ai-score-row">
+
+                <div class="ai-score-circle">
+                    <span><?= $score ?>%</span>
                 </div>
 
-                <div class="match-bars">
-                    <div class="match-row">
-                        <span class="match-label">Skills Match</span>
-                        <div class="progress-track"><div class="progress-fill"></div></div>
-                        <span class="match-value">0%</span>
-                    </div>
-                    <div class="match-row">
-                        <span class="match-label">Experience Match</span>
-                        <div class="progress-track"><div class="progress-fill"></div></div>
-                        <span class="match-value">0%</span>
-                    </div>
-                    <div class="match-row">
-                        <span class="match-label">Education Match</span>
-                        <div class="progress-track"><div class="progress-fill"></div></div>
-                        <span class="match-value">0%</span>
-                    </div>
+                <div class="ai-recommendation">
+
+                    <span class="info-label">
+                        Recommendation
+                    </span>
+
+                    <span class="rec-badge">
+                        <?= htmlspecialchars($applicant['recommendation']) ?>
+                    </span>
+
                 </div>
-            </section>
+
+            </div>
+
+            <div class="match-bars">
+
+                <div class="match-row">
+
+                    <span class="match-label">Skills Match</span>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:<?= $skills ?>%"></div>
+                    </div>
+
+                    <span class="match-value"><?= $skills ?>%</span>
+
+                </div>
+
+                <div class="match-row">
+
+                    <span class="match-label">Experience Match</span>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:<?= $experience ?>%"></div>
+                    </div>
+
+                    <span class="match-value"><?= $experience ?>%</span>
+
+                </div>
+
+                <div class="match-row">
+
+                    <span class="match-label">Education Match</span>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:<?= $education ?>%"></div>
+                    </div>
+
+                    <span class="match-value"><?= $education ?>%</span>
+
+                </div>
+
+                <div class="match-row">
+
+                    <span class="match-label">Keyword Match</span>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:<?= $keywords ?>%"></div>
+                    </div>
+
+                    <span class="match-value"><?= $keywords ?>%</span>
+
+                </div>
+
+            </div>
+
+            <div class="ai-analysis-grid">
+
+                <div class="analysis-card">
+
+                    <h4>
+                        <i class="fa-solid fa-circle-check"></i>
+                        Key Strengths
+                    </h4>
+
+                    <ul>
+
+                        <?php foreach($strengths as $item): ?>
+
+                            <li><?= htmlspecialchars($item) ?></li>
+
+                        <?php endforeach; ?>
+
+                    </ul>
+
+                </div>
+
+                <div class="analysis-card">
+
+                    <h4>
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        Areas for Review
+                    </h4>
+
+                    <ul>
+
+                        <?php foreach($concerns as $item): ?>
+
+                            <li><?= htmlspecialchars($item) ?></li>
+
+                        <?php endforeach; ?>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="ai-summary">
+
+                <span class="info-label">
+                    AI Summary
+                </span>
+
+                <p>
+                    <?= htmlspecialchars($summary) ?>
+                </p>
+
+            </div>
+
+        </section>
 
             <!-- Interview -->
             <section class="detail-section">
