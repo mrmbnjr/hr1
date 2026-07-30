@@ -517,7 +517,13 @@
     font-family: "Luckiest Guy", cursive;
     font-size: 18px;
     color: var(--maroon-dark);
-    background: conic-gradient(var(--gold) calc(var(--score) * 1%), var(--border) 0);
+    background:
+        conic-gradient(
+            from -180deg,
+            var(--gold) 0%,
+            var(--maroon) calc(var(--score) * 1%),
+            var(--border) 0
+        );
     position: relative;
 }
 
@@ -674,18 +680,9 @@
 @media (max-width:700px){
 
     .ai-score-row{
-        flex-direction:column;
-        align-items:flex-start;
+        flex-direction:row;
+        align-items:center;
     }
-
-    .match-row{
-        grid-template-columns:100px 1fr 42px;
-    }
-
-    .ai-analysis-grid{
-        grid-template-columns:1fr;
-    }
-
 }
 /* ---------------- Modals ---------------- */
 

@@ -139,8 +139,8 @@ $statusMeta = [
             ?>
 
             <div class="ai-score-row">
-
-                <div class="ai-score-circle">
+                <div class="ai-score-circle"
+                    style="--score: <?= number_format($score, 2, '.', '') ?>;">
                     <span><?= number_format($score, 2) ?>%</span>
                 </div>
 
