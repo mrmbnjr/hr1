@@ -116,67 +116,24 @@ $statusMeta = [
 
             <?php
 
-            $score = (int)($applicant['ai_score'] ?? 0);
+            $score = (float) ($applicant['ai_score'] ?? 0);
 
-            if ($score >= 85) {
+            $skills      = (float) ($applicant['skills_score'] ?? 0);
+            $experience  = (float) ($applicant['experience_score'] ?? 0);
+            $education   = (float) ($applicant['education_score'] ?? 0);
+            $keywords    = (float) ($applicant['keyword_score'] ?? 0);
 
-                $skills = 90;
-                $experience = 84;
-                $education = 95;
-                $keywords = 88;
+            $strengths = json_decode($applicant['strengths'] ?? '[]', true);
+            $concerns  = json_decode($applicant['concerns'] ?? '[]', true);
 
-                $strengths = [
-                    "Strong technical skills",
-                    "Relevant educational background",
-                    "Experience closely matches the position",
-                    "Resume is complete and well-structured"
-                ];
+            $summary = $applicant['ai_summary'] ?? 'No AI summary available.';
 
-                $concerns = [
-                    "Leadership experience not mentioned"
-                ];
+            if (!is_array($strengths)) {
+                $strengths = [];
+            }
 
-                $summary = "The applicant demonstrates a strong match for the position and is recommended to proceed to the interview stage.";
-
-            } elseif ($score >= 70) {
-
-                $skills = 76;
-                $experience = 72;
-                $education = 85;
-                $keywords = 74;
-
-                $strengths = [
-                    "Meets most job requirements",
-                    "Relevant degree",
-                    "Acceptable work experience"
-                ];
-
-                $concerns = [
-                    "Several preferred skills are missing",
-                    "Limited industry experience"
-                ];
-
-                $summary = "The applicant satisfies most requirements but should be further evaluated during the interview.";
-
-            } else {
-
-                $skills = 58;
-                $experience = 54;
-                $education = 70;
-                $keywords = 60;
-
-                $strengths = [
-                    "Educational requirements met"
-                ];
-
-                $concerns = [
-                    "Skills do not fully match",
-                    "Relevant experience is limited",
-                    "Several required qualifications are missing"
-                ];
-
-                $summary = "The applicant currently does not meet enough of the required qualifications for this position.";
-
+            if (!is_array($concerns)) {
+                $concerns = [];
             }
 
             ?>
@@ -184,7 +141,7 @@ $statusMeta = [
             <div class="ai-score-row">
 
                 <div class="ai-score-circle">
-                    <span><?= $score ?>%</span>
+                    <span><?= number_format($score, 2) ?>%</span>
                 </div>
 
                 <div class="ai-recommendation">
@@ -208,10 +165,10 @@ $statusMeta = [
                     <span class="match-label">Skills Match</span>
 
                     <div class="progress-track">
-                        <div class="progress-fill" style="width:<?= $skills ?>%"></div>
+                        <div class="progress-fill" style="width:<?= number_format($skills, 2) ?>%"></div>
                     </div>
 
-                    <span class="match-value"><?= $skills ?>%</span>
+                    <span class="match-value"><?= number_format($skills, 2) ?>%</span>
 
                 </div>
 
@@ -220,10 +177,10 @@ $statusMeta = [
                     <span class="match-label">Experience Match</span>
 
                     <div class="progress-track">
-                        <div class="progress-fill" style="width:<?= $experience ?>%"></div>
+                        <div class="progress-fill" style="width:<?= number_format($experience, 2) ?>%"></div>
                     </div>
 
-                    <span class="match-value"><?= $experience ?>%</span>
+                    <span class="match-value"><?= number_format($experience, 2) ?>%</span>
 
                 </div>
 
@@ -232,10 +189,10 @@ $statusMeta = [
                     <span class="match-label">Education Match</span>
 
                     <div class="progress-track">
-                        <div class="progress-fill" style="width:<?= $education ?>%"></div>
+                        <div class="progress-fill" style="width:<?= number_format($education, 2) ?>%"></div>
                     </div>
 
-                    <span class="match-value"><?= $education ?>%</span>
+                    <span class="match-value"><?= number_format($education, 2) ?>%</span>
 
                 </div>
 
@@ -244,10 +201,10 @@ $statusMeta = [
                     <span class="match-label">Keyword Match</span>
 
                     <div class="progress-track">
-                        <div class="progress-fill" style="width:<?= $keywords ?>%"></div>
+                        <div class="progress-fill" style="width:<?= number_format($keywords, 2) ?>%"></div>
                     </div>
 
-                    <span class="match-value"><?= $keywords ?>%</span>
+                    <span class="match-value"><?= number_format($keywords, 2) ?>%</span>
 
                 </div>
 

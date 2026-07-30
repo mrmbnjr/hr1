@@ -38,7 +38,7 @@ class Applicant
                 ap.application_status,
                 ap.applied_at,
 
-                ai.match_score AS ai_score,
+                ai.overall_score AS ai_score,
                 ai.ai_summary AS screening_summary,
 
                 i.interview_date,
@@ -94,11 +94,15 @@ class Applicant
                 ap.application_status,
                 ap.applied_at,
 
-                ai.match_score AS ai_score,
+                ai.overall_score AS ai_score,
+                ai.skills_score,
+                ai.experience_score,
+                ai.education_score,
+                ai.keyword_score,
                 ai.recommendation,
                 ai.extracted_skills,
                 ai.strengths,
-                ai.weaknesses,
+                ai.concerns,
                 ai.ai_summary,
 
                 i.interview_date,

@@ -92,22 +92,37 @@ CREATE TABLE applications (
 
 CREATE TABLE ai_screening (
     screening_id INT AUTO_INCREMENT PRIMARY KEY,
-    application_id INT UNIQUE,
-    match_score DECIMAL(5,2),
+
+    application_id INT NOT NULL UNIQUE,
+
+    overall_score DECIMAL(5,2) NOT NULL,
+
+    skills_score DECIMAL(5,2) NOT NULL,
+    experience_score DECIMAL(5,2) NOT NULL,
+    education_score DECIMAL(5,2) NOT NULL,
+    keyword_score DECIMAL(5,2) NOT NULL,
+
     recommendation ENUM(
         'Highly Recommended',
         'Recommended',
         'Consider',
         'Not Recommended'
-    ),
+    ) NOT NULL,
+
     extracted_skills TEXT,
-    strengths TEXT,
-    weaknesses TEXT,
+
+    strengths JSON,
+
+    concerns JSON,
+
     ai_summary TEXT,
+
     processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(application_id)
-    REFERENCES applications(application_id)
-    ON DELETE CASCADE
+
+    CONSTRAINT fk_ai_screening_application
+        FOREIGN KEY (application_id)
+        REFERENCES applications(application_id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE interviews (

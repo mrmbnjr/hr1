@@ -276,149 +276,212 @@ INSERT INTO applications (
 
 INSERT INTO ai_screening (
     application_id,
-    match_score,
+    overall_score,
+    skills_score,
+    experience_score,
+    education_score,
+    keyword_score,
     recommendation,
     extracted_skills,
     strengths,
-    weaknesses,
+    concerns,
     ai_summary
 ) VALUES
-    (
-        1,
-        78.50,
-        'Consider',
-        'Cash Handling, Customer Service, Communication',
-        'Good communication skills and customer-oriented.',
-        'Limited cashier experience.',
-        'Applicant demonstrates potential for entry-level cashier responsibilities.'
-    ),
-    (
-        2,
-        94.30,
-        'Highly Recommended',
-        'Recruitment, Documentation, MS Office',
-        'Strong HR background and excellent communication.',
-        'Limited payroll experience.',
-        'Excellent candidate for HR Assistant position.'
-    ),
-    (
-        3,
-        89.75,
-        'Recommended',
-        'Computer Troubleshooting, Networking, Windows',
-        'Strong technical knowledge.',
-        'Needs additional experience in server administration.',
-        'Recommended for IT Support interview.'
-    ),
-    (
-        4,
-        91.20,
-        'Highly Recommended',
-        'Sales, Customer Service, Communication',
-        'Confident communicator with retail experience.',
-        'Limited inventory management knowledge.',
-        'Highly suitable for Sales Associate.'
-    ),
-    (
-        5,
-        56.80,
-        'Not Recommended',
-        'Inventory',
-        'Willing to learn.',
-        'Lacks warehouse experience.',
-        'Does not currently meet minimum requirements.'
-    ),
-    (
-        6,
-        82.40,
-        'Recommended',
-        'Cash Handling, POS System',
-        'Previous cashier experience.',
-        'Needs improvement in communication.',
-        'Suitable for further evaluation.'
-    ),
-    (
-        7,
-        90.50,
-        'Highly Recommended',
-        'Networking, Hardware Repair, Windows Server',
-        'Excellent technical skills.',
-        'Minimal Linux experience.',
-        'Strong IT Support candidate.'
-    ),
-    (
-        8,
-        84.10,
-        'Recommended',
-        'Sales, Marketing',
-        'Friendly and persuasive.',
-        'Limited product knowledge.',
-        'Recommended for interview.'
-    ),
-    (
-        9,
-        87.35,
-        'Recommended',
-        'Inventory, Forklift Operation',
-        'Warehouse experience.',
-        'Needs safety certification.',
-        'Good warehouse applicant.'
-    ),
-    (
-        10,
-        79.90,
-        'Consider',
-        'Recruitment, Filing',
-        'Organized and detail-oriented.',
-        'Needs more HR experience.',
-        'Can be considered for HR Assistant.'
-    ),
-    (
-        11,
-        74.60,
-        'Consider',
-        'Cashiering, Customer Service',
-        'Friendly personality.',
-        'Limited work experience.',
-        'May be considered after interview.'
-    ),
-    (
-        12,
-        61.20,
-        'Not Recommended',
-        'Sales',
-        'Basic communication skills.',
-        'Insufficient experience.',
-        'Not recommended for current opening.'
-    ),
-    (
-        13,
-        86.70,
-        'Recommended',
-        'Computer Repair, Networking',
-        'Good troubleshooting skills.',
-        'Needs cloud technology exposure.',
-        'Recommended for technical interview.'
-    ),
-    (
-        14,
-        92.80,
-        'Highly Recommended',
-        'Recruitment, Employee Relations',
-        'Strong HR knowledge.',
-        'Limited labor law exposure.',
-        'Excellent HR Assistant candidate.'
-    ),
-    (
-        15,
-        77.30,
-        'Consider',
-        'Warehouse Operations',
-        'Physically fit.',
-        'Needs inventory software training.',
-        'Potential warehouse employee.'
-    );
-
+(
+    1,
+    78.50,
+    80.00,
+    72.00,
+    85.00,
+    77.00,
+    'Consider',
+    'Cash Handling, Customer Service, Communication',
+    '["Good communication skills","Customer-oriented","Fast learner"]',
+    '["Limited cashier experience","Needs additional POS training"]',
+    'The applicant demonstrates potential for entry-level cashier responsibilities but requires additional practical experience.'
+),
+(
+    2,
+    94.30,
+    95.00,
+    92.00,
+    96.00,
+    94.00,
+    'Highly Recommended',
+    'Recruitment, Documentation, MS Office',
+    '["Strong HR background","Excellent communication","Highly organized"]',
+    '["Limited payroll experience"]',
+    'Excellent candidate for the HR Assistant position with strong overall qualifications.'
+),
+(
+    3,
+    89.75,
+    91.00,
+    86.00,
+    88.00,
+    94.00,
+    'Recommended',
+    'Computer Troubleshooting, Networking, Windows',
+    '["Strong troubleshooting skills","Good networking knowledge","Technical aptitude"]',
+    '["Needs additional server administration experience"]',
+    'Recommended for IT Support interview due to strong technical competencies.'
+),
+(
+    4,
+    91.20,
+    90.00,
+    92.00,
+    90.00,
+    93.00,
+    'Highly Recommended',
+    'Sales, Customer Service, Communication',
+    '["Excellent retail experience","Confident communicator","Customer-focused"]',
+    '["Limited inventory management knowledge"]',
+    'Highly suitable for the Sales Associate position.'
+),
+(
+    5,
+    56.80,
+    55.00,
+    52.00,
+    68.00,
+    54.00,
+    'Not Recommended',
+    'Inventory',
+    '["Willing to learn"]',
+    '["Lacks warehouse experience","Limited technical skills","Insufficient qualifications"]',
+    'The applicant currently does not meet the minimum requirements for the position.'
+),
+(
+    6,
+    82.40,
+    84.00,
+    80.00,
+    81.00,
+    85.00,
+    'Recommended',
+    'Cash Handling, POS System',
+    '["Previous cashier experience","Familiar with POS systems"]',
+    '["Communication skills need improvement"]',
+    'Suitable for further evaluation through an interview.'
+),
+(
+    7,
+    90.50,
+    94.00,
+    88.00,
+    90.00,
+    90.00,
+    'Highly Recommended',
+    'Networking, Hardware Repair, Windows Server',
+    '["Excellent technical skills","Strong hardware knowledge","Server administration basics"]',
+    '["Minimal Linux experience"]',
+    'Strong IT Support candidate with excellent technical capabilities.'
+),
+(
+    8,
+    84.10,
+    82.00,
+    83.00,
+    85.00,
+    86.00,
+    'Recommended',
+    'Sales, Marketing',
+    '["Friendly personality","Persuasive communication"]',
+    '["Limited product knowledge"]',
+    'Recommended for interview to further assess sales potential.'
+),
+(
+    9,
+    87.35,
+    88.00,
+    87.00,
+    84.00,
+    90.00,
+    'Recommended',
+    'Inventory, Forklift Operation',
+    '["Warehouse experience","Equipment handling skills"]',
+    '["Needs workplace safety certification"]',
+    'Good warehouse applicant suitable for further evaluation.'
+),
+(
+    10,
+    79.90,
+    80.00,
+    76.00,
+    84.00,
+    79.00,
+    'Consider',
+    'Recruitment, Filing',
+    '["Organized","Detail-oriented"]',
+    '["Needs additional HR experience"]',
+    'May be considered for the HR Assistant role after further assessment.'
+),
+(
+    11,
+    74.60,
+    73.00,
+    70.00,
+    82.00,
+    75.00,
+    'Consider',
+    'Cashiering, Customer Service',
+    '["Friendly personality","Good customer interaction"]',
+    '["Limited work experience"]',
+    'Applicant has potential but requires additional evaluation.'
+),
+(
+    12,
+    61.20,
+    62.00,
+    58.00,
+    70.00,
+    60.00,
+    'Not Recommended',
+    'Sales',
+    '["Basic communication skills"]',
+    '["Insufficient experience","Weak sales background"]',
+    'The applicant does not currently meet the qualifications for the opening.'
+),
+(
+    13,
+    86.70,
+    89.00,
+    84.00,
+    86.00,
+    88.00,
+    'Recommended',
+    'Computer Repair, Networking',
+    '["Strong troubleshooting skills","Good networking fundamentals"]',
+    '["Needs cloud technology exposure"]',
+    'Recommended for technical interview based on current qualifications.'
+),
+(
+    14,
+    92.80,
+    93.00,
+    91.00,
+    95.00,
+    92.00,
+    'Highly Recommended',
+    'Recruitment, Employee Relations',
+    '["Strong HR knowledge","Excellent interpersonal skills","Professional communication"]',
+    '["Limited labor law exposure"]',
+    'Outstanding candidate for the HR Assistant position.'
+),
+(
+    15,
+    77.30,
+    76.00,
+    75.00,
+    80.00,
+    78.00,
+    'Consider',
+    'Warehouse Operations',
+    '["Physically fit","Adaptable worker"]',
+    '["Needs inventory software training"]',
+    'Applicant has potential for warehouse operations after additional training.'
+);
 
 /* ==========================================================
    INTERVIEWS
