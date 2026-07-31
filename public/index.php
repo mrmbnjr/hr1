@@ -44,6 +44,10 @@ switch ($page) {
         (new ApplicantController())->review();
         break;
 
+    case 'scheduleInterview':
+        (new ApplicantController())->scheduleInterview();
+        break;
+
     case 'recruitment':
         (new RecruitmentController())->recruitment();
         break;

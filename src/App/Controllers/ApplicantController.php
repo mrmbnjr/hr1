@@ -43,6 +43,19 @@ class ApplicantController
         require '../resources/views/applicants/review.php';
     }
 
+    public function scheduleInterview()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location:?page=applicants");
+            exit;
+        }
+
+        $this->applicant->scheduleInterview($_POST);
+
+        header("Location:?page=review&id=" . $_POST['applicant_id']);
+        exit;
+    }
+
     /**
      * Edit Applicant
      */

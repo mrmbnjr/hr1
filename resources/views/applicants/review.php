@@ -284,11 +284,16 @@ $statusMeta = [
             <?php else: ?>
 
                 <?php
-                    $resultClass = match ($applicant['result']) {
-                        'Passed' => 'badge-green',
-                        'Failed' => 'badge-red',
-                        default  => 'badge-orange'
-                    };
+
+                $resultClass = match ($applicant['result']) {
+                    'Passed' => 'badge-green',
+                    'Failed' => 'badge-red',
+                    default  => 'badge-orange'
+                };
+
+                $isManagerInterview =
+                    ($applicant['interviewer_role'] ?? '') === 'MANAGER';
+
                 ?>
 
                 <div class="interview-scheduled">
@@ -313,6 +318,7 @@ $statusMeta = [
                             <span class="info-label">Interviewer</span>
                             <span class="info-value">
                                 <?= htmlspecialchars($applicant['interviewer_name']) ?>
+                                (<?= htmlspecialchars($applicant['interviewer_role']) ?>)
                             </span>
                         </div>
 
@@ -330,24 +336,32 @@ $statusMeta = [
                             </span>
                         </div>
 
-                        <div>
-                            <span class="info-label">Result</span>
+                        <?php if ($isManagerInterview): ?>
 
-                            <span class="badge <?= $resultClass ?>">
-                                <?= htmlspecialchars($applicant['result']) ?>
-                            </span>
-                        </div>
+                            <div>
+                                <span class="info-label">Result</span>
+
+                                <span class="badge <?= $resultClass ?>">
+                                    <?= htmlspecialchars($applicant['result']) ?>
+                                </span>
+                            </div>
+
+                        <?php endif; ?>
 
                     </div>
 
-                    <?php if ($applicant['result'] !== 'Pending'): ?>
+                    <?php if ($isManagerInterview && $applicant['result'] !== 'Pending'): ?>
 
                         <div class="remarks-box">
-                            <span class="info-label">Interview Remarks</span>
+
+                            <span class="info-label">
+                                Interview Remarks
+                            </span>
 
                             <p class="remarks-text">
                                 <?= nl2br(htmlspecialchars($applicant['remarks'])) ?>
                             </p>
+
                         </div>
 
                     <?php endif; ?>
@@ -396,8 +410,9 @@ $statusMeta = [
                 <h3><i class="fa-solid fa-calendar-days"></i> Schedule Interview</h3>
                 <button type="button" class="close-btn" data-close="scheduleModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form id="scheduleForm" class="modal-body">
+            <form id="scheduleForm" class="modal-body" method="POST" action="?page=scheduleInterview">
                 <input type="hidden" name="application_id" value="<?= $applicant['application_id']; ?>">
+                <input type="hidden" name="application_id" value="<?= $applicant['applicant_id']; ?>">
                 <label>Interviewer
                     <select name="interviewer_id" id="scheduleManager" required>
                         <option value="">Select Interviewer</option>
@@ -405,10 +420,13 @@ $statusMeta = [
                             <option disabled>No managers found</option>
                         <?php else: ?>
                             <?php foreach ($managers as $manager): ?>
-                                    <option value="<?= $manager['user_id']; ?>">
-                                        <?= htmlspecialchars($manager['fullname']); ?>
-                                        (<?= htmlspecialchars($manager['role_name']); ?>)
-                                    </option>
+                                <option
+                                    value="<?= $manager['user_id']; ?>"
+                                    <?= ($applicant['interviewer_id'] ?? '') == $manager['user_id'] ? 'selected' : ''; ?>>
+
+                                    <?= htmlspecialchars($manager['fullname']); ?>
+                                    (<?= htmlspecialchars($manager['role_name']); ?>)
+                                </option>                            
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </select>
@@ -416,26 +434,38 @@ $statusMeta = [
 
                 <label>Interview Type
                     <select name="interview_type" id="scheduleType" required>
-                        <option value="">Select Interview Type</option>
-                        <option value="Face-to-Face">Face-to-Face</option>
-                        <option value="Online">Online</option>
-                        <option value="Phone">Phone</option>
+                        <option value="">Select Type</option>
+
+                        <option value="Phone"
+                            <?= ($applicant['interview_type'] ?? '') === 'Phone' ? 'selected' : ''; ?>>
+                            Phone
+                        </option>
+
+                        <option value="Online"
+                            <?= ($applicant['interview_type'] ?? '') === 'Online' ? 'selected' : ''; ?>>
+                            Online
+                        </option>
+
+                        <option value="Face-to-Face"
+                            <?= ($applicant['interview_type'] ?? '') === 'Face-to-Face' ? 'selected' : ''; ?>>
+                            Face-to-Face
+                        </option>
                     </select>
                 </label>
 
                 <div class="form-row">                    
                     <label>Interview Date
-                        <input type="date" name="interview_date" id="scheduleDate" required>
+                        <input type="date" name="interview_date" id="scheduleDate" value="<?= !empty($applicant['interview_date']) ? date('Y-m-d', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                     <label>Interview Time
-                        <input type="time" name="interview_time" id="scheduleTime" required>
+                        <<input type="time" name="interview_time" id="scheduleTime" value="<?= !empty($applicant['interview_date']) ? date('H:i', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                 </div>
                 <label>Location
-                    <input type="text" name="location" id="scheduleLocation" placeholder="e.g. HR Conference Room, Google Meet link" required>
+                    <input type="text" name="location" value="<?= htmlspecialchars($applicant['location'] ?? ''); ?>" id="scheduleLocation" placeholder="e.g. HR Conference Room, Google Meet link" required>
                 </label>
                 <label>Notes
-                    <textarea name="notes" id="scheduleNotes" rows="3" placeholder="Additional notes for the interview"></textarea>
+                    <textarea name="notes"  id="scheduleNotes" rows="3" placeholder="Additional notes for the interview"><?= htmlspecialchars($applicant['remarks'] ?? ''); ?></textarea>
                 </label>
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="scheduleModal">Cancel</button>

@@ -87,7 +87,7 @@ Applicant
 ### Dependencies
 1. composer require phpmailer/phpmailer
 2. composer require vlucas/phpdotenv
-
+3. Edit HASH Password for users in seed.php
 
 ## 5. Tech stack
 - UI/UX Design: Figma
