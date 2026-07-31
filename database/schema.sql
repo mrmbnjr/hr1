@@ -127,25 +127,35 @@ CREATE TABLE ai_screening (
 
 CREATE TABLE interviews (
     interview_id INT AUTO_INCREMENT PRIMARY KEY,
-    application_id INT,
-    interviewer_id INT,
+
+    application_id INT NOT NULL UNIQUE,
+    interviewer_id INT NOT NULL,
+
     interview_type ENUM(
         'Phone',
         'Online',
         'Face-to-Face'
-    ),
-    interview_date DATETIME,
+    ) NOT NULL,
+
+    interview_date DATETIME NOT NULL,
+
+    location VARCHAR(255),
+
     remarks TEXT,
+
     result ENUM(
         'Pending',
         'Passed',
         'Failed'
     ) DEFAULT 'Pending',
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(application_id)
-    REFERENCES applications(application_id),
-    FOREIGN KEY(interviewer_id)
-    REFERENCES users(user_id)
+
+    FOREIGN KEY (application_id)
+        REFERENCES applications(application_id),
+
+    FOREIGN KEY (interviewer_id)
+        REFERENCES users(user_id)
 );
 
 CREATE TABLE onboarding (

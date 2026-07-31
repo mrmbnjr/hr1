@@ -105,10 +105,20 @@ class Applicant
                 ai.concerns,
                 ai.ai_summary,
 
+                i.interview_id,
                 i.interview_date,
+                i.location,
                 i.interview_type,
                 i.remarks,
                 i.result,
+
+                CONCAT(
+                    interviewer.first_name,
+                    ' ',
+                    COALESCE(interviewer.middle_name, ''),
+                    ' ',
+                    interviewer.last_name
+                ) AS interviewer_name,
 
                 ap.application_status AS hiring_decision
 
@@ -125,6 +135,18 @@ class Applicant
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
+
+            LEFT JOIN users u
+                ON i.interviewer_id = u.user_id
+
+            LEFT JOIN employees e
+                ON u.employee_id = e.employee_id
+
+            LEFT JOIN applications ia
+                ON e.application_id = ia.application_id
+
+            LEFT JOIN applicants interviewer
+                ON ia.applicant_id = interviewer.applicant_id
 
             WHERE a.applicant_id = :id
         ";
@@ -146,6 +168,48 @@ class Applicant
             FROM job_postings
             WHERE status = 'Open'
             ORDER BY title ASC
+        ";
+
+        return $this->db
+            ->query($sql)
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function getManagers()
+    {
+        $sql = "
+            SELECT
+                u.user_id,
+
+                CONCAT(
+                    a.first_name,
+                    ' ',
+                    COALESCE(a.middle_name, ''),
+                    ' ',
+                    a.last_name
+                ) AS fullname,
+
+                r.role_name
+
+            FROM users u
+
+            INNER JOIN roles r
+                ON u.role_id = r.role_id
+
+            INNER JOIN employees e
+                ON u.employee_id = e.employee_id
+
+            INNER JOIN applications ap
+                ON e.application_id = ap.application_id
+
+            INNER JOIN applicants a
+                ON ap.applicant_id = a.applicant_id
+
+            WHERE r.role_code IN ('ADMIN', 'HR', 'MANAGER')
+
+            ORDER BY
+                r.role_name,
+                fullname
         ";
 
         return $this->db

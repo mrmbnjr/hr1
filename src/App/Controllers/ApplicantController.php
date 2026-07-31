@@ -31,14 +31,14 @@ class ApplicantController
             exit;
         }
 
-        $applicantModel = new Applicant();
-
-        $applicant = $applicantModel->getApplicantById($_GET['id']);
+        $applicant = $this->applicant->getApplicantById((int)$_GET['id']);
 
         if (!$applicant) {
             header("Location:?page=applicants");
             exit;
         }
+
+        $managers = $this->applicant->getManagers();
 
         require '../resources/views/applicants/review.php';
     }

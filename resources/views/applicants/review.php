@@ -266,49 +266,111 @@ $statusMeta = [
 
         </section>
 
-            <!-- Interview -->
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
+        <!-- Interview -->
+        <section class="detail-section">
+            <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
 
-                <?php if (empty($applicant['interview_date'])): ?>
+            <?php if (empty($applicant['interview_id'])): ?>
+
                 <div class="interview-empty">
                     <span class="badge badge-gray">Not Scheduled</span>
+
                     <button type="button" class="btn-primary" id="openScheduleModal">
-                        <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        Schedule Interview
                     </button>
                 </div>
-                <?php endif; ?>
 
-                <?php if (!empty($applicant['interview_date'])): ?>
-                <div class="interview-scheduled" style="display:none;">
+            <?php else: ?>
+
+                <?php
+                    $resultClass = match ($applicant['result']) {
+                        'Passed' => 'badge-green',
+                        'Failed' => 'badge-red',
+                        default  => 'badge-orange'
+                    };
+                ?>
+
+                <div class="interview-scheduled">
+
                     <div class="info-grid">
-                        <div><span class="info-label">Interview Date</span><span class="info-value"><?= htmlspecialchars($applicant['interview_date'] ?? '-') ?></span></div>
-                        <div><span class="info-label">Interview Time</span><span class="info-value"><?= htmlspecialchars($applicant['interview_time'] ?? '-') ?></span></div>
-                        <div><span class="info-label">Manager</span><span class="info-value"><?= htmlspecialchars($applicant['manager_name'] ?? '-') ?></span></div>
-                        <div><span class="info-label">Location</span><span class="info-value"><?= htmlspecialchars($applicant['location'] ?? '-') ?></span></div>
-                        <div><span class="info-label">Interview Status</span><span class="badge badge-orange">Scheduled</span></div>
-                    </div>
-                    <button type="button" class="btn-outline" id="editScheduleBtn">
-                        <i class="fa-solid fa-pen"></i> Edit Schedule
-                    </button>
-                </div>
-                <?php endif; ?>
-            </section>
 
-            <!-- Manager Decision -->
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-user-tie"></i> Manager Decision</h3>
-                <div class="info-grid">
-                    <div>
-                        <span class="info-label">Recommendation</span>
-                        <span class="rec-badge">Pending</span>
+                        <div>
+                            <span class="info-label">Interview Date</span>
+                            <span class="info-value">
+                                <?= date('F d, Y', strtotime($applicant['interview_date'])) ?>
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="info-label">Interview Time</span>
+                            <span class="info-value">
+                                <?= date('g:i A', strtotime($applicant['interview_date'])) ?>
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="info-label">Interviewer</span>
+                            <span class="info-value">
+                                <?= htmlspecialchars($applicant['interviewer_name']) ?>
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="info-label">Interview Type</span>
+                            <span class="info-value">
+                                <?= htmlspecialchars($applicant['interview_type']) ?>
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="info-label">Location</span>
+                            <span class="info-value">
+                                <?= htmlspecialchars($applicant['location']) ?>
+                            </span>
+                        </div>
+
+                        <div>
+                            <span class="info-label">Result</span>
+
+                            <span class="badge <?= $resultClass ?>">
+                                <?= htmlspecialchars($applicant['result']) ?>
+                            </span>
+                        </div>
+
                     </div>
-                    <div class="full-width">
-                        <span class="info-label">Interview Remarks</span>
-                        <p class="remarks-text"><?= nl2br(htmlspecialchars($applicant['remarks'])) ?></p>
-                    </div>
+
+                    <?php if ($applicant['result'] !== 'Pending'): ?>
+
+                        <div class="remarks-box">
+                            <span class="info-label">Interview Remarks</span>
+
+                            <p class="remarks-text">
+                                <?= nl2br(htmlspecialchars($applicant['remarks'])) ?>
+                            </p>
+                        </div>
+
+                    <?php endif; ?>
+
+                    <?php if ($applicant['result'] === 'Pending'): ?>
+
+                        <button
+                            type="button"
+                            class="btn-outline"
+                            id="editScheduleBtn">
+
+                            <i class="fa-solid fa-pen"></i>
+                            Edit Schedule
+
+                        </button>
+
+                    <?php endif; ?>
+
                 </div>
-            </section>
+
+            <?php endif; ?>
+
+        </section>
 
             <!-- Decision -->
             <section class="detail-section decision-section">
@@ -322,7 +384,6 @@ $statusMeta = [
                     </button>
                 </div>
             </section>
-
         </div>
 
     <!-- ==========================================================
@@ -336,12 +397,33 @@ $statusMeta = [
                 <button type="button" class="close-btn" data-close="scheduleModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="scheduleForm" class="modal-body">
-                <label>Manager
-                    <select name="manager" id="scheduleManager" required>
-                        <option value="">Select manager</option>
+                <input type="hidden" name="application_id" value="<?= $applicant['application_id']; ?>">
+                <label>Interviewer
+                    <select name="interviewer_id" id="scheduleManager" required>
+                        <option value="">Select Interviewer</option>
+                        <?php if (empty($managers)): ?>
+                            <option disabled>No managers found</option>
+                        <?php else: ?>
+                            <?php foreach ($managers as $manager): ?>
+                                    <option value="<?= $manager['user_id']; ?>">
+                                        <?= htmlspecialchars($manager['fullname']); ?>
+                                        (<?= htmlspecialchars($manager['role_name']); ?>)
+                                    </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </select>
                 </label>
-                <div class="form-row">
+
+                <label>Interview Type
+                    <select name="interview_type" id="scheduleType" required>
+                        <option value="">Select Interview Type</option>
+                        <option value="Face-to-Face">Face-to-Face</option>
+                        <option value="Online">Online</option>
+                        <option value="Phone">Phone</option>
+                    </select>
+                </label>
+
+                <div class="form-row">                    
                     <label>Interview Date
                         <input type="date" name="interview_date" id="scheduleDate" required>
                     </label>

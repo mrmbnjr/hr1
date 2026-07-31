@@ -492,6 +492,7 @@ INSERT INTO interviews (
     interviewer_id,
     interview_type,
     interview_date,
+    location,
     remarks,
     result
 ) VALUES
@@ -500,6 +501,7 @@ INSERT INTO interviews (
         3,
         'Face-to-Face',
         '2026-08-15 09:00:00',
+        'HR Conference Room A',
         'Technical interview scheduled.',
         'Pending'
     ),
@@ -507,7 +509,8 @@ INSERT INTO interviews (
         7,
         3,
         'Online',
-        '2026-08-15 01:30:00',
+        '2026-08-15 13:30:00',
+        'Google Meet',
         'Strong technical background.',
         'Passed'
     ),
@@ -516,6 +519,7 @@ INSERT INTO interviews (
         3,
         'Face-to-Face',
         '2026-08-16 10:00:00',
+        'Operations Meeting Room',
         'Warehouse skills validated.',
         'Passed'
     ),
@@ -523,7 +527,8 @@ INSERT INTO interviews (
         11,
         3,
         'Phone',
-        '2026-08-17 02:00:00',
+        '2026-08-17 14:00:00',
+        'Phone Call',
         'Communication needs improvement.',
         'Failed'
     ),
@@ -532,6 +537,7 @@ INSERT INTO interviews (
         3,
         'Online',
         '2026-08-18 11:00:00',
+        'Microsoft Teams',
         'Excellent HR knowledge.',
         'Pending'
     ),
@@ -539,11 +545,12 @@ INSERT INTO interviews (
         4,
         3,
         'Face-to-Face',
-        '2026-08-19 03:00:00',
+        '2026-08-19 15:00:00',
+        'Executive Meeting Room',
         'Sales assessment scheduled.',
         'Pending'
     );
-
+    
 /* ==========================================================
    HR1 DATABASE SEED
    Part 4 - Employee Onboarding
