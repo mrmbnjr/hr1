@@ -83,24 +83,11 @@ Applicant
 ├── Download Report
 ```
 
-## 4. Database Design
-### Users
-- id
-- name
-- email
-- password
+## 4. Set up
+### Dependencies
+1. composer require phpmailer/phpmailer
+2. composer require vlucas/phpdotenv
 
-### Resumes
-- id
-- user_id
-- filename
-- upload_date
-
-### Results
-- id
-- resume_id
-- score
-- recommendation
 
 ## 5. Tech stack
 - UI/UX Design: Figma
