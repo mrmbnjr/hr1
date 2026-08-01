@@ -412,7 +412,7 @@ $statusMeta = [
             </div>
             <form id="scheduleForm" class="modal-body" method="POST" action="?page=scheduleInterview">
                 <input type="hidden" name="application_id" value="<?= $applicant['application_id']; ?>">
-                <input type="hidden" name="application_id" value="<?= $applicant['applicant_id']; ?>">
+                <input type="hidden" name="applicant_id" value="<?= $applicant['applicant_id']; ?>">
                 <label>Interviewer
                     <select name="interviewer_id" id="scheduleManager" required>
                         <option value="">Select Interviewer</option>
@@ -458,7 +458,7 @@ $statusMeta = [
                         <input type="date" name="interview_date" id="scheduleDate" value="<?= !empty($applicant['interview_date']) ? date('Y-m-d', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                     <label>Interview Time
-                        <<input type="time" name="interview_time" id="scheduleTime" value="<?= !empty($applicant['interview_date']) ? date('H:i', strtotime($applicant['interview_date'])) : ''; ?>" required>
+                        <input type="time" name="interview_time" id="scheduleTime" value="<?= !empty($applicant['interview_date']) ? date('H:i', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                 </div>
                 <label>Location

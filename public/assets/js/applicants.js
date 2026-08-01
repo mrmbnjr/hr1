@@ -260,40 +260,7 @@
 
     if (editScheduleBtn) {
         editScheduleBtn.addEventListener('click', () => {
-            if (!currentRow) return;
-            const d = currentRow.dataset;
-            document.getElementById('scheduleDate').value = d.interviewDate || '';
-            document.getElementById('scheduleTime').value = d.interviewTime || '';
-            document.getElementById('scheduleLocation').value = d.interviewLocation || '';
-            document.getElementById('scheduleNotes').value = d.interviewNotes || '';
             openModal('scheduleModal');
-        });
-    }
-
-    const scheduleForm = document.getElementById('scheduleForm');
-
-    if (scheduleForm) {
-        scheduleForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (!currentRow) return;
-
-            const d = currentRow.dataset;
-            d.interviewStatus   = 'Scheduled';
-            d.interviewDate     = document.getElementById('scheduleDate').value;
-            d.interviewTime     = document.getElementById('scheduleTime').value;
-            d.interviewManager  = document.getElementById('scheduleManager').selectedOptions[0]?.text || '';
-            d.interviewLocation = document.getElementById('scheduleLocation').value;
-            d.interviewNotes    = document.getElementById('scheduleNotes').value;
-
-            d.status = 'Interview';
-            const statusCell = currentRow.querySelector('td:nth-child(4) .badge');
-            statusCell.textContent = statusLabel['Interview'];
-            statusCell.className = 'badge ' + statusBadgeClass['Interview'];
-
-            closeModal('scheduleModal');
-            openDetails(currentRow);
-
-            // TODO: replace with AJAX call to ApplicantController::scheduleInterview
         });
     }
 
