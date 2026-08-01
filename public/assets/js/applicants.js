@@ -1,14 +1,14 @@
 // Applicants
 (function () {
 
-    const rows            = Array.from(document.querySelectorAll('#applicantTable tbody tr.applicant-row'));
-    const searchInput      = document.getElementById('applicantSearch');
-    const positionFilter   = document.getElementById('positionFilter');
-    const statusFilter     = document.getElementById('statusFilter');
-    const resultsCount     = document.getElementById('resultsCount');
-    const pageNumbers      = document.getElementById('pageNumbers');
-    const prevPageBtn      = document.getElementById('prevPage');
-    const nextPageBtn      = document.getElementById('nextPage');
+    const rows                = Array.from(document.querySelectorAll('#applicantTable tbody tr.applicant-row'));
+    const searchInput         = document.getElementById('applicantSearch');
+    const positionFilter      = document.getElementById('positionFilter');
+    const sortFilter          = document.getElementById('sortFilter');
+    const resultsCount        = document.getElementById('resultsCount');
+    const pageNumbers         = document.getElementById('pageNumbers');
+    const prevPageBtn         = document.getElementById('prevPage');
+    const nextPageBtn         = document.getElementById('nextPage');
     const isApplicantListPage = document.getElementById('applicantTable');
 
     const PAGE_SIZE = 8;
@@ -19,29 +19,73 @@
 
     if (isApplicantListPage) {
         function applyFilters() {
-            const search   = (searchInput.value || '').toLowerCase().trim();
+            const search = (searchInput.value || '').toLowerCase().trim();
             const position = positionFilter.value;
-            const status   = statusFilter.value !== 'All' ? statusFilter.value : activeStatusFilter;
+            const sort = sortFilter.value;
 
-            const visible = rows.filter(row => {
-                const matchesSearch   = !search || row.dataset.name.includes(search);
+            let visible = rows.filter(row => {
+                const matchesSearch = !search || row.dataset.name.includes(search);
                 const matchesPosition = position === 'All' || row.dataset.position === position;
-                const matchesStatus   = status === 'All' || row.dataset.status === status;
+                const matchesStatus = activeStatusFilter === 'All' || row.dataset.status === activeStatusFilter;
+
                 return matchesSearch && matchesPosition && matchesStatus;
             });
 
+            visible.sort((a, b) => {
+
+                switch (sort) {
+
+                    case 'highest-score':
+                        return parseInt(b.dataset.aiScore) - parseInt(a.dataset.aiScore);
+
+                    case 'lowest-score':
+                        return parseInt(a.dataset.aiScore) - parseInt(b.dataset.aiScore);
+
+                    case 'oldest':
+                        return new Date(a.dataset.appliedDate) - new Date(b.dataset.appliedDate);
+
+                    case 'name-az':
+                        return a.dataset.fullname.localeCompare(b.dataset.fullname);
+
+                    case 'name-za':
+                        return b.dataset.fullname.localeCompare(a.dataset.fullname);
+
+                    case 'priority':
+                        return (
+                            (a.dataset.status !== 'Submitted') - (b.dataset.status !== 'Submitted') ||
+                            parseInt(b.dataset.aiScore) - parseInt(a.dataset.aiScore) ||
+                            new Date(b.dataset.appliedDate) - new Date(a.dataset.appliedDate)
+                        );
+
+                    case 'newest':
+                    default:
+                        return new Date(b.dataset.appliedDate) - new Date(a.dataset.appliedDate);
+                }
+
+            });
+
+            const tbody = document.querySelector('#applicantTable tbody');
+
+            // Reorder the table rows based on the sorted array
+            visible.forEach(row => tbody.appendChild(row));
+
+            // Hide all rows
             rows.forEach(row => row.style.display = 'none');
 
             const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
-            if (currentPage > totalPages) currentPage = totalPages;
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
 
             const start = (currentPage - 1) * PAGE_SIZE;
             const pageRows = visible.slice(start, start + PAGE_SIZE);
+
             pageRows.forEach(row => row.style.display = '');
 
             resultsCount.textContent = visible.length
                 ? `Showing ${start + 1}-${Math.min(start + PAGE_SIZE, visible.length)} of ${visible.length} applicants`
-                : 'No applicants match your filters';
+                : 'No applicants found';
 
             renderPagination(totalPages);
         }
@@ -99,12 +143,11 @@
 
         searchInput.addEventListener('input', () => { currentPage = 1; applyFilters(); });
         positionFilter.addEventListener('change', () => { currentPage = 1; applyFilters(); });
-        statusFilter.addEventListener('change', () => { currentPage = 1; activeStatusFilter = 'All'; applyFilters(); });
-
+        sortFilter.addEventListener('change', () => { currentPage = 1; applyFilters(); });
         document.querySelectorAll('.summary-card').forEach(card => {
             card.addEventListener('click', () => {
                 activeStatusFilter = card.dataset.filter;
-                statusFilter.value = 'All';
+                sortFilter.value = 'priority';
                 currentPage = 1;
                 document.querySelectorAll('.summary-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');

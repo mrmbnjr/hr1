@@ -31,7 +31,12 @@ class ApplicantController
             exit;
         }
 
-        $applicant = $this->applicant->getApplicantById((int)$_GET['id']);
+        $applicantId = (int)$_GET['id'];
+
+        // Change Submitted -> Under Review
+        $this->applicant->markAsUnderReview($applicantId);
+
+        $applicant = $this->applicant->getApplicantById($applicantId);
 
         if (!$applicant) {
             header("Location:?page=applicants");

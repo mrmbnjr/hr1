@@ -166,6 +166,20 @@ class Applicant
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function markAsUnderReview(int $applicantId)
+    {
+        $stmt = $this->db->prepare("
+            UPDATE applications
+            SET application_status = 'Under Review'
+            WHERE applicant_id = :applicant_id
+            AND application_status = 'Submitted'
+        ");
+
+        return $stmt->execute([
+            ':applicant_id' => $applicantId
+        ]);
+    }
+
     public function getAllJobPostings()
     {
         $sql = "

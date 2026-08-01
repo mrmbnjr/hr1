@@ -136,13 +136,13 @@ foreach ($applicants as $a) {
                 <?php endforeach; ?>
             </select>
 
-            <select id="statusFilter">
-                <option value="All">All Statuses</option>
-                <?php foreach ($statusMeta as $key => $meta): ?>
-                    <option value="<?= $key ?>"><?= $meta['label'] ?></option>
-                <?php endforeach; ?>
+            <select id="sortFilter">
+                <option value="priority">Priority Queue</option>
+                <option value="highest-score">Highest AI Score</option>
+                <option value="newest">Newest Applications</option>
+                <option value="oldest">Oldest Applications</option>
+                <option value="name-az">Applicant Name (A-Z)</option>
             </select>
-
         </section>
 
         <!-- ==========================================================
