@@ -96,6 +96,6 @@ switch ($page) {
         break;
 
     default:
-        require '../resources/views/auth/login.php';
+        require '../resources/views/misc/soon.php';
         break;
 }
