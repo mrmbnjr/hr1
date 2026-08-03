@@ -3,7 +3,7 @@
 ========================================================== */
 .main-content{
   margin-left:var(--sidebar-width);
-  min-height: 100vh;
+  min-height: auto;
   background:var(--bg);
   color:var(--ink);
   transition: margin-left .35s ease;
