@@ -80,7 +80,7 @@ switch ($page) {
         break;
 
     case 'human-capital':
-        (new HumanCapitalController())->humanCapital();
+        (new HumanCapitalController())->index();
         break;
 
     case 'employee-records':
