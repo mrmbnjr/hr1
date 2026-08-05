@@ -1,10 +1,6 @@
 /* --- reset --- */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
-body {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-}
 img, svg { display: block; max-width: 100%; }
 button { font: inherit; }
 h1, h2, p { margin: 0; }
