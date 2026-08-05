@@ -60,138 +60,93 @@ $departmentLookup = $departmentLookup ?? [];
                 <!-- =====================================================
                 ORGANIZATION
                 ===================================================== -->
-
-                <section
-                    class="cs-view-panel"
-                    id="organizationView">
-
+                <section class="cs-view-panel" id="organizationView">
                     <div class="dashboard-card">
-
                         <div class="card-header">
-
                             <div>
-
-                                <h2>
-
-                                    Organization Structure
-
-                                </h2>
-
-                                <p>
-
-                                    View your company's organizational hierarchy.
-
-                                </p>
-
+                                <h2>Organization Structure</h2>
+                                <p>View your company's organizational hierarchy.</p>
                             </div>
-
-                            <button
-                                type="button"
-                                class="btn-primary"
-                                id="editOrganization">
-
-                                <i class="fa-solid fa-pen"></i>
-
-                                Edit Organization
-
-                            </button>
-
                         </div>
 
                         <div class="organization-tree">
-
                             <div class="organization-root">
-
                                 <div class="organization-company">
-
                                     <i class="fa-solid fa-building"></i>
-
                                     <span>RAM-YUM</span>
-
                                 </div>
 
-                                <?php if (!empty($organization)): ?>
+                                <div class="organization-departments">
+                                    <?php if (!empty($organization)): ?>
+                                        <?php foreach ($organization as $department): ?>
+                                            <div class="organization-department">
+                                                <div class="department-node">
+                                                    <i class="fa-solid fa-building"></i>
 
-                                    <?php foreach ($organization as $department): ?>
+                                                    <span><?= htmlspecialchars($department['department_name']); ?></span>
+                                                </div>
 
-                                        <div class="organization-department">
-
-                                            <div class="department-node">
-
-                                                <i class="fa-solid fa-building"></i>
-
-                                                <span>
-
-                                                    <?= htmlspecialchars($department['department_name']); ?>
-
-                                                </span>
-
-                                            </div>
-
-                                            <?php if (!empty($department['positions'])): ?>
-
-                                                <ul class="organization-position-list">
+                                                <?php if (!empty($department['positions'])): ?>
+                                                <div class="organization-positions">
 
                                                     <?php foreach ($department['positions'] as $position): ?>
 
-                                                        <li>
+                                                        <div class="organization-position">
 
-                                                            <i class="fa-solid fa-briefcase"></i>
+                                                            <div class="position-node">
 
-                                                            <span>
+                                                                <i class="fa-solid fa-briefcase"></i>
 
-                                                                <?= htmlspecialchars($position['title']); ?>
+                                                                <span><?= htmlspecialchars($position['title']); ?></span>
 
-                                                            </span>
+                                                            </div>
 
-                                                        </li>
+                                                            <?php if (!empty($position['employees'])): ?>
+
+                                                                <div class="organization-employees">
+
+                                                                    <?php foreach ($position['employees'] as $employee): ?>
+
+                                                                        <div class="employee-node">
+
+                                                                            <i class="fa-solid fa-user"></i>
+
+                                                                            <span>
+                                                                                <?= htmlspecialchars($employee['employee_name']); ?>
+                                                                            </span>
+
+                                                                        </div>
+
+                                                                    <?php endforeach; ?>
+
+                                                                </div>
+
+                                                            <?php endif; ?>
+
+                                                        </div>
 
                                                     <?php endforeach; ?>
 
-                                                </ul>
-
-                                            <?php else: ?>
-
-                                                <div class="organization-empty">
-
-                                                    No positions assigned.
-
                                                 </div>
 
-                                            <?php endif; ?>
+                                                <?php else: ?>
+                                                    <div class="organization-empty">No positions assigned.</div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
 
+                                    <?php else: ?>
+                                        <div class="cs-empty-state">
+                                            <i class="fa-solid fa-sitemap"></i>
+                                            <h3>No organizational structure available</h3>
+
+                                            <p>Create departments and positions to build your organization.</p>
                                         </div>
-
-                                    <?php endforeach; ?>
-
-                                <?php else: ?>
-
-                                    <div class="cs-empty-state">
-
-                                        <i class="fa-solid fa-sitemap"></i>
-
-                                        <h3>
-
-                                            No organizational structure available
-
-                                        </h3>
-
-                                        <p>
-
-                                            Create departments and positions to build your organization.
-
-                                        </p>
-
-                                    </div>
-
-                                <?php endif; ?>
-
+                                    <?php endif; ?>
+                                </div>
                             </div>
-
                         </div>
-
                     </div>
-
                 </section>
 
                 <!-- =====================================================
@@ -241,7 +196,7 @@ $departmentLookup = $departmentLookup ?? [];
                                                         : '—'; ?>
                                                 </td>
 
-                                                <td><?= (int) $department['job_postings']; ?></td>
+                                                <td><?= (int) $department['positions']; ?></td>
                                                 <td><?= (int) $department['vacancies']; ?></td>
 
                                                 <td>
@@ -349,7 +304,7 @@ $departmentLookup = $departmentLookup ?? [];
                                                     </span>
                                                 </td>
 
-                                                <td><?= (int) $job['total_applicants']; ?></td>
+                                                <td><?= (int) $job['applicants']; ?></td>
 
                                                 <td>
                                                     <div class="dropdown">

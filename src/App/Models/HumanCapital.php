@@ -26,8 +26,7 @@ class HumanCapital
 
             'positions' => (int) $this->db->query("
                 SELECT COUNT(*)
-                FROM job_postings
-                WHERE status = 'Open'
+                FROM positions
             ")->fetchColumn(),
 
             'vacancies' => (int) $this->db->query("
@@ -37,9 +36,11 @@ class HumanCapital
             ")->fetchColumn(),
 
             'hiring_departments' => (int) $this->db->query("
-                SELECT COUNT(DISTINCT department_id)
-                FROM job_postings
-                WHERE status='Open'
+                SELECT COUNT(DISTINCT p.department_id)
+                FROM job_postings j
+                INNER JOIN positions p
+                    ON p.position_id = j.position_id
+                WHERE j.status = 'Open'
             ")->fetchColumn(),
 
         ];
@@ -49,31 +50,37 @@ class HumanCapital
     {
         $stmt = $this->db->query("
 
-            SELECT
+        SELECT
 
-                d.department_id,
-                d.department_name,
-                d.description,
+            d.department_id,
+            d.department_name,
+            d.created_at,
 
-                COUNT(j.posting_id) AS positions,
+            COUNT(DISTINCT p.position_id) AS positions,
 
-                COALESCE(SUM(
-                    CASE
-                        WHEN j.status='Open'
-                        THEN j.vacancies
-                        ELSE 0
-                    END
-                ),0) AS vacancies
+            COALESCE(SUM(
+                CASE
+                    WHEN j.status = 'Open'
+                    THEN j.vacancies
+                    ELSE 0
+                END
+            ),0) AS vacancies
 
-            FROM departments d
+        FROM departments d
 
-            LEFT JOIN job_postings j
+        LEFT JOIN positions p
+            ON p.department_id = d.department_id
 
-                ON j.department_id=d.department_id
+        LEFT JOIN job_postings j
+            ON j.position_id = p.position_id
 
-            GROUP BY d.department_id
+        GROUP BY
+            d.department_id,
+            d.department_name,
+            d.created_at
 
-            ORDER BY d.department_name
+        ORDER BY
+            d.department_name
 
         ");
 
@@ -102,24 +109,13 @@ class HumanCapital
         $stmt=$this->db->prepare("
 
             INSERT INTO departments
-            (
-
-                department_name,
-                description
-
-            )
-
+            (department_name)
             VALUES
-
-            (?,?)
-
+            (?)
         ");
 
         return $stmt->execute([
-
-            $data['department_name'],
-            $data['description']
-
+            $data['department_name']
         ]);
     }
     public function updateDepartment($id,$data)
@@ -129,18 +125,13 @@ class HumanCapital
             UPDATE departments
 
             SET
-
-                department_name=?,
-                description=?
-
+                department_name=?
             WHERE department_id=?
-
         ");
 
         return $stmt->execute([
 
             $data['department_name'],
-            $data['description'],
             $id
 
         ]);
@@ -148,13 +139,9 @@ class HumanCapital
     public function deleteDepartment($id)
     {
         $stmt=$this->db->prepare("
-
             SELECT COUNT(*)
-
-            FROM job_postings
-
+            FROM positions
             WHERE department_id=?
-
         ");
 
         $stmt->execute([$id]);
@@ -165,7 +152,7 @@ class HumanCapital
 
                 'success'=>false,
 
-                'message'=>'This department still has job postings.'
+                'message'=>'This department still has positions.'
 
             ];
 
@@ -195,7 +182,7 @@ class HumanCapital
             SELECT
 
                 j.*,
-
+                p.position_name,
                 d.department_name,
 
                 (
@@ -210,56 +197,114 @@ class HumanCapital
 
             FROM job_postings j
 
-            JOIN departments d
+            INNER JOIN positions p
 
-                ON d.department_id=j.department_id
+                ON p.position_id = j.position_id
+
+            INNER JOIN departments d
+
+                ON d.department_id = p.department_id
 
             ORDER BY
 
                 d.department_name,
-
+                p.position_name,
                 j.title
 
         ");
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getOrganizationTree()
     {
-        $departments=$this->getDepartments();
+        $departments = $this->getDepartments();
 
-        foreach($departments as &$department){
+        foreach ($departments as &$department) {
 
-            $stmt=$this->db->prepare("
+            // Get all positions in this department
+            $stmt = $this->db->prepare("
 
                 SELECT
 
-                    posting_id,
+                    position_id,
+                    position_name
 
-                    title,
+                FROM positions
 
-                    employment_type,
+                WHERE department_id = ?
 
-                    vacancies,
-
-                    status
-
-                FROM job_postings
-
-                WHERE department_id=?
+                ORDER BY position_name
 
                 ORDER BY title
 
             ");
 
             $stmt->execute([
-
                 $department['department_id']
-
             ]);
 
-            $department['positions']=$stmt->fetchAll(PDO::FETCH_ASSOC);
+            $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Get employees for every position
+            foreach ($positions as &$position) {
+
+            $employeeStmt = $this->db->prepare("
+
+                SELECT
+
+                    e.employee_id,
+                    e.employee_number,
+                    e.hire_date,
+                    e.employment_status,
+
+                CONCAT(
+                    a.first_name,
+                    IF(
+                        a.middle_name IS NULL OR a.middle_name='',
+                        '',
+                        CONCAT(' ', a.middle_name)
+                    ),
+                    ' ',
+                    a.last_name
+                ) AS employee_name
+
+                FROM employees e
+
+                INNER JOIN applications ap
+
+                    ON ap.application_id = e.application_id
+
+                INNER JOIN applicants a
+
+                    ON a.applicant_id = ap.applicant_id
+
+                WHERE EXISTS (
+
+                    SELECT 1
+
+                    FROM job_postings jp
+
+                    WHERE jp.posting_id = ap.posting_id
+                    AND jp.position_id = ?
+
+                )
+
+                ORDER BY
+
+                    a.last_name,
+                    a.first_name
+
+            ");
+
+            $employeeStmt->execute([
+                $position['position_id']
+            ]);
+
+            $position['employees'] = $employeeStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            $department['positions'] = $positions;
         }
 
         return $departments;

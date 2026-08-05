@@ -24,12 +24,22 @@ CREATE TABLE users (
 CREATE TABLE departments (
     department_id INT AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE positions (
+    position_id INT AUTO_INCREMENT PRIMARY KEY,
+    department_id INT NOT NULL,
+    position_name VARCHAR(150) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
 );
 
 CREATE TABLE job_postings (
     posting_id INT AUTO_INCREMENT PRIMARY KEY,
-    department_id INT NOT NULL,
+    position_id INT NOT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT,
     requirements TEXT,
@@ -40,14 +50,16 @@ CREATE TABLE job_postings (
         'Internship'
     ) NOT NULL,
     vacancies INT DEFAULT 1,
-    status ENUM('Open','Closed') DEFAULT 'Open',
+    status ENUM(
+        'Open',
+        'Closed'
+    ) DEFAULT 'Open',
     application_deadline DATE NOT NULL,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (department_id)
-        REFERENCES departments(department_id),
-
+    FOREIGN KEY (position_id)
+        REFERENCES positions(position_id),
     FOREIGN KEY (created_by)
         REFERENCES users(user_id)
 );

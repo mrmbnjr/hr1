@@ -20,11 +20,12 @@ class Recruitment
             SELECT
                 jp.posting_id,
                 jp.title,
+                p.position_name,
+                d.department_name,
                 jp.employment_type,
                 jp.vacancies,
                 jp.status,
                 jp.application_deadline,
-                d.department_name,
 
                 COALESCE(COUNT(a.application_id),0) AS applicants,
 
@@ -51,9 +52,12 @@ class Recruitment
 
             FROM job_postings jp
 
-            LEFT JOIN departments d
-                ON d.department_id = jp.department_id
+            LEFT JOIN positions p
+                ON p.position_id = jp.position_id
 
+            LEFT JOIN departments d
+                ON d.department_id = p.department_id
+                
             LEFT JOIN applications a
                 ON a.posting_id = jp.posting_id
 
@@ -66,12 +70,39 @@ class Recruitment
                 jp.vacancies,
                 jp.status,
                 jp.application_deadline,
+                p.position_name,
                 d.department_name
 
             ORDER BY jp.created_at DESC
         ";
 
         $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+        public function getPositions()
+    {
+        $stmt = $this->db->query("
+
+            SELECT
+
+                p.position_id,
+                p.position_name,
+                d.department_name
+
+            FROM positions p
+
+            INNER JOIN departments d
+
+                ON d.department_id = p.department_id
+
+            ORDER BY
+
+                d.department_name,
+                p.position_name
+
+        ");
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -92,7 +123,7 @@ class Recruitment
         $sql = "
             INSERT INTO job_postings
             (
-                department_id,
+                position_id,
                 title,
                 description,
                 requirements,
@@ -104,7 +135,7 @@ class Recruitment
             )
             VALUES
             (
-                :department_id,
+                :position_id,
                 :title,
                 :description,
                 :requirements,
@@ -149,9 +180,11 @@ class Recruitment
                 jp.*,
                 d.department_name
             FROM job_postings jp
+            LEFT JOIN positions p
+                ON p.position_id = jp.position_id
             LEFT JOIN departments d
-                ON jp.department_id = d.department_id
-            WHERE jp.posting_id = ?
+                ON d.department_id = p.department_id
+                WHERE jp.posting_id = ?
         ";
 
         $stmt = $this->db->prepare($sql);
@@ -164,7 +197,7 @@ class Recruitment
     {
         $sql = "
             UPDATE job_postings
-            SET department_id = ?,
+            SET SET position_id = ?,
                 title = ?,
                 description = ?,
                 requirements = ?,
@@ -178,7 +211,7 @@ class Recruitment
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            $data['department_id'],
+            $data['position_id'],
             $data['title'],
             $data['description'],
             $data['requirements'],
@@ -192,8 +225,7 @@ class Recruitment
     public function delete(int $id): bool
     {
         $stmt = $this->db->prepare("
-            UPDATE job_postings
-            SET status='Archived'
+            DELETE FROM job_postings
             WHERE posting_id = ?
         ");
 
