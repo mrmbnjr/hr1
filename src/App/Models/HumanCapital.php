@@ -56,7 +56,7 @@ class HumanCapital
             d.department_name,
             d.created_at,
 
-            COUNT(DISTINCT p.position_id) AS positions,
+            COUNT(DISTINCT p.position_id) AS position_count,
 
             COALESCE(SUM(
                 CASE
@@ -89,19 +89,44 @@ class HumanCapital
 
     public function getDepartment(int $id)
     {
-        $stmt=$this->db->prepare("
+        $stmt = $this->db->query("
 
-            SELECT *
+            SELECT
 
-            FROM departments
+                d.department_id,
+                d.department_name,
+                d.created_at,
 
-            WHERE department_id=?
+                COUNT(DISTINCT p.position_id) AS position_count,
+
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN j.status = 'Open'
+                            THEN j.vacancies
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS vacancies
+
+            FROM departments d
+
+            LEFT JOIN positions p
+                ON p.department_id = d.department_id
+
+            LEFT JOIN job_postings j
+                ON j.position_id = p.position_id
+
+            GROUP BY
+                d.department_id,
+                d.department_name,
+                d.created_at
+
+            ORDER BY
+                d.department_name
 
         ");
-
-        $stmt->execute([$id]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function createDepartment(array $data)
@@ -225,18 +250,12 @@ class HumanCapital
             // Get all positions in this department
             $stmt = $this->db->prepare("
 
-                SELECT
-
-                    position_id,
-                    position_name
-
-                FROM positions
-
-                WHERE department_id = ?
-
-                ORDER BY position_name
-
-                ORDER BY title
+            SELECT
+                position_id,
+                position_name
+            FROM positions
+            WHERE department_id = ?
+            ORDER BY position_name
 
             ");
 
@@ -251,17 +270,16 @@ class HumanCapital
 
             $employeeStmt = $this->db->prepare("
 
-                SELECT
-
-                    e.employee_id,
-                    e.employee_number,
-                    e.hire_date,
-                    e.employment_status,
+            SELECT
+                e.employee_id,
+                e.employee_number,
+                e.hire_date,
+                e.employment_status,
 
                 CONCAT(
                     a.first_name,
                     IF(
-                        a.middle_name IS NULL OR a.middle_name='',
+                        a.middle_name IS NULL OR a.middle_name = '',
                         '',
                         CONCAT(' ', a.middle_name)
                     ),
@@ -269,31 +287,22 @@ class HumanCapital
                     a.last_name
                 ) AS employee_name
 
-                FROM employees e
+            FROM employees e
 
-                INNER JOIN applications ap
+            INNER JOIN applications ap
+                ON ap.application_id = e.application_id
 
-                    ON ap.application_id = e.application_id
+            INNER JOIN applicants a
+                ON a.applicant_id = ap.applicant_id
 
-                INNER JOIN applicants a
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
 
-                    ON a.applicant_id = ap.applicant_id
+            WHERE jp.position_id = ?
 
-                WHERE EXISTS (
-
-                    SELECT 1
-
-                    FROM job_postings jp
-
-                    WHERE jp.posting_id = ap.posting_id
-                    AND jp.position_id = ?
-
-                )
-
-                ORDER BY
-
-                    a.last_name,
-                    a.first_name
+            ORDER BY
+                a.last_name,
+                a.first_name;
 
             ");
 

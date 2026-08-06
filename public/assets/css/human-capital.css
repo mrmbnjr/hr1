@@ -1,60 +1,95 @@
+/* =====================================================
+   HUMAN CAPITAL MANAGEMENT — Enterprise Redesign
+   Structural classes/IDs unchanged (JS-dependent)
+===================================================== */
+
 .page-content{
     display:flex;
     flex-direction:column;
-    gap:24px;
-    padding:28px;
+    gap:20px;
+    padding:24px 28px;
 }
 
+/* =====================================================
+   CARD SHELL
+===================================================== */
 .dashboard-card{
     background:var(--card-bg);
-
-    border:2px solid var(--card-border);
-
-    border-radius:var(--radius-card);
-
+    border:1px solid rgba(111,20,20,.10);
+    border-radius:12px;
     overflow:hidden;
-
-    box-shadow:var(--shadow-soft);
+    box-shadow:0 1px 3px rgba(20,10,5,.04);
 }
 
 .card-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-
     gap:20px;
-
-    padding:24px 28px;
-
-    border-bottom:1px solid rgba(111,20,20,.12);
+    padding:20px 24px;
+    border-bottom:1px solid rgba(111,20,20,.08);
 }
 
 .card-header h2{
     margin:0;
-    color:var(--maroon);
-
+    color:var(--ink);
     font-family:var(--font-heading);
-
-    font-size:28px;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:-.01em;
 }
 
 .card-header p{
-    margin-top:6px;
+    margin-top:3px;
     color:var(--ink-soft);
+    font-size:13px;
 }
 
-.organization-tree{
-    padding:40px;
-}
-
-.organization-root{
+/* =====================================================
+   VIEW NAVIGATION — segmented control instead of buttons
+===================================================== */
+.cs-view-navigation{
     display:flex;
-    flex-direction:column;
-    align-items:center;
-    position:relative;
-    gap:60px;
+    gap:4px;
+    padding:4px;
+    background:#f4f1ea;
+    border:1px solid rgba(111,20,20,.08);
+    border-radius:10px;
+    width:fit-content;
 }
 
+.cs-view-tab{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    border:none;
+    border-radius:7px;
+    background:transparent;
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.cs-view-tab i{
+    font-size:12px;
+}
+
+.cs-view-tab:hover{
+    color:var(--maroon);
+}
+
+.cs-view-tab.active{
+    background:var(--card-bg);
+    color:var(--maroon);
+    box-shadow:0 1px 2px rgba(20,10,5,.08);
+}
+
+/* =====================================================
+   SLIDER MECHANICS — unchanged behavior, cleaned visuals
+===================================================== */
 .cs-view-wrapper{
     width:100%;
     overflow:hidden;
@@ -73,15 +108,33 @@
     max-width:100%;
 }
 
-.organization-company{
-    display:relative;
+/* =====================================================
+   ORGANIZATION TREE
+===================================================== */
+.organization-tree{
+    padding:32px;
+}
+
+.organization-root{
+    display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:12px;
-    padding:18px 32px;
+    position:relative;
+    gap:48px;
+}
+
+.organization-company{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 24px;
     background:var(--maroon);
     color:var(--white);
-    border-radius:18px;
+    border-radius:10px;
+    font-size:13px;
     font-weight:700;
+    letter-spacing:.02em;
+    position:relative;
 }
 
 .organization-company::after{
@@ -89,14 +142,15 @@
     position:absolute;
     left:50%;
     top:100%;
-    width:2px;
-    height:40px;
+    width:1px;
+    height:32px;
     transform:translateX(-50%);
-    background:rgba(111,20,20,.25);
+    background:rgba(111,20,20,.20);
 }
 
 .organization-company i{
     color:var(--gold);
+    font-size:12px;
 }
 
 .organization-departments{
@@ -104,25 +158,25 @@
     justify-content:center;
     align-items:flex-start;
     flex-wrap:wrap;
-    gap:40px;
+    gap:32px;
     position:relative;
     width:100%;
-    padding-top:40px;
+    padding-top:32px;
 }
 
 .organization-departments::before{
     content:"";
     position:absolute;
-    left:8%;
-    right:8%;
+    left:10%;
+    right:10%;
     top:0;
-    height:2px;
-    background:rgba(111,20,20,.20);
+    height:1px;
+    background:rgba(111,20,20,.14);
 }
 
 .organization-department{
     position:relative;
-    width:260px;
+    width:230px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -131,148 +185,262 @@
 .organization-department::before{
     content:"";
     position:absolute;
-    top:-40px;
+    top:-32px;
     left:50%;
-    width:2px;
-    height:40px;
+    width:1px;
+    height:32px;
     transform:translateX(-50%);
-    background:rgba(111,20,20,.20);
+    background:rgba(111,20,20,.14);
 }
 
 .department-node{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:12px;
+    gap:8px;
     width:100%;
-    padding:16px 22px;
+    padding:11px 16px;
+    background:#faf7f2;
+    border:1px solid rgba(111,20,20,.10);
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+}
+
+.department-node i{
+    color:var(--maroon);
+    font-size:12px;
+}
+
+.organization-positions{
+    margin-top:16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    width:100%;
 }
 
 .organization-position{
     list-style:none;
-    margin:22px 0 0;
+    margin:0;
     padding:0;
     width:100%;
     display:flex;
     flex-direction:column;
-    gap:12px;
-    position:relative;
+    gap:8px;
 }
 
-.organization-position-list::before{
-    content:"";
-    position:absolute;
-    left:50%;
-    top:-20px;
-    width:2px;
-    height:20px;
-    transform:translateX(-50%);
-    background:rgba(111,20,20,.20);
-}
-
-.organization-position li{
+.position-node{
     display:flex;
     align-items:center;
-    gap:10px;
-    padding:12px 16px;
+    gap:8px;
+    padding:9px 14px;
     background:#fff;
-    border:1px solid rgba(111,20,20,.12);
-    border-radius:14px;
+    border:1px solid rgba(111,20,20,.08);
+    border-radius:7px;
+    font-size:12px;
+    color:var(--ink);
 }
 
-.organization-position i{
+.position-node i{
     color:var(--gold-dark);
+    font-size:11px;
 }
 
+.organization-employees{
+    margin-top:6px;
+    padding-left:14px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.employee-node{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 10px;
+    background:#fbfbfb;
+    border-radius:6px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+}
+
+.employee-node i{
+    font-size:10px;
+    color:#b8b0a0;
+}
 
 .organization-empty{
-    margin-top:14px;
-
-    padding:18px;
-
-    border-radius:14px;
-
-    background:#fff;
-
+    margin-top:10px;
+    padding:12px;
+    border-radius:8px;
+    background:#fbfaf7;
+    border:1px dashed rgba(111,20,20,.14);
     color:var(--ink-soft);
-
     text-align:center;
+    font-size:11.5px;
 }
 
+/* =====================================================
+   TABLES — compact enterprise style
+===================================================== */
 .table-responsive{
-    overflow:auto;
+    height:100%;
+    overflow: auto; /* or scroll if you want forced scroll */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    border:1px solid rgba(111,20,20,.08);
+    border-radius:10px;
 }
 
 .cs-table{
     width:100%;
     border-collapse:collapse;
+    font-size:13px;
 }
 
-.cs-table th{
-    background:var(--maroon);
-
-    color:var(--white);
-
-    padding:16px;
-
+.cs-table thead th{
+    background:#faf8f4;
+    color:var(--ink-soft);
+    padding:10px 16px;
     text-align:left;
-
-    font-size:14px;
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    border-bottom:1px solid rgba(111,20,20,.10);
+    white-space:nowrap;
 }
 
-.cs-table td{
-    padding:18px 16px;
-
-    border-bottom:1px solid rgba(111,20,20,.08);
+.cs-table tbody td{
+    padding:10px 16px;
+    border-bottom:1px solid rgba(111,20,20,.06);
+    color:var(--ink);
+    vertical-align:middle;
+    line-height:1.35;
 }
 
 .cs-table tbody tr{
-    transition:.2s;
+    position:relative;
+    transition:background .15s ease;
+}
+
+.cs-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.cs-table tbody tr::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:var(--maroon);
+    opacity:0;
+    transition:opacity .15s ease;
 }
 
 .cs-table tbody tr:hover{
-    background:#fffdf6;
+    background:#fdfcf9;
 }
 
+.cs-table tbody tr:hover::before{
+    opacity:1;
+}
+
+.cs-table tbody td strong{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+}
+
+.cs-table tbody td:not(:first-child){
+    color:var(--ink-soft);
+    font-size:12.5px;
+}
+
+/* Status badges */
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:3px 10px 3px 8px;
+    border-radius:100px;
+    font-size:11px;
+    font-weight:600;
+    background:#f2f2f2;
+    color:#5c5c5c;
+    line-height:1.6;
+}
+
+.status-dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+    flex-shrink:0;
+}
+
+.status-badge.open,
+.status-badge.active{
+    background:rgba(34,140,80,.10);
+    color:#1f7a46;
+}
+
+.status-badge.closed,
+.status-badge.inactive{
+    background:rgba(150,150,150,.14);
+    color:#6b6b6b;
+}
+
+.status-badge.pending,
+.status-badge.draft{
+    background:rgba(196,140,20,.12);
+    color:#a3730f;
+}
+
+/* Row actions */
 .dropdown{
     position:relative;
 }
 
 .dropdown-btn{
-    width:40px;
-    height:40px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:var(--gold);
-
-    color:var(--maroon);
-
+    width:28px;
+    height:28px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:transparent;
+    color:var(--ink-soft);
     cursor:pointer;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.dropdown-btn:hover{
+    background:#faf7f2;
+    color:var(--maroon);
+    border-color:rgba(111,20,20,.10);
 }
 
 .dropdown-menu{
     position:absolute;
     right:0;
-    top:110%;
-
+    top:calc(100% + 4px);
     display:none;
-
-    min-width:170px;
-
+    min-width:150px;
     background:var(--card-bg);
-
-    border:1px solid var(--card-border);
-
-    border-radius:14px;
-
-    box-shadow:var(--shadow-soft);
-
+    border:1px solid rgba(111,20,20,.10);
+    border-radius:10px;
+    box-shadow:0 8px 20px rgba(20,10,5,.10);
     overflow:hidden;
-
     z-index:20;
+    padding:4px;
 }
 
 .dropdown:hover .dropdown-menu{
@@ -283,60 +451,132 @@
 .dropdown-menu button{
     display:flex;
     align-items:center;
-    gap:10px;
-
+    gap:8px;
     width:100%;
-
-    padding:13px 16px;
-
+    padding:8px 10px;
     border:none;
-
+    border-radius:6px;
     background:none;
-
     color:var(--ink);
-
     text-align:left;
-
     cursor:pointer;
+    font-size:12.5px;
+    font-weight:500;
+}
+
+.dropdown-menu a i,
+.dropdown-menu button i{
+    width:14px;
+    font-size:11.5px;
+    color:var(--ink-soft);
 }
 
 .dropdown-menu a:hover,
 .dropdown-menu button:hover{
-    background:#fff8ec;
+    background:#faf7f2;
 }
 
-.cs-empty-state{
-    padding:60px 30px;
+.dropdown-menu .deleteDepartment:hover{
+    background:rgba(200,50,50,.08);
+    color:#c23434;
+}
 
+.dropdown-menu .deleteDepartment:hover i{
+    color:#c23434;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+.btn-primary{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:8px 16px;
+    background:var(--maroon);
+    color:var(--white);
+    border:none;
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    transition:background .15s ease, box-shadow .15s ease;
+}
+
+.btn-primary:hover{
+    background:#5a1010;
+    box-shadow:0 2px 6px rgba(111,20,20,.20);
+}
+
+.btn-secondary{
+    padding:8px 16px;
+    background:#f2f0eb;
+    color:var(--ink);
+    border:1px solid rgba(111,20,20,.08);
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease;
+}
+
+.btn-secondary:hover{
+    background:#e9e6df;
+}
+
+.btn-danger{
+    padding:8px 16px;
+    background:#c23434;
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s ease;
+}
+
+.btn-danger:hover{
+    background:#a92a2a;
+}
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+.cs-empty-state{
+    padding:48px 24px;
     text-align:center;
 }
 
 .cs-empty-state i{
-    font-size:54px;
+    font-size:36px;
     color:var(--gold-dark);
+    opacity:.7;
 }
 
 .cs-empty-state h3{
-    margin:20px 0 10px;
-
-    color:var(--maroon);
+    margin:16px 0 6px;
+    color:var(--ink);
+    font-size:15px;
+    font-weight:700;
 }
 
 .cs-empty-state p{
-    margin-bottom:25px;
-
+    margin-bottom:18px;
     color:var(--ink-soft);
+    font-size:13px;
 }
 
+/* =====================================================
+   MODAL
+===================================================== */
 .cs-modal{
     position:fixed;
     inset:0;
-
     display:none;
-
     justify-content:center;
     align-items:center;
-
     z-index:500;
 }
 
@@ -347,119 +587,118 @@
 .modal-backdrop{
     position:absolute;
     inset:0;
-
-    background:rgba(0,0,0,.45);
+    background:rgba(20,10,5,.35);
 }
 
 .modal-content{
     position:relative;
-
-    width:min(420px,92vw);
-
+    width:min(400px,92vw);
     background:var(--card-bg);
-
-    border:2px solid var(--card-border);
-
-    border-radius:22px;
-
+    border:1px solid rgba(111,20,20,.10);
+    border-radius:12px;
+    box-shadow:0 12px 32px rgba(20,10,5,.16);
     overflow:hidden;
-
     z-index:1;
 }
 
-.modal-header,
-.modal-body,
-.modal-footer{
-    padding:22px 24px;
+.modal-header{
+    padding:18px 20px;
+    border-bottom:1px solid rgba(111,20,20,.08);
+}
+
+.modal-header h3{
+    margin:0;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+}
+
+.modal-body{
+    padding:18px 20px;
+    font-size:13px;
+    color:var(--ink-soft);
 }
 
 .modal-footer{
+    padding:14px 20px;
     display:flex;
     justify-content:flex-end;
-    gap:12px;
+    gap:10px;
+    border-top:1px solid rgba(111,20,20,.06);
 }
 
+/* =====================================================
+   TOAST
+===================================================== */
 .toast-container{
     position:fixed;
-
     top:20px;
     right:20px;
-
     display:flex;
     flex-direction:column;
-    gap:12px;
-
+    gap:10px;
     z-index:600;
 }
 
 .toast{
-    padding:16px 22px;
-
-    background:var(--maroon);
-
+    padding:12px 18px;
+    background:var(--ink);
     color:var(--white);
-
-    border-radius:14px;
-
-    box-shadow:var(--shadow-soft);
-
-    animation:slideIn .25s ease;
+    border-radius:8px;
+    font-size:13px;
+    box-shadow:0 6px 16px rgba(20,10,5,.18);
+    animation:slideIn .2s ease;
 }
 
 @keyframes slideIn{
-
-from{
-    opacity:0;
-    transform:translateX(40px);
+    from{ opacity:0; transform:translateX(30px); }
+    to{ opacity:1; transform:none; }
 }
 
-to{
-    opacity:1;
-    transform:none;
-}
-
-}
-
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 @media (max-width:900px){
+    .card-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 
-.card-header{
-    flex-direction:column;
-    align-items:flex-start;
-}
+    .organization-tree{
+        padding:20px;
+    }
 
-.organization-tree{
-    padding:24px;
-}
+    .organization-department{
+        max-width:none;
+    }
 
-.organization-department{
-    max-width:none;
-}
-
-.cs-table{
-    min-width:700px;
-}
-
+    .cs-table{
+        min-width:640px;
+    }
 }
 
 @media (max-width:600px){
+    .page-content{
+        padding:16px;
+    }
 
-.page-content{
-    padding:18px;
-}
+    .cs-view-navigation{
+        width:100%;
+        flex-direction:column;
+    }
 
-.cs-view-navigation{
-    flex-direction:column;
-}
+    .cs-view-tab{
+        width:100%;
+        justify-content:center;
+    }
 
-.cs-view-tab{
-    width:100%;
-    justify-content:center;
-}
+    .organization-company,
+    .department-node{
+        width:100%;
+        justify-content:center;
+    }
 
-.organization-company,
-.department-node{
-    width:100%;
-    justify-content:center;
-}
-
+    .cs-table{
+        min-width:520px;
+    }
 }

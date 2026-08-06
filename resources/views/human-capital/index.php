@@ -97,7 +97,7 @@ $departmentLookup = $departmentLookup ?? [];
 
                                                                 <i class="fa-solid fa-briefcase"></i>
 
-                                                                <span><?= htmlspecialchars($position['title']); ?></span>
+                                                                <span><?= htmlspecialchars($position['position_name']); ?></span>
 
                                                             </div>
 
@@ -190,13 +190,7 @@ $departmentLookup = $departmentLookup ?? [];
                                                     <strong><?= htmlspecialchars($department['department_name']); ?></strong>
                                                 </td>
 
-                                                <td>
-                                                    <?= !empty($department['description'])
-                                                        ? htmlspecialchars($department['description'])
-                                                        : '—'; ?>
-                                                </td>
-
-                                                <td><?= (int) $department['positions']; ?></td>
+                                                <td><?= (int) $department['position_count']; ?></td>
                                                 <td><?= (int) $department['vacancies']; ?></td>
 
                                                 <td>
@@ -300,6 +294,7 @@ $departmentLookup = $departmentLookup ?? [];
 
                                                 <td>
                                                     <span class="status-badge <?= strtolower($job['status']); ?>">
+                                                        <span class="status-dot"></span>
                                                         <?= htmlspecialchars($job['status']); ?>
                                                     </span>
                                                 </td>
