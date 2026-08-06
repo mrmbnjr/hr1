@@ -87,7 +87,7 @@ class HumanCapital
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getDepartment($id)
+    public function getDepartment(int $id)
     {
         $stmt=$this->db->prepare("
 
@@ -104,7 +104,7 @@ class HumanCapital
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function createDepartment($data)
+    public function createDepartment(array $data)
     {
         $stmt=$this->db->prepare("
 
@@ -118,7 +118,7 @@ class HumanCapital
             $data['department_name']
         ]);
     }
-    public function updateDepartment($id,$data)
+    public function updateDepartment(int $id, array $data)
     {
         $stmt=$this->db->prepare("
 
@@ -136,7 +136,7 @@ class HumanCapital
 
         ]);
     }
-    public function deleteDepartment($id)
+    public function deleteDepartment(int $id)
     {
         $stmt=$this->db->prepare("
             SELECT COUNT(*)
