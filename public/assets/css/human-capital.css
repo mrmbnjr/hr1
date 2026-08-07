@@ -629,6 +629,86 @@
     animation:slideIn .2s ease;
 }
 
+/* =====================================================
+   MODAL FORM ELEMENTS (new — not previously defined)
+===================================================== */
+.modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.modal-close{
+    width:26px;
+    height:26px;
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    border-radius:6px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s ease, color .15s ease;
+}
+
+.modal-close:hover{
+    background:#f2f0eb;
+    color:var(--ink);
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:16px;
+}
+
+.form-group:last-child{
+    margin-bottom:0;
+}
+
+.form-row{
+    display:flex;
+    gap:12px;
+}
+
+.form-row .form-group{
+    flex:1;
+}
+
+.form-group label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    padding:9px 12px;
+    border:1px solid rgba(111,20,20,.14);
+    border-radius:7px;
+    font-size:13px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+    transition:border-color .15s ease, box-shadow .15s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:var(--maroon);
+    box-shadow:0 0 0 3px rgba(111,20,20,.08);
+}
+
+.form-group textarea{
+    resize:vertical;
+    min-height:70px;
+}
+
 @keyframes slideIn{
     from{ opacity:0; transform:translateX(30px); }
     to{ opacity:1; transform:none; }

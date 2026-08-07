@@ -289,10 +289,10 @@ $departmentLookup = $departmentLookup ?? [];
                                 <p>Manage job positions within your organization.</p>
                             </div>
 
-                            <a href="?page=recruitment" class="btn-primary">
+                            <button type="button" class="btn-primary" id="addPosition">
                                 <i class="fa-solid fa-plus"></i>
                                 New Position
-                            </a>
+                            </button>
                         </div>
 
                         <?php if (!empty($positions)): ?>
@@ -366,10 +366,10 @@ $departmentLookup = $departmentLookup ?? [];
                                 <h3>No positions found</h3>
                                 <p>Create your first position to start recruiting employees.</p>
 
-                                <a href="?page=recruitment" class="btn-primary">
+                                <button type="button" class="btn-primary" id="addPosition">
                                     <i class="fa-solid fa-plus"></i>
                                     New Position
-                                </a>
+                                </button>
                             </div>
 
                         <?php endif; ?>
@@ -379,7 +379,8 @@ $departmentLookup = $departmentLookup ?? [];
                 </section>
             </div>
         </div>
-
+<?php require '../resources/views/human-capital/add.php'; ?>
+<?php require '../resources/views/human-capital/add.php'; ?>
         <!-- =====================================================
             CONFIRMATION MODAL
         ===================================================== -->

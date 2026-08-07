@@ -38,3 +38,31 @@ window.addEventListener("resize", () => {
     const active = document.querySelector(".cs-view-tab.active");
     updateHeight(views[active.dataset.view]);
 });
+
+// Add department and position modals
+document.addEventListener("click", (e) => {
+    // Department modal
+    if (
+        e.target.closest("#addDepartment") ||
+        e.target.closest("#createFirstDepartment")
+    ) {
+        document.getElementById("addDepartmentModal").classList.add("show");
+    }
+
+    // Position modal
+    if (
+        e.target.closest("#addPosition") ||
+        e.target.closest("#createFirstPosition")
+    ) {
+        document.getElementById("addPositionModal").classList.add("show");
+    }
+
+    const closeId = e.target.closest("[data-close-modal]")?.dataset.closeModal;
+    if (closeId) {
+        document.getElementById(closeId).classList.remove("show");
+    }
+
+    if (e.target.classList.contains("modal-backdrop")) {
+        e.target.closest(".cs-modal").classList.remove("show");
+    }
+});
