@@ -21,6 +21,7 @@ class RecruitmentController
         $recruitment = new Recruitment();
 
         $departments = $recruitment->getDepartments();
+        $positions   = $recruitment->getPositions();
 
         require '../resources/views/recruitment/create.php';
     }
@@ -55,6 +56,7 @@ class RecruitmentController
         }
 
         $departments = $recruitment->getDepartments();
+        $positions   = $recruitment->getPositions();
 
         require '../resources/views/recruitment/edit.php';
     }

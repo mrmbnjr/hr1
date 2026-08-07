@@ -29,17 +29,22 @@ if (!isset($_SESSION['user_id'])) {
         <div class="form-grid">
 
             <div class="form-group">
-                    <label>
-                        Job Title
-                        <span class="required">*</span>
-                    </label>          
-                    
-                    <input
-                    type="text"
-                    name="title"
-                    value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
-                    placeholder="e.g. Sales Associate"
-                    required>
+                <label>
+                    Position
+                    <span class="required">*</span>
+                </label>
+
+                <select name="position_id" required>
+                    <option value="">Select Position</option>
+
+                    <?php if (!empty($positions)): ?>
+                        <?php foreach ($positions as $position): ?>
+                            <option value="<?= htmlspecialchars($position['position_id']) ?>">
+                                <?= htmlspecialchars($position['position_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
 
             <div class="form-group">
@@ -72,13 +77,22 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <div class="form-group">
-                <label>Vacancies</label>
-                <input
-                    type="number"
-                    name="vacancies"
-                    min="1"
-                    value="1"
-                    required>
+                <label>
+                    Position
+                    <span class="required">*</span>
+                </label>
+
+                <select name="position_id" required>
+                    <option value="">Select Position</option>
+
+                    <?php if (!empty($positions)): ?>
+                        <?php foreach ($positions as $position): ?>
+                            <option value="<?= htmlspecialchars($position['position_id']) ?>">
+                                <?= htmlspecialchars($position['position_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
             </div>
 
             <div class="form-group">

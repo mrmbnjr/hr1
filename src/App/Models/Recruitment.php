@@ -150,7 +150,7 @@ class Recruitment
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            ':department_id' => $data['department_id'],
+            ':position_id' => $data['position_id'],
             ':title' => $data['title'],
             ':description' => $data['description'],
             ':requirements' => $data['requirements'],
@@ -197,7 +197,7 @@ class Recruitment
     {
         $sql = "
             UPDATE job_postings
-            SET SET position_id = ?,
+            SET position_id = ?,
                 title = ?,
                 description = ?,
                 requirements = ?,
