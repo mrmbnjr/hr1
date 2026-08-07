@@ -286,77 +286,56 @@
 /* =====================================================
    TABLES — compact enterprise style
 ===================================================== */
+/* =====================================================
+   TABLES
+===================================================== */
+
 .table-responsive{
-    height:100%;
-    overflow: auto; /* or scroll if you want forced scroll */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
-    border:1px solid rgba(111,20,20,.08);
-    border-radius:10px;
+    width:100%;
+    overflow-x:auto;
+    border-top:1px solid rgba(111,20,20,.08);
 }
 
 .cs-table{
     width:100%;
     border-collapse:collapse;
+    table-layout:auto;
     font-size:13px;
 }
 
 .cs-table thead th{
+    padding:14px 20px;
     background:#faf8f4;
     color:var(--ink-soft);
-    padding:10px 16px;
     text-align:left;
-    font-size:10.5px;
+    font-size:11px;
     font-weight:700;
     text-transform:uppercase;
-    letter-spacing:.06em;
-    border-bottom:1px solid rgba(111,20,20,.10);
-    white-space:nowrap;
+    border-bottom:1px solid rgba(111,20,20,.08);
 }
 
 .cs-table tbody td{
-    padding:10px 16px;
+    padding:16px 20px;
     border-bottom:1px solid rgba(111,20,20,.06);
-    color:var(--ink);
     vertical-align:middle;
-    line-height:1.35;
-}
-
-.cs-table tbody tr{
-    position:relative;
-    transition:background .15s ease;
 }
 
 .cs-table tbody tr:last-child td{
     border-bottom:none;
 }
 
-.cs-table tbody tr::before{
-    content:"";
-    position:absolute;
-    left:0;
-    top:0;
-    bottom:0;
-    width:2px;
-    background:var(--maroon);
-    opacity:0;
-    transition:opacity .15s ease;
+.cs-table tbody tr{
+    transition:background .2s ease;
 }
 
 .cs-table tbody tr:hover{
-    background:#fdfcf9;
-}
-
-.cs-table tbody tr:hover::before{
-    opacity:1;
+    background:#faf7f2;
 }
 
 .cs-table tbody td strong{
-    font-size:13px;
     font-weight:600;
     color:var(--ink);
 }
-
 .cs-table tbody td:not(:first-child){
     color:var(--ink-soft);
     font-size:12.5px;
