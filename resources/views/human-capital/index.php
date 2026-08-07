@@ -295,90 +295,66 @@ $departmentLookup = $departmentLookup ?? [];
                             </a>
                         </div>
 
-                        <?php if (!empty($jobPostings)): ?>
+                        <?php if (!empty($positions)): ?>
 
                             <div class="table-responsive">
                                 <table class="cs-table">
                                     <thead>
                                         <tr>
+                                            <th>Position</th>
                                             <th>Department</th>
-                                            <th>Positions</th>
-                                            <th>Headcount</th>
-                                            <th>Open Roles</th>
+                                            <th>Filled</th>
+                                            <th>Vacant</th>
+                                            <th>Status</th>
                                             <th width="80"></th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
+                                        <?php foreach ($positions as $position): ?>
+                                        <tr>
+                                            <td>
+                                                <strong><?= htmlspecialchars($position['position_name']); ?></strong>
+                                            </td>
 
-                                        <?php foreach ($departments as $department): ?>
+                                            <td>
+                                                <?= htmlspecialchars($position['department_name']); ?>
+                                            </td>
 
-                                            <tr>
+                                            <td class="text-center">
+                                                <?= (int) $position['employee_count']; ?>
+                                            </td>
 
-                                                <td>
-                                                    <strong><?= htmlspecialchars($department['department_name']); ?></strong>
-                                                </td>
+                                            <td class="text-center">
+                                                <?= (int) $position['vacancies']; ?>
+                                            </td>
 
-                                                <td>
-                                                    <?= (int) $department['position_count']; ?>
-                                                </td>
+                                            <td>
+                                                <span class="status-badge <?= strtolower($position['status']); ?>">
+                                                    <span class="status-dot"></span>
+                                                    <?= htmlspecialchars($position['status']); ?>
+                                                </span>
+                                            </td>
 
-                                                <td>
-                                                    <?= (int) $department['employee_count']; ?>
-                                                </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="dropdown-btn">
+                                                        <i class="fa-solid fa-ellipsis"></i>
+                                                    </button>
 
-                                                <td>
-                                                    <?= (int) $department['vacancies']; ?>
-                                                </td>
-
-                                                <td>
-                                                    <div class="dropdown">
-
-                                                        <button class="dropdown-btn">
-                                                            <i class="fa-solid fa-ellipsis"></i>
+                                                    <div class="dropdown-menu">
+                                                        <button type="button" class="viewPosition" data-id="<?= $position['position_id']; ?>">
+                                                            <i class="fa-solid fa-eye"></i>View
                                                         </button>
 
-                                                        <div class="dropdown-menu">
-
-                                                            <button
-                                                                type="button"
-                                                                class="viewDepartment"
-                                                                data-id="<?= $department['department_id']; ?>">
-
-                                                                <i class="fa-solid fa-eye"></i>
-                                                                View
-
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                class="editDepartment"
-                                                                data-id="<?= $department['department_id']; ?>">
-
-                                                                <i class="fa-solid fa-pen"></i>
-                                                                Edit
-
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                class="deleteDepartment"
-                                                                data-id="<?= $department['department_id']; ?>">
-
-                                                                <i class="fa-solid fa-trash"></i>
-                                                                Delete
-
-                                                            </button>
-
-                                                        </div>
-
+                                                        <button type="button" class="editPosition" data-id="<?= $position['position_id']; ?>">
+                                                            <i class="fa-solid fa-pen"></i>Edit
+                                                        </button>
                                                     </div>
-                                                </td>
-
-                                            </tr>
-
+                                                </div>
+                                            </td>
+                                        </tr>
                                         <?php endforeach; ?>
-
                                     </tbody>
                                 </table>
                             </div>

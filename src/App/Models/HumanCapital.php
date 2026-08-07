@@ -105,12 +105,13 @@ class HumanCapital
         $stmt = $this->db->prepare("
 
             SELECT
-
                 d.department_id,
                 d.department_name,
                 d.created_at,
 
                 COUNT(DISTINCT p.position_id) AS position_count,
+
+                COUNT(DISTINCT e.employee_id) AS employee_count,
 
                 COALESCE(
                     SUM(
@@ -123,36 +124,29 @@ class HumanCapital
                     0
                 ) AS vacancies
 
-                FROM departments d
+            FROM departments d
 
-                LEFT JOIN positions p
-                    ON p.department_id = d.department_id
+            LEFT JOIN positions p
+                ON p.department_id = d.department_id
 
-                LEFT JOIN job_postings j
-                    ON j.position_id = p.position_id
+            LEFT JOIN job_postings j
+                ON j.position_id = p.position_id
 
-                LEFT JOIN applications ap
-                    ON ap.posting_id = j.posting_id
+            LEFT JOIN applications ap
+                ON ap.posting_id = j.posting_id
 
-                LEFT JOIN employees e
-                    ON e.application_id = ap.application_id
+            LEFT JOIN employees e
+                ON e.application_id = ap.application_id
 
-                WHERE d.department_id = ?
+            WHERE d.department_id = ?
 
-                GROUP BY
-                    d.department_id,
-                    d.department_name,
-                    d.created_at
-
-                ORDER BY
-                    d.department_name
-
-                COUNT(DISTINCT e.employee_id) AS employee_count
-
+            GROUP BY
+                d.department_id,
+                d.department_name,
+                d.created_at;
         ");
 
         $stmt->execute([$id]);
-
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
