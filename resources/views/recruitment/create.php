@@ -2,6 +2,7 @@
 
 $pageTitle = "Create Job Posting";
 $pageCSS = "recruitment.css";
+$pageJS = "recruitment.js";
 $pageDescription = "Create a new job posting.";
 
 if (!isset($_SESSION['user_id'])) {
@@ -29,29 +30,24 @@ if (!isset($_SESSION['user_id'])) {
         <div class="form-grid">
 
             <div class="form-group">
-                <label>
-                    Position
-                    <span class="required">*</span>
-                </label>
-
-                <select name="position_id" required>
-                    <option value="">Select Position</option>
-
-                    <?php if (!empty($positions)): ?>
-                        <?php foreach ($positions as $position): ?>
-                            <option value="<?= htmlspecialchars($position['position_id']) ?>">
-                                <?= htmlspecialchars($position['position_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </select>
+                    <label>
+                        Job Title
+                        <span class="required">*</span>
+                    </label>          
+                    
+                    <input
+                    type="text"
+                    name="title"
+                    value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
+                    placeholder="e.g. Sales Associate"
+                    required>
             </div>
 
             <div class="form-group">
                 <label>Department</label>
 
-                <select name="department_id" required>
-                    <option value="">Select Department</option>
+                <select id="department" name="department_id" required>
+                <option value="" hidden selected>Select Department</option>
 
                     <?php if (!empty($departments)): ?>
                         <?php foreach ($departments as $department): ?>
@@ -61,7 +57,6 @@ if (!isset($_SESSION['user_id'])) {
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
-
             </div>
 
             <div class="form-group">
@@ -82,16 +77,22 @@ if (!isset($_SESSION['user_id'])) {
                     <span class="required">*</span>
                 </label>
 
-                <select name="position_id" required>
-                    <option value="">Select Position</option>
+                <select id="position" name="position_id" required>
+                <option value="" hidden selected>Select Position</option>
 
-                    <?php if (!empty($positions)): ?>
-                        <?php foreach ($positions as $position): ?>
-                            <option value="<?= htmlspecialchars($position['position_id']) ?>">
-                                <?= htmlspecialchars($position['position_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php foreach ($positions as $position): ?>
+
+                        <option
+                            value="<?= htmlspecialchars($position['position_id']) ?>"
+                            data-department="<?= htmlspecialchars($position['department_id']) ?>"
+                            <?= isset($job) && $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
+
+                            <?= htmlspecialchars($position['position_name']) ?>
+
+                        </option>
+
+                    <?php endforeach; ?>
+
                 </select>
             </div>
 

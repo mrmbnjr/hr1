@@ -2,6 +2,7 @@
 
 $pageTitle = "Edit Job Posting";
 $pageCSS = "recruitment.css";
+$pageJS = "recruitment.js";
 $pageDescription = "Edit an existing job posting.";
 
 if (!isset($_SESSION['user_id'])) {
@@ -48,7 +49,7 @@ if (!isset($_SESSION['user_id'])) {
 
                 <label>Department</label>
 
-                <select name="department_id" required>
+                <select id="department" name="department_id" required>
 
                     <?php foreach ($departments as $department): ?>
 
@@ -57,7 +58,6 @@ if (!isset($_SESSION['user_id'])) {
                             <?= $department['department_id'] == $job['department_id'] ? 'selected' : '' ?>>
 
                             <?= htmlspecialchars($department['department_name']) ?>
-
                         </option>
 
                     <?php endforeach; ?>
@@ -97,19 +97,19 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <div class="form-group">
-
                 <label>
                     Position
                     <span class="required">*</span>
                 </label>
 
-                <select name="position_id" required>
+                <select id="position" name="position_id" required>
 
                     <?php foreach ($positions as $position): ?>
 
                         <option
                             value="<?= htmlspecialchars($position['position_id']) ?>"
-                            <?= $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
+                            data-department="<?= htmlspecialchars($position['department_id']) ?>"
+                            <?= isset($job) && $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
 
                             <?= htmlspecialchars($position['position_name']) ?>
 
@@ -118,7 +118,6 @@ if (!isset($_SESSION['user_id'])) {
                     <?php endforeach; ?>
 
                 </select>
-
             </div>
 
             <div class="form-group">

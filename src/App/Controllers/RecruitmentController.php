@@ -100,4 +100,20 @@ class RecruitmentController
         header("Location:?page=recruitment");
         exit;
     }
+
+    public function getPositions()
+    {
+        $recruitment = new Recruitment();
+
+        $departmentId = (int)($_GET['department_id'] ?? 0);
+
+        header('Content-Type: application/json');
+
+        echo json_encode(
+            $recruitment->getPositionsByDepartment($departmentId)
+        );
+
+        exit;
+    }
+
 }

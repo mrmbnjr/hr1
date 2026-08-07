@@ -62,6 +62,7 @@ switch ($page) {
 
     case 'close':
         (new RecruitmentController())->close();
+        break;
 
     case 'delete':
         (new RecruitmentController())->delete();

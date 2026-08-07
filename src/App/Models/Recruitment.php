@@ -81,27 +81,20 @@ class Recruitment
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-        public function getPositions()
+    public function getPositions()
     {
         $stmt = $this->db->query("
-
             SELECT
-
                 p.position_id,
                 p.position_name,
+                p.department_id,
                 d.department_name
-
             FROM positions p
-
             INNER JOIN departments d
-
                 ON d.department_id = p.department_id
-
             ORDER BY
-
                 d.department_name,
                 p.position_name
-
         ");
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -245,5 +238,20 @@ class Recruitment
 
         return $stmt->execute([$status, $id]);
     }
-}
 
+    public function getPositionsByDepartment(int $departmentId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                position_id,
+                position_name
+            FROM positions
+            WHERE department_id = ?
+            ORDER BY position_name
+        ");
+
+        $stmt->execute([$departmentId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
