@@ -98,14 +98,26 @@ if (!isset($_SESSION['user_id'])) {
 
             <div class="form-group">
 
-                <label>Vacancies</label>
+                <label>
+                    Position
+                    <span class="required">*</span>
+                </label>
 
-                <input
-                    type="number"
-                    name="vacancies"
-                    min="1"
-                    value="<?= htmlspecialchars($job['vacancies']) ?>"
-                    required>
+                <select name="position_id" required>
+
+                    <?php foreach ($positions as $position): ?>
+
+                        <option
+                            value="<?= htmlspecialchars($position['position_id']) ?>"
+                            <?= $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
+
+                            <?= htmlspecialchars($position['position_name']) ?>
+
+                        </option>
+
+                    <?php endforeach; ?>
+
+                </select>
 
             </div>
 

@@ -178,13 +178,16 @@ class Recruitment
         $sql = "
             SELECT
                 jp.*,
+                p.position_id,
+                p.position_name,
+                p.department_id,
                 d.department_name
             FROM job_postings jp
             LEFT JOIN positions p
                 ON p.position_id = jp.position_id
             LEFT JOIN departments d
                 ON d.department_id = p.department_id
-                WHERE jp.posting_id = ?
+            WHERE jp.posting_id = ?
         ";
 
         $stmt = $this->db->prepare($sql);
