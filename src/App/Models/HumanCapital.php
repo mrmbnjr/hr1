@@ -50,37 +50,50 @@ class HumanCapital
     {
         $stmt = $this->db->query("
 
-        SELECT
+            SELECT
 
-            d.department_id,
-            d.department_name,
-            d.created_at,
+                d.department_id,
+                d.department_name,
+                d.created_at,
 
-            COUNT(DISTINCT p.position_id) AS position_count,
+                COUNT(DISTINCT p.position_id) AS position_count,
 
-            COALESCE(SUM(
-                CASE
-                    WHEN j.status = 'Open'
-                    THEN j.vacancies
-                    ELSE 0
-                END
-            ),0) AS vacancies
+                COUNT(DISTINCT e.employee_id) AS employee_count,
 
-        FROM departments d
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN jp.status = 'Open'
+                            THEN jp.vacancies
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS vacancies
 
-        LEFT JOIN positions p
-            ON p.department_id = d.department_id
+            FROM departments d
 
-        LEFT JOIN job_postings j
-            ON j.position_id = p.position_id
+            LEFT JOIN positions p
+                ON p.department_id = d.department_id
 
-        GROUP BY
-            d.department_id,
-            d.department_name,
-            d.created_at
+            LEFT JOIN job_postings jp
+                ON jp.position_id = p.position_id
 
-        ORDER BY
-            d.department_name
+            LEFT JOIN applications ap
+                ON ap.posting_id = jp.posting_id
+
+            LEFT JOIN employees e
+                ON e.application_id = ap.application_id
+
+            GROUP BY
+
+                d.department_id,
+                d.department_name,
+                d.created_at
+
+            ORDER BY
+
+                d.department_name
 
         ");
 
@@ -89,7 +102,7 @@ class HumanCapital
 
     public function getDepartment(int $id)
     {
-        $stmt = $this->db->query("
+        $stmt = $this->db->prepare("
 
             SELECT
 
@@ -110,23 +123,37 @@ class HumanCapital
                     0
                 ) AS vacancies
 
-            FROM departments d
+                FROM departments d
 
-            LEFT JOIN positions p
-                ON p.department_id = d.department_id
+                LEFT JOIN positions p
+                    ON p.department_id = d.department_id
 
-            LEFT JOIN job_postings j
-                ON j.position_id = p.position_id
+                LEFT JOIN job_postings j
+                    ON j.position_id = p.position_id
 
-            GROUP BY
-                d.department_id,
-                d.department_name,
-                d.created_at
+                LEFT JOIN applications ap
+                    ON ap.posting_id = j.posting_id
 
-            ORDER BY
-                d.department_name
+                LEFT JOIN employees e
+                    ON e.application_id = ap.application_id
+
+                WHERE d.department_id = ?
+
+                GROUP BY
+                    d.department_id,
+                    d.department_name,
+                    d.created_at
+
+                ORDER BY
+                    d.department_name
+
+                COUNT(DISTINCT e.employee_id) AS employee_count
 
         ");
+
+        $stmt->execute([$id]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function createDepartment(array $data)
@@ -200,41 +227,73 @@ class HumanCapital
         ];
     }
 
-    public function getJobPostings()
+    public function getPositions()
     {
-        $stmt=$this->db->query("
+        $stmt = $this->db->query("
 
             SELECT
 
-                j.*,
+                p.position_id,
                 p.position_name,
+
                 d.department_name,
 
-                (
+                COUNT(DISTINCT e.employee_id) AS employee_count,
 
-                    SELECT COUNT(*)
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN jp.status = 'Open'
+                            THEN jp.vacancies
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS vacancies,
 
-                    FROM applications a
+                CASE
 
-                    WHERE a.posting_id=j.posting_id
+                    WHEN COALESCE(
+                        SUM(
+                            CASE
+                                WHEN jp.status = 'Open'
+                                THEN jp.vacancies
+                                ELSE 0
+                            END
+                        ),
+                        0
+                    ) > 0
 
-                ) applicants
+                    THEN 'Open'
 
-            FROM job_postings j
+                    ELSE 'Closed'
 
-            INNER JOIN positions p
+                END AS status
 
-                ON p.position_id = j.position_id
+            FROM positions p
 
             INNER JOIN departments d
-
                 ON d.department_id = p.department_id
+
+            LEFT JOIN job_postings jp
+                ON jp.position_id = p.position_id
+
+            LEFT JOIN applications ap
+                ON ap.posting_id = jp.posting_id
+
+            LEFT JOIN employees e
+                ON e.application_id = ap.application_id
+
+            GROUP BY
+
+                p.position_id,
+                p.position_name,
+                d.department_name
 
             ORDER BY
 
                 d.department_name,
-                p.position_name,
-                j.title
+                p.position_name
 
         ");
 

@@ -176,48 +176,84 @@ $departmentLookup = $departmentLookup ?? [];
                                     <thead>
                                         <tr>
                                             <th>Department</th>
-                                            <th>Description</th>
                                             <th>Positions</th>
-                                            <th>Vacancies</th>
+                                            <th>Headcount</th>
+                                            <th>Open Roles</th>
                                             <th width="80"></th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
+
                                         <?php foreach ($departments as $department): ?>
+
                                             <tr>
+
                                                 <td>
                                                     <strong><?= htmlspecialchars($department['department_name']); ?></strong>
                                                 </td>
 
-                                                <td><?= (int) $department['position_count']; ?></td>
-                                                <td><?= (int) $department['vacancies']; ?></td>
+                                                <td>
+                                                    <?= (int) $department['position_count']; ?>
+                                                </td>
+
+                                                <td>
+                                                    <?= (int) $department['employee_count']; ?>
+                                                </td>
+
+                                                <td>
+                                                    <?= (int) $department['vacancies']; ?>
+                                                </td>
 
                                                 <td>
                                                     <div class="dropdown">
+
                                                         <button class="dropdown-btn">
                                                             <i class="fa-solid fa-ellipsis"></i>
                                                         </button>
 
                                                         <div class="dropdown-menu">
-                                                            <button class="viewDepartment" data-id="<?= $department['department_id']; ?>">
-                                                                <i class="fa-solid fa-eye"></i> View
+
+                                                            <button
+                                                                type="button"
+                                                                class="viewDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
+                                                                <i class="fa-solid fa-eye"></i>
+                                                                View
+
                                                             </button>
 
-                                                            <button class="editDepartment" data-id="<?= $department['department_id']; ?>">
-                                                                <i class="fa-solid fa-pen"></i> Edit
+                                                            <button
+                                                                type="button"
+                                                                class="editDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
+                                                                <i class="fa-solid fa-pen"></i>
+                                                                Edit
+
                                                             </button>
 
-                                                            <button class="deleteDepartment" data-id="<?= $department['department_id']; ?>">
-                                                                <i class="fa-solid fa-trash"></i> Delete
+                                                            <button
+                                                                type="button"
+                                                                class="deleteDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
+                                                                <i class="fa-solid fa-trash"></i>
+                                                                Delete
+
                                                             </button>
+
                                                         </div>
+
                                                     </div>
                                                 </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
 
+                                            </tr>
+
+                                        <?php endforeach; ?>
+
+                                    </tbody>
                                 </table>
                             </div>
 
@@ -263,43 +299,37 @@ $departmentLookup = $departmentLookup ?? [];
 
                             <div class="table-responsive">
                                 <table class="cs-table">
-
                                     <thead>
                                         <tr>
-                                            <th>Position</th>
                                             <th>Department</th>
-                                            <th>Employment Type</th>
-                                            <th>Vacancies</th>
-                                            <th>Status</th>
-                                            <th>Applicants</th>
+                                            <th>Positions</th>
+                                            <th>Headcount</th>
+                                            <th>Open Roles</th>
                                             <th width="80"></th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
 
-                                        <?php foreach ($jobPostings as $job): ?>
+                                        <?php foreach ($departments as $department): ?>
 
                                             <tr>
 
                                                 <td>
-                                                    <strong><?= htmlspecialchars($job['title']); ?></strong>
+                                                    <strong><?= htmlspecialchars($department['department_name']); ?></strong>
                                                 </td>
-
-                                                <td><?= htmlspecialchars($job['department_name']); ?></td>
-
-                                                <td><?= htmlspecialchars($job['employment_type']); ?></td>
-
-                                                <td><?= (int) $job['vacancies']; ?></td>
 
                                                 <td>
-                                                    <span class="status-badge <?= strtolower($job['status']); ?>">
-                                                        <span class="status-dot"></span>
-                                                        <?= htmlspecialchars($job['status']); ?>
-                                                    </span>
+                                                    <?= (int) $department['position_count']; ?>
                                                 </td>
 
-                                                <td><?= (int) $job['applicants']; ?></td>
+                                                <td>
+                                                    <?= (int) $department['employee_count']; ?>
+                                                </td>
+
+                                                <td>
+                                                    <?= (int) $department['vacancies']; ?>
+                                                </td>
 
                                                 <td>
                                                     <div class="dropdown">
@@ -310,15 +340,35 @@ $departmentLookup = $departmentLookup ?? [];
 
                                                         <div class="dropdown-menu">
 
-                                                            <a href="?page=recruitment">
+                                                            <button
+                                                                type="button"
+                                                                class="viewDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
                                                                 <i class="fa-solid fa-eye"></i>
                                                                 View
-                                                            </a>
 
-                                                            <a href="?page=recruitment">
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                class="editDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
                                                                 <i class="fa-solid fa-pen"></i>
                                                                 Edit
-                                                            </a>
+
+                                                            </button>
+
+                                                            <button
+                                                                type="button"
+                                                                class="deleteDepartment"
+                                                                data-id="<?= $department['department_id']; ?>">
+
+                                                                <i class="fa-solid fa-trash"></i>
+                                                                Delete
+
+                                                            </button>
 
                                                         </div>
 
@@ -330,7 +380,6 @@ $departmentLookup = $departmentLookup ?? [];
                                         <?php endforeach; ?>
 
                                     </tbody>
-
                                 </table>
                             </div>
 

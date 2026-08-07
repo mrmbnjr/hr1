@@ -25,7 +25,7 @@ class HumanCapitalController
 
         $departments = $this->humanCapital->getDepartments();
 
-        $jobPostings = $this->humanCapital->getJobPostings();
+        $positions = $this->humanCapital->getPositions();
 
         $organization = $this->humanCapital->getOrganizationTree();
 
