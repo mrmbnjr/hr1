@@ -61,7 +61,9 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
 ===================================================== -->
 <div class="cs-modal" id="addPositionModal">
     <div class="modal-backdrop"></div>
+
     <div class="modal-content">
+
         <div class="modal-header">
             <h3>New Position</h3>
 
@@ -92,34 +94,41 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                 <div class="form-group">
                     <label for="positionDepartment">Department</label>
 
-                    <select
-                        id="positionDepartment"
-                        name="department_id"
-                        required>
+                    <?php if (empty($departmentLookup)): ?>
 
-                        <option value="" disabled selected>
-                            Select department
-                        </option>
+                        <select id="positionDepartment"
+                                name="department_id"
+                                disabled>
 
-                        <?php foreach ($departmentOptions as $dept): ?>
-                            <option value="<?= $dept['department_id']; ?>">
-                                <?= htmlspecialchars($dept['department_name']); ?>
+                            <option value="">
+                                No departments available
                             </option>
-                        <?php endforeach; ?>
 
-                    </select>
-                </div>
+                        </select>
 
-                <div class="form-group">
-                    <label for="vacancies">Number of Vacancies</label>
+                        <small class="form-help">
+                            Create a department first before adding a position.
+                        </small>
 
-                    <input
-                        type="number"
-                        id="vacancies"
-                        name="vacancies"
-                        min="1"
-                        value="1"
-                        required>
+                    <?php else: ?>
+
+                        <select id="positionDepartment"
+                                name="department_id"
+                                required>
+
+                            <option value="" disabled selected>
+                                Select department
+                            </option>
+
+                            <?php foreach ($departmentLookup as $dept): ?>
+                                <option value="<?= $dept['department_id']; ?>">
+                                    <?= htmlspecialchars($dept['department_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+
+                        </select>
+
+                    <?php endif; ?>
                 </div>
 
             </div>
