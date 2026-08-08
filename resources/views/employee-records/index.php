@@ -1,12 +1,38 @@
 <?php
-$pageTitle = "Employee Records";
-$pageCSS = "employee-records.css";
-$pageDescription = "The Employee Records module should manage the employees themselves after they've been hired.";
+
+$pageTitle       = "Employee Records";
+$pageCSS         = "employee-records.css";
+$pageJS          = "employee-records.js";
+$pageDescription = "Manage and view employee information and employment records.";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: /hr1/public/?page=login");
     exit;
 }
+
+/*
+|--------------------------------------------------------------------------
+| DATA
+|--------------------------------------------------------------------------
+| $employees and $departments should be provided by
+| EmployeeRecordsController.
+*/
+
+$employees   = $employees ?? [];
+$departments = $departments ?? [];
+
+$statusMeta = [
+    "Active" => [
+        "label" => "Active",
+        "class" => "badge-green"
+    ],
+
+    "Inactive" => [
+        "label" => "Inactive",
+        "class" => "badge-gray"
+    ]
+];
+
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -16,273 +42,413 @@ if (!isset($_SESSION['user_id'])) {
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
+    <div class="employee-records-page">
 
-<div class="page-header">
+        <!-- ==========================================================
+            FILTER BAR
+        ========================================================== -->
 
-    <div>
-        <h1>Employee Records</h1>
-        <p>
-            View and manage employee information, employment status,
-            and personnel records.
-        </p>
-    </div>
+        <section class="filter-bar">
 
-    <button class="btn-primary">
-        <i class="fa-solid fa-user-plus"></i>
-        Add Employee
-    </button>
+            <select id="departmentFilter">
 
-</div>
+                <option value="All">
+                    All Departments
+                </option>
 
+                <?php foreach ($departments as $department): ?>
 
+                    <option
+                        value="<?= htmlspecialchars($department['department_name']) ?>">
 
-<!-- ========================= -->
-<!-- Statistics -->
-<!-- ========================= -->
+                        <?= htmlspecialchars($department['department_name']) ?>
 
-<div class="stats-grid">
+                    </option>
 
-    <div class="stat-card">
+                <?php endforeach; ?>
 
-        <div class="stat-icon blue">
-            <i class="fa-solid fa-users"></i>
-        </div>
-
-        <div>
-            <h2>152</h2>
-            <span>Total Employees</span>
-        </div>
-
-    </div>
-
-    <div class="stat-card">
-
-        <div class="stat-icon green">
-            <i class="fa-solid fa-user-check"></i>
-        </div>
-
-        <div>
-            <h2>120</h2>
-            <span>Regular</span>
-        </div>
-
-    </div>
-
-    <div class="stat-card">
-
-        <div class="stat-icon orange">
-            <i class="fa-solid fa-user-clock"></i>
-        </div>
-
-        <div>
-            <h2>24</h2>
-            <span>Probationary</span>
-        </div>
-
-    </div>
-
-    <div class="stat-card">
-
-        <div class="stat-icon purple">
-            <i class="fa-solid fa-file-contract"></i>
-        </div>
-
-        <div>
-            <h2>8</h2>
-            <span>Contract</span>
-        </div>
-
-    </div>
-
-</div>
+            </select>
 
 
+            <select id="employmentTypeFilter">
 
-<!-- ========================= -->
-<!-- Filters -->
-<!-- ========================= -->
+                <option value="All">
+                    All Employment Types
+                </option>
 
-<div class="filter-card">
+                <option value="Full-Time">
+                    Full-Time
+                </option>
 
-    <div class="filter-group">
+                <option value="Part-Time">
+                    Part-Time
+                </option>
 
-        <input
-            type="text"
-            placeholder="Search employee..."
-        >
+                <option value="Contract">
+                    Contract
+                </option>
 
-        <select>
+                <option value="Internship">
+                    Internship
+                </option>
 
-            <option>All Departments</option>
-            <option>Human Resources</option>
-            <option>Finance</option>
-            <option>Operations</option>
-            <option>IT</option>
-
-        </select>
-
-        <select>
-
-            <option>All Status</option>
-            <option>Regular</option>
-            <option>Probationary</option>
-            <option>Contract</option>
-
-        </select>
-
-    </div>
-
-</div>
+            </select>
 
 
+            <select id="statusFilter">
 
-<!-- ========================= -->
-<!-- Employee Table -->
-<!-- ========================= -->
+                <option value="All">
+                    All Status
+                </option>
 
-<div class="content-card">
+                <option value="Active">
+                    Active
+                </option>
 
-    <div class="card-header">
+                <option value="Inactive">
+                    Inactive
+                </option>
 
-        <h2>Employee Directory</h2>
+            </select>
 
-    </div>
 
-    <table class="data-table">
+            <select id="sortFilter">
 
-        <thead>
+                <option value="newest">
+                    Newest
+                </option>
 
-        <tr>
+                <option value="oldest">
+                    Oldest
+                </option>
 
-            <th>Employee No.</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Position</th>
-            <th>Status</th>
-            <th>Hire Date</th>
-            <th>Action</th>
+                <option value="name-az">
+                    Employee Name (A-Z)
+                </option>
 
-        </tr>
+                <option value="name-za">
+                    Employee Name (Z-A)
+                </option>
 
-        </thead>
+            </select>
 
-        <tbody>
+        </section>
 
-        <tr>
 
-            <td>EMP-0001</td>
+        <!-- ==========================================================
+            EMPLOYEE RECORDS TABLE
+        ========================================================== -->
 
-            <td>Juan Dela Cruz</td>
+        <section class="table-card">
 
-            <td>Human Resources</td>
+            <div class="table-scroll">
 
-            <td>HR Officer</td>
+                <table
+                    class="employee-records-table"
+                    id="employeeRecordsTable">
 
-            <td>
-                <span class="status regular">
-                    Regular
+                    <thead>
+
+                        <tr>
+
+                            <th>Employee</th>
+
+                            <th>Employee ID</th>
+
+                            <th>Department</th>
+
+                            <th>Job Title</th>
+
+                            <th>Employment Type</th>
+
+                            <th>Status</th>
+
+                            <th>Date Hired</th>
+
+                            <th class="col-actions">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <?php if (empty($employees)): ?>
+
+                            <tr class="empty-row">
+
+                                <td colspan="8">
+
+                                    <div class="empty-state">
+
+                                        <i class="fa-solid fa-address-book"></i>
+
+                                        <p>
+                                            No employee records found.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        <?php else: ?>
+
+
+                            <?php foreach ($employees as $employee): ?>
+
+                                <?php
+
+                                $status =
+                                    $employee['employment_status']
+                                    ?? 'Active';
+
+                                $meta =
+                                    $statusMeta[$status]
+                                    ?? $statusMeta['Active'];
+
+                                $fullname =
+                                    $employee['fullname']
+                                    ?? 'Unknown Employee';
+
+                                $email =
+                                    $employee['email']
+                                    ?? '';
+
+                                $employeeId =
+                                    $employee['employee_id']
+                                    ?? '';
+
+                                $department =
+                                    $employee['department_name']
+                                    ?? '';
+
+                                $jobTitle =
+                                    $employee['job_title']
+                                    ?? '';
+
+                                $employmentType =
+                                    $employee['employment_type']
+                                    ?? '';
+
+                                $dateHired =
+                                    $employee['date_hired']
+                                    ?? '';
+
+                                ?>
+
+
+                                <tr
+                                    class="employee-row"
+
+                                    data-status="<?= htmlspecialchars($status) ?>"
+
+                                    data-department="<?= htmlspecialchars($department) ?>"
+
+                                    data-employment-type="<?= htmlspecialchars($employmentType) ?>"
+
+                                    data-name="<?= htmlspecialchars(strtolower($fullname)) ?>"
+
+                                    data-date="<?= htmlspecialchars($dateHired) ?>"
+
+                                    data-id="<?= htmlspecialchars($employeeId) ?>"
+                                >
+
+
+                                    <!-- Employee -->
+
+                                    <td>
+
+                                        <div class="employee-cell">
+
+                                            <div class="avatar-circle">
+
+                                                <?= strtoupper(
+                                                    substr(
+                                                        $fullname,
+                                                        0,
+                                                        1
+                                                    )
+                                                ) ?>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <strong>
+                                                    <?= htmlspecialchars($fullname) ?>
+                                                </strong>
+
+                                                <?php if ($email): ?>
+
+                                                    <span class="sub-text">
+
+                                                        <?= htmlspecialchars($email) ?>
+
+                                                    </span>
+
+                                                <?php endif; ?>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Employee ID -->
+
+                                    <td>
+
+                                        <span class="employee-id">
+
+                                            <?= htmlspecialchars($employeeId) ?>
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Department -->
+
+                                    <td>
+
+                                        <?= htmlspecialchars($department) ?>
+
+                                    </td>
+
+
+                                    <!-- Job Title -->
+
+                                    <td>
+
+                                        <?= htmlspecialchars($jobTitle) ?>
+
+                                    </td>
+
+
+                                    <!-- Employment Type -->
+
+                                    <td>
+
+                                        <?= htmlspecialchars($employmentType) ?>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <span
+                                            class="badge <?= $meta['class'] ?>">
+
+                                            <?= $meta['label'] ?>
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Date Hired -->
+
+                                    <td>
+
+                                        <?= htmlspecialchars($dateHired) ?>
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+
+                                    <td class="col-actions">
+
+                                        <a
+                                            href="?page=employee-view&id=<?= urlencode($employeeId) ?>"
+                                            class="btn-review">
+
+                                            <i class="fa-solid fa-eye"></i>
+
+                                            View
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
+
+                        <?php endif; ?>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- ======================================================
+                TABLE FOOTER
+            ======================================================= -->
+
+            <div class="table-footer">
+
+                <span
+                    class="results-count"
+                    id="resultsCount">
                 </span>
-            </td>
-
-            <td>Jan 10, 2026</td>
-
-            <td>
-
-                <button class="btn-action">
-                    <i class="fa-solid fa-eye"></i>
-                </button>
-
-                <button class="btn-action">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-
-            </td>
-
-        </tr>
-
-        <tr>
-
-            <td>EMP-0002</td>
-
-            <td>Maria Santos</td>
-
-            <td>Finance</td>
-
-            <td>Accountant</td>
-
-            <td>
-                <span class="status probation">
-                    Probationary
-                </span>
-            </td>
-
-            <td>Feb 14, 2026</td>
-
-            <td>
-
-                <button class="btn-action">
-                    <i class="fa-solid fa-eye"></i>
-                </button>
-
-                <button class="btn-action">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-
-            </td>
-
-        </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
 
 
+                <div
+                    class="pagination"
+                    id="pagination">
 
-<!-- ========================= -->
-<!-- Recently Hired -->
-<!-- ========================= -->
+                    <button
+                        class="page-btn"
+                        id="prevPage"
+                        type="button"
+                        aria-label="Previous page">
 
-<div class="content-card">
+                        <i class="fa-solid fa-chevron-left"></i>
 
-    <div class="card-header">
+                    </button>
 
-        <h2>Recently Hired Employees</h2>
+
+                    <div
+                        class="page-numbers"
+                        id="pageNumbers">
+                    </div>
+
+
+                    <button
+                        class="page-btn"
+                        id="nextPage"
+                        type="button"
+                        aria-label="Next page">
+
+                        <i class="fa-solid fa-chevron-right"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
 
     </div>
 
-    <table class="data-table">
-
-        <thead>
-
-        <tr>
-
-            <th>Employee</th>
-            <th>Position</th>
-            <th>Department</th>
-            <th>Hire Date</th>
-
-        </tr>
-
-        </thead>
-
-        <tbody>
-
-        <tr>
-
-            <td>John Reyes</td>
-            <td>Software Developer</td>
-            <td>IT</td>
-            <td>July 18, 2026</td>
-
-        </tr>
-
-        </tbody>
-
-    </table>
 
     <?php require '../resources/views/includes/footer.php'; ?>
+
 </div>
 
-<?php require '../resources/views/includes/scripts.php'?>
+
+<?php require '../resources/views/includes/scripts.php'; ?>
