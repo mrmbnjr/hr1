@@ -326,4 +326,156 @@ class Applicant
             throw $e;
         }
     }
+
+    public function updateApplicationStatus(int $applicationId, string $status)
+    {
+        $this->db->beginTransaction();
+
+        try {
+
+            /*
+            * Get the job posting connected to this application.
+            */
+            $postingStmt = $this->db->prepare("
+                SELECT
+                    posting_id
+                FROM applications
+                WHERE application_id = :application_id
+            ");
+
+            $postingStmt->execute([
+                ':application_id' => $applicationId
+            ]);
+
+            $application = $postingStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$application) {
+                throw new \Exception('Application not found.');
+            }
+
+            $postingId = (int) $application['posting_id'];
+
+
+            /*
+            * If hiring this applicant, make sure
+            * the job posting still has an available vacancy.
+            */
+            if ($status === 'Hired') {
+
+                $capacityStmt = $this->db->prepare("
+                    SELECT
+                        jp.vacancies,
+                        COUNT(ap.application_id) AS hired_count
+                    FROM job_postings jp
+
+                    LEFT JOIN applications ap
+                        ON ap.posting_id = jp.posting_id
+                        AND ap.application_status = 'Hired'
+
+                    WHERE jp.posting_id = :posting_id
+
+                    GROUP BY
+                        jp.posting_id,
+                        jp.vacancies
+                ");
+
+                $capacityStmt->execute([
+                    ':posting_id' => $postingId
+                ]);
+
+                $capacity = $capacityStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$capacity) {
+                    throw new \Exception('Job posting not found.');
+                }
+
+                $vacancies = (int) $capacity['vacancies'];
+                $hiredCount = (int) $capacity['hired_count'];
+
+                /*
+                * Prevent hiring beyond the available vacancies.
+                */
+                if ($hiredCount >= $vacancies) {
+                    throw new \Exception(
+                        'This job posting has already reached its vacancy limit.'
+                    );
+                }
+            }
+
+
+            /*
+            * Update the application status.
+            */
+            $statusStmt = $this->db->prepare("
+                UPDATE applications
+                SET application_status = :status
+                WHERE application_id = :application_id
+            ");
+
+            $statusStmt->execute([
+                ':status' => $status,
+                ':application_id' => $applicationId
+            ]);
+
+
+            /*
+            * If the applicant was hired,
+            * check whether the posting is now full.
+            */
+            if ($status === 'Hired') {
+
+                $checkStmt = $this->db->prepare("
+                    SELECT
+                        jp.vacancies,
+                        COUNT(ap.application_id) AS hired_count
+
+                    FROM job_postings jp
+
+                    LEFT JOIN applications ap
+                        ON ap.posting_id = jp.posting_id
+                        AND ap.application_status = 'Hired'
+
+                    WHERE jp.posting_id = :posting_id
+
+                    GROUP BY
+                        jp.posting_id,
+                        jp.vacancies
+                ");
+
+                $checkStmt->execute([
+                    ':posting_id' => $postingId
+                ]);
+
+                $posting = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (
+                    $posting &&
+                    (int) $posting['hired_count'] >=
+                    (int) $posting['vacancies']
+                ) {
+
+                    $closeStmt = $this->db->prepare("
+                        UPDATE job_postings
+                        SET status = 'Closed'
+                        WHERE posting_id = :posting_id
+                    ");
+
+                    $closeStmt->execute([
+                        ':posting_id' => $postingId
+                    ]);
+                }
+            }
+
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (\Exception $e) {
+
+            $this->db->rollBack();
+
+            throw $e;
+        }
+    }
 }

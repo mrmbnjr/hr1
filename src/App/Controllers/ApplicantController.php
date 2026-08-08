@@ -76,4 +76,48 @@ class ApplicantController
 
         require '../resources/views/applicants/edit.php';
     }
+
+    public function updateStatus()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location:?page=applicants");
+            exit;
+        }
+
+        $applicationId = (int) ($_POST['application_id'] ?? 0);
+        $status = $_POST['status'] ?? '';
+
+        if (!$applicationId || !$status) {
+            header("Location:?page=applicants");
+            exit;
+        }
+
+        try {
+
+            $this->applicant->updateApplicationStatus(
+                $applicationId,
+                $status
+            );
+
+            header(
+                "Location:?page=review&id=" .
+                (int) ($_POST['applicant_id'] ?? 0)
+            );
+            exit;
+
+        } catch (\Exception $e) {
+
+            /*
+            * You can later replace this with
+            * a proper session flash message.
+            */
+            $_SESSION['error'] = $e->getMessage();
+
+            header(
+                "Location:?page=review&id=" .
+                (int) ($_POST['applicant_id'] ?? 0)
+            );
+            exit;
+        }
+    }
 }

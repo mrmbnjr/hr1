@@ -1,7 +1,7 @@
 <?php
 
-$pageTitle       = "New Hire Onboarding";
-$pageDescription = "Manage newly hired employees and monitor their onboarding progress.";
+$pageTitle       = "Coming Soon!";
+$pageDescription = "This feature is currently under development. We're working hard to bring it to you soon.";
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: /hr1/public/?page=login");
@@ -20,6 +20,7 @@ if (!isset($_SESSION['user_id'])) {
     --ink: #2b2b2b;
 }
 .coming-soon-wrapper {
+    min-height: 84.34vh;
     display: flex;
     align-items: center;
     justify-content: center;

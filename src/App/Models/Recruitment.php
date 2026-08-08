@@ -89,9 +89,19 @@ class Recruitment
                 p.position_name,
                 p.department_id,
                 d.department_name
+
             FROM positions p
+
             INNER JOIN departments d
                 ON d.department_id = p.department_id
+
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM job_postings jp
+                WHERE jp.position_id = p.position_id
+                AND jp.status = 'Open'
+            )
+
             ORDER BY
                 d.department_name,
                 p.position_name
@@ -113,6 +123,26 @@ class Recruitment
 
     public function createJob(array $data)
     {
+        // Check whether this position already has an open posting
+        $check = $this->db->prepare("
+            SELECT posting_id
+            FROM job_postings
+            WHERE position_id = :position_id
+            AND status = 'Open'
+            LIMIT 1
+        ");
+
+        $check->execute([
+            ':position_id' => $data['position_id']
+        ]);
+
+        if ($check->fetch()) {
+            throw new \Exception(
+                'This position already has an open job posting.'
+            );
+        }
+
+
         $sql = "
             INSERT INTO job_postings
             (
@@ -243,15 +273,61 @@ class Recruitment
     {
         $stmt = $this->db->prepare("
             SELECT
-                position_id,
-                position_name
-            FROM positions
-            WHERE department_id = ?
-            ORDER BY position_name
+                p.position_id,
+                p.position_name
+
+            FROM positions p
+
+            WHERE p.department_id = ?
+
+            AND NOT EXISTS (
+                SELECT 1
+                FROM job_postings jp
+                WHERE jp.position_id = p.position_id
+                    AND jp.status = 'Open'
+            )
+
+            ORDER BY p.position_name
         ");
 
         $stmt->execute([$departmentId]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getPositionsForEdit(int $postingId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                p.position_id,
+                p.position_name,
+                p.department_id,
+                d.department_name
+
+            FROM positions p
+
+            INNER JOIN departments d
+                ON d.department_id = p.department_id
+
+            WHERE
+                NOT EXISTS (
+                    SELECT 1
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                    AND jp.status = 'Open'
+                    AND jp.posting_id <> :posting_id
+                )
+
+            ORDER BY
+                d.department_name,
+                p.position_name
+        ");
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

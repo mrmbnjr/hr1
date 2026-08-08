@@ -33,10 +33,20 @@ class RecruitmentController
         $data = $_POST;
         $data['created_by'] = $_SESSION['user_id'];
 
-        $recruitment->createJob($data);
+        try {
 
-        header("Location: ?page=recruitment");
-        exit;
+            $recruitment->createJob($data);
+
+            header("Location: ?page=recruitment");
+            exit;
+
+        } catch (\Exception $e) {
+
+            $_SESSION['error'] = $e->getMessage();
+
+            header("Location: ?page=recruitment&action=create");
+            exit;
+        }
     }
 
     public function edit()
@@ -48,7 +58,9 @@ class RecruitmentController
             exit;
         }
 
-        $job = $recruitment->getJobById($_GET['id']);
+        $postingId = (int) $_GET['id'];
+
+        $job = $recruitment->getJobById($postingId);
 
         if (!$job) {
             header("Location:?page=recruitment");
@@ -56,7 +68,8 @@ class RecruitmentController
         }
 
         $departments = $recruitment->getDepartments();
-        $positions   = $recruitment->getPositions();
+
+        $positions = $recruitment->getPositionsForEdit($postingId);
 
         require '../resources/views/recruitment/edit.php';
     }
@@ -115,5 +128,4 @@ class RecruitmentController
 
         exit;
     }
-
 }
