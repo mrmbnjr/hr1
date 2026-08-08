@@ -88,6 +88,10 @@ switch ($page) {
         (new EmployeeRecordsController())->employeeRecords();
         break;
 
+    case 'view':
+        (new EmployeeRecordsController())->view();
+        break;
+
     case 'employee-self-service':
         (new EmployeeSelfServiceController())->employeeSelfService();
         break;

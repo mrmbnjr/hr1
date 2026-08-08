@@ -369,7 +369,7 @@ $statusMeta = [
                                     <td class="col-actions">
 
                                         <a
-                                            href="?page=employee-view&id=<?= urlencode($employeeId) ?>"
+                                            href="?page=view&id=<?= urlencode($employeeId) ?>"
                                             class="btn-review">
 
                                             <i class="fa-solid fa-eye"></i>

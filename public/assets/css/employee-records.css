@@ -459,6 +459,444 @@
     color: var(--gold);
 }
 
+/* ==========================================================
+   EMPLOYEE RECORD DETAIL PAGE
+========================================================== */
+
+.employee-record-page {
+    min-height: 84.34vh;
+
+    padding: 28px 32px 60px;
+
+    font-family: "Nunito", "Segoe UI", sans-serif;
+
+    color: var(--ink);
+}
+
+
+/* ==========================================================
+   BACK NAVIGATION
+========================================================== */
+
+.page-back {
+    margin-bottom: 18px;
+}
+
+.page-back a {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--maroon);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        color 0.12s ease,
+        transform 0.12s ease;
+}
+
+.page-back a:hover {
+    color: var(--maroon-dark);
+
+    transform: translateX(-2px);
+}
+
+
+/* ==========================================================
+   EMPLOYEE PROFILE HEADER
+========================================================== */
+
+.employee-profile-card {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
+
+    padding: 24px 26px;
+
+    margin-bottom: 20px;
+}
+
+.employee-profile-main {
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    min-width: 0;
+}
+
+
+/* ==========================================================
+   LARGE AVATAR
+========================================================== */
+
+.employee-profile-card .avatar-large {
+    width: 64px;
+    height: 64px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold-light),
+            var(--gold)
+        );
+
+    color: var(--maroon-dark);
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-family: "Baloo 2", sans-serif;
+}
+
+
+/* ==========================================================
+   EMPLOYEE HEADER INFORMATION
+========================================================== */
+
+.employee-profile-info {
+    min-width: 0;
+}
+
+.employee-profile-info h1 {
+    margin: 0;
+
+    font-size: 24px;
+
+    line-height: 1.25;
+
+    color: var(--maroon-dark);
+
+    font-weight: 800;
+}
+
+.employee-position {
+    margin: 5px 0 3px;
+
+    color: var(--ink-soft);
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.employee-number {
+    display: block;
+
+    color: var(--ink-soft);
+
+    font-size: 12.5px;
+
+    font-weight: 600;
+}
+
+.employee-profile-status {
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================
+   RECORD CARDS
+========================================================== */
+
+.record-card {
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius);
+
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+
+    margin-bottom: 20px;
+}
+
+
+/* ==========================================================
+   RECORD CARD HEADER
+========================================================== */
+
+.record-card-header {
+    padding: 18px 22px;
+
+    border-bottom: 1px solid var(--border);
+
+    background: #fbf2e2;
+}
+
+.record-card-header h2 {
+    margin: 0;
+
+    color: var(--maroon-dark);
+
+    font-size: 16px;
+
+    font-weight: 800;
+}
+
+.record-card-header p {
+    margin: 4px 0 0;
+
+    color: var(--ink-soft);
+
+    font-size: 12.5px;
+}
+
+
+/* ==========================================================
+   RECORD INFORMATION GRID
+========================================================== */
+
+.record-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 0;
+
+    padding: 4px 22px;
+}
+
+.record-item {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    min-height: 74px;
+
+    padding: 14px 12px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.record-item:nth-last-child(-n + 2) {
+    border-bottom: none;
+}
+
+.record-item:nth-child(odd) {
+    padding-left: 0;
+
+    padding-right: 24px;
+
+    border-right: 1px solid var(--border);
+}
+
+.record-item:nth-child(even) {
+    padding-left: 24px;
+}
+
+.record-label {
+    color: var(--ink-soft);
+
+    font-size: 11.5px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+
+    font-weight: 700;
+}
+
+.record-item strong {
+    color: var(--ink);
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    word-break: break-word;
+}
+
+
+/* ==========================================================
+   RECORD ID VALUES
+========================================================== */
+
+.record-item strong[id] {
+    color: var(--maroon-dark);
+}
+
+
+/* ==========================================================
+   EMPTY RECORD STATE
+========================================================== */
+
+.employee-record-page .empty-state {
+    min-height: 260px;
+
+    justify-content: center;
+
+    padding: 48px 24px;
+}
+
+.employee-record-page .empty-state p {
+    margin: 0 0 8px;
+
+    font-size: 14px;
+}
+
+
+/* ==========================================================
+   STATUS BADGE INSIDE RECORDS
+========================================================== */
+
+.record-item .badge {
+    width: fit-content;
+}
+
+
+/* ==========================================================
+   RESPONSIVE — TABLET
+========================================================== */
+
+@media (max-width: 900px) {
+
+    .employee-record-page {
+        padding: 20px;
+    }
+
+    .employee-profile-card {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .employee-profile-status {
+        align-self: flex-start;
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — MOBILE
+========================================================== */
+
+@media (max-width: 640px) {
+
+    .employee-record-page {
+        padding: 16px;
+
+        padding-bottom: 40px;
+    }
+
+    .employee-profile-card {
+        padding: 20px;
+    }
+
+    .employee-profile-main {
+        align-items: flex-start;
+
+        width: 100%;
+    }
+
+    .employee-profile-card .avatar-large {
+        width: 52px;
+        height: 52px;
+
+        font-size: 18px;
+    }
+
+    .employee-profile-info h1 {
+        font-size: 20px;
+    }
+
+    .record-grid {
+        grid-template-columns: 1fr;
+
+        padding: 4px 18px;
+    }
+
+    .record-item,
+    .record-item:nth-child(odd),
+    .record-item:nth-child(even) {
+        padding: 14px 0;
+
+        border-right: none;
+
+        border-bottom: 1px solid var(--border);
+    }
+
+    .record-item:last-child {
+        border-bottom: none;
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — SMALL MOBILE
+========================================================== */
+
+@media (max-width: 420px) {
+
+    .page-back {
+        margin-bottom: 14px;
+    }
+
+    .employee-profile-card {
+        padding: 16px;
+    }
+
+    .employee-profile-main {
+        gap: 12px;
+    }
+
+    .employee-profile-info h1 {
+        font-size: 18px;
+    }
+
+    .employee-position {
+        font-size: 13px;
+    }
+
+    .record-card-header {
+        padding: 16px 18px;
+    }
+
+    .record-card-header h2 {
+        font-size: 15px;
+    }
+
+}
 
 /* ==========================================================
    RESPONSIVE
