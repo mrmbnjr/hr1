@@ -221,79 +221,64 @@ class HumanCapital
         ];
     }
 
-    public function getPositions()
-    {
-        $stmt = $this->db->query("
+public function getPositions()
+{
+    $stmt = $this->db->query("
+        SELECT
+            p.position_id,
+            p.position_name,
+            d.department_name,
 
-            SELECT
+            COUNT(DISTINCT e.employee_id) AS employee_count,
 
-                p.position_id,
-                p.position_name,
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN jp.status = 'Open'
+                        THEN jp.vacancies
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS vacancies,
 
-                d.department_name,
+            CASE
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM job_postings active_jp
+                    WHERE active_jp.position_id = p.position_id
+                      AND active_jp.status = 'Open'
+                )
+                THEN 'Open'
+                ELSE 'Closed'
+            END AS status
 
-                COUNT(DISTINCT e.employee_id) AS employee_count,
+        FROM positions p
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN jp.status = 'Open'
-                            THEN jp.vacancies
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS vacancies,
+        INNER JOIN departments d
+            ON d.department_id = p.department_id
 
-                CASE
+        LEFT JOIN job_postings jp
+            ON jp.position_id = p.position_id
 
-                    WHEN COALESCE(
-                        SUM(
-                            CASE
-                                WHEN jp.status = 'Open'
-                                THEN jp.vacancies
-                                ELSE 0
-                            END
-                        ),
-                        0
-                    ) > 0
+        LEFT JOIN applications ap
+            ON ap.posting_id = jp.posting_id
 
-                    THEN 'Open'
+        LEFT JOIN employees e
+            ON e.application_id = ap.application_id
 
-                    ELSE 'Closed'
+        GROUP BY
+            p.position_id,
+            p.position_name,
+            d.department_name
 
-                END AS status
+        ORDER BY
+            d.department_name,
+            p.position_name
+    ");
 
-            FROM positions p
-
-            INNER JOIN departments d
-                ON d.department_id = p.department_id
-
-            LEFT JOIN job_postings jp
-                ON jp.position_id = p.position_id
-
-            LEFT JOIN applications ap
-                ON ap.posting_id = jp.posting_id
-
-            LEFT JOIN employees e
-                ON e.application_id = ap.application_id
-
-            GROUP BY
-
-                p.position_id,
-                p.position_name,
-                d.department_name
-
-            ORDER BY
-
-                d.department_name,
-                p.position_name
-
-        ");
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     public function getOrganizationTree()
     {
         $departments = $this->getDepartments();
