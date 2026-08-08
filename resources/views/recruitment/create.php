@@ -28,14 +28,13 @@ if (!isset($_SESSION['user_id'])) {
         <h2>Basic Information</h2>
 
         <div class="form-grid">
-
             <div class="form-group">
-                    <label>
-                        Job Title
-                        <span class="required">*</span>
-                    </label>          
-                    
-                    <input
+                <label>
+                    Job Title
+                    <span class="required">*</span>
+                </label>
+
+                <input
                     type="text"
                     name="title"
                     value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
@@ -47,15 +46,66 @@ if (!isset($_SESSION['user_id'])) {
                 <label>Department</label>
 
                 <select id="department" name="department_id" required>
-                <option value="" hidden selected>Select Department</option>
+                    <option value="" hidden selected>
+                        Select Department
+                    </option>
 
                     <?php if (!empty($departments)): ?>
+
                         <?php foreach ($departments as $department): ?>
-                            <option value="<?= htmlspecialchars($department['department_id']) ?>">
+                            <option
+                                value="<?= htmlspecialchars($department['department_id']) ?>">
+
                                 <?= htmlspecialchars($department['department_name']); ?>
+
                             </option>
                         <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <option value="" disabled>
+                            No departments available
+                        </option>
+
                     <?php endif; ?>
+
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    Position
+                    <span class="required">*</span>
+                </label>
+
+                <select id="position" name="position_id" required>
+                    <option value="" hidden selected>
+                        Select Position
+                    </option>
+
+                    <?php if (!empty($positions)): ?>
+
+                        <?php foreach ($positions as $position): ?>
+
+                            <option
+                                value="<?= htmlspecialchars($position['position_id']) ?>"
+                                data-department="<?= htmlspecialchars($position['department_id']) ?>"
+                                <?= isset($job) && $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
+
+                                <?= htmlspecialchars($position['position_name']) ?>
+
+                            </option>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
+
+                        <option value="" disabled>
+                            No positions available
+                        </option>
+
+                    <?php endif; ?>
+
                 </select>
             </div>
 
@@ -68,32 +118,21 @@ if (!isset($_SESSION['user_id'])) {
                     <option value="Contract">Contract</option>
                     <option value="Internship">Internship</option>
                 </select>
-
             </div>
 
             <div class="form-group">
                 <label>
-                    Position
+                    Number of Vacancies
                     <span class="required">*</span>
                 </label>
 
-                <select id="position" name="position_id" required>
-                <option value="" hidden selected>Select Position</option>
+                <input
+                    type="number"
+                    name="vacancies"
+                    min="1"
+                    value="<?= htmlspecialchars($_POST['vacancies'] ?? '1') ?>"
+                    required>
 
-                    <?php foreach ($positions as $position): ?>
-
-                        <option
-                            value="<?= htmlspecialchars($position['position_id']) ?>"
-                            data-department="<?= htmlspecialchars($position['department_id']) ?>"
-                            <?= isset($job) && $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
-
-                            <?= htmlspecialchars($position['position_name']) ?>
-
-                        </option>
-
-                    <?php endforeach; ?>
-
-                </select>
             </div>
 
             <div class="form-group">
@@ -105,7 +144,6 @@ if (!isset($_SESSION['user_id'])) {
                     min="<?= date('Y-m-d') ?>"
                     required>
             </div>
-
         </div>
 
         <hr>
