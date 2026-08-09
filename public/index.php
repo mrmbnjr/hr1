@@ -8,7 +8,7 @@ use App\Controllers\ApplicantController;
 use App\Controllers\OnboardingController;
 use App\Controllers\HumanCapitalController;
 use App\Controllers\EmployeeRecordsController;
-use App\Controllers\EmployeeSelfServiceController;
+use App\Controllers\EmployeeRequestsController;
 use App\Controllers\ProfileController;
 
 session_start();
@@ -92,8 +92,8 @@ switch ($page) {
         (new EmployeeRecordsController())->view();
         break;
 
-    case 'employee-self-service':
-        (new EmployeeSelfServiceController())->employeeSelfService();
+    case 'employee-requests':
+        (new EmployeeRequestsController())->employeeRequests();
         break;
 
     case 'logout':

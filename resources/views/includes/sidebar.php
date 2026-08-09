@@ -63,7 +63,7 @@ $currentPage = $_GET['page'] ?? 'dashboard';
             <span>Employee Records</span>
         </a>
 
-        <a href="?page=employee-self-service" class="<?= $currentPage == 'employee-self-service' ? 'active' : '' ?>">
+        <a href="?page=employee-requests" class="<?= $currentPage == 'employee-requests' ? 'active' : '' ?>">
             <i class="fa-solid fa-user"></i>
             <span>Employee Requests</span>
         </a>
