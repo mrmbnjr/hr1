@@ -19,41 +19,83 @@ class Onboarding
     public function getAllOnboarding()
     {
         $sql = "
-
             SELECT
                 o.onboarding_id,
+                o.application_id,
                 o.orientation_date,
                 o.onboarding_status,
+                o.remarks,
+
+                e.employee_id,
+                e.employee_number,
+                e.hire_date,
+                e.employment_status,
 
                 a.first_name,
+                a.middle_name,
                 a.last_name,
+                a.email,
 
-                jp.title AS position,
+                CONCAT(
+                    a.first_name,
+                    ' ',
+                    COALESCE(CONCAT(a.middle_name, ' '), ''),
+                    a.last_name
+                ) AS fullname,
 
-                e.employee_number,
-                e.hire_date
+                d.department_name,
+
+                p.position_name AS job_title
 
             FROM onboarding o
 
-            JOIN applications app
+            INNER JOIN applications app
                 ON o.application_id = app.application_id
 
-            JOIN applicants a
+            INNER JOIN applicants a
                 ON app.applicant_id = a.applicant_id
 
-            JOIN job_postings jp
+            INNER JOIN job_postings jp
                 ON app.posting_id = jp.posting_id
 
-            LEFT JOIN employees e
+            INNER JOIN positions p
+                ON jp.position_id = p.position_id
+
+            INNER JOIN departments d
+                ON p.department_id = d.department_id
+
+            INNER JOIN employees e
                 ON app.application_id = e.application_id
 
             ORDER BY o.onboarding_id DESC
-
         ";
 
-    return $this->db
-        ->query($sql)
-        ->fetchAll(PDO::FETCH_ASSOC);
+        $employees = $this->db
+            ->query($sql)
+            ->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($employees as &$employee) {
+
+            switch ($employee['onboarding_status']) {
+
+                case 'Completed':
+                    $employee['progress'] = 100;
+                    break;
+
+                case 'Ongoing':
+                    $employee['progress'] = 50;
+                    break;
+
+                case 'Pending':
+                default:
+                    $employee['progress'] = 0;
+                    break;
+            }
+
+            $employee['start_date'] = $employee['hire_date'];
+        }
+
+        return $employees;
     }
 
     public function countAll()
