@@ -15,12 +15,10 @@ if (!isset($_SESSION['user_id'])) {
     --maroon: #6e1423;
     --gold: #d4af37;
     --cream: #f8f1e7;
-    --bg: #f8f1e7;
-    --card-bg: #ffffff;
     --ink: #2b2b2b;
 }
 .coming-soon-wrapper {
-    min-height: 85.2vh;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
