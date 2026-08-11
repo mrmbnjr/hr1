@@ -20,7 +20,7 @@ if (!isset($_SESSION['user_id'])) {
     --ink: #2b2b2b;
 }
 .coming-soon-wrapper {
-    min-height: 84.34vh;
+    min-height: 85.2vh;
     display: flex;
     align-items: center;
     justify-content: center;
