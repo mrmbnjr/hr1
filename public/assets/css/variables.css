@@ -29,6 +29,19 @@
   --ink-soft: #6b4a44;
   --white: #fff;
 
+   --gold-light:    #f0d78c;
+   --cream:         #faf6ee;
+
+   --gray:   #6b7280;  --gray-bg:   #eef0f2;
+   --blue:   #2563eb;  --blue-bg:   #e5edff;
+   --orange: #c2660d;  --orange-bg: #fff0dd;
+   --green:  #1a7d4c;  --green-bg:  #e2f6ea;
+
+   --radius: 14px;
+   --shadow: 0 4px 16px rgba(74, 14, 24, 0.08);
+   --shadow-lg: 0 16px 48px rgba(74, 14, 24, 0.18);
+
+
   --badge-seal: var(--maroon);
 
   /* ==========================
