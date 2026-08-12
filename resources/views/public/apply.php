@@ -205,95 +205,6 @@ $applicationToken =
 <body>
 
 <div class="application-page">
-
-    <div class="job-card">
-
-        <div class="brand">
-            RAM-YUM
-        </div>
-
-        <h1>
-            <?= htmlspecialchars($job['title']) ?>
-        </h1>
-
-        <div class="job-meta">
-
-            <span>
-                <?= htmlspecialchars($job['department_name']) ?>
-            </span>
-
-            <span>
-                <?= htmlspecialchars($job['position_name']) ?>
-            </span>
-
-            <span>
-                <?= htmlspecialchars($job['employment_type']) ?>
-            </span>
-
-            <span>
-                <?= (int) $job['vacancies'] ?> vacancy
-                <?= (int) $job['vacancies'] !== 1 ? 'ies' : '' ?>
-            </span>
-
-        </div>
-
-        <div class="job-section">
-
-            <h3>Job Description</h3>
-
-            <p>
-                <?= nl2br(
-                    htmlspecialchars(
-                        $job['description'] ?? ''
-                    )
-                ) ?>
-            </p>
-
-        </div>
-
-        <div class="job-section">
-
-            <h3>Requirements</h3>
-
-            <p>
-                <?= nl2br(
-                    htmlspecialchars(
-                        $job['requirements'] ?? ''
-                    )
-                ) ?>
-            </p>
-
-        </div>
-
-        <div class="job-section">
-
-            <strong>
-                Application Deadline:
-            </strong>
-
-            <?= htmlspecialchars(
-                date(
-                    'F d, Y',
-                    strtotime(
-                        $job['application_deadline']
-                    )
-                )
-            ) ?>
-
-        </div>
-
-    </div>
-
-
-    <?php if ($error): ?>
-
-        <div class="error">
-            <?= htmlspecialchars($error) ?>
-        </div>
-
-    <?php endif; ?>
-
-
     <div class="application-card">
 
         <h2>
@@ -431,27 +342,6 @@ $applicationToken =
                     </span>
 
                 </div>
-
-
-                <div class="form-group full">
-
-                    <label>
-                        Cover Letter
-                    </label>
-
-                    <input
-                        type="file"
-                        name="cover_letter"
-                        accept=".pdf,.doc,.docx"
-                    >
-
-                    <span class="file-note">
-                        Optional. PDF, DOC, or DOCX.
-                        Maximum 5 MB.
-                    </span>
-
-                </div>
-
             </div>
 
 
