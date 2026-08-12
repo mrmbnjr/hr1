@@ -390,11 +390,24 @@ $statusMeta = [
             <section class="detail-section decision-section">
                 <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
                 <div class="decision-buttons">
-                    <button type="button" class="btn-success btn-block" id="hireBtn">
-                        <i class="fa-solid fa-user-check"></i> Hire Applicant
+                    <button
+                        type="button"
+                        class="btn-success btn-block"
+                        id="hireBtn"
+                        data-application-id="<?= (int) $applicant['application_id'] ?>"
+                    >
+                        <i class="fa-solid fa-user-check"></i>
+                        Hire Applicant
                     </button>
-                    <button type="button" class="btn-danger btn-block" id="rejectBtn">
-                        <i class="fa-solid fa-user-xmark"></i> Reject Applicant
+
+                    <button
+                        type="button"
+                        class="btn-danger btn-block"
+                        id="rejectBtn"
+                        data-application-id="<?= (int) $applicant['application_id'] ?>"
+                    >
+                        <i class="fa-solid fa-user-xmark"></i>
+                        Reject Applicant
                     </button>
                 </div>
             </section>
@@ -515,8 +528,8 @@ $statusMeta = [
                 <button type="button" class="close-btn" data-close="rejectModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="rejectForm" class="modal-body">
-                <label>Rejection Remarks
-                    <textarea name="rejection_remarks" id="rejectionRemarks" rows="4" placeholder="Explain the reason for rejection" required></textarea>
+                <label>
+                    <p>Are you sure you want to reject this applicant?</p>
                 </label>
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="rejectModal">Cancel</button>

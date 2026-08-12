@@ -537,4 +537,88 @@ class ApplicantController
             exit;
         }
     }
+
+    public function hire()
+    {
+        header('Content-Type: application/json');
+
+        try {
+
+            $applicationId = (int) ($_POST['application_id'] ?? 0);
+
+            if ($applicationId <= 0) {
+                throw new \Exception(
+                    'Invalid application ID.'
+                );
+            }
+
+            $model = new \App\Models\Applicant();
+
+            $account = $model->hireApplication(
+                $applicationId
+            );
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Applicant successfully hired.',
+                'data' => $account
+            ]);
+
+        } catch (\Exception $e) {
+
+            http_response_code(400);
+
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
+        exit;
+    }
+
+
+    public function reject()
+    {
+        header('Content-Type: application/json');
+
+        try {
+
+            $applicationId = (int) ($_POST['application_id'] ?? 0);
+
+            if ($applicationId <= 0) {
+                throw new \Exception(
+                    'Invalid application ID.'
+                );
+            }
+
+            $model = new \App\Models\Applicant();
+
+            $success = $model->rejectApplication(
+                $applicationId
+            );
+
+            if (!$success) {
+                throw new \Exception(
+                    'Unable to reject this application. It may already be hired or may not exist.'
+                );
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Applicant has been rejected.'
+            ]);
+
+        } catch (\Exception $e) {
+
+            http_response_code(400);
+
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
+        exit;
+    }
 }

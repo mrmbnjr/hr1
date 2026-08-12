@@ -56,6 +56,14 @@ switch ($page) {
         (new ApplicantController())->scheduleInterview();
         break;
 
+    case 'hire-applicant':
+        (new ApplicantController())->hire();
+        break;
+
+    case 'reject-applicant':
+        (new ApplicantController())->reject();
+        break;
+
     case 'recruitment':
         (new RecruitmentController())->recruitment();
         break;

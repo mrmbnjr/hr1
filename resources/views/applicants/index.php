@@ -202,6 +202,7 @@ foreach ($applicants as $a) {
                         ?>
 
                         <tr class="applicant-row"
+                            data-application-id="<?= (int) $applicant['application_id'] ?>"
                             data-status="<?= htmlspecialchars($status) ?>"
                             data-position="<?= htmlspecialchars($applicant['position'] ?? '') ?>"
                             data-name="<?= htmlspecialchars(strtolower($applicant['fullname'] ?? '')) ?>"

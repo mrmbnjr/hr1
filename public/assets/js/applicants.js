@@ -307,60 +307,317 @@
         });
     }
 
-    /* Hire */
+    /* ==========================================================
+    HIRE / REJECT
+    ========================================================== */
+
     const hireBtn = document.getElementById('hireBtn');
-
-    if (hireBtn) {
-        hireBtn.addEventListener('click', () => openModal('hireModal'));
-    }
-
-    const confirmHireBtn = document.getElementById('confirmHireBtn');
-
-    if (confirmHireBtn) {
-        confirmHireBtn.addEventListener('click', function () {
-            if (!currentRow) return;
-
-            currentRow.dataset.status = 'Hired';
-            const statusCell = currentRow.querySelector('td:nth-child(4) .badge');
-            statusCell.textContent = statusLabel['Hired'];
-            statusCell.className = 'badge ' + statusBadgeClass['Hired'];
-
-            closeModal('hireModal');
-            closeDetailsPanel();
-            applyFilters();
-
-            // TODO: replace with AJAX call to ApplicantController::hireApplicant
-            // which should: set application_status = Hired, insert into employees,
-            // create the user account, send the hiring email, and start onboarding.
-        });
-    }
-
-    /* Reject */
     const rejectBtn = document.getElementById('rejectBtn');
 
-    if (rejectBtn) {
-        rejectBtn.addEventListener('click', () => openModal('rejectModal'));
+    const confirmHireBtn =
+        document.getElementById('confirmHireBtn');
+
+    const rejectForm =
+        document.getElementById('rejectForm');
+
+
+    /* ----------------------------------------------------------
+    OPEN HIRE MODAL
+    ---------------------------------------------------------- */
+
+    if (hireBtn) {
+
+        hireBtn.addEventListener('click', function () {
+
+            console.log('Hire button clicked');
+
+            const applicationId =
+                this.dataset.applicationId;
+
+            console.log(
+                'Application ID:',
+                applicationId
+            );
+
+            if (!applicationId) {
+                alert('Application ID is missing.');
+                return;
+            }
+
+            openModal('hireModal');
+        });
     }
 
-    const rejectForm = document.getElementById('rejectForm');
+
+    /* ----------------------------------------------------------
+    CONFIRM HIRE
+    ---------------------------------------------------------- */
+
+    if (confirmHireBtn) {
+
+        confirmHireBtn.addEventListener(
+            'click',
+            async function () {
+
+                const applicationId =
+                    hireBtn.dataset.applicationId;
+
+                if (!applicationId) {
+                    alert('Application ID is missing.');
+                    return;
+                }
+
+                confirmHireBtn.disabled = true;
+                confirmHireBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> Hiring...';
+
+                try {
+
+                    const formData = new FormData();
+
+                    formData.append(
+                        'application_id',
+                        applicationId
+                    );
+
+
+                    const response = await fetch(
+                        '?page=hire-applicant',
+                        {
+                            method: 'POST',
+                            body: formData
+                        }
+                    );
+
+
+                    const result =
+                        await response.json();
+
+
+                    console.log(
+                        'Hire response:',
+                        result
+                    );
+
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            'Unable to hire applicant.'
+                        );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SUCCESS
+                    |--------------------------------------------------------------------------
+                    */
+
+                    closeModal('hireModal');
+
+
+                    alert(
+                        'Applicant hired successfully!\n\n' +
+
+                        'Employee Number: ' +
+                        result.data.employee_number +
+
+                        '\n\nUsername: ' +
+                        result.data.username +
+
+                        '\n\nTemporary Password: ' +
+                        result.data.temporary_password
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Reload applicant page
+                    |--------------------------------------------------------------------------
+                    */
+
+                    window.location.href =
+                        '?page=review&id=' +
+                        applicationId;
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Hire error:',
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        'An error occurred while hiring the applicant.'
+                    );
+
+                } finally {
+
+                    confirmHireBtn.disabled = false;
+
+                    confirmHireBtn.innerHTML =
+                        '<i class="fa-solid fa-user-check"></i> Confirm Hire';
+
+                }
+
+            }
+        );
+    }
+
+
+    /* ----------------------------------------------------------
+    OPEN REJECT MODAL
+    ---------------------------------------------------------- */
+
+    if (rejectBtn) {
+
+        rejectBtn.addEventListener('click', function () {
+
+            console.log('Reject button clicked');
+
+            const applicationId =
+                this.dataset.applicationId;
+
+            if (!applicationId) {
+                alert('Application ID is missing.');
+                return;
+            }
+
+            openModal('rejectModal');
+        });
+    }
+
+
+    /* ----------------------------------------------------------
+    CONFIRM REJECTION
+    ---------------------------------------------------------- */
 
     if (rejectForm) {
-        rejectForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (!currentRow) return;
 
-            currentRow.dataset.status = 'Rejected';
-            const statusCell = currentRow.querySelector('td:nth-child(4) .badge');
-            statusCell.textContent = statusLabel['Rejected'];
-            statusCell.className = 'badge ' + statusBadgeClass['Rejected'];
+        rejectForm.addEventListener(
+            'submit',
+            async function (e) {
 
-            closeModal('rejectModal');
-            closeDetailsPanel();
-            applyFilters();
+                e.preventDefault();
 
-            // TODO: replace with AJAX call to ApplicantController::rejectApplicant
-            // passing document.getElementById('rejectionRemarks').value
-        });
+
+                const applicationId =
+                    rejectBtn.dataset.applicationId;
+
+
+                if (!applicationId) {
+
+                    alert(
+                        'Application ID is missing.'
+                    );
+
+                    return;
+                }
+
+
+                const submitBtn =
+                    rejectForm.querySelector(
+                        'button[type="submit"]'
+                    );
+
+
+                if (submitBtn) {
+
+                    submitBtn.disabled = true;
+
+                    submitBtn.innerHTML =
+                        '<i class="fa-solid fa-spinner fa-spin"></i> Rejecting...';
+
+                }
+
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        'application_id',
+                        applicationId
+                    );
+
+
+                    const response =
+                        await fetch(
+                            '?page=reject-applicant',
+                            {
+                                method: 'POST',
+                                body: formData
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    console.log(
+                        'Reject response:',
+                        result
+                    );
+
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            'Unable to reject applicant.'
+                        );
+
+                    }
+
+
+                    closeModal('rejectModal');
+
+
+                    alert(
+                        'Applicant has been rejected.'
+                    );
+
+
+                    window.location.href =
+                        '?page=review&id=' +
+                        applicationId;
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Reject error:',
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        'An error occurred while rejecting the applicant.'
+                    );
+
+
+                } finally {
+
+                    if (submitBtn) {
+
+                        submitBtn.disabled = false;
+
+                        submitBtn.innerHTML =
+                            'Confirm Rejection';
+
+                    }
+
+                }
+
+            }
+        );
     }
 
 })();
