@@ -40,6 +40,14 @@ switch ($page) {
         (new ApplicantController())->index();
         break;
 
+    case 'apply':
+        (new ApplicantController())->apply();
+        break;
+
+    case 'submit-application':
+        (new ApplicantController())->submitApplication();
+        break;
+
     case 'review':
         (new ApplicantController())->review();
         break;

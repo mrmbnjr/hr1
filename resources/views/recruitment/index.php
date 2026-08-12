@@ -2,6 +2,7 @@
 
 $pageTitle       = "Recruitment Management";
 $pageCSS         = "recruitment.css";
+$pageJS          = "recruitment.js";
 $pageDescription = "Create and manage job postings";
 
 if (!isset($_SESSION['user_id'])) {
@@ -94,6 +95,7 @@ if (!isset($_SESSION['user_id'])) {
                         <th>APPLICATIONS</th>
                         <th>DEADLINE</th>
                         <th>STATUS</th>
+                        <th>APPLICATION LINK</th>
                         <th width="170">ACTIONS</th>
                     </tr>
 
@@ -135,6 +137,43 @@ if (!isset($_SESSION['user_id'])) {
                                 <span class="badge status <?= strtolower($job['status']) ?>">
                                     <?= htmlspecialchars($job['status']) ?>
                                 </span>
+
+                            </td>
+
+                            <td class="application-link-cell">
+                                <?php if (
+                                    $job['status'] === 'Open' &&
+                                    !empty($job['application_token'])
+                                ): ?>
+
+                                    <?php
+                                    $applicationUrl =
+                                        '/hr1/public/index.php?page=apply&token=' .
+                                        urlencode($job['application_token']);
+                                    ?>
+
+                                    <button
+                                        type="button"
+                                        class="action-btn link-btn"
+                                        title="Copy application link"
+                                        onclick="copyApplicationLink(
+                                            <?= htmlspecialchars(
+                                                json_encode($applicationUrl),
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>
+                                        )"
+                                    >
+                                        <i class="fa-solid fa-link"></i>
+                                    </button>
+
+                                <?php else: ?>
+
+                                    <span class="no-link">
+                                        —
+                                    </span>
+
+                                <?php endif; ?>
 
                             </td>
 
@@ -191,7 +230,7 @@ if (!isset($_SESSION['user_id'])) {
                 <?php else: ?>
 
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             No job postings found.
                         </td>
                     </tr>

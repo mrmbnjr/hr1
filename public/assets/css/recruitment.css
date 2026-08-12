@@ -154,6 +154,19 @@
     color:#b78103;
 }
 
+.application-link-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.link-btn {
+    cursor: pointer;
+}
+
+.no-link {
+    color: #aaa;
+    font-size: 14px;
+}
 
 /* ==========================================
    ACTION BUTTONS

@@ -13,6 +13,8 @@ class RecruitmentController
         $jobs = $recruitment->getAllJobs();
         $departments = $recruitment->getDepartments();
 
+        $applicationBaseUrl = '/hr1/public/apply/';
+
         require '../resources/views/recruitment/index.php';
     }
 

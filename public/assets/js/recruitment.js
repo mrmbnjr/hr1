@@ -27,3 +27,24 @@ document.addEventListener('DOMContentLoaded', function () {
     filterPositions();
 
 });
+
+function copyApplicationLink(path) {
+
+    const fullUrl =
+        window.location.origin + path;
+
+    navigator.clipboard.writeText(fullUrl)
+        .then(() => {
+
+            alert('Application link copied!');
+
+        })
+        .catch(() => {
+
+            prompt(
+                'Copy this application link:',
+                fullUrl
+            );
+
+        });
+}

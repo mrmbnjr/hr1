@@ -54,6 +54,7 @@ CREATE TABLE job_postings (
         'Open',
         'Closed'
     ) DEFAULT 'Open',
+    application_token VARCHAR(64) UNIQUE NULL,
     application_deadline DATE NOT NULL,
     created_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -20,6 +20,7 @@ class Recruitment
             SELECT
                 jp.posting_id,
                 jp.title,
+                jp.application_token,
                 p.position_name,
                 d.department_name,
                 jp.employment_type,
@@ -66,6 +67,7 @@ class Recruitment
             GROUP BY
                 jp.posting_id,
                 jp.title,
+                jp.application_token,
                 jp.employment_type,
                 jp.vacancies,
                 jp.status,
@@ -142,6 +144,21 @@ class Recruitment
             );
         }
 
+        // Generate a unique token for the public application URL
+        do {
+            $applicationToken = bin2hex(random_bytes(16));
+
+            $tokenCheck = $this->db->prepare("
+                SELECT posting_id
+                FROM job_postings
+                WHERE application_token = ?
+                LIMIT 1
+            ");
+
+            $tokenCheck->execute([$applicationToken]);
+
+        } while ($tokenCheck->fetch());
+
 
         $sql = "
             INSERT INTO job_postings
@@ -154,7 +171,8 @@ class Recruitment
                 vacancies,
                 status,
                 application_deadline,
-                created_by
+                created_by,
+                application_token
             )
             VALUES
             (
@@ -166,11 +184,14 @@ class Recruitment
                 :vacancies,
                 'Open',
                 :application_deadline,
-                :created_by
+                :created_by,
+                :application_token
             )
         ";
 
+
         $stmt = $this->db->prepare($sql);
+
 
         return $stmt->execute([
             ':position_id' => $data['position_id'],
@@ -180,7 +201,8 @@ class Recruitment
             ':employment_type' => $data['employment_type'],
             ':vacancies' => $data['vacancies'],
             ':application_deadline' => $data['application_deadline'],
-            ':created_by' => $data['created_by']
+            ':created_by' => $data['created_by'],
+            ':application_token' => $applicationToken
         ]);
     }
 
@@ -330,4 +352,28 @@ class Recruitment
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getJobByToken(string $token)
+    {
+        $sql = "
+            SELECT
+                jp.*,
+                p.position_name,
+                d.department_name
+            FROM job_postings jp
+
+            LEFT JOIN positions p
+                ON p.position_id = jp.position_id
+
+            LEFT JOIN departments d
+                ON d.department_id = p.department_id
+
+            WHERE jp.application_token = ?
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$token]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

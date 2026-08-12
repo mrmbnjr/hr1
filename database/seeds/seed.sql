@@ -79,7 +79,6 @@ VALUES
 -- HR Staff creates these
 -- created_by = HR user
 -- =====================================================
-
 INSERT INTO job_postings
 (position_id,
 title,
@@ -89,7 +88,8 @@ employment_type,
 vacancies,
 status,
 application_deadline,
-created_by)
+created_by,
+application_token)
 VALUES
 
 (
@@ -101,7 +101,8 @@ VALUES
 2,
 'Open',
 '2026-12-31',
-2
+2,
+'a8f92c7e31b54d6f90e21a7b45c83912'
 ),
 
 (
@@ -113,7 +114,8 @@ VALUES
 1,
 'Open',
 '2026-11-30',
-2
+2,
+'c41e8b72f95a36d1097c2e84b56f0139'
 ),
 
 (
@@ -125,7 +127,8 @@ VALUES
 1,
 'Closed',
 '2026-10-15',
-2
+2,
+'d73a91f06c28b45e9172a6f38c50e124'
 );
 
 

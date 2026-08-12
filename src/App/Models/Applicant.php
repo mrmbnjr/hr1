@@ -333,9 +333,6 @@ class Applicant
 
         try {
 
-            /*
-            * Get the job posting connected to this application.
-            */
             $postingStmt = $this->db->prepare("
                 SELECT
                     posting_id
@@ -355,11 +352,6 @@ class Applicant
 
             $postingId = (int) $application['posting_id'];
 
-
-            /*
-            * If hiring this applicant, make sure
-            * the job posting still has an available vacancy.
-            */
             if ($status === 'Hired') {
 
                 $capacityStmt = $this->db->prepare("
@@ -392,9 +384,6 @@ class Applicant
                 $vacancies = (int) $capacity['vacancies'];
                 $hiredCount = (int) $capacity['hired_count'];
 
-                /*
-                * Prevent hiring beyond the available vacancies.
-                */
                 if ($hiredCount >= $vacancies) {
                     throw new \Exception(
                         'This job posting has already reached its vacancy limit.'
@@ -403,9 +392,6 @@ class Applicant
             }
 
 
-            /*
-            * Update the application status.
-            */
             $statusStmt = $this->db->prepare("
                 UPDATE applications
                 SET application_status = :status
@@ -418,10 +404,6 @@ class Applicant
             ]);
 
 
-            /*
-            * If the applicant was hired,
-            * check whether the posting is now full.
-            */
             if ($status === 'Hired') {
 
                 $checkStmt = $this->db->prepare("
@@ -477,5 +459,175 @@ class Applicant
 
             throw $e;
         }
+    }
+
+    public function getJobByApplicationToken(string $token)
+    {
+        $sql = "
+            SELECT
+                jp.posting_id,
+                jp.title,
+                jp.description,
+                jp.requirements,
+                jp.employment_type,
+                jp.vacancies,
+                jp.status,
+                jp.application_token,
+                jp.application_deadline,
+
+                p.position_name,
+                d.department_name,
+
+                COUNT(
+                    CASE
+                        WHEN ap.application_status = 'Hired'
+                        THEN 1
+                    END
+                ) AS hired_count
+
+            FROM job_postings jp
+
+            INNER JOIN positions p
+                ON p.position_id = jp.position_id
+
+            INNER JOIN departments d
+                ON d.department_id = p.department_id
+
+            LEFT JOIN applications ap
+                ON ap.posting_id = jp.posting_id
+
+            WHERE jp.application_token = :token
+
+            GROUP BY
+                jp.posting_id,
+                jp.title,
+                jp.description,
+                jp.requirements,
+                jp.employment_type,
+                jp.vacancies,
+                jp.status,
+                jp.application_token,
+                jp.application_deadline,
+                p.position_name,
+                d.department_name
+
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':token' => $token
+        ]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getApplicantByEmail(string $email)
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                applicant_id,
+                first_name,
+                middle_name,
+                last_name,
+                email,
+                phone,
+                address
+            FROM applicants
+            WHERE email = ?
+            LIMIT 1
+        ");
+
+        $stmt->execute([$email]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function hasApplied(
+        int $applicantId,
+        int $postingId
+    ): bool
+    {
+        $stmt = $this->db->prepare("
+            SELECT application_id
+            FROM applications
+            WHERE applicant_id = ?
+            AND posting_id = ?
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            $applicantId,
+            $postingId
+        ]);
+
+        return (bool) $stmt->fetch();
+    }
+
+    public function createApplicant(array $data): int
+    {
+        $stmt = $this->db->prepare("
+            INSERT INTO applicants
+            (
+                first_name,
+                middle_name,
+                last_name,
+                email,
+                phone,
+                address
+            )
+            VALUES
+            (
+                :first_name,
+                :middle_name,
+                :last_name,
+                :email,
+                :phone,
+                :address
+            )
+        ");
+
+        $stmt->execute([
+            ':first_name' => $data['first_name'],
+            ':middle_name' => $data['middle_name'],
+            ':last_name' => $data['last_name'],
+            ':email' => $data['email'],
+            ':phone' => $data['phone'],
+            ':address' => $data['address']
+        ]);
+
+        return (int) $this->db->lastInsertId();
+    }
+
+    public function createApplication(array $data): int
+    {
+        $stmt = $this->db->prepare("
+            INSERT INTO applications
+            (
+                applicant_id,
+                posting_id,
+                resume_file,
+                cover_letter_file,
+                application_status
+            )
+            VALUES
+            (
+                :applicant_id,
+                :posting_id,
+                :resume_file,
+                :cover_letter_file,
+                'Submitted'
+            )
+        ");
+
+        $stmt->execute([
+            ':applicant_id' => $data['applicant_id'],
+            ':posting_id' => $data['posting_id'],
+            ':resume_file' => $data['resume_file'],
+            ':cover_letter_file' => $data['cover_letter_file']
+        ]);
+
+        return (int) $this->db->lastInsertId();
     }
 }
