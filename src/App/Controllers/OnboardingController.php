@@ -17,4 +17,9 @@ class OnboardingController
 
         require '../resources/views/onboarding/index.php';
     }
+
+    public function onboardingView()
+    {
+        require '../resources/views/onboarding/onboarding-view.php';
+    }
 }

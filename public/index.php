@@ -96,6 +96,10 @@ switch ($page) {
         (new OnboardingController())->onboarding();
         break;
 
+    case 'onboarding-view':
+        (new OnboardingController())->onboardingView();
+        break;
+
     case 'human-capital':
         (new HumanCapitalController())->index();
         break;

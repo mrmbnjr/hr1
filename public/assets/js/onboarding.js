@@ -153,3 +153,102 @@
         applyFilters();
     }
 }())
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modal = document.getElementById("documentModal");
+
+    const openButton = document.getElementById("openDocumentModal");
+
+    const closeButton = document.getElementById("closeDocumentModal");
+
+    const cancelButton = document.getElementById("cancelDocumentModal");
+
+    const form = document.getElementById("requestDocumentForm");
+
+
+    if (!modal || !openButton) {
+        return;
+    }
+
+
+    function openModal() {
+
+        modal.classList.add("is-visible");
+
+        modal.setAttribute("aria-hidden", "false");
+
+        document.body.style.overflow = "hidden";
+
+    }
+
+
+    function closeModal() {
+
+        modal.classList.remove("is-visible");
+
+        modal.setAttribute("aria-hidden", "true");
+
+        document.body.style.overflow = "";
+
+    }
+
+
+    openButton.addEventListener("click", openModal);
+
+
+    closeButton?.addEventListener("click", closeModal);
+
+
+    cancelButton?.addEventListener("click", closeModal);
+
+
+    modal.addEventListener("click", function (event) {
+
+        if (event.target === modal) {
+            closeModal();
+        }
+
+    });
+
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+            closeModal();
+        }
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TEMPORARY FORM SUBMIT
+    |--------------------------------------------------------------------------
+    | This only demonstrates the UI.
+    | We will connect this to the backend later.
+    */
+
+    form?.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        const documentType =
+            document.getElementById("documentType").value;
+
+        if (!documentType) {
+
+            alert("Please select a document.");
+
+            return;
+        }
+
+        alert("Document request UI is working. Backend will be connected next.");
+
+        closeModal();
+
+        form.reset();
+
+    });
+
+});
