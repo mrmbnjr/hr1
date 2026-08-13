@@ -139,7 +139,6 @@ if (!isset($_SESSION['user_id'])) {
                                     <!-- Deadline -->
                                     <td>
                                         <span class="deadline-cell">
-                                            <i class="fa-regular fa-calendar"></i>
                                             <?= htmlspecialchars($job['application_deadline']) ?>
                                         </span>
                                     </td>

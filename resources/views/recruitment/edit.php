@@ -39,6 +39,7 @@ if (!isset($_SESSION['user_id'])) {
                     type="text"
                     name="title"
                     value="<?= htmlspecialchars($job['title']) ?>"
+                    minlength="3" maxlength="32"
                     required>
 
             </div>
@@ -204,8 +205,9 @@ if (!isset($_SESSION['user_id'])) {
             <textarea
                 name="description"
                 rows="6"
-                required><?= htmlspecialchars($job['description']) ?></textarea>
-
+                minlength="3" maxlength="500"
+                required><?= htmlspecialchars($job['description']) ?>
+            </textarea>
         </div>
 
         <div class="form-group">
@@ -215,8 +217,9 @@ if (!isset($_SESSION['user_id'])) {
             <textarea
                 name="requirements"
                 rows="6"
-                required><?= htmlspecialchars($job['requirements']) ?></textarea>
-
+                minlength="3" maxlength="500"
+                required><?= htmlspecialchars($job['requirements']) ?>
+            </textarea>
         </div>
 
         <hr>

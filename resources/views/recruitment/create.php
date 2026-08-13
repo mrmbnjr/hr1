@@ -39,6 +39,7 @@ if (!isset($_SESSION['user_id'])) {
                     name="title"
                     value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
                     placeholder="e.g. Sales Associate"
+                    minlength="3" maxlength="32"
                     required>
             </div>
 
@@ -158,7 +159,10 @@ if (!isset($_SESSION['user_id'])) {
                 name="description"
                 rows="6"
                 placeholder="Describe the responsibilities of this position..."
-                required></textarea>
+                required
+                minlength="3"
+                maxlength="500"
+            ></textarea>
 
         </div>
 
@@ -170,7 +174,10 @@ if (!isset($_SESSION['user_id'])) {
                 name="requirements"
                 rows="6"
                 placeholder="List the qualifications, education, and experience required..."
-                required></textarea>
+                required
+                minlength="3"
+                maxlength="500"
+            ></textarea>
 
         </div>
 

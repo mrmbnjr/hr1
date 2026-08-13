@@ -34,6 +34,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                         id="departmentName"
                         name="department_name"
                         placeholder="e.g. Marketing"
+                        minlength="3" maxlength="32"
                         required>
                 </div>
 
@@ -88,6 +89,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                         id="positionTitle"
                         name="position_name"
                         placeholder="e.g. Software Engineer"
+                        minlength="3" maxlength="32"
                         required>
                 </div>
 
