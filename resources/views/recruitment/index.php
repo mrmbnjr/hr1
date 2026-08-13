@@ -92,7 +92,7 @@ if (!isset($_SESSION['user_id'])) {
                     <thead>
                         <tr>
                             <th>
-                                (<?= isset($jobs) ? count($jobs) : 0; ?>) Job Titles
+                                (<?= isset($jobs) ? count($jobs) : 0; ?>) Job Positions
                             </th>
                             <th>Departments</th>
                             <th>Employment Types</th>

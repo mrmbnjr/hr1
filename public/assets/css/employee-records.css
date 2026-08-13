@@ -83,6 +83,20 @@
     min-width: 900px;
 }
 
+.employee-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.employee-link .employee-cell {
+    cursor: pointer;
+}
+
+.employee-link:hover strong {
+    text-decoration: underline;
+}
+
 .employee-records-table thead th {
     text-align: left;
 

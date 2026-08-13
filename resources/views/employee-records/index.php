@@ -164,11 +164,6 @@ $statusMeta = [
                             <th>Status</th>
 
                             <th>Date Hired</th>
-
-                            <th class="col-actions">
-                                Actions
-                            </th>
-
                         </tr>
 
                     </thead>
@@ -180,7 +175,7 @@ $statusMeta = [
 
                             <tr class="empty-row">
 
-                                <td colspan="8">
+                                <td colspan="7">
 
                                     <div class="empty-state">
 
@@ -263,43 +258,45 @@ $statusMeta = [
 
                                     <td>
 
-                                        <div class="employee-cell">
+                                        <a
+                                            href="?page=view&id=<?= urlencode($employeeId) ?>"
+                                            class="employee-link">
 
-                                            <div class="avatar-circle">
+                                            <div class="employee-cell">
 
-                                                <?= strtoupper(
-                                                    substr(
-                                                        $fullname,
-                                                        0,
-                                                        1
-                                                    )
-                                                ) ?>
+                                                <div class="avatar-circle">
+
+                                                    <?= strtoupper(
+                                                        substr(
+                                                            $fullname,
+                                                            0,
+                                                            1
+                                                        )
+                                                    ) ?>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <strong>
+                                                        <?= htmlspecialchars($fullname) ?>
+                                                    </strong>
+
+                                                    <?php if ($email): ?>
+
+                                                        <span class="sub-text">
+                                                            <?= htmlspecialchars($email) ?>
+                                                        </span>
+
+                                                    <?php endif; ?>
+
+                                                </div>
 
                                             </div>
 
-
-                                            <div>
-
-                                                <strong>
-                                                    <?= htmlspecialchars($fullname) ?>
-                                                </strong>
-
-                                                <?php if ($email): ?>
-
-                                                    <span class="sub-text">
-
-                                                        <?= htmlspecialchars($email) ?>
-
-                                                    </span>
-
-                                                <?php endif; ?>
-
-                                            </div>
-
-                                        </div>
+                                        </a>
 
                                     </td>
-
 
                                     <!-- Employee ID -->
 
@@ -362,24 +359,6 @@ $statusMeta = [
                                         <?= htmlspecialchars($dateHired) ?>
 
                                     </td>
-
-
-                                    <!-- Actions -->
-
-                                    <td class="col-actions">
-
-                                        <a
-                                            href="?page=view&id=<?= urlencode($employeeId) ?>"
-                                            class="btn-review">
-
-                                            <i class="fa-solid fa-eye"></i>
-
-                                            View
-
-                                        </a>
-
-                                    </td>
-
                                 </tr>
 
                             <?php endforeach; ?>

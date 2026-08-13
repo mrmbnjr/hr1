@@ -164,6 +164,20 @@
 
 .applicant-cell { display: flex; align-items: center; gap: 12px; }
 
+.applicant-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.applicant-link .applicant-cell {
+    cursor: pointer;
+}
+
+.applicant-link:hover strong {
+    text-decoration: underline;
+}
+
 .avatar-circle {
     width: 38px;
     height: 38px;

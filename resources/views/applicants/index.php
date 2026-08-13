@@ -160,7 +160,6 @@ foreach ($applicants as $a) {
                             <th>AI Score</th>
                             <th>Status</th>
                             <th>Date Applied</th>
-                            <th class="col-actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -168,7 +167,7 @@ foreach ($applicants as $a) {
                     <?php if (empty($applicants)): ?>
 
                         <tr class="empty-row">
-                            <td colspan="6">
+                            <td colspan="5">
                                 <div class="empty-state">
                                     <i class="fa-solid fa-user-slash"></i>
                                     <p>No applicants found.</p>
@@ -229,13 +228,20 @@ foreach ($applicants as $a) {
                             data-mgr-remarks="<?= htmlspecialchars($mgrRemarks) ?>">
 
                             <td>
-                                <div class="applicant-cell">
-                                    <div class="avatar-circle"><?= strtoupper(substr($applicant['fullname'] ?? '?', 0, 1)) ?></div>
-                                    <div>
-                                        <strong><?= htmlspecialchars($applicant['fullname'] ?? '') ?></strong>
-                                        <span class="sub-text"><?= htmlspecialchars($applicant['email'] ?? '') ?></span>
+                                <a href="?page=review&id=<?= (int)$applicant['applicant_id'] ?>" class="applicant-link">
+                                    <div class="applicant-cell">
+                                        <div class="avatar-circle">
+                                            <?= strtoupper(substr($applicant['fullname'] ?? '?', 0, 1)) ?>
+                                        </div>
+
+                                        <div>
+                                            <strong><?= htmlspecialchars($applicant['fullname'] ?? '') ?></strong>
+                                            <span class="sub-text">
+                                                <?= htmlspecialchars($applicant['email'] ?? '') ?>
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
+                                </a>
                             </td>
 
                             <td><?= htmlspecialchars($applicant['position'] ?? '') ?></td>
@@ -252,13 +258,6 @@ foreach ($applicants as $a) {
                             </td>
 
                             <td><?= htmlspecialchars($applicant['applied_at'] ?? '') ?></td>
-
-                            <td class="col-actions">
-                                <a href="?page=review&id=<?= $applicant['applicant_id'] ?>" class="btn-review">
-                                    <i class="fa-solid fa-magnifying-glass"></i>Review
-                                </a>
-                            </td>
-
                         </tr>
 
                         <?php endforeach; ?>

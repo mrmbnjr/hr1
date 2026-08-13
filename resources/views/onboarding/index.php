@@ -126,8 +126,6 @@ $statusMeta = [
 
                     <th>Start Date</th>
 
-                    <th class="col-actions">Actions</th>
-
                     </tr>
 
                     </thead>
@@ -138,7 +136,7 @@ $statusMeta = [
 
                     <tr class="empty-row">
 
-                        <td colspan="7">
+                        <td colspan="6">
 
                             <div class="empty-state">
 
@@ -173,29 +171,27 @@ $statusMeta = [
                         <!-- Employee -->
 
                         <td>
+                            <a
+                                href="?page=onboarding-view&id=<?= (int)$employee['employee_id'] ?>"
+                                class="employee-link">
 
-                            <div class="onboarding-cell">
+                                <div class="onboarding-cell">
 
-                                <div class="avatar-circle">
+                                    <div class="avatar-circle">
+                                        <?= strtoupper(substr($employee['fullname'], 0, 1)) ?>
+                                    </div>
 
-                                    <?= strtoupper(substr($employee['fullname'],0,1)) ?>
+                                    <div>
+                                        <strong><?= htmlspecialchars($employee['fullname']) ?></strong>
+
+                                        <span class="sub-text">
+                                            <?= htmlspecialchars($employee['email']) ?>
+                                        </span>
+                                    </div>
 
                                 </div>
 
-                                <div>
-
-                                    <strong><?= htmlspecialchars($employee['fullname']) ?></strong>
-
-                                    <span class="sub-text">
-
-                                        <?= htmlspecialchars($employee['email']) ?>
-
-                                    </span>
-
-                                </div>
-
-                            </div>
-
+                            </a>
                         </td>
 
                         <!-- Department -->
@@ -250,23 +246,6 @@ $statusMeta = [
                             <?= htmlspecialchars($employee['start_date']) ?>
 
                         </td>
-
-                        <!-- Actions -->
-
-                        <td class="col-actions">
-
-                            <a
-                                href="?page=onboarding-view&id=<?= $employee['employee_id'] ?>"
-                                class="btn-review">
-
-                                <i class="fa-solid fa-eye"></i>
-
-                                View
-
-                            </a>
-
-                        </td>
-
                     </tr>
 
                     <?php endforeach; ?>
