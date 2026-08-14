@@ -355,14 +355,6 @@
     line-height:1.6;
 }
 
-.status-dot{
-    width:6px;
-    height:6px;
-    border-radius:50%;
-    background:currentColor;
-    flex-shrink:0;
-}
-
 .status-badge.open,
 .status-badge.active{
     background:rgba(34,140,80,.10);
