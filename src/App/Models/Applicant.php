@@ -226,7 +226,7 @@ class Applicant
             INNER JOIN applicants a
                 ON ap.applicant_id = a.applicant_id
 
-            WHERE r.role_code IN ('ADMIN', 'HR', 'MANAGER')
+            WHERE r.role_code IN ('ADMIN', 'HR', 'MGR')
 
             ORDER BY
                 r.role_name,
@@ -481,9 +481,13 @@ class Applicant
 
                 p.position_id,
                 p.position_name,
+                p.role_id,
 
                 d.department_id,
                 d.department_name,
+
+                r.role_code,
+                r.role_name,
 
                 (
                     SELECT COUNT(*)
@@ -700,30 +704,21 @@ class Applicant
 
             $employeeId = (int) $this->db->lastInsertId();
 
-
             /*
             |--------------------------------------------------------------------------
-            | 7. Get Employee role
+            | 7. Get role from position
             |--------------------------------------------------------------------------
             */
 
-            $roleStmt = $this->db->prepare("
-                SELECT role_id
-                FROM roles
-                WHERE role_code = 'EMPLOYEE'
-                LIMIT 1
-            ");
-
-            $roleStmt->execute();
-
-            $roleId = $roleStmt->fetchColumn();
+            $roleId = $application['role_id'] ?? null;
 
             if (!$roleId) {
                 throw new \Exception(
-                    'Employee role was not found.'
+                    'No system role is assigned to this position.'
                 );
             }
 
+            $roleId = (int) $roleId;
 
             /*
             |--------------------------------------------------------------------------

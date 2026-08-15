@@ -29,7 +29,11 @@ class HumanCapitalController
 
         $organization = $this->humanCapital->getOrganizationTree();
 
-        $departmentLookup = $this->humanCapital->getDepartmentLookup();
+        $departmentLookup =
+            $this->humanCapital->getDepartmentLookup();
+
+        $roles =
+            $this->humanCapital->getRoles();
 
         require '../resources/views/human-capital/index.php';
     }
@@ -94,6 +98,86 @@ class HumanCapitalController
             $this->humanCapital->deleteDepartment($id)
 
         );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | POSITIONS
+    |--------------------------------------------------------------------------
+    */
+
+    public function createPosition()
+    {
+        $positionName = trim(
+            $_POST['position_name'] ?? ''
+        );
+
+        $departmentId = (int) (
+            $_POST['department_id'] ?? 0
+        );
+
+        $roleId = (int) (
+            $_POST['role_id'] ?? 0
+        );
+
+
+        if ($positionName === '') {
+
+            $this->json([
+                'success' => false,
+                'message' => 'Position name is required.'
+            ]);
+
+        }
+
+
+        if ($departmentId <= 0) {
+
+            $this->json([
+                'success' => false,
+                'message' => 'Department is required.'
+            ]);
+
+        }
+
+
+        if ($roleId <= 0) {
+
+            $this->json([
+                'success' => false,
+                'message' => 'System role is required.'
+            ]);
+
+        }
+
+
+        try {
+
+            $success = $this->humanCapital->createPosition([
+
+                'position_name' => $positionName,
+
+                'department_id' => $departmentId,
+
+                'role_id' => $roleId
+
+            ]);
+
+
+            $this->json([
+                'success' => $success,
+                'message' => 'Position created successfully.'
+            ]);
+
+
+        } catch (\Exception $e) {
+
+            $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+
+        }
     }
 
     /*

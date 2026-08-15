@@ -90,12 +90,18 @@ class Recruitment
                 p.position_id,
                 p.position_name,
                 p.department_id,
-                d.department_name
+                p.role_id,
+                d.department_name,
+                r.role_code,
+                r.role_name
 
             FROM positions p
 
             INNER JOIN departments d
                 ON d.department_id = p.department_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
 
             WHERE NOT EXISTS (
                 SELECT 1
@@ -223,15 +229,28 @@ class Recruitment
         $sql = "
             SELECT
                 jp.*,
+
                 p.position_id,
                 p.position_name,
                 p.department_id,
-                d.department_name
+                p.role_id,
+
+                d.department_name,
+
+                r.role_code,
+                r.role_name
+
             FROM job_postings jp
+
             LEFT JOIN positions p
                 ON p.position_id = jp.position_id
+
             LEFT JOIN departments d
                 ON d.department_id = p.department_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
+
             WHERE jp.posting_id = ?
         ";
 
@@ -296,9 +315,15 @@ class Recruitment
         $stmt = $this->db->prepare("
             SELECT
                 p.position_id,
-                p.position_name
+                p.position_name,
+                p.role_id,
+                r.role_code,
+                r.role_name
 
             FROM positions p
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
 
             WHERE p.department_id = ?
 
@@ -324,12 +349,18 @@ class Recruitment
                 p.position_id,
                 p.position_name,
                 p.department_id,
-                d.department_name
+                p.role_id,
+                d.department_name,
+                r.role_code,
+                r.role_name
 
             FROM positions p
 
             INNER JOIN departments d
                 ON d.department_id = p.department_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
 
             WHERE
                 NOT EXISTS (
@@ -357,8 +388,17 @@ class Recruitment
         $sql = "
             SELECT
                 jp.*,
+
+                p.position_id,
                 p.position_name,
-                d.department_name
+                p.department_id,
+                p.role_id,
+
+                d.department_name,
+
+                r.role_code,
+                r.role_name
+
             FROM job_postings jp
 
             LEFT JOIN positions p
@@ -366,6 +406,9 @@ class Recruitment
 
             LEFT JOIN departments d
                 ON d.department_id = p.department_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
 
             WHERE jp.application_token = ?
             LIMIT 1

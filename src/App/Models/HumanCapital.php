@@ -517,4 +517,43 @@ class HumanCapital
 
         ")->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getRoles(): array
+    {
+        $stmt = $this->db->query("
+            SELECT
+                role_id,
+                role_code,
+                role_name
+            FROM roles
+            ORDER BY role_name
+        ");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createPosition(array $data): bool
+    {
+        $stmt = $this->db->prepare("
+            INSERT INTO positions
+            (
+                department_id,
+                role_id,
+                position_name
+            )
+            VALUES
+            (
+                :department_id,
+                :role_id,
+                :position_name
+            )
+        ");
+
+        return $stmt->execute([
+            ':department_id' => $data['department_id'],
+            ':role_id' => $data['role_id'],
+            ':position_name' => $data['position_name']
+        ]);
+    }
+
 }
