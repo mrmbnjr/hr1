@@ -231,7 +231,7 @@ $statusMeta = [
                                     ?? '';
 
                                 $dateHired =
-                                    $employee['date_hired']
+                                    $employee['hire_date']
                                     ?? '';
 
                                 ?>

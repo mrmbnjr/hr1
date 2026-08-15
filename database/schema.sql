@@ -201,14 +201,28 @@ CREATE TABLE onboarding_documents (
 
 CREATE TABLE employees (
     employee_id INT AUTO_INCREMENT PRIMARY KEY,
+
     application_id INT UNIQUE,
+
     employee_number VARCHAR(30) UNIQUE,
+
+    position_id INT,
+    department_id INT,
+
     hire_date DATE NOT NULL,
+
     employment_status ENUM(
         'Probationary',
         'Regular',
         'Contract'
     ),
+
     FOREIGN KEY(application_id)
-    REFERENCES applications(application_id)
+        REFERENCES applications(application_id),
+
+    FOREIGN KEY(position_id)
+        REFERENCES positions(position_id),
+
+    FOREIGN KEY(department_id)
+        REFERENCES departments(department_id)
 );

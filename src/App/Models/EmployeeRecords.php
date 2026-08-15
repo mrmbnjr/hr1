@@ -14,7 +14,6 @@ class EmployeeRecords
         $this->db = Database::connection();
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | GET ALL EMPLOYEES
@@ -25,55 +24,50 @@ class EmployeeRecords
     {
         $sql = "
             SELECT
-
-                /* Employee information */
                 e.employee_id,
                 e.employee_number,
                 e.application_id,
+                e.position_id,
                 e.hire_date,
                 e.employment_status,
 
-                /* Applicant information */
                 ap.applicant_id,
 
                 CONCAT(
-                    ap.first_name,
+                    COALESCE(ap.first_name, ''),
                     ' ',
-                    ap.last_name
+                    COALESCE(ap.last_name, '')
                 ) AS fullname,
 
                 ap.email,
 
-                /* Organization information */
                 d.department_name,
 
                 p.position_name AS job_title,
 
-                /* Job posting information */
                 jp.employment_type
 
             FROM employees e
 
-            INNER JOIN applications app
+            LEFT JOIN applications app
                 ON e.application_id = app.application_id
 
-            INNER JOIN applicants ap
+            LEFT JOIN applicants ap
                 ON app.applicant_id = ap.applicant_id
 
-            INNER JOIN job_postings jp
+            LEFT JOIN job_postings jp
                 ON app.posting_id = jp.posting_id
 
-            INNER JOIN positions p
-                ON jp.position_id = p.position_id
+            LEFT JOIN positions p
+                ON e.position_id = p.position_id
 
-            INNER JOIN departments d
+            LEFT JOIN departments d
                 ON p.department_id = d.department_id
 
             ORDER BY e.hire_date DESC
         ";
 
         $stmt = $this->db->prepare($sql);
-
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -90,48 +84,44 @@ class EmployeeRecords
     {
         $sql = "
             SELECT
-
-                /* Employee information */
                 e.employee_id,
                 e.employee_number,
                 e.application_id,
+                e.position_id,
                 e.hire_date,
                 e.employment_status,
 
-                /* Applicant information */
                 ap.applicant_id,
 
                 CONCAT(
-                    ap.first_name,
+                    COALESCE(ap.first_name, ''),
                     ' ',
-                    ap.last_name
+                    COALESCE(ap.last_name, '')
                 ) AS fullname,
 
                 ap.email,
 
-                /* Organization information */
                 d.department_name,
 
                 p.position_name AS job_title,
 
-                /* Job posting information */
                 jp.employment_type
 
             FROM employees e
 
-            INNER JOIN applications app
+            LEFT JOIN applications app
                 ON e.application_id = app.application_id
 
-            INNER JOIN applicants ap
+            LEFT JOIN applicants ap
                 ON app.applicant_id = ap.applicant_id
 
-            INNER JOIN job_postings jp
+            LEFT JOIN job_postings jp
                 ON app.posting_id = jp.posting_id
 
-            INNER JOIN positions p
-                ON jp.position_id = p.position_id
+            LEFT JOIN positions p
+                ON e.position_id = p.position_id
 
-            INNER JOIN departments d
+            LEFT JOIN departments d
                 ON p.department_id = d.department_id
 
             WHERE e.employee_id = :employee_id
@@ -165,7 +155,6 @@ class EmployeeRecords
     {
         $sql = "
             SELECT DISTINCT
-
                 d.department_id,
                 d.department_name
 
@@ -174,14 +163,8 @@ class EmployeeRecords
             INNER JOIN positions p
                 ON p.department_id = d.department_id
 
-            INNER JOIN job_postings jp
-                ON jp.position_id = p.position_id
-
-            INNER JOIN applications app
-                ON app.posting_id = jp.posting_id
-
             INNER JOIN employees e
-                ON e.application_id = app.application_id
+                ON e.position_id = p.position_id
 
             ORDER BY d.department_name ASC
         ";
