@@ -143,7 +143,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                                 name="department_id"
                                 required>
 
-                            <option value="" disabled selected>
+                            <option value="" hidden selected>
                                 Select department
                             </option>
 
