@@ -397,14 +397,21 @@ class HumanCapital
 
                 SELECT
 
-                    position_id,
-                    position_name
+                    p.position_id,
+                    p.position_name,
 
-                FROM positions
+                    r.role_id,
+                    r.role_code,
+                    r.role_name
 
-                WHERE department_id = ?
+                FROM positions p
 
-                ORDER BY position_name
+                LEFT JOIN roles r
+                    ON r.role_id = p.role_id
+
+                WHERE p.department_id = ?
+
+                ORDER BY p.position_name
 
             ");
 

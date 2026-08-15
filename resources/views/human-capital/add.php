@@ -94,6 +94,31 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                 </div>
 
                 <div class="form-group">
+                    <label for="positionRole">Default System Role</label>
+
+                    <select
+                        id="positionRole"
+                        name="role_id"
+                        required>
+
+                        <option value="" hidden selected>
+                            Select system role
+                        </option>
+
+                        <?php foreach ($roles as $role): ?>
+                            <option value="<?= $role['role_id']; ?>">
+                                <?= htmlspecialchars($role['role_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+
+                    </select>
+
+                    <small class="form-help">
+                        This role will be assigned automatically when an employee is hired for this position.
+                    </small>
+                </div>
+
+                <div class="form-group">
                     <label for="positionDepartment">Department</label>
 
                     <?php if (empty($departmentLookup)): ?>

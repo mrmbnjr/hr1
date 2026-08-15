@@ -18,7 +18,7 @@ CREATE TABLE users (
     must_change_password BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(role_id)
-    REFERENCES roles(role_id)
+        REFERENCES roles(role_id)
 );
 
 CREATE TABLE departments (
@@ -30,11 +30,15 @@ CREATE TABLE departments (
 CREATE TABLE positions (
     position_id INT AUTO_INCREMENT PRIMARY KEY,
     department_id INT NOT NULL,
+    role_id INT NOT NULL,
     position_name VARCHAR(150) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (department_id)
-        REFERENCES departments(department_id)
+        REFERENCES departments(department_id),
+
+    FOREIGN KEY (role_id)
+        REFERENCES roles(role_id)
 );
 
 CREATE TABLE job_postings (
@@ -182,7 +186,7 @@ CREATE TABLE onboarding (
     ) DEFAULT 'Pending',
     remarks TEXT,
     FOREIGN KEY(application_id)
-    REFERENCES applications(application_id)
+        REFERENCES applications(application_id)
 );
 
 CREATE TABLE onboarding_documents (
@@ -196,7 +200,7 @@ CREATE TABLE onboarding_documents (
         'Verified'
     ) DEFAULT 'Pending',
     FOREIGN KEY(onboarding_id)
-    REFERENCES onboarding(onboarding_id)
+        REFERENCES onboarding(onboarding_id)
 );
 
 CREATE TABLE employees (
