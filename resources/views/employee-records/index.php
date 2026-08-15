@@ -157,7 +157,7 @@ $statusMeta = [
 
                             <th>Department</th>
 
-                            <th>Job Title</th>
+                            <th>Position</th>
 
                             <th>Employment Type</th>
 

@@ -7,73 +7,111 @@ use PDO;
 
 class Onboarding
 {
-
     private PDO $db;
-
 
     public function __construct()
     {
         $this->db = Database::connection();
     }
 
-    public function getAllOnboarding()
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET ALL ONBOARDING
+    |--------------------------------------------------------------------------
+    */
+
+    public function getAllOnboarding(): array
     {
         $sql = "
             SELECT
+
+                /* Onboarding */
                 o.onboarding_id,
                 o.application_id,
                 o.orientation_date,
                 o.onboarding_status,
                 o.remarks,
 
+                /* Employee */
                 e.employee_id,
                 e.employee_number,
                 e.hire_date,
                 e.employment_status,
+                e.position_id,
 
+                /* Applicant */
+                a.applicant_id,
                 a.first_name,
                 a.middle_name,
                 a.last_name,
                 a.email,
 
                 CONCAT(
-                    a.first_name,
+                    COALESCE(a.first_name, ''),
                     ' ',
-                    COALESCE(CONCAT(a.middle_name, ' '), ''),
-                    a.last_name
+                    IF(
+                        a.middle_name IS NULL
+                        OR a.middle_name = '',
+                        '',
+                        CONCAT(a.middle_name, ' ')
+                    ),
+                    COALESCE(a.last_name, '')
                 ) AS fullname,
 
+                /* Organization */
                 d.department_name,
-
                 p.position_name AS job_title
 
             FROM onboarding o
 
-            INNER JOIN applications app
+            /*
+             * Onboarding → Application
+             */
+            LEFT JOIN applications app
                 ON o.application_id = app.application_id
 
-            INNER JOIN applicants a
+            /*
+             * Application → Applicant
+             */
+            LEFT JOIN applicants a
                 ON app.applicant_id = a.applicant_id
 
-            INNER JOIN job_postings jp
-                ON app.posting_id = jp.posting_id
+            /*
+             * Application → Employee
+             *
+             * Employee is the main HR record.
+             */
+            LEFT JOIN employees e
+                ON o.application_id = e.application_id
 
-            INNER JOIN positions p
-                ON jp.position_id = p.position_id
+            /*
+             * Employee → Position
+             *
+             * IMPORTANT:
+             * Do not use job_postings here.
+             */
+            LEFT JOIN positions p
+                ON e.position_id = p.position_id
 
-            INNER JOIN departments d
+            /*
+             * Position → Department
+             */
+            LEFT JOIN departments d
                 ON p.department_id = d.department_id
 
-            INNER JOIN employees e
-                ON app.application_id = e.application_id
-
-            ORDER BY o.onboarding_id DESC
+            ORDER BY
+                o.onboarding_id DESC
         ";
 
         $employees = $this->db
             ->query($sql)
             ->fetchAll(PDO::FETCH_ASSOC);
 
+
+        /*
+         * Calculate onboarding progress.
+         */
         foreach ($employees as &$employee) {
 
             switch ($employee['onboarding_status']) {
@@ -92,20 +130,44 @@ class Onboarding
                     break;
             }
 
-            $employee['start_date'] = $employee['hire_date'];
+
+            /*
+             * Start date is the employee's hire date.
+             */
+            $employee['start_date'] =
+                $employee['hire_date'] ?? null;
         }
+
+        unset($employee);
 
         return $employees;
     }
 
-    public function countAll()
+
+    /*
+    |--------------------------------------------------------------------------
+    | COUNT ALL ONBOARDING
+    |--------------------------------------------------------------------------
+    */
+
+    public function countAll(): int
     {
-        return $this->db
-                    ->query("SELECT COUNT(*) FROM onboarding")
-                    ->fetchColumn();
+        return (int) $this->db
+            ->query("
+                SELECT COUNT(*)
+                FROM onboarding
+            ")
+            ->fetchColumn();
     }
 
-    public function countStatus(string $status)
+
+    /*
+    |--------------------------------------------------------------------------
+    | COUNT ONBOARDING BY STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    public function countStatus(string $status): int
     {
         $stmt = $this->db->prepare("
             SELECT COUNT(*)
@@ -115,6 +177,6 @@ class Onboarding
 
         $stmt->execute([$status]);
 
-        return $stmt->fetchColumn();
+        return (int) $stmt->fetchColumn();
     }
 }

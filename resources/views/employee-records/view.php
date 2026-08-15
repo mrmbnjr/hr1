@@ -343,7 +343,7 @@ $initial =
                     <div class="record-item">
 
                         <span class="record-label">
-                            Job Title
+                            Position
                         </span>
 
                         <strong>

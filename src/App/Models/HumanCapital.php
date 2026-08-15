@@ -15,7 +15,13 @@ class HumanCapital
     }
 
 
-    public function getOverviewStats()
+    /*
+    |--------------------------------------------------------------------------
+    | OVERVIEW STATISTICS
+    |--------------------------------------------------------------------------
+    */
+
+    public function getOverviewStats(): array
     {
         return [
 
@@ -30,23 +36,30 @@ class HumanCapital
             ")->fetchColumn(),
 
             'vacancies' => (int) $this->db->query("
-                SELECT COALESCE(SUM(vacancies),0)
+                SELECT COALESCE(SUM(vacancies), 0)
                 FROM job_postings
-                WHERE status='Open'
+                WHERE status = 'Open'
             ")->fetchColumn(),
 
             'hiring_departments' => (int) $this->db->query("
                 SELECT COUNT(DISTINCT p.department_id)
-                FROM job_postings j
+                FROM job_postings jp
                 INNER JOIN positions p
-                    ON p.position_id = j.position_id
-                WHERE j.status = 'Open'
+                    ON p.position_id = jp.position_id
+                WHERE jp.status = 'Open'
             ")->fetchColumn(),
 
         ];
     }
 
-    public function getDepartments()
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET ALL DEPARTMENTS
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDepartments(): array
     {
         $stmt = $this->db->query("
 
@@ -73,26 +86,35 @@ class HumanCapital
 
             FROM departments d
 
+            /*
+             * Department → Position
+             */
             LEFT JOIN positions p
                 ON p.department_id = d.department_id
 
+            /*
+             * Position → Employee
+             *
+             * IMPORTANT:
+             * Employees belong to positions directly.
+             */
+            LEFT JOIN employees e
+                ON e.position_id = p.position_id
+
+            /*
+             * Position → Job Posting
+             *
+             * Used ONLY for vacancy information.
+             */
             LEFT JOIN job_postings jp
                 ON jp.position_id = p.position_id
 
-            LEFT JOIN applications ap
-                ON ap.posting_id = jp.posting_id
-
-            LEFT JOIN employees e
-                ON e.application_id = ap.application_id
-
             GROUP BY
-
                 d.department_id,
                 d.department_name,
                 d.created_at
 
             ORDER BY
-
                 d.department_name
 
         ");
@@ -100,11 +122,19 @@ class HumanCapital
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getDepartment(int $id)
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET SINGLE DEPARTMENT
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDepartment(int $id): ?array
     {
         $stmt = $this->db->prepare("
 
             SELECT
+
                 d.department_id,
                 d.department_name,
                 d.created_at,
@@ -116,8 +146,8 @@ class HumanCapital
                 COALESCE(
                     SUM(
                         CASE
-                            WHEN j.status = 'Open'
-                            THEN j.vacancies
+                            WHEN jp.status = 'Open'
+                            THEN jp.vacancies
                             ELSE 0
                         END
                     ),
@@ -126,89 +156,132 @@ class HumanCapital
 
             FROM departments d
 
+            /*
+             * Department → Position
+             */
             LEFT JOIN positions p
                 ON p.department_id = d.department_id
 
-            LEFT JOIN job_postings j
-                ON j.position_id = p.position_id
-
-            LEFT JOIN applications ap
-                ON ap.posting_id = j.posting_id
-
+            /*
+             * Position → Employee
+             */
             LEFT JOIN employees e
-                ON e.application_id = ap.application_id
+                ON e.position_id = p.position_id
+
+            /*
+             * Position → Job Posting
+             */
+            LEFT JOIN job_postings jp
+                ON jp.position_id = p.position_id
 
             WHERE d.department_id = ?
 
             GROUP BY
                 d.department_id,
                 d.department_name,
-                d.created_at;
+                d.created_at
+
+            LIMIT 1
+
         ");
 
         $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $department = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $department ?: null;
     }
 
-    public function createDepartment(array $data)
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE DEPARTMENT
+    |--------------------------------------------------------------------------
+    */
+
+    public function createDepartment(array $data): bool
     {
-        $stmt=$this->db->prepare("
+        $stmt = $this->db->prepare("
 
             INSERT INTO departments
-            (department_name)
+                (department_name)
+
             VALUES
-            (?)
+                (?)
+
         ");
 
         return $stmt->execute([
             $data['department_name']
         ]);
     }
-    public function updateDepartment(int $id, array $data)
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE DEPARTMENT
+    |--------------------------------------------------------------------------
+    */
+
+    public function updateDepartment(int $id, array $data): bool
     {
-        $stmt=$this->db->prepare("
+        $stmt = $this->db->prepare("
 
             UPDATE departments
 
             SET
-                department_name=?
-            WHERE department_id=?
+                department_name = ?
+
+            WHERE department_id = ?
+
         ");
 
         return $stmt->execute([
-
             $data['department_name'],
             $id
-
         ]);
     }
-    public function deleteDepartment(int $id)
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE DEPARTMENT
+    |--------------------------------------------------------------------------
+    */
+
+    public function deleteDepartment(int $id): array
     {
-        $stmt=$this->db->prepare("
+        /*
+         * Do not allow deletion when positions
+         * still belong to this department.
+         */
+        $stmt = $this->db->prepare("
+
             SELECT COUNT(*)
             FROM positions
-            WHERE department_id=?
+            WHERE department_id = ?
+
         ");
 
         $stmt->execute([$id]);
 
-        if($stmt->fetchColumn()>0){
+        if ((int) $stmt->fetchColumn() > 0) {
 
             return [
 
-                'success'=>false,
+                'success' => false,
 
-                'message'=>'This department still has positions.'
+                'message' => 'This department still has positions.'
 
             ];
-
         }
 
-        $stmt=$this->db->prepare("
+
+        $stmt = $this->db->prepare("
 
             DELETE FROM departments
 
-            WHERE department_id=?
+            WHERE department_id = ?
 
         ");
 
@@ -216,84 +289,122 @@ class HumanCapital
 
         return [
 
-            'success'=>true
+            'success' => true
 
         ];
     }
 
-public function getPositions()
-{
-    $stmt = $this->db->query("
-        SELECT
-            p.position_id,
-            p.position_name,
-            d.department_name,
 
-            COUNT(DISTINCT e.employee_id) AS employee_count,
+    /*
+    |--------------------------------------------------------------------------
+    | GET ALL POSITIONS
+    |--------------------------------------------------------------------------
+    */
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN jp.status = 'Open'
-                        THEN jp.vacancies
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS vacancies,
+    public function getPositions(): array
+    {
+        $stmt = $this->db->query("
 
-            CASE
-                WHEN EXISTS (
-                    SELECT 1
-                    FROM job_postings active_jp
-                    WHERE active_jp.position_id = p.position_id
-                      AND active_jp.status = 'Open'
-                )
-                THEN 'Open'
-                ELSE 'Closed'
-            END AS status
+            SELECT
 
-        FROM positions p
+                p.position_id,
+                p.position_name,
 
-        INNER JOIN departments d
-            ON d.department_id = p.department_id
+                d.department_name,
 
-        LEFT JOIN job_postings jp
-            ON jp.position_id = p.position_id
+                /*
+                 * Employees belong directly to positions.
+                 */
+                COUNT(DISTINCT e.employee_id) AS employee_count,
 
-        LEFT JOIN applications ap
-            ON ap.posting_id = jp.posting_id
+                /*
+                 * Vacancies come from open job postings.
+                 */
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN jp.status = 'Open'
+                            THEN jp.vacancies
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS vacancies,
 
-        LEFT JOIN employees e
-            ON e.application_id = ap.application_id
+                /*
+                 * Position is Open when it has
+                 * at least one open job posting.
+                 */
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM job_postings active_jp
+                        WHERE active_jp.position_id = p.position_id
+                          AND active_jp.status = 'Open'
+                    )
+                    THEN 'Open'
+                    ELSE 'Closed'
+                END AS status
 
-        GROUP BY
-            p.position_id,
-            p.position_name,
-            d.department_name
+            FROM positions p
 
-        ORDER BY
-            d.department_name,
-            p.position_name
-    ");
+            INNER JOIN departments d
+                ON d.department_id = p.department_id
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-    public function getOrganizationTree()
+            /*
+             * Position → Employee
+             */
+            LEFT JOIN employees e
+                ON e.position_id = p.position_id
+
+            /*
+             * Position → Job Posting
+             */
+            LEFT JOIN job_postings jp
+                ON jp.position_id = p.position_id
+
+            GROUP BY
+                p.position_id,
+                p.position_name,
+                d.department_name
+
+            ORDER BY
+                d.department_name,
+                p.position_name
+
+        ");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET ORGANIZATION TREE
+    |--------------------------------------------------------------------------
+    */
+
+    public function getOrganizationTree(): array
     {
         $departments = $this->getDepartments();
 
         foreach ($departments as &$department) {
 
-            // Get all positions in this department
+            /*
+             * Get positions belonging to this department.
+             */
             $stmt = $this->db->prepare("
 
-            SELECT
-                position_id,
-                position_name
-            FROM positions
-            WHERE department_id = ?
-            ORDER BY position_name
+                SELECT
+
+                    position_id,
+                    position_name
+
+                FROM positions
+
+                WHERE department_id = ?
+
+                ORDER BY position_name
 
             ");
 
@@ -303,61 +414,88 @@ public function getPositions()
 
             $positions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Get employees for every position
+
+            /*
+             * Get employees for every position.
+             */
             foreach ($positions as &$position) {
 
-            $employeeStmt = $this->db->prepare("
+                $employeeStmt = $this->db->prepare("
 
-            SELECT
-                e.employee_id,
-                e.employee_number,
-                e.hire_date,
-                e.employment_status,
+                    SELECT
 
-                CONCAT(
-                    a.first_name,
-                    IF(
-                        a.middle_name IS NULL OR a.middle_name = '',
-                        '',
-                        CONCAT(' ', a.middle_name)
-                    ),
-                    ' ',
-                    a.last_name
-                ) AS employee_name
+                        e.employee_id,
+                        e.employee_number,
+                        e.hire_date,
+                        e.employment_status,
 
-            FROM employees e
+                        CONCAT(
+                            COALESCE(a.first_name, ''),
+                            IF(
+                                a.middle_name IS NULL
+                                OR a.middle_name = '',
+                                '',
+                                CONCAT(' ', a.middle_name)
+                            ),
+                            ' ',
+                            COALESCE(a.last_name, '')
+                        ) AS employee_name
 
-            INNER JOIN applications ap
-                ON ap.application_id = e.application_id
+                    FROM employees e
 
-            INNER JOIN applicants a
-                ON a.applicant_id = ap.applicant_id
+                    /*
+                     * Employee → Application
+                     */
+                    LEFT JOIN applications ap
+                        ON ap.application_id = e.application_id
 
-            INNER JOIN job_postings jp
-                ON jp.posting_id = ap.posting_id
+                    /*
+                     * Application → Applicant
+                     */
+                    LEFT JOIN applicants a
+                        ON a.applicant_id = ap.applicant_id
 
-            WHERE jp.position_id = ?
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Do NOT join job_postings here.
+                     *
+                     * The employee already has position_id.
+                     */
+                    WHERE e.position_id = ?
 
-            ORDER BY
-                a.last_name,
-                a.first_name;
+                    ORDER BY
+                        a.last_name,
+                        a.first_name
 
-            ");
+                ");
 
-            $employeeStmt->execute([
-                $position['position_id']
-            ]);
+                $employeeStmt->execute([
+                    $position['position_id']
+                ]);
 
-            $position['employees'] = $employeeStmt->fetchAll(PDO::FETCH_ASSOC);
+                $position['employees'] =
+                    $employeeStmt->fetchAll(PDO::FETCH_ASSOC);
             }
+
+            unset($position);
 
             $department['positions'] = $positions;
         }
 
+        unset($department);
+
         return $departments;
     }
 
-    public function getDepartmentLookup()
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEPARTMENT LOOKUP
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDepartmentLookup(): array
     {
         return $this->db->query("
 
