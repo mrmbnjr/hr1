@@ -461,9 +461,6 @@ class Applicant
         }
     }
 
-    /**
-     * Get application information needed for hiring.
-     */
     public function getApplicationForHiring(int $applicationId): ?array
     {
         $sql = "
@@ -482,6 +479,12 @@ class Applicant
                 jp.employment_type,
                 jp.vacancies,
 
+                p.position_id,
+                p.position_name,
+
+                d.department_id,
+                d.department_name,
+
                 (
                     SELECT COUNT(*)
                     FROM applications hired_app
@@ -496,6 +499,12 @@ class Applicant
 
             INNER JOIN job_postings jp
                 ON ap.posting_id = jp.posting_id
+
+            INNER JOIN positions p
+                ON jp.position_id = p.position_id
+
+            INNER JOIN departments d
+                ON p.department_id = d.department_id
 
             WHERE ap.application_id = :application_id
 
@@ -512,7 +521,6 @@ class Applicant
 
         return $result ?: null;
     }
-
 
     /**
      * Generate the next employee number.
@@ -564,12 +572,6 @@ class Applicant
         };
     }
 
-
-    /**
-     * Create a hired employee, user account and onboarding record.
-     *
-     * Returns generated account information.
-     */
     public function hireApplication(int $applicationId): array
     {
         $this->db->beginTransaction();
@@ -672,6 +674,8 @@ class Applicant
                 (
                     application_id,
                     employee_number,
+                    position_id,
+                    department_id,
                     hire_date,
                     employment_status
                 )
@@ -679,6 +683,8 @@ class Applicant
                 (
                     :application_id,
                     :employee_number,
+                    :position_id,
+                    :department_id,
                     CURDATE(),
                     :employment_status
                 )
@@ -687,6 +693,8 @@ class Applicant
             $employeeStmt->execute([
                 ':application_id' => $applicationId,
                 ':employee_number' => $employeeNumber,
+                ':position_id' => $application['position_id'],
+                ':department_id' => $application['department_id'],
                 ':employment_status' => $employmentStatus
             ]);
 
