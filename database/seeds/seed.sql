@@ -29,28 +29,6 @@
 
 USE hr1_db;
 
-SET FOREIGN_KEY_CHECKS = 0;
-
--- =====================================================================
--- RESET EXISTING DATA
--- =====================================================================
-
-TRUNCATE TABLE onboarding_documents;
-TRUNCATE TABLE onboarding;
-TRUNCATE TABLE interviews;
-TRUNCATE TABLE ai_screening;
-TRUNCATE TABLE applications;
-TRUNCATE TABLE employees;
-TRUNCATE TABLE applicants;
-TRUNCATE TABLE job_postings;
-TRUNCATE TABLE positions;
-TRUNCATE TABLE departments;
-TRUNCATE TABLE users;
-TRUNCATE TABLE roles;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-
 -- =====================================================================
 -- 1. ROLES
 -- =====================================================================
@@ -92,31 +70,10 @@ INSERT INTO users (
 
 (NULL, 1, 'admin',
  '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
- 'Active', 0),
-
-(NULL, 2, 'hr.delacruz',
- '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
- 'Active', 0),
-
-(NULL, 2, 'hr.santos',
- '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
- 'Active', 0),
-
-(NULL, 3, 'mgr.ramos',
- '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
- 'Active', 0),
-
-(NULL, 3, 'mgr.villar',
- '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
  'Active', 0);
 
 -- user_id:
 -- 1 = admin
--- 2 = hr.delacruz
--- 3 = hr.santos
--- 4 = mgr.ramos
--- 5 = mgr.villar
-
 
 -- =====================================================================
 -- 3. DEPARTMENTS
@@ -185,6 +142,9 @@ INSERT INTO positions (
 -- =====================================================================
 -- 5. JOB POSTINGS
 -- =====================================================================
+-- created_by references users(user_id). Only user_id 1 (admin) exists
+-- at this point in the script, so all postings are attributed to admin.
+-- =====================================================================
 
 INSERT INTO job_postings (
     position_id,
@@ -209,7 +169,7 @@ INSERT INTO job_postings (
     'Open',
     'a1f9c3d84e2b4a1f9d3c7e6b0a5f2c11',
     '2026-09-30',
-    2
+    1
 ),
 
 (
@@ -222,7 +182,7 @@ INSERT INTO job_postings (
     'Open',
     'b2e8d4c95f3a4b2e8c4d6f7a1b6e3d22',
     '2026-09-20',
-    2
+    1
 ),
 
 (
@@ -235,7 +195,7 @@ INSERT INTO job_postings (
     'Open',
     'c3d7e5b06a4c5d3f9e5c8b2a7f4d1e33',
     '2026-09-15',
-    3
+    1
 ),
 
 (
@@ -248,7 +208,7 @@ INSERT INTO job_postings (
     'Closed',
     'd4c6f6a17b5d6e4a0f6d9c3b8a5e2f44',
     '2026-07-31',
-    3
+    1
 ),
 
 (
@@ -261,7 +221,7 @@ INSERT INTO job_postings (
     'Open',
     'e5b5a7328c6e7f5b1a7e0d4c9b6f3a55',
     '2026-10-15',
-    3
+    1
 ),
 
 (
@@ -274,7 +234,7 @@ INSERT INTO job_postings (
     'Closed',
     'f6a4b8439d7f8a6c2b8f1e5d0a7c4b66',
     '2026-06-30',
-    2
+    1
 );
 
 -- posting_id:
@@ -609,6 +569,10 @@ INSERT INTO ai_screening (
 -- =====================================================================
 -- 9. INTERVIEWS
 -- =====================================================================
+-- interviewer_id references users(user_id). Only user_id 1 (admin)
+-- exists at this point in the script, so admin is recorded as the
+-- interviewer for all rows below.
+-- =====================================================================
 
 INSERT INTO interviews (
     application_id,
@@ -622,7 +586,7 @@ INSERT INTO interviews (
 
 (
     1,
-    4,
+    1,
     'Face-to-Face',
     '2026-08-05 10:00:00',
     'RAM-YUM Head Office, 3F Conference Room',
@@ -632,7 +596,7 @@ INSERT INTO interviews (
 
 (
     2,
-    4,
+    1,
     'Online',
     '2026-08-20 14:00:00',
     'Google Meet',
@@ -642,7 +606,7 @@ INSERT INTO interviews (
 
 (
     4,
-    5,
+    1,
     'Face-to-Face',
     '2026-08-01 09:30:00',
     'RAM-YUM Head Office, HR Interview Room',
@@ -652,7 +616,7 @@ INSERT INTO interviews (
 
 (
     6,
-    5,
+    1,
     'Phone',
     '2026-08-22 11:00:00',
     'N/A',
@@ -662,7 +626,7 @@ INSERT INTO interviews (
 
 (
     10,
-    5,
+    1,
     'Online',
     '2026-07-15 13:00:00',
     'Google Meet',
