@@ -76,6 +76,18 @@ $departmentLookup = $departmentLookup ?? [];
                                     <span>RAM-YUM</span>
                                 </div>
 
+                                <div class="organization-owner">
+                                    <div class="owner-node">
+                                        <i class="fa-solid fa-briefcase"></i>
+                                        <span>System Admin / Owner</span>
+                                    </div>
+
+                                    <div class="owner-node">
+                                        <i class="fa-solid fa-user-tie"></i>
+                                        <span>Aduwin Kakoy</span>
+                                    </div>
+                                </div>
+
                                 <div class="organization-departments">
                                     <?php if (!empty($organization)): ?>
                                         <?php foreach ($organization as $department): ?>
