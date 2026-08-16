@@ -428,9 +428,9 @@ $statusMeta = [
                 <input type="hidden" name="applicant_id" value="<?= $applicant['applicant_id']; ?>">
                 <label>Interviewer
                     <select name="interviewer_id" id="scheduleManager" required>
-                        <option value="">Select Interviewer</option>
+                        <option value="" hidden>Select Interviewer</option>
                         <?php if (empty($managers)): ?>
-                            <option disabled>No managers found</option>
+                            <option disabled>No Staff Available</option>
                         <?php else: ?>
                             <?php foreach ($managers as $manager): ?>
                                 <option

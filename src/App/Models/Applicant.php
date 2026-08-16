@@ -210,6 +210,7 @@ class Applicant
                     a.last_name
                 ) AS fullname,
 
+                r.role_code,
                 r.role_name
 
             FROM users u
@@ -217,16 +218,17 @@ class Applicant
             INNER JOIN roles r
                 ON u.role_id = r.role_id
 
-            INNER JOIN employees e
+            LEFT JOIN employees e
                 ON u.employee_id = e.employee_id
 
-            INNER JOIN applications ap
+            LEFT JOIN applications ap
                 ON e.application_id = ap.application_id
 
-            INNER JOIN applicants a
+            LEFT JOIN applicants a
                 ON ap.applicant_id = a.applicant_id
 
-            WHERE r.role_code IN ('ADMIN', 'HR', 'MGR')
+            WHERE u.status = 'Active'
+            AND r.role_code IN ('ADMIN', 'HR', 'MGR')
 
             ORDER BY
                 r.role_name,
