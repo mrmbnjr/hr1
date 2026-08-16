@@ -447,12 +447,12 @@
     background:#faf7f2;
 }
 
-.dropdown-menu .deleteDepartment:hover{
+.dropdown-menu .deleteDepartment:hover, .deletePosition:hover{
     background:rgba(200,50,50,.08);
     color:#c23434;
 }
 
-.dropdown-menu .deleteDepartment:hover i{
+.dropdown-menu .deleteDepartment:hover, .deletePosition:hover i{
     color:#c23434;
 }
 
@@ -704,6 +704,51 @@
 @keyframes slideIn{
     from{ opacity:0; transform:translateX(30px); }
     to{ opacity:1; transform:none; }
+}
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-soft);
+    color: var(--ink-soft);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success i {
+    color: var(--ry-gold, #d4af37);
+}
+
+.toast-error {
+    border-color: #472828;
+}
+
+.toast-error i {
+    color: #321b1a;
 }
 
 /* =====================================================

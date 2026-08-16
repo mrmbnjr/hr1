@@ -104,6 +104,26 @@ switch ($page) {
         (new HumanCapitalController())->index();
         break;
 
+    case 'save-department':
+        (new HumanCapitalController())->saveDepartment();
+        break;
+
+    case 'delete-department':
+        (new HumanCapitalController())->deleteDepartment();
+        break;
+
+    case 'create-position':
+        (new HumanCapitalController())->createPosition();
+        break;
+
+    case 'delete-position':
+        (new HumanCapitalController())->deletePosition();
+        break;
+
+    case 'get-department':
+        (new HumanCapitalController())->getDepartment();
+        break;
+
     case 'employee-records':
         (new EmployeeRecordsController())->employeeRecords();
         break;

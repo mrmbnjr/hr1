@@ -180,6 +180,15 @@ class HumanCapitalController
         }
     }
 
+    public function deletePosition()
+    {
+        $id = (int) ($_POST['position_id'] ?? 0);
+
+        $this->json(
+            $this->humanCapital->deletePosition($id)
+        );
+    }
+    
     /*
     |--------------------------------------------------------------------------
     | ORGANIZATION

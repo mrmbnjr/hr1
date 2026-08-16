@@ -20,10 +20,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
             </button>
         </div>
 
-        <form id="addDepartmentForm"
-            method="POST"
-            action="?page=human-capital&action=createDepartment">
-
+        <form id="addDepartmentForm" method="POST" action="?page=save-department">   
             <div class="modal-body">
 
                 <div class="form-group">
@@ -75,9 +72,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
             </button>
         </div>
 
-        <form id="addPositionForm"
-            method="POST"
-            action="?page=human-capital&action=createPosition">
+        <form id="addPositionForm" method="POST" action="?page=create-position">
 
             <div class="modal-body">
 

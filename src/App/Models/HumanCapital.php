@@ -556,4 +556,44 @@ class HumanCapital
         ]);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE POSITION
+    |--------------------------------------------------------------------------
+    */
+
+    public function deletePosition(int $id): array
+    {
+        /*
+        * Do not allow deletion when employees
+        * are still assigned to this position.
+        */
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*)
+            FROM employees
+            WHERE position_id = ?
+        ");
+
+        $stmt->execute([$id]);
+
+        if ((int) $stmt->fetchColumn() > 0) {
+
+            return [
+                'success' => false,
+                'message' => 'This position still has employees assigned.'
+            ];
+        }
+
+        $stmt = $this->db->prepare("
+            DELETE FROM positions
+            WHERE position_id = ?
+        ");
+
+        $stmt->execute([$id]);
+
+        return [
+            'success' => true
+        ];
+    }
+
 }

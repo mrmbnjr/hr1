@@ -350,6 +350,10 @@ $departmentLookup = $departmentLookup ?? [];
                                                         <button type="button" class="editPosition" data-id="<?= $position['position_id']; ?>">
                                                             <i class="fa-solid fa-pen"></i>Edit
                                                         </button>
+
+                                                        <button type="button" class="deletePosition" data-id="<?= $position['position_id']; ?>">
+                                                            <i class="fa-solid fa-trash"></i>Delete
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -379,7 +383,6 @@ $departmentLookup = $departmentLookup ?? [];
                 </section>
             </div>
         </div>
-<?php require '../resources/views/human-capital/add.php'; ?>
 <?php require '../resources/views/human-capital/add.php'; ?>
         <!-- =====================================================
             CONFIRMATION MODAL
