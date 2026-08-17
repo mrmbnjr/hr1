@@ -171,9 +171,7 @@ $statusMeta = [
                         <!-- Employee -->
 
                         <td>
-                            <a
-                                href="?page=onboarding-view&id=<?= (int)$employee['employee_id'] ?>"
-                                class="employee-link">
+                            <a href="?page=onboarding-view&employee_id=<?= (int)$employee['employee_id'] ?>" class="employee-link">
 
                                 <div class="onboarding-cell">
 

@@ -100,6 +100,10 @@ switch ($page) {
         (new OnboardingController())->onboardingView();
         break;
 
+    case 'onboarding-request-document':
+        (new OnboardingController())->requestDocument();
+        break;
+
     case 'human-capital':
         (new HumanCapitalController())->index();
         break;

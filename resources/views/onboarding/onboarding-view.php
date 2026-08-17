@@ -10,145 +10,179 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+
 /*
 |--------------------------------------------------------------------------
-| TEMPORARY UI DATA
+| DATA PROVIDED BY CONTROLLER
 |--------------------------------------------------------------------------
-| This is only for previewing the interface.
-| We will replace these with controller/database data later.
+|
+| The controller provides:
+|
+| $employee
+| $progress
+| $progressSteps
+| $documents
+| $documentProgress
+| $activities
+|
 */
 
-$employee = [
-    'employee_id'     => 1001,
-    'fullname'        => 'Juliana Dimaandal',
-    'email'           => 'juliana.dimaandal@email.com',
-    'department_name' => 'Product & Design',
-    'job_title'       => 'UI/UX Designer',
-    'employment_type' => 'Full-Time',
-    'start_date'      => 'August 18, 2026',
-    'status'          => 'In Progress'
+$employee = $employee ?? [];
+
+$progress = (int) ($progress ?? 0);
+
+$progressSteps = $progressSteps ?? [];
+
+$documents = $documents ?? [];
+
+$documentProgress = $documentProgress ?? [
+    'total'     => 0,
+    'verified'  => 0,
+    'submitted' => 0,
+    'pending'   => 0
 ];
 
-$progress = 50;
+$activities = $activities ?? [];
 
-$progressSteps = [
 
-    [
-        'title' => 'Employee Hired',
-        'description' => 'Applicant was approved and marked as Hired.',
-        'date' => 'Aug 10, 2026',
-        'status' => 'completed'
-    ],
+/*
+|--------------------------------------------------------------------------
+| EMPLOYEE DISPLAY DATA
+|--------------------------------------------------------------------------
+*/
 
-    [
-        'title' => 'Employee Record Created',
-        'description' => 'Employee record was automatically created.',
-        'date' => 'Aug 10, 2026',
-        'status' => 'completed'
-    ],
+$fullname = trim(
+    ($employee['first_name'] ?? '') . ' ' .
+    ($employee['middle_name'] ?? '') . ' ' .
+    ($employee['last_name'] ?? '')
+);
 
-    [
-        'title' => 'Documents Requested',
-        'description' => 'Required onboarding documents have been requested.',
-        'date' => 'Aug 11, 2026',
-        'status' => 'current'
-    ],
+$fullname = preg_replace('/\s+/', ' ', $fullname);
 
-    [
-        'title' => 'Documents Verified',
-        'description' => 'All required documents must be verified by HR Staff.',
-        'date' => null,
-        'status' => 'pending'
-    ],
+if ($fullname === '') {
+    $fullname = 'Unknown Employee';
+}
 
-    [
-        'title' => 'Onboarding Completed',
-        'description' => 'Employee has completed all onboarding requirements.',
-        'date' => null,
-        'status' => 'pending'
-    ]
 
-];
+$employeeId =
+    $employee['employee_id'] ?? 'N/A';
 
-$documents = [
 
-    [
-        'name' => 'Signed Employment Contract',
-        'status' => 'Verified',
-        'status_class' => 'verified',
-        'date' => 'Uploaded Aug 12, 2026'
-    ],
+$jobTitle =
+    $employee['job_title'] ?? 'No Position';
 
-    [
-        'name' => 'SSS / PhilHealth / Pag-IBIG Numbers',
-        'status' => 'Needs Review',
-        'status_class' => 'review',
-        'date' => 'Uploaded Aug 12, 2026'
-    ],
 
-    [
-        'name' => 'Valid Government ID',
-        'status' => 'Pending',
-        'status_class' => 'pending',
-        'date' => 'Not yet uploaded'
-    ],
+$department =
+    $employee['department_name'] ?? 'No Department';
 
-    [
-        'name' => 'NBI Clearance',
-        'status' => 'Pending',
-        'status_class' => 'pending',
-        'date' => 'Not yet uploaded'
-    ]
 
-];
+$email =
+    $employee['email'] ?? '';
 
-$activities = [
 
-    [
-        'text' => 'HR Staff requested Valid Government ID.',
-        'date' => 'Aug 14, 2026 • 9:42 AM'
-    ],
+$employmentType =
+    $employee['employment_type'] ?? '';
 
-    [
-        'text' => 'HR Staff requested NBI Clearance.',
-        'date' => 'Aug 14, 2026 • 9:40 AM'
-    ],
 
-    [
-        'text' => 'Employee uploaded Signed Employment Contract.',
-        'date' => 'Aug 12, 2026 • 2:15 PM'
-    ],
+$status =
+    $employee['onboarding_status'] ?? 'Pending';
 
-    [
-        'text' => 'Employment Contract was verified by HR Staff.',
-        'date' => 'Aug 13, 2026 • 4:20 PM'
-    ],
 
-    [
-        'text' => 'Onboarding record was created.',
-        'date' => 'Aug 11, 2026 • 10:05 AM'
-    ]
+/*
+|--------------------------------------------------------------------------
+| START DATE
+|--------------------------------------------------------------------------
+*/
 
-];
+$startDate = 'Not available';
+
+if (!empty($employee['start_date'])) {
+
+    $timestamp = strtotime(
+        $employee['start_date']
+    );
+
+    if ($timestamp !== false) {
+
+        $startDate = date(
+            'F d, Y',
+            $timestamp
+        );
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| AVATAR INITIAL
+|--------------------------------------------------------------------------
+*/
+
+$avatarInitial =
+    strtoupper(
+        substr(
+            trim($fullname),
+            0,
+            1
+        )
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| DOCUMENT COUNTS
+|--------------------------------------------------------------------------
+*/
+
+$totalDocuments =
+    (int) ($documentProgress['total'] ?? 0);
+
+$verifiedDocuments =
+    (int) ($documentProgress['verified'] ?? 0);
+
+$submittedDocuments =
+    (int) ($documentProgress['submitted'] ?? 0);
+
+$pendingDocuments =
+    (int) ($documentProgress['pending'] ?? 0);
+
+
+/*
+|--------------------------------------------------------------------------
+| ONBOARDING ID
+|--------------------------------------------------------------------------
+*/
+
+$onboardingId =
+    (int) ($employee['onboarding_id'] ?? 0);
 
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
+
 <?php require '../resources/views/includes/sidebar.php'; ?>
+
 
 <div class="main-content">
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
+
     <div class="onboarding-view-page">
+
 
         <!-- ==========================================================
             BACK
         =========================================================== -->
 
-        <a href="?page=onboarding" class="back-link">
+        <a
+            href="?page=onboarding"
+            class="back-link">
+
             <i class="fa-solid fa-arrow-left"></i>
+
             Back to New Hire Onboarding
+
         </a>
 
 
@@ -160,38 +194,81 @@ $activities = [
 
             <div class="employee-header-left">
 
+
                 <div class="employee-avatar">
-                    <?= strtoupper(substr($employee['fullname'], 0, 1)) ?>
+
+                    <?= htmlspecialchars(
+                        $avatarInitial
+                    ) ?>
+
                 </div>
+
 
                 <div class="employee-heading">
 
                     <h1>
-                        <?= htmlspecialchars($employee['fullname']) ?>
+                        <?= htmlspecialchars(
+                            $fullname
+                        ) ?>
                     </h1>
 
+
                     <p class="employee-position">
-                        <?= htmlspecialchars($employee['job_title']) ?>
+
+                        <?= htmlspecialchars(
+                            $jobTitle
+                        ) ?>
+
                         <span>•</span>
-                        <?= htmlspecialchars($employee['department_name']) ?>
+
+                        <?= htmlspecialchars(
+                            $department
+                        ) ?>
+
                     </p>
+
 
                     <div class="employee-meta">
 
+
                         <span>
+
                             <i class="fa-solid fa-id-card"></i>
-                            Employee ID: <?= htmlspecialchars($employee['employee_id']) ?>
+
+                            Employee ID:
+                            <?= htmlspecialchars(
+                                $employeeId
+                            ) ?>
+
                         </span>
 
-                        <span>
-                            <i class="fa-solid fa-briefcase"></i>
-                            <?= htmlspecialchars($employee['employment_type']) ?>
-                        </span>
+
+                        <?php if ($employmentType !== ''): ?>
+
+                            <span>
+
+                                <i class="fa-solid fa-briefcase"></i>
+
+                                <?= htmlspecialchars(
+                                    $employmentType
+                                ) ?>
+
+                            </span>
+
+                        <?php endif; ?>
+
 
                         <span>
+
                             <i class="fa-solid fa-calendar"></i>
-                            Start Date: <?= htmlspecialchars($employee['start_date']) ?>
+
+                            Start Date:
+                            <?= htmlspecialchars(
+                                $startDate
+                            ) ?>
+
                         </span>
+
 
                     </div>
 
@@ -199,9 +276,15 @@ $activities = [
 
             </div>
 
+
             <span class="onboarding-status-badge">
+
                 <span></span>
-                <?= htmlspecialchars($employee['status']) ?>
+
+                <?= htmlspecialchars(
+                    $status
+                ) ?>
+
             </span>
 
         </section>
@@ -220,105 +303,211 @@ $activities = [
 
             <section class="detail-card progress-card">
 
+
                 <div class="card-header">
 
+
                     <div>
+
                         <span class="card-icon">
+
                             <i class="fa-solid fa-route"></i>
+
                         </span>
 
+
                         <div>
-                            <h2>Onboarding Progress</h2>
-                            <p>Track the employee's onboarding journey.</p>
+
+                            <h2>
+                                Onboarding Progress
+                            </h2>
+
+                            <p>
+                                Track the employee's onboarding journey.
+                            </p>
+
                         </div>
+
                     </div>
 
+
                     <span class="progress-count">
-                        2 of 5
+
+                        <?php
+
+                        $completedStepCount = 0;
+
+                        foreach ($progressSteps as $step) {
+
+                            if (
+                                ($step['status'] ?? '')
+                                === 'completed'
+                            ) {
+                                $completedStepCount++;
+                            }
+                        }
+
+                        ?>
+
+                        <?= $completedStepCount ?>
+                        of
+                        <?= count($progressSteps) ?>
+
                     </span>
 
                 </div>
 
 
-                <!-- Progress bar -->
+                <!-- ==================================================
+                    PROGRESS BAR
+                =================================================== -->
 
                 <div class="overall-progress">
 
+
                     <div class="progress-label">
-                        <span>Overall Progress</span>
-                        <strong><?= $progress ?>%</strong>
+
+                        <span>
+                            Overall Progress
+                        </span>
+
+                        <strong>
+                            <?= $progress ?>%
+                        </strong>
+
                     </div>
 
+
                     <div class="progress-track">
+
                         <div
                             class="progress-fill"
                             style="width: <?= $progress ?>%;">
                         </div>
+
                     </div>
 
                 </div>
 
 
-                <!-- Timeline -->
+                <!-- ==================================================
+                    TIMELINE
+                =================================================== -->
 
                 <div class="progress-timeline">
 
-                    <?php foreach ($progressSteps as $step): ?>
 
-                        <div class="progress-step <?= $step['status'] ?>">
-
-                            <div class="step-marker">
-
-                                <?php if ($step['status'] === 'completed'): ?>
-
-                                    <i class="fa-solid fa-check"></i>
-
-                                <?php elseif ($step['status'] === 'current'): ?>
-
-                                    <i class="fa-solid fa-circle"></i>
-
-                                <?php else: ?>
-
-                                    <i class="fa-regular fa-circle"></i>
-
-                                <?php endif; ?>
-
-                            </div>
+                    <?php if (!empty($progressSteps)): ?>
 
 
-                            <div class="step-content">
+                        <?php foreach ($progressSteps as $step): ?>
 
-                                <div class="step-top">
 
-                                    <h3>
-                                        <?= htmlspecialchars($step['title']) ?>
-                                    </h3>
+                            <div
+                                class="progress-step <?= htmlspecialchars(
+                                    $step['status'] ?? 'pending'
+                                ) ?>">
 
-                                    <?php if ($step['date']): ?>
 
-                                        <span>
-                                            <?= htmlspecialchars($step['date']) ?>
-                                        </span>
+                                <div class="step-marker">
+
+
+                                    <?php if (
+                                        ($step['status'] ?? '')
+                                        === 'completed'
+                                    ): ?>
+
+                                        <i class="fa-solid fa-check"></i>
+
+
+                                    <?php elseif (
+                                        ($step['status'] ?? '')
+                                        === 'current'
+                                    ): ?>
+
+                                        <i class="fa-solid fa-circle"></i>
+
 
                                     <?php else: ?>
 
-                                        <span>Pending</span>
+                                        <i class="fa-regular fa-circle"></i>
 
                                     <?php endif; ?>
 
+
                                 </div>
 
-                                <p>
-                                    <?= htmlspecialchars($step['description']) ?>
-                                </p>
+
+                                <div class="step-content">
+
+
+                                    <div class="step-top">
+
+
+                                        <h3>
+                                            <?= htmlspecialchars(
+                                                $step['title'] ?? ''
+                                            ) ?>
+                                        </h3>
+
+
+                                        <?php if (
+                                            !empty($step['date'])
+                                        ): ?>
+
+                                            <span>
+                                                <?= htmlspecialchars(
+                                                    $step['date']
+                                                ) ?>
+                                            </span>
+
+                                        <?php else: ?>
+
+                                            <span>
+                                                Pending
+                                            </span>
+
+                                        <?php endif; ?>
+
+
+                                    </div>
+
+
+                                    <p>
+
+                                        <?= htmlspecialchars(
+                                            $step['description'] ?? ''
+                                        ) ?>
+
+                                    </p>
+
+
+                                </div>
+
 
                             </div>
 
+
+                        <?php endforeach; ?>
+
+
+                    <?php else: ?>
+
+
+                        <div class="empty-state">
+
+                            <p>
+                                No onboarding progress available.
+                            </p>
+
                         </div>
 
-                    <?php endforeach; ?>
+
+                    <?php endif; ?>
+
 
                 </div>
+
 
             </section>
 
@@ -329,29 +518,51 @@ $activities = [
 
             <section class="detail-card documents-card">
 
+
                 <div class="card-header">
+
 
                     <div>
 
+
                         <span class="card-icon">
+
                             <i class="fa-solid fa-file-circle-check"></i>
+
                         </span>
 
+
                         <div>
-                            <h2>Document Checklist</h2>
-                            <p>Documents requested from this employee.</p>
+
+                            <h2>
+                                Document Checklist
+                            </h2>
+
+                            <p>
+                                Documents requested from this employee.
+                            </p>
+
                         </div>
+
 
                     </div>
 
+
                     <span class="document-count">
-                        2 / <?= count($documents) ?>
+
+                        <?= $verifiedDocuments ?>
+                        /
+                        <?= $totalDocuments ?>
+
                     </span>
+
 
                 </div>
 
 
-                <!-- Request Button -->
+                <!-- ==================================================
+                    REQUEST BUTTON
+                =================================================== -->
 
                 <button
                     type="button"
@@ -365,53 +576,149 @@ $activities = [
                 </button>
 
 
-                <!-- Documents -->
+                <!-- ==================================================
+                    DOCUMENTS
+                =================================================== -->
 
                 <div class="document-list">
 
-                    <?php foreach ($documents as $document): ?>
 
-                        <div class="document-item">
+                    <?php if (!empty($documents)): ?>
 
-                            <div class="document-icon">
 
-                                <i class="fa-regular fa-file-lines"></i>
+                        <?php foreach ($documents as $document): ?>
 
-                            </div>
 
-                            <div class="document-info">
+                            <?php
 
-                                <h3>
-                                    <?= htmlspecialchars($document['name']) ?>
-                                </h3>
+                            $documentStatus =
+                                $document['status'] ?? 'Pending';
 
-                                <span>
-                                    <?= htmlspecialchars($document['date']) ?>
+
+                            switch ($documentStatus) {
+
+                                case 'Verified':
+
+                                    $statusClass =
+                                        'verified';
+
+                                    break;
+
+
+                                case 'Submitted':
+
+                                    $statusClass =
+                                        'review';
+
+                                    break;
+
+
+                                case 'Pending':
+
+                                default:
+
+                                    $statusClass =
+                                        'pending';
+
+                                    break;
+                            }
+
+
+                            ?>
+
+
+                            <div class="document-item">
+
+
+                                <div class="document-icon">
+
+                                    <i class="fa-regular fa-file-lines"></i>
+
+                                </div>
+
+
+                                <div class="document-info">
+
+
+                                    <h3>
+
+                                        <?= htmlspecialchars(
+                                            $document['document_name']
+                                                ?? 'Unnamed Document'
+                                        ) ?>
+
+                                    </h3>
+
+
+                                    <span>
+
+                                        <?php if (
+                                            !empty(
+                                                $document['file_path']
+                                            )
+                                        ): ?>
+
+                                            Document uploaded
+
+                                        <?php else: ?>
+
+                                            Not yet uploaded
+
+                                        <?php endif; ?>
+
+                                    </span>
+
+
+                                </div>
+
+
+                                <span
+                                    class="document-status <?= htmlspecialchars(
+                                        $statusClass
+                                    ) ?>">
+
+                                    <?= htmlspecialchars(
+                                        $documentStatus
+                                    ) ?>
+
                                 </span>
 
+
+                                <button
+                                    type="button"
+                                    class="document-action"
+                                    title="Document options">
+
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+
+                                </button>
+
+
                             </div>
 
-                            <span
-                                class="document-status <?= htmlspecialchars($document['status_class']) ?>">
 
-                                <?= htmlspecialchars($document['status']) ?>
+                        <?php endforeach; ?>
 
-                            </span>
 
-                            <button
-                                type="button"
-                                class="document-action"
-                                title="Document options">
+                    <?php else: ?>
 
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
 
-                            </button>
+                        <div class="empty-state">
+
+                            <i class="fa-regular fa-folder-open"></i>
+
+                            <p>
+                                No documents have been requested yet.
+                            </p>
 
                         </div>
 
-                    <?php endforeach; ?>
+
+                    <?php endif; ?>
+
 
                 </div>
+
 
             </section>
 
@@ -422,59 +729,115 @@ $activities = [
 
             <section class="detail-card activity-card">
 
+
                 <div class="card-header">
+
 
                     <div>
 
+
                         <span class="card-icon">
+
                             <i class="fa-solid fa-clock-rotate-left"></i>
+
                         </span>
 
+
                         <div>
-                            <h2>Activity Log</h2>
-                            <p>Recent onboarding activities.</p>
+
+                            <h2>
+                                Activity Log
+                            </h2>
+
+                            <p>
+                                Recent onboarding activities.
+                            </p>
+
                         </div>
 
+
                     </div>
+
 
                 </div>
 
 
                 <div class="activity-list">
 
-                    <?php foreach ($activities as $activity): ?>
 
-                        <div class="activity-item">
+                    <?php if (!empty($activities)): ?>
 
-                            <span class="activity-dot"></span>
 
-                            <div class="activity-content">
+                        <?php foreach ($activities as $activity): ?>
 
-                                <p>
-                                    <?= htmlspecialchars($activity['text']) ?>
-                                </p>
 
-                                <span>
-                                    <?= htmlspecialchars($activity['date']) ?>
-                                </span>
+                            <div class="activity-item">
+
+
+                                <span class="activity-dot"></span>
+
+
+                                <div class="activity-content">
+
+
+                                    <p>
+
+                                        <?= htmlspecialchars(
+                                            $activity['text'] ?? ''
+                                        ) ?>
+
+                                    </p>
+
+
+                                    <span>
+
+                                        <?= htmlspecialchars(
+                                            $activity['date'] ?? ''
+                                        ) ?>
+
+                                    </span>
+
+
+                                </div>
+
 
                             </div>
 
+
+                        <?php endforeach; ?>
+
+
+                    <?php else: ?>
+
+
+                        <div class="empty-state">
+
+                            <p>
+                                No onboarding activity yet.
+                            </p>
+
                         </div>
 
-                    <?php endforeach; ?>
+
+                    <?php endif; ?>
+
 
                 </div>
 
+
             </section>
+
 
         </div>
 
     </div>
 
+
     <?php require '../resources/views/includes/footer.php'; ?>
 
+
 </div>
+
 
 
 <!-- ==============================================================
@@ -486,21 +849,33 @@ $activities = [
     id="documentModal"
     aria-hidden="true">
 
+
     <div
         class="document-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="documentModalTitle">
 
+
+        <!-- ======================================================
+            MODAL HEADER
+        ======================================================= -->
+
         <div class="modal-header">
+
 
             <div>
 
+
                 <span class="modal-icon">
+
                     <i class="fa-solid fa-file-circle-plus"></i>
+
                 </span>
 
+
                 <div>
+
                     <h2 id="documentModalTitle">
                         Request Document
                     </h2>
@@ -508,9 +883,12 @@ $activities = [
                     <p>
                         Request a document from this employee.
                     </p>
+
                 </div>
 
+
             </div>
+
 
             <button
                 type="button"
@@ -522,61 +900,48 @@ $activities = [
 
             </button>
 
+
         </div>
 
 
-        <form id="requestDocumentForm">
+
+        <!-- ======================================================
+            REQUEST FORM
+        ======================================================= -->
+        <form
+            method="POST"
+            action="?page=onboarding-request-document"
+            id="requestDocumentForm">
+
+            <input
+                type="hidden"
+                name="onboarding_id"
+                value="<?= (int) $onboardingId ?>">
 
             <div class="form-group">
 
-                <label for="documentType">
+                <label for="documentName">
                     Document Type
                 </label>
 
-                <select id="documentType" name="document_type">
-
-                    <option value="">
-                        Select document
-                    </option>
-
-                    <option value="government_id">
-                        Valid Government ID
-                    </option>
-
-                    <option value="nbi_clearance">
-                        NBI Clearance
-                    </option>
-
-                    <option value="sss">
-                        SSS Number
-                    </option>
-
-                    <option value="philhealth">
-                        PhilHealth Number
-                    </option>
-
-                    <option value="pagibig">
-                        Pag-IBIG Number
-                    </option>
-
-                    <option value="medical_certificate">
-                        Medical Certificate
-                    </option>
-
-                    <option value="other">
-                        Other
-                    </option>
-
-                </select>
+                <input
+                    type="text"
+                    id="documentName"
+                    name="document_name"
+                    placeholder="e.g. Birth Certificate"
+                    maxlength="150"
+                    required>
 
             </div>
-
 
             <div class="form-group">
 
                 <label for="documentDescription">
+
                     Instructions
+
                     <span>Optional</span>
+
                 </label>
 
                 <textarea
@@ -586,7 +951,6 @@ $activities = [
                     placeholder="Enter instructions or additional information for the employee..."></textarea>
 
             </div>
-
 
             <div class="modal-footer">
 
@@ -612,9 +976,7 @@ $activities = [
             </div>
 
         </form>
-
     </div>
-
 </div>
 
 
