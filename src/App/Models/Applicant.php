@@ -512,6 +512,9 @@ class Applicant
             INNER JOIN departments d
                 ON p.department_id = d.department_id
 
+            INNER JOIN roles r
+                ON p.role_id = r.role_id
+
             WHERE ap.application_id = :application_id
 
             LIMIT 1
