@@ -1,648 +1,617 @@
 // ==========================================================
 // RAM-YUM — Employee Records
-// Table filtering, sorting, and pagination
+// Filtering, sorting, pagination, and employee view navigation
 // ==========================================================
 
 (function () {
 
+    // ======================================================
+    // EMPLOYEE RECORDS TABLE
+    // ======================================================
+
     const table = document.getElementById('employeeRecordsTable');
 
-    // Only run on Employee Records page
-    if (!table) {
-        return;
-    }
+    if (table) {
+
+        const rows = Array.from(
+            table.querySelectorAll('tbody tr.employee-row')
+        );
+
+        const departmentFilter =
+            document.getElementById('departmentFilter');
+
+        const employmentTypeFilter =
+            document.getElementById('employmentTypeFilter');
+
+        const statusFilter =
+            document.getElementById('statusFilter');
+
+        const sortFilter =
+            document.getElementById('sortFilter');
+
+        const resultsCount =
+            document.getElementById('resultsCount');
+
+        const pageNumbers =
+            document.getElementById('pageNumbers');
+
+        const prevPageBtn =
+            document.getElementById('prevPage');
+
+        const nextPageBtn =
+            document.getElementById('nextPage');
+
+        const PAGE_SIZE = 8;
+
+        let currentPage = 1;
 
 
-    // ======================================================
-    // ELEMENTS
-    // ======================================================
+        // ==================================================
+        // FILTER + SORT
+        // ==================================================
 
-    const rows = Array.from(
-        table.querySelectorAll('tbody tr.employee-row')
-    );
+        function getVisibleRows() {
 
-    const departmentFilter =
-        document.getElementById('departmentFilter');
+            const department =
+                departmentFilter?.value ?? 'All';
 
-    const employmentTypeFilter =
-        document.getElementById('employmentTypeFilter');
+            const employmentType =
+                employmentTypeFilter?.value ?? 'All';
 
-    const statusFilter =
-        document.getElementById('statusFilter');
+            const status =
+                statusFilter?.value ?? 'All';
 
-    const sortFilter =
-        document.getElementById('sortFilter');
+            const sort =
+                sortFilter?.value ?? 'newest';
 
-    const resultsCount =
-        document.getElementById('resultsCount');
+            const visible = rows.filter(row => {
 
-    const pageNumbers =
-        document.getElementById('pageNumbers');
+                const matchesDepartment =
+                    department === 'All' ||
+                    row.dataset.department === department;
 
-    const prevPageBtn =
-        document.getElementById('prevPage');
+                const matchesEmploymentType =
+                    employmentType === 'All' ||
+                    row.dataset.employmentType === employmentType;
 
-    const nextPageBtn =
-        document.getElementById('nextPage');
+                const matchesStatus =
+                    status === 'All' ||
+                    row.dataset.status === status;
 
+                return (
+                    matchesDepartment &&
+                    matchesEmploymentType &&
+                    matchesStatus
+                );
+            });
 
-    // ======================================================
-    // SETTINGS
-    // ======================================================
+            visible.sort((a, b) => {
 
-    const PAGE_SIZE = 8;
+                switch (sort) {
 
-    let currentPage = 1;
+                    case 'oldest':
+                        return compareDates(
+                            a.dataset.date,
+                            b.dataset.date
+                        );
 
+                    case 'name-az':
+                        return (a.dataset.name || '').localeCompare(
+                            b.dataset.name || ''
+                        );
 
-    // ======================================================
-    // TABLE FILTERING + SORTING + PAGINATION
-    // ======================================================
+                    case 'name-za':
+                        return (b.dataset.name || '').localeCompare(
+                            a.dataset.name || ''
+                        );
 
-    function applyFilters() {
+                    case 'newest':
+                    default:
+                        return compareDates(
+                            b.dataset.date,
+                            a.dataset.date
+                        );
+                }
+            });
 
-        const department =
-            departmentFilter
-                ? departmentFilter.value
-                : 'All';
-
-        const employmentType =
-            employmentTypeFilter
-                ? employmentTypeFilter.value
-                : 'All';
-
-        const status =
-            statusFilter
-                ? statusFilter.value
-                : 'All';
-
-        const sort =
-            sortFilter
-                ? sortFilter.value
-                : 'newest';
-
-
-        // --------------------------------------------------
-        // FILTER
-        // --------------------------------------------------
-
-        let visible = rows.filter(row => {
-
-            const matchesDepartment =
-                department === 'All' ||
-                row.dataset.department === department;
-
-
-            const matchesEmploymentType =
-                employmentType === 'All' ||
-                row.dataset.employmentType === employmentType;
-
-
-            const matchesStatus =
-                status === 'All' ||
-                row.dataset.status === status;
-
-
-            return (
-                matchesDepartment &&
-                matchesEmploymentType &&
-                matchesStatus
-            );
-
-        });
-
-
-        // --------------------------------------------------
-        // SORT
-        // --------------------------------------------------
-
-        visible.sort((a, b) => {
-
-            switch (sort) {
-
-                case 'oldest':
-
-                    return compareDates(
-                        a.dataset.date,
-                        b.dataset.date
-                    );
-
-
-                case 'name-az':
-
-                    return (
-                        a.dataset.name || ''
-                    ).localeCompare(
-                        b.dataset.name || ''
-                    );
-
-
-                case 'name-za':
-
-                    return (
-                        b.dataset.name || ''
-                    ).localeCompare(
-                        a.dataset.name || ''
-                    );
-
-
-                case 'newest':
-
-                default:
-
-                    return compareDates(
-                        b.dataset.date,
-                        a.dataset.date
-                    );
-
-            }
-
-        });
-
-
-        // --------------------------------------------------
-        // REORDER TABLE
-        // --------------------------------------------------
-
-        const tbody =
-            table.querySelector('tbody');
-
-        visible.forEach(row => {
-            tbody.appendChild(row);
-        });
-
-
-        // --------------------------------------------------
-        // HIDE ALL ORIGINAL ROWS
-        // --------------------------------------------------
-
-        rows.forEach(row => {
-            row.style.display = 'none';
-        });
-
-
-        // --------------------------------------------------
-        // PAGINATION
-        // --------------------------------------------------
-
-        const totalPages =
-            Math.max(
-                1,
-                Math.ceil(
-                    visible.length / PAGE_SIZE
-                )
-            );
-
-
-        if (currentPage > totalPages) {
-            currentPage = totalPages;
+            return visible;
         }
 
 
-        const start =
-            (currentPage - 1) * PAGE_SIZE;
+        // ==================================================
+        // DATE COMPARISON
+        // ==================================================
+
+        function compareDates(dateA, dateB) {
+
+            const timeA = parseDate(dateA);
+            const timeB = parseDate(dateB);
+
+            return timeA - timeB;
+        }
+
+        function parseDate(dateString) {
+
+            if (!dateString) {
+                return 0;
+            }
+
+            const parsed = new Date(dateString).getTime();
+
+            return Number.isNaN(parsed)
+                ? 0
+                : parsed;
+        }
 
 
-        const pageRows =
-            visible.slice(
+        // ==================================================
+        // APPLY TABLE STATE
+        // ==================================================
+
+        function applyFilters() {
+
+            const visible = getVisibleRows();
+
+            const totalPages = Math.max(
+                1,
+                Math.ceil(visible.length / PAGE_SIZE)
+            );
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            const start =
+                (currentPage - 1) * PAGE_SIZE;
+
+            const pageRows = visible.slice(
                 start,
                 start + PAGE_SIZE
             );
 
+            const tbody = table.querySelector('tbody');
 
-        pageRows.forEach(row => {
-            row.style.display = '';
-        });
+            visible.forEach(row => {
+                tbody.appendChild(row);
+            });
+
+            rows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            pageRows.forEach(row => {
+                row.style.display = '';
+            });
+
+            updateResultsCount(
+                visible.length,
+                start
+            );
+
+            renderPagination(totalPages);
+        }
 
 
-        // --------------------------------------------------
+        // ==================================================
         // RESULTS COUNT
-        // --------------------------------------------------
+        // ==================================================
 
-        if (resultsCount) {
+        function updateResultsCount(totalRows, start) {
 
-            if (visible.length === 0) {
+            if (!resultsCount) {
+                return;
+            }
 
-                resultsCount.textContent =
-                    'No employees found';
+            if (totalRows === 0) {
+                resultsCount.textContent = 'No employees found';
+                return;
+            }
+
+            const startNumber = start + 1;
+
+            const endNumber = Math.min(
+                start + PAGE_SIZE,
+                totalRows
+            );
+
+            resultsCount.textContent =
+                `Showing ${startNumber}-${endNumber} of ${totalRows} employees`;
+        }
+
+
+        // ==================================================
+        // PAGINATION
+        // ==================================================
+
+        function renderPagination(totalPages) {
+
+            if (!pageNumbers) {
+                return;
+            }
+
+            pageNumbers.innerHTML = '';
+
+            const addButton = page => {
+
+                const button =
+                    document.createElement('button');
+
+                button.type = 'button';
+                button.className =
+                    `page-num${page === currentPage ? ' active' : ''}`;
+
+                button.textContent = page;
+
+                button.addEventListener('click', () => {
+
+                    currentPage = page;
+                    applyFilters();
+
+                });
+
+                pageNumbers.appendChild(button);
+            };
+
+            const addDots = () => {
+
+                const span =
+                    document.createElement('span');
+
+                span.textContent = '...';
+
+                pageNumbers.appendChild(span);
+            };
+
+
+            if (totalPages <= 7) {
+
+                for (let page = 1; page <= totalPages; page++) {
+                    addButton(page);
+                }
 
             } else {
 
-                const startNumber =
-                    start + 1;
+                addButton(1);
 
-                const endNumber =
-                    Math.min(
-                        start + PAGE_SIZE,
-                        visible.length
-                    );
-
-                resultsCount.textContent =
-                    `Showing ${startNumber}-${endNumber} of ${visible.length} employees`;
-
-            }
-
-        }
-
-
-        // --------------------------------------------------
-        // PAGINATION UI
-        // --------------------------------------------------
-
-        renderPagination(totalPages);
-
-    }
-
-
-    // ======================================================
-    // DATE COMPARISON
-    // ======================================================
-
-    function compareDates(dateA, dateB) {
-
-        const timeA =
-            parseDate(dateA);
-
-        const timeB =
-            parseDate(dateB);
-
-
-        return timeA - timeB;
-
-    }
-
-
-    function parseDate(dateString) {
-
-        if (!dateString) {
-            return 0;
-        }
-
-
-        const parsed =
-            new Date(dateString).getTime();
-
-
-        return Number.isNaN(parsed)
-            ? 0
-            : parsed;
-
-    }
-
-
-    // ======================================================
-    // PAGINATION
-    // ======================================================
-
-    function renderPagination(totalPages) {
-
-        if (!pageNumbers) {
-            return;
-        }
-
-
-        pageNumbers.innerHTML = '';
-
-
-        // --------------------------------------------------
-        // PAGE BUTTON
-        // --------------------------------------------------
-
-        const addButton = (page) => {
-
-            const button =
-                document.createElement('button');
-
-
-            button.type = 'button';
-
-            button.className =
-                'page-num' +
-                (
-                    page === currentPage
-                        ? ' active'
-                        : ''
-                );
-
-
-            button.textContent = page;
-
-
-            button.addEventListener(
-                'click',
-                () => {
-
-                    currentPage = page;
-
-                    applyFilters();
-
+                if (currentPage > 3) {
+                    addDots();
                 }
-            );
 
-
-            pageNumbers.appendChild(button);
-
-        };
-
-
-        // --------------------------------------------------
-        // ELLIPSIS
-        // --------------------------------------------------
-
-        const addDots = () => {
-
-            const span =
-                document.createElement('span');
-
-            span.textContent = '...';
-
-            pageNumbers.appendChild(span);
-
-        };
-
-
-        // --------------------------------------------------
-        // PAGINATION LAYOUT
-        // --------------------------------------------------
-
-        if (totalPages <= 7) {
-
-            for (
-                let page = 1;
-                page <= totalPages;
-                page++
-            ) {
-
-                addButton(page);
-
-            }
-
-        } else {
-
-            // First page
-
-            addButton(1);
-
-
-            // Left dots
-
-            if (currentPage > 3) {
-                addDots();
-            }
-
-
-            // Middle pages
-
-            const start =
-                Math.max(
+                const start = Math.max(
                     2,
                     currentPage - 1
                 );
 
-
-            const end =
-                Math.min(
+                const end = Math.min(
                     totalPages - 1,
                     currentPage + 1
                 );
 
+                for (let page = start; page <= end; page++) {
+                    addButton(page);
+                }
 
-            for (
-                let page = start;
-                page <= end;
-                page++
-            ) {
+                if (currentPage < totalPages - 2) {
+                    addDots();
+                }
 
-                addButton(page);
-
+                addButton(totalPages);
             }
 
-
-            // Right dots
-
-            if (
-                currentPage <
-                totalPages - 2
-            ) {
-
-                addDots();
-
+            if (prevPageBtn) {
+                prevPageBtn.disabled =
+                    currentPage === 1;
             }
 
-
-            // Last page
-
-            addButton(totalPages);
-
+            if (nextPageBtn) {
+                nextPageBtn.disabled =
+                    currentPage === totalPages;
+            }
         }
 
 
-        // --------------------------------------------------
-        // PREVIOUS / NEXT
-        // --------------------------------------------------
+        // ==================================================
+        // PAGINATION EVENTS
+        // ==================================================
 
         if (prevPageBtn) {
 
-            prevPageBtn.disabled =
-                currentPage === 1;
+            prevPageBtn.addEventListener('click', () => {
 
+                if (currentPage <= 1) {
+                    return;
+                }
+
+                currentPage--;
+                applyFilters();
+
+            });
         }
-
 
         if (nextPageBtn) {
 
-            nextPageBtn.disabled =
-                currentPage === totalPages;
+            nextPageBtn.addEventListener('click', () => {
 
+                const visibleRows = getVisibleRows();
+
+                const totalPages = Math.max(
+                    1,
+                    Math.ceil(visibleRows.length / PAGE_SIZE)
+                );
+
+                if (currentPage >= totalPages) {
+                    return;
+                }
+
+                currentPage++;
+                applyFilters();
+
+            });
         }
 
-    }
 
+        // ==================================================
+        // FILTER EVENTS
+        // ==================================================
 
-    // ======================================================
-    // PREVIOUS PAGE
-    // ======================================================
+        [
+            departmentFilter,
+            employmentTypeFilter,
+            statusFilter,
+            sortFilter
+        ].forEach(filter => {
 
-    if (prevPageBtn) {
-
-        prevPageBtn.addEventListener(
-            'click',
-            () => {
-
-                if (currentPage > 1) {
-
-                    currentPage--;
-
-                    applyFilters();
-
-                }
-
+            if (!filter) {
+                return;
             }
-        );
 
-    }
-
-
-    // ======================================================
-    // NEXT PAGE
-    // ======================================================
-
-    if (nextPageBtn) {
-
-        nextPageBtn.addEventListener(
-            'click',
-            () => {
-
-                const visibleRows =
-                    getFilteredRows();
-
-
-                const totalPages =
-                    Math.max(
-                        1,
-                        Math.ceil(
-                            visibleRows.length /
-                            PAGE_SIZE
-                        )
-                    );
-
-
-                if (currentPage < totalPages) {
-
-                    currentPage++;
-
-                    applyFilters();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // ======================================================
-    // FILTER EVENTS
-    // ======================================================
-
-    if (departmentFilter) {
-
-        departmentFilter.addEventListener(
-            'change',
-            () => {
+            filter.addEventListener('change', () => {
 
                 currentPage = 1;
-
                 applyFilters();
 
-            }
-        );
-
-    }
+            });
+        });
 
 
-    if (employmentTypeFilter) {
+        // ==================================================
+        // INITIALIZE TABLE
+        // ==================================================
 
-        employmentTypeFilter.addEventListener(
-            'change',
-            () => {
-
-                currentPage = 1;
-
-                applyFilters();
-
-            }
-        );
-
-    }
-
-
-    if (statusFilter) {
-
-        statusFilter.addEventListener(
-            'change',
-            () => {
-
-                currentPage = 1;
-
-                applyFilters();
-
-            }
-        );
-
-    }
-
-
-    if (sortFilter) {
-
-        sortFilter.addEventListener(
-            'change',
-            () => {
-
-                currentPage = 1;
-
-                applyFilters();
-
-            }
-        );
-
+        applyFilters();
     }
 
 
     // ======================================================
-    // GET FILTERED ROWS
+    // EMPLOYEE DETAIL VIEW
     // ======================================================
 
-    function getFilteredRows() {
+    const tabs =
+        document.querySelectorAll('.employee-view-tab');
 
-        const department =
-            departmentFilter
-                ? departmentFilter.value
-                : 'All';
+    const slider =
+        document.querySelector('.employee-view-slider');
 
-        const employmentType =
-            employmentTypeFilter
-                ? employmentTypeFilter.value
-                : 'All';
+    if (!tabs.length || !slider) {
+        return;
+    }
 
-        const status =
-            statusFilter
-                ? statusFilter.value
-                : 'All';
-
-
-        return rows.filter(row => {
-
-            const matchesDepartment =
-                department === 'All' ||
-                row.dataset.department === department;
+    const views = [
+        'overview',
+        'employment',
+        'documents',
+        'notes',
+        'activity'
+    ];
 
 
-            const matchesEmploymentType =
-                employmentType === 'All' ||
-                row.dataset.employmentType === employmentType;
+    // ======================================================
+    // ACTIVATE VIEW
+    // ======================================================
+
+    function activateView(viewName, updateHash = true) {
+
+        const index = views.indexOf(viewName);
+
+        if (index === -1) {
+            return;
+        }
+
+        slider.style.transform =
+            `translateX(-${index * 20}%)`;
+
+        tabs.forEach(tab => {
+
+            const isActive =
+                tab.dataset.view === viewName;
+
+            tab.classList.toggle(
+                'active',
+                isActive
+            );
+
+            tab.setAttribute(
+                'aria-selected',
+                isActive ? 'true' : 'false'
+            );
+        });
+
+        if (updateHash) {
+
+            try {
+
+                history.replaceState(
+                    null,
+                    '',
+                    `#${viewName}`
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    'Unable to update employee record URL.',
+                    error
+                );
+            }
+        }
+
+        const activeTab =
+            document.querySelector(
+                `.employee-view-tab[data-view="${viewName}"]`
+            );
+
+        if (activeTab) {
+
+            activeTab.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+        }
+    }
 
 
-            const matchesStatus =
-                status === 'All' ||
-                row.dataset.status === status;
+    // ======================================================
+    // TAB CLICK
+    // ======================================================
 
+    tabs.forEach(tab => {
 
-            return (
-                matchesDepartment &&
-                matchesEmploymentType &&
-                matchesStatus
+        tab.addEventListener('click', () => {
+
+            activateView(
+                tab.dataset.view
             );
 
         });
+    });
 
+
+    // ======================================================
+    // KEYBOARD NAVIGATION
+    // ======================================================
+
+    tabs.forEach((tab, index) => {
+
+        tab.addEventListener('keydown', event => {
+
+            let nextIndex = index;
+
+            if (event.key === 'ArrowRight') {
+
+                event.preventDefault();
+
+                nextIndex =
+                    index + 1 >= tabs.length
+                        ? 0
+                        : index + 1;
+            }
+
+            if (event.key === 'ArrowLeft') {
+
+                event.preventDefault();
+
+                nextIndex =
+                    index - 1 < 0
+                        ? tabs.length - 1
+                        : index - 1;
+            }
+
+            if (event.key === 'Home') {
+
+                event.preventDefault();
+                nextIndex = 0;
+            }
+
+            if (event.key === 'End') {
+
+                event.preventDefault();
+                nextIndex = tabs.length - 1;
+            }
+
+            if (nextIndex === index) {
+                return;
+            }
+
+            tabs[nextIndex].focus();
+
+            activateView(
+                tabs[nextIndex].dataset.view
+            );
+        });
+    });
+
+
+    // ======================================================
+    // INITIAL VIEW
+    // ======================================================
+
+    const hash =
+        window.location.hash
+            .replace('#', '')
+            .trim();
+
+    if (views.includes(hash)) {
+
+        activateView(
+            hash,
+            false
+        );
+
+    } else {
+
+        activateView(
+            'overview',
+            false
+        );
     }
 
 
     // ======================================================
-    // INITIALIZE
+    // DOCUMENT REQUEST
     // ======================================================
 
-    applyFilters();
+    const requestDocumentButton =
+        document.getElementById(
+            'requestEmployeeDocument'
+        );
+
+    if (requestDocumentButton) {
+
+        requestDocumentButton.addEventListener(
+            'click',
+            () => {
+
+                console.log(
+                    'Employee document request clicked.'
+                );
+
+            }
+        );
+    }
+
+
+    // ======================================================
+    // ADD NOTE
+    // ======================================================
+
+    const addNoteButton =
+        document.getElementById(
+            'addEmployeeNote'
+        );
+
+    if (addNoteButton) {
+
+        addNoteButton.addEventListener(
+            'click',
+            () => {
+
+                console.log(
+                    'Add employee note clicked.'
+                );
+
+            }
+        );
+    }
 
 })();
