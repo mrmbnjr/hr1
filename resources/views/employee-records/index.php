@@ -45,8 +45,6 @@ $statusMeta = [
         <section class="filter-bar">
 
             <div class="filter-field">
-                <label for="departmentFilter">Department</label>
-
                 <select id="departmentFilter">
                     <option value="All">All Departments</option>
 
@@ -59,8 +57,6 @@ $statusMeta = [
             </div>
 
             <div class="filter-field">
-                <label for="employmentTypeFilter">Employment Type</label>
-
                 <select id="employmentTypeFilter">
                     <option value="All">All Employment Types</option>
                     <option value="Full-Time">Full-Time</option>
@@ -71,8 +67,6 @@ $statusMeta = [
             </div>
 
             <div class="filter-field">
-                <label for="statusFilter">Status</label>
-
                 <select id="statusFilter">
                     <option value="All">All Status</option>
                     <option value="Active">Active</option>
@@ -81,8 +75,6 @@ $statusMeta = [
             </div>
 
             <div class="filter-field">
-                <label for="sortFilter">Sort By</label>
-
                 <select id="sortFilter">
                     <option value="newest">Newest</option>
                     <option value="oldest">Oldest</option>
