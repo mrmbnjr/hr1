@@ -2,7 +2,8 @@
 -- RAM-YUM HRMS (hr1_db) — Seed Data
 -- =====================================================================
 -- Purpose : Sample data for local development and demos of the
---           Recruitment, Applicant, Onboarding, and Core HCM modules.
+--           Recruitment, Applicant, Onboarding, Core HCM,
+--           and Employee Self-Service modules.
 --
 -- IMPORTANT:
 -- This seed assumes the FINAL hr1_db schema.
@@ -21,13 +22,15 @@
 --   -> onboarding_documents
 --   -> employees
 --   -> employee users
+--   -> employee_requests
 --
 -- NOTE:
--- users.employee_id is intentionally nullable and currently has no
--- foreign-key constraint in the finalized schema.
+-- users.employee_id is nullable because system users such as Admin
+-- may not belong to an employee record.
 -- =====================================================================
 
 USE hr1_db;
+
 
 -- =====================================================================
 -- 1. ROLES
@@ -52,11 +55,11 @@ INSERT INTO roles (
 -- =====================================================================
 -- 2. SYSTEM USERS
 -- =====================================================================
--- All passwords below use the same placeholder bcrypt hash.
--- Replace with actual password_hash() output for real authentication.
---
--- Test plaintext password:
+-- Test password for the sample accounts:
 -- Admin!123
+--
+-- The password below is a placeholder bcrypt hash.
+-- Replace it with password_hash() output for production use.
 -- =====================================================================
 
 INSERT INTO users (
@@ -66,14 +69,18 @@ INSERT INTO users (
     password,
     status,
     must_change_password
-) VALUES
-
-(NULL, 1, 'admin',
- '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
- 'Active', 0);
+) VALUES (
+    NULL,
+    1,
+    'admin',
+    '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
+    'Active',
+    0
+);
 
 -- user_id:
 -- 1 = admin
+
 
 -- =====================================================================
 -- 3. DEPARTMENTS
@@ -99,12 +106,13 @@ INSERT INTO departments (
 -- =====================================================================
 -- 4. POSITIONS
 -- =====================================================================
--- role_id determines the intended SYSTEM ROLE for the position.
+-- role_id represents the intended SYSTEM ROLE associated with
+-- the position.
 --
--- EMP = normal employee
--- MGR = manager
--- HR  = HR staff
--- ADMIN positions should generally not be recruited as normal positions.
+-- EMP  = Employee
+-- MGR  = Manager
+-- HR   = HR Staff
+-- ADMIN positions are generally not recruited as normal positions.
 -- =====================================================================
 
 INSERT INTO positions (
@@ -113,19 +121,19 @@ INSERT INTO positions (
     position_name
 ) VALUES
 
-(1, 4, 'Software Developer'),        -- 1
-(1, 3, 'IT Manager'),                -- 2
-(1, 4, 'UI/UX Designer'),            -- 3
+(1, 4, 'Software Developer'),
+(1, 3, 'IT Manager'),
+(1, 4, 'UI/UX Designer'),
 
-(2, 4, 'HR Officer'),                -- 4
-(2, 3, 'HR Manager'),                -- 5
+(2, 4, 'HR Officer'),
+(2, 3, 'HR Manager'),
 
-(3, 4, 'Financial Analyst'),         -- 6
+(3, 4, 'Financial Analyst'),
 
-(4, 4, 'Marketing Associate'),       -- 7
-(4, 3, 'Marketing Manager'),         -- 8
+(4, 4, 'Marketing Associate'),
+(4, 3, 'Marketing Manager'),
 
-(5, 4, 'Operations Coordinator');    -- 9
+(5, 4, 'Operations Coordinator');
 
 -- position_id:
 -- 1 = Software Developer
@@ -142,8 +150,8 @@ INSERT INTO positions (
 -- =====================================================================
 -- 5. JOB POSTINGS
 -- =====================================================================
--- created_by references users(user_id). Only user_id 1 (admin) exists
--- at this point in the script, so all postings are attributed to admin.
+-- created_by references users(user_id).
+-- Admin is the only system user available at this point.
 -- =====================================================================
 
 INSERT INTO job_postings (
@@ -259,67 +267,107 @@ INSERT INTO applicants (
     address
 ) VALUES
 
-('Juan',     'Ramirez', 'Dela Cruz',
- 'juan.delacruz@example.com',
- '09171234501',
- 'Quezon City, Metro Manila'),
+(
+    'Juan',
+    'Ramirez',
+    'Dela Cruz',
+    'juan.delacruz@example.com',
+    '09171234501',
+    'Quezon City, Metro Manila'
+),
 
-('Maria',    'Lopez', 'Santos',
- 'maria.santos@example.com',
- '09171234502',
- 'Manila, Metro Manila'),
+(
+    'Maria',
+    'Lopez',
+    'Santos',
+    'maria.santos@example.com',
+    '09171234502',
+    'Manila, Metro Manila'
+),
 
-('Jose',     'Antonio', 'Reyes',
- 'jose.reyes@example.com',
- '09171234503',
- 'Makati City, Metro Manila'),
+(
+    'Jose',
+    'Antonio',
+    'Reyes',
+    'jose.reyes@example.com',
+    '09171234503',
+    'Makati City, Metro Manila'
+),
 
-('Ana',      'Marie', 'Bautista',
- 'ana.bautista@example.com',
- '09171234504',
- 'Pasig City, Metro Manila'),
+(
+    'Ana',
+    'Marie',
+    'Bautista',
+    'ana.bautista@example.com',
+    '09171234504',
+    'Pasig City, Metro Manila'
+),
 
-('Mark',     'Julian', 'Villanueva',
- 'mark.villanueva@example.com',
- '09171234505',
- 'Taguig City, Metro Manila'),
+(
+    'Mark',
+    'Julian',
+    'Villanueva',
+    'mark.villanueva@example.com',
+    '09171234505',
+    'Taguig City, Metro Manila'
+),
 
-('Kristine', 'Faith', 'Aquino',
- 'kristine.aquino@example.com',
- '09171234506',
- 'Caloocan City, Metro Manila'),
+(
+    'Kristine',
+    'Faith',
+    'Aquino',
+    'kristine.aquino@example.com',
+    '09171234506',
+    'Caloocan City, Metro Manila'
+),
 
-('Paolo',    'Miguel', 'Mendoza',
- 'paolo.mendoza@example.com',
- '09171234507',
- 'Marikina City, Metro Manila'),
+(
+    'Paolo',
+    'Miguel',
+    'Mendoza',
+    'paolo.mendoza@example.com',
+    '09171234507',
+    'Marikina City, Metro Manila'
+),
 
-('Angela',   'Rose', 'Fernandez',
- 'angela.fernandez@example.com',
- '09171234508',
- 'San Juan City, Metro Manila'),
+(
+    'Angela',
+    'Rose',
+    'Fernandez',
+    'angela.fernandez@example.com',
+    '09171234508',
+    'San Juan City, Metro Manila'
+),
 
-('Ramon',    'Luis', 'Garcia',
- 'ramon.garcia@example.com',
- '09171234509',
- 'Mandaluyong City, Metro Manila'),
+(
+    'Ramon',
+    'Luis',
+    'Garcia',
+    'ramon.garcia@example.com',
+    '09171234509',
+    'Mandaluyong City, Metro Manila'
+),
 
-('Michelle', 'Anne', 'Torres',
- 'michelle.torres@example.com',
- '09171234510',
- 'Quezon City, Metro Manila');
+(
+    'Michelle',
+    'Anne',
+    'Torres',
+    'michelle.torres@example.com',
+    '09171234510',
+    'Quezon City, Metro Manila'
+);
 
 -- applicant_id:
--- 1 = Juan
--- 2 = Maria
--- 3 = Jose
--- 4 = Ana
--- 5 = Mark
--- 6 = Kristine
--- 7 = Paolo
--- 8 = Angela
--- 9 = Ramon
--- 10 = Michelle
+-- 1  = Juan Dela Cruz
+-- 2  = Maria Santos
+-- 3  = Jose Reyes
+-- 4  = Ana Bautista
+-- 5  = Mark Villanueva
+-- 6  = Kristine Aquino
+-- 7  = Paolo Mendoza
+-- 8  = Angela Fernandez
+-- 9  = Ramon Garcia
+-- 10 = Michelle Torres
 
 
 -- =====================================================================
@@ -334,55 +382,85 @@ INSERT INTO applications (
     application_status
 ) VALUES
 
-(1, 1,
- 'resumes/juan_delacruz_resume.pdf',
- 'cover_letters/juan_delacruz_cl.pdf',
- 'Hired'),
+(
+    1,
+    1,
+    'resumes/juan_delacruz_resume.pdf',
+    'cover_letters/juan_delacruz_cl.pdf',
+    'Hired'
+),
 
-(2, 1,
- 'resumes/maria_santos_resume.pdf',
- NULL,
- 'Interview'),
+(
+    2,
+    1,
+    'resumes/maria_santos_resume.pdf',
+    NULL,
+    'Interview'
+),
 
-(3, 1,
- 'resumes/jose_reyes_resume.pdf',
- 'cover_letters/jose_reyes_cl.pdf',
- 'Under Review'),
+(
+    3,
+    1,
+    'resumes/jose_reyes_resume.pdf',
+    'cover_letters/jose_reyes_cl.pdf',
+    'Under Review'
+),
 
-(4, 3,
- 'resumes/ana_bautista_resume.pdf',
- 'cover_letters/ana_bautista_cl.pdf',
- 'Hired'),
+(
+    4,
+    3,
+    'resumes/ana_bautista_resume.pdf',
+    'cover_letters/ana_bautista_cl.pdf',
+    'Hired'
+),
 
-(5, 3,
- 'resumes/mark_villanueva_resume.pdf',
- NULL,
- 'Rejected'),
+(
+    5,
+    3,
+    'resumes/mark_villanueva_resume.pdf',
+    NULL,
+    'Rejected'
+),
 
-(6, 5,
- 'resumes/kristine_aquino_resume.pdf',
- 'cover_letters/kristine_aquino_cl.pdf',
- 'Interview'),
+(
+    6,
+    5,
+    'resumes/kristine_aquino_resume.pdf',
+    'cover_letters/kristine_aquino_cl.pdf',
+    'Interview'
+),
 
-(7, 5,
- 'resumes/paolo_mendoza_resume.pdf',
- NULL,
- 'Submitted'),
+(
+    7,
+    5,
+    'resumes/paolo_mendoza_resume.pdf',
+    NULL,
+    'Submitted'
+),
 
-(8, 2,
- 'resumes/angela_fernandez_resume.pdf',
- 'cover_letters/angela_fernandez_cl.pdf',
- 'Under Review'),
+(
+    8,
+    2,
+    'resumes/angela_fernandez_resume.pdf',
+    'cover_letters/angela_fernandez_cl.pdf',
+    'Under Review'
+),
 
-(9, 2,
- 'resumes/ramon_garcia_resume.pdf',
- NULL,
- 'Submitted'),
+(
+    9,
+    2,
+    'resumes/ramon_garcia_resume.pdf',
+    NULL,
+    'Submitted'
+),
 
-(10, 4,
- 'resumes/michelle_torres_resume.pdf',
- 'cover_letters/michelle_torres_cl.pdf',
- 'Rejected');
+(
+    10,
+    4,
+    'resumes/michelle_torres_resume.pdf',
+    'cover_letters/michelle_torres_cl.pdf',
+    'Rejected'
+);
 
 
 -- =====================================================================
@@ -390,12 +468,6 @@ INSERT INTO applications (
 -- =====================================================================
 -- Applications 7 and 9 intentionally have no AI screening because
 -- they are still in Submitted status.
---
--- IMPORTANT:
--- Final schema uses:
---   strengths JSON
---   concerns JSON
---   processed_at TIMESTAMP
 -- =====================================================================
 
 INSERT INTO ai_screening (
@@ -569,9 +641,8 @@ INSERT INTO ai_screening (
 -- =====================================================================
 -- 9. INTERVIEWS
 -- =====================================================================
--- interviewer_id references users(user_id). Only user_id 1 (admin)
--- exists at this point in the script, so admin is recorded as the
--- interviewer for all rows below.
+-- interviewer_id references users(user_id).
+-- Admin is used as the sample interviewer.
 -- =====================================================================
 
 INSERT INTO interviews (
@@ -638,21 +709,26 @@ INSERT INTO interviews (
 -- =====================================================================
 -- 10. ONBOARDING
 -- =====================================================================
--- Final schema:
+-- Final status values:
 -- Pending
--- Ongoing
+-- In Progress
 -- Completed
+-- Overdue
 -- =====================================================================
 
 INSERT INTO onboarding (
     application_id,
     orientation_date,
+    started_at,
+    completed_at,
     onboarding_status,
     remarks
 ) VALUES
 
 (
     1,
+    '2026-08-17',
+    '2026-08-11',
     '2026-08-17',
     'Completed',
     'Employee has completed orientation and submitted all required documents.'
@@ -661,8 +737,10 @@ INSERT INTO onboarding (
 (
     4,
     '2026-08-10',
-    'Ongoing',
-    'Employee attended orientation; awaiting submission of remaining pre-employment documents.'
+    '2026-08-10',
+    NULL,
+    'In Progress',
+    'Employee attended orientation and is awaiting submission of remaining pre-employment documents.'
 );
 
 -- onboarding_id:
@@ -741,26 +819,21 @@ INSERT INTO onboarding_documents (
 -- =====================================================================
 -- 12. EMPLOYEES
 -- =====================================================================
--- Position and department must correspond to the employee's application.
+-- Department is intentionally NOT stored here.
 --
--- Juan:
---   Application 1
---   Position 1 = Software Developer
---   Department 1 = Information Technology
---   Position role = EMP
+-- An employee's department is determined through:
 --
--- Ana:
---   Application 4
---   Position 4 = HR Officer
---   Department 2 = Human Resources
---   Position role = EMP
+-- employees.position_id
+--       ↓
+-- positions.department_id
+--       ↓
+-- departments
 -- =====================================================================
 
 INSERT INTO employees (
     application_id,
     employee_number,
     position_id,
-    department_id,
     hire_date,
     employment_status
 ) VALUES
@@ -768,7 +841,6 @@ INSERT INTO employees (
 (
     1,
     'EMP-2026-0001',
-    1,
     1,
     '2026-08-17',
     'Probationary'
@@ -778,7 +850,6 @@ INSERT INTO employees (
     4,
     'EMP-2026-0002',
     4,
-    2,
     '2026-08-10',
     'Probationary'
 );
@@ -789,19 +860,12 @@ INSERT INTO employees (
 
 
 -- =====================================================================
--- 13. ESS USER ACCOUNTS FOR NEWLY HIRED EMPLOYEES
+-- 13. EMPLOYEE USER ACCOUNTS
 -- =====================================================================
--- The role assigned here follows positions.role_id.
+-- These accounts are linked to employees through users.employee_id.
 --
--- Juan:
---   Software Developer -> EMP (role_id 4)
---
--- Ana:
---   HR Officer -> EMP (role_id 4)
---
--- IMPORTANT:
--- A person hired into an HR Manager position would receive MGR (3).
--- A person hired into an HR Staff position would receive HR (2).
+-- Both employees are assigned the EMP system role because their
+-- positions are regular employee positions.
 -- =====================================================================
 
 INSERT INTO users (
@@ -829,6 +893,80 @@ INSERT INTO users (
     '$2y$10$4qosLS/s3G.aXV3x/BVSvetdSsmrv8ReFDFAbyQXj6gbn2kT1ucIa',
     'Active',
     1
+);
+
+-- user_id:
+-- 2 = Juan Dela Cruz
+-- 3 = Ana Bautista
+
+
+-- =====================================================================
+-- 14. EMPLOYEE REQUESTS
+-- =====================================================================
+-- Sample Employee Self-Service requests.
+--
+-- These requests are completely separate from onboarding documents.
+-- They are created by employees after they have an employee record.
+-- =====================================================================
+
+INSERT INTO employee_requests (
+    employee_id,
+    request_type,
+    subject,
+    description,
+    status,
+    hr_remarks,
+    requested_at,
+    resolved_at,
+    resolved_by
+) VALUES
+
+(
+    1,
+    'Certificate of Employment',
+    'Request for Certificate of Employment',
+    'I would like to request a Certificate of Employment for personal documentation purposes.',
+    'Completed',
+    'Certificate prepared and released to the employee.',
+    '2026-08-18 09:15:00',
+    '2026-08-18 14:30:00',
+    1
+),
+
+(
+    1,
+    'Profile Update',
+    'Update Contact Information',
+    'I would like to update my contact information in my employee record.',
+    'Pending',
+    NULL,
+    '2026-08-19 10:20:00',
+    NULL,
+    NULL
+),
+
+(
+    2,
+    'Document Request',
+    'Request for Employment Contract Copy',
+    'I would like to request a digital copy of my signed employment contract.',
+    'Approved',
+    'Request approved. HR will prepare the requested document.',
+    '2026-08-18 13:45:00',
+    NULL,
+    1
+),
+
+(
+    2,
+    'Employment Concern',
+    'Question Regarding Employment Status',
+    'I would like clarification regarding my current probationary employment status.',
+    'Pending',
+    NULL,
+    '2026-08-19 08:40:00',
+    NULL,
+    NULL
 );
 
 

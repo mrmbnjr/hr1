@@ -12,26 +12,34 @@ CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     employee_id INT NULL,
     role_id INT NOT NULL,
+
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    status ENUM('Active','Inactive') DEFAULT 'Active',
+
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
     must_change_password BOOLEAN DEFAULT TRUE,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(role_id)
+
+    FOREIGN KEY (role_id)
         REFERENCES roles(role_id)
 );
 
 CREATE TABLE departments (
     department_id INT AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(100) UNIQUE NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE positions (
     position_id INT AUTO_INCREMENT PRIMARY KEY,
+
     department_id INT NOT NULL,
     role_id INT NOT NULL,
+
     position_name VARCHAR(150) NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (department_id)
@@ -43,45 +51,60 @@ CREATE TABLE positions (
 
 CREATE TABLE job_postings (
     posting_id INT AUTO_INCREMENT PRIMARY KEY,
+
     position_id INT NOT NULL,
+
     title VARCHAR(150) NOT NULL,
     description TEXT,
     requirements TEXT,
+
     employment_type ENUM(
         'Full-Time',
         'Part-Time',
         'Contract',
         'Internship'
     ) NOT NULL,
+
     vacancies INT DEFAULT 1,
+
     status ENUM(
         'Open',
         'Closed'
     ) DEFAULT 'Open',
+
     application_token VARCHAR(64) UNIQUE NULL,
+
     application_deadline DATE NOT NULL,
+
     created_by INT NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (position_id)
         REFERENCES positions(position_id),
+
     FOREIGN KEY (created_by)
         REFERENCES users(user_id)
 );
 
 CREATE TABLE applicants (
     applicant_id INT AUTO_INCREMENT PRIMARY KEY,
+
     first_name VARCHAR(100) NOT NULL,
     middle_name VARCHAR(100),
     last_name VARCHAR(100) NOT NULL,
+
     email VARCHAR(150) UNIQUE NOT NULL,
     phone VARCHAR(30) UNIQUE NOT NULL,
+
     address TEXT,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE applications (
     application_id INT AUTO_INCREMENT PRIMARY KEY,
+
     applicant_id INT NOT NULL,
     posting_id INT NOT NULL,
 
@@ -98,7 +121,7 @@ CREATE TABLE applications (
 
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    UNIQUE(applicant_id, posting_id),
+    UNIQUE (applicant_id, posting_id),
 
     FOREIGN KEY (applicant_id)
         REFERENCES applicants(applicant_id),
@@ -129,15 +152,13 @@ CREATE TABLE ai_screening (
     extracted_skills TEXT,
 
     strengths JSON,
-
     concerns JSON,
 
     ai_summary TEXT,
 
     processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_ai_screening_application
-        FOREIGN KEY (application_id)
+    FOREIGN KEY (application_id)
         REFERENCES applications(application_id)
         ON DELETE CASCADE
 );
@@ -177,30 +198,44 @@ CREATE TABLE interviews (
 
 CREATE TABLE onboarding (
     onboarding_id INT AUTO_INCREMENT PRIMARY KEY,
+
     application_id INT UNIQUE,
+
     orientation_date DATE,
+
+    started_at DATE,
+    completed_at DATE,
+
     onboarding_status ENUM(
         'Pending',
-        'Ongoing',
-        'Completed'
+        'In Progress',
+        'Completed',
+        'Overdue'
     ) DEFAULT 'Pending',
+
     remarks TEXT,
-    FOREIGN KEY(application_id)
+
+    FOREIGN KEY (application_id)
         REFERENCES applications(application_id)
 );
 
 CREATE TABLE onboarding_documents (
     document_id INT AUTO_INCREMENT PRIMARY KEY,
-    onboarding_id INT,
-    document_name VARCHAR(150),
+
+    onboarding_id INT NOT NULL,
+
+    document_name VARCHAR(150) NOT NULL,
     file_path VARCHAR(255),
+
     status ENUM(
         'Pending',
         'Submitted',
         'Verified'
     ) DEFAULT 'Pending',
-    FOREIGN KEY(onboarding_id)
+
+    FOREIGN KEY (onboarding_id)
         REFERENCES onboarding(onboarding_id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE employees (
@@ -210,8 +245,7 @@ CREATE TABLE employees (
 
     employee_number VARCHAR(30) UNIQUE,
 
-    position_id INT,
-    department_id INT,
+    position_id INT NOT NULL,
 
     hire_date DATE NOT NULL,
 
@@ -219,14 +253,55 @@ CREATE TABLE employees (
         'Probationary',
         'Regular',
         'Contract'
-    ),
+    ) DEFAULT 'Probationary',
 
-    FOREIGN KEY(application_id)
+    FOREIGN KEY (application_id)
         REFERENCES applications(application_id),
 
-    FOREIGN KEY(position_id)
-        REFERENCES positions(position_id),
+    FOREIGN KEY (position_id)
+        REFERENCES positions(position_id)
+);
 
-    FOREIGN KEY(department_id)
-        REFERENCES departments(department_id)
+ALTER TABLE users
+ADD CONSTRAINT fk_users_employee
+FOREIGN KEY (employee_id)
+REFERENCES employees(employee_id);
+
+CREATE TABLE employee_requests (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    employee_id INT NOT NULL,
+
+    request_type ENUM(
+        'Certificate of Employment',
+        'Document Request',
+        'Profile Update',
+        'Payroll Concern',
+        'Employment Concern',
+        'Other'
+    ) NOT NULL,
+
+    subject VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+
+    status ENUM(
+        'Pending',
+        'Approved',
+        'Rejected',
+        'Completed'
+    ) DEFAULT 'Pending',
+
+    hr_remarks TEXT,
+
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    resolved_at TIMESTAMP NULL,
+
+    resolved_by INT NULL,
+
+    FOREIGN KEY (employee_id)
+        REFERENCES employees(employee_id),
+
+    FOREIGN KEY (resolved_by)
+        REFERENCES users(user_id)
 );
