@@ -10,34 +10,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-/*
-|--------------------------------------------------------------------------
-| DATA
-|--------------------------------------------------------------------------
-| $requests and $departments should be provided by
-| EmployeeRequestController.
-*/
-
 $requests    = $requests ?? [];
 $departments = $departments ?? [];
-
-
-/*
-|--------------------------------------------------------------------------
-| REQUEST STATUS
-|--------------------------------------------------------------------------
-*/
 
 $statusMeta = [
 
     "Pending" => [
         "label" => "Pending",
         "class" => "badge-gray"
-    ],
-
-    "Under Review" => [
-        "label" => "Under Review",
-        "class" => "badge-blue"
     ],
 
     "Approved" => [
@@ -57,6 +37,17 @@ $statusMeta = [
 
 ];
 
+$requestTypes = [
+
+    "Certificate of Employment",
+    "Document Request",
+    "Profile Update",
+    "Payroll Concern",
+    "Employment Concern",
+    "Other"
+
+];
+
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -66,16 +57,13 @@ $statusMeta = [
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
-
     <div class="employee-request-page">
-
 
         <!-- ==========================================================
             FILTER BAR
         =========================================================== -->
 
         <section class="filter-bar">
-
 
             <!-- Department -->
 
@@ -111,21 +99,15 @@ $statusMeta = [
                     All Request Types
                 </option>
 
-                <option value="Employment Certificate">
-                    Employment Certificate
-                </option>
+                <?php foreach ($requestTypes as $requestType): ?>
 
-                <option value="Profile Update">
-                    Profile Update
-                </option>
+                    <option value="<?= htmlspecialchars($requestType) ?>">
 
-                <option value="Record Correction">
-                    Record Correction
-                </option>
+                        <?= htmlspecialchars($requestType) ?>
 
-                <option value="Other HR Request">
-                    Other HR Request
-                </option>
+                    </option>
+
+                <?php endforeach; ?>
 
             </select>
 
@@ -140,10 +122,6 @@ $statusMeta = [
 
                 <option value="Pending">
                     Pending
-                </option>
-
-                <option value="Under Review">
-                    Under Review
                 </option>
 
                 <option value="Approved">
@@ -190,13 +168,11 @@ $statusMeta = [
         </section>
 
 
-
         <!-- ==========================================================
             REQUEST TABLE
         =========================================================== -->
 
         <section class="table-card">
-
 
             <div class="table-scroll">
 
@@ -236,12 +212,9 @@ $statusMeta = [
 
                     </thead>
 
-
                     <tbody>
 
-
                         <?php if (empty($requests)): ?>
-
 
                             <tr class="empty-row">
 
@@ -261,70 +234,58 @@ $statusMeta = [
 
                             </tr>
 
-
                         <?php else: ?>
-
 
                             <?php foreach ($requests as $request): ?>
 
-
                                 <?php
 
-                                $status =
-                                    $request['request_status']
-                                    ?? 'Pending';
+                                $status = $request['status'] ?? 'Pending';
 
                                 $meta =
                                     $statusMeta[$status]
                                     ?? $statusMeta['Pending'];
 
+                                $fullName = trim(
+                                    $request['fullname'] ?? ''
+                                );
+
+                                if ($fullName === '') {
+                                    $fullName = 'Unknown Employee';
+                                }
+
+                                $initial = strtoupper(
+                                    substr($fullName, 0, 1)
+                                );
+
                                 ?>
 
-
                                 <tr
-
                                     class="request-row"
 
-                                    data-id="<?=
-                                        htmlspecialchars(
-                                            $request['request_id']
-                                        )
-                                    ?>"
+                                    data-id="<?= htmlspecialchars(
+                                        $request['request_id'] ?? ''
+                                    ) ?>"
 
-                                    data-department="<?=
-                                        htmlspecialchars(
-                                            $request['department_name']
-                                            ?? ''
-                                        )
-                                    ?>"
+                                    data-department="<?= htmlspecialchars(
+                                        $request['department_name'] ?? ''
+                                    ) ?>"
 
-                                    data-request-type="<?=
-                                        htmlspecialchars(
-                                            $request['request_type']
-                                            ?? ''
-                                        )
-                                    ?>"
+                                    data-request-type="<?= htmlspecialchars(
+                                        $request['request_type'] ?? ''
+                                    ) ?>"
 
-                                    data-status="<?=
-                                        htmlspecialchars($status)
-                                    ?>"
+                                    data-status="<?= htmlspecialchars(
+                                        $status
+                                    ) ?>"
 
-                                    data-name="<?=
-                                        htmlspecialchars(
-                                            $request['fullname']
-                                            ?? ''
-                                        )
-                                    ?>"
+                                    data-name="<?= htmlspecialchars(
+                                        $fullName
+                                    ) ?>"
 
-                                    data-date="<?=
-                                        htmlspecialchars(
-                                            $request['created_at']
-                                            ?? ''
-                                        )
-                                    ?>"
-
-                                >
-
+                                    data-date="<?= htmlspecialchars(
+                                        $request['requested_at'] ?? ''
+                                    ) ?>">
 
                                     <!-- Employee -->
 
@@ -332,45 +293,31 @@ $statusMeta = [
 
                                         <div class="request-cell">
 
-
                                             <div class="avatar-circle">
 
-                                                <?=
-                                                    strtoupper(
-                                                        substr(
-                                                            $request['fullname']
-                                                            ?? '?',
-                                                            0,
-                                                            1
-                                                        )
-                                                    )
-                                                ?>
+                                                <?= htmlspecialchars(
+                                                    $initial
+                                                ) ?>
 
                                             </div>
-
 
                                             <div>
 
                                                 <strong>
 
-                                                    <?=
-                                                        htmlspecialchars(
-                                                            $request['fullname']
-                                                            ?? 'Unknown Employee'
-                                                        )
-                                                    ?>
+                                                    <?= htmlspecialchars(
+                                                        $fullName
+                                                    ) ?>
 
                                                 </strong>
 
-
                                                 <span class="sub-text">
 
-                                                    <?=
-                                                        htmlspecialchars(
-                                                            $request['employee_number']
-                                                            ?? ''
-                                                        )
-                                                    ?>
+                                                    <?= htmlspecialchars(
+                                                        $request[
+                                                            'employee_number'
+                                                        ] ?? ''
+                                                    ) ?>
 
                                                 </span>
 
@@ -385,12 +332,10 @@ $statusMeta = [
 
                                     <td>
 
-                                        <?=
-                                            htmlspecialchars(
-                                                $request['department_name']
-                                                ?? '—'
-                                            )
-                                        ?>
+                                        <?= htmlspecialchars(
+                                            $request['department_name']
+                                            ?? '—'
+                                        ) ?>
 
                                     </td>
 
@@ -401,29 +346,20 @@ $statusMeta = [
 
                                         <strong class="request-type">
 
-                                            <?=
-                                                htmlspecialchars(
-                                                    $request['request_type']
-                                                    ?? '—'
-                                                )
-                                            ?>
+                                            <?= htmlspecialchars(
+                                                $request['request_type']
+                                                ?? '—'
+                                            ) ?>
 
                                         </strong>
 
-
-                                        <?php if (!empty(
-                                            $request['request_title']
-                                        )): ?>
+                                        <?php if (!empty($request['subject'])): ?>
 
                                             <span class="sub-text">
 
-                                                <?=
-                                                    htmlspecialchars(
-                                                        $request[
-                                                            'request_title'
-                                                        ]
-                                                    )
-                                                ?>
+                                                <?= htmlspecialchars(
+                                                    $request['subject']
+                                                ) ?>
 
                                             </span>
 
@@ -432,16 +368,23 @@ $statusMeta = [
                                     </td>
 
 
-                                    <!-- Date -->
+                                    <!-- Date Submitted -->
 
                                     <td>
 
-                                        <?=
-                                            htmlspecialchars(
-                                                $request['created_at']
-                                                ?? '—'
-                                            )
-                                        ?>
+                                        <?php if (!empty(
+                                            $request['requested_at']
+                                        )): ?>
+
+                                            <?= htmlspecialchars(
+                                                $request['requested_at']
+                                            ) ?>
+
+                                        <?php else: ?>
+
+                                            —
+
+                                        <?php endif; ?>
 
                                     </td>
 
@@ -451,10 +394,13 @@ $statusMeta = [
                                     <td>
 
                                         <span
-                                            class="badge
-                                            <?= $meta['class'] ?>">
+                                            class="badge <?= htmlspecialchars(
+                                                $meta['class']
+                                            ) ?>">
 
-                                            <?= $meta['label'] ?>
+                                            <?= htmlspecialchars(
+                                                $meta['label']
+                                            ) ?>
 
                                         </span>
 
@@ -466,11 +412,9 @@ $statusMeta = [
                                     <td class="col-actions">
 
                                         <a
-                                            href="?page=employee-request-view&id=<?=
-                                                urlencode(
-                                                    $request['request_id']
-                                                )
-                                            ?>"
+                                            href="?page=employee-request-view&id=<?= urlencode(
+                                                $request['request_id'] ?? ''
+                                            ) ?>"
                                             class="btn-review">
 
                                             <i class="fa-solid fa-eye"></i>
@@ -481,22 +425,17 @@ $statusMeta = [
 
                                     </td>
 
-
                                 </tr>
-
 
                             <?php endforeach; ?>
 
-
                         <?php endif; ?>
-
 
                     </tbody>
 
                 </table>
 
             </div>
-
 
 
             <!-- ======================================================
@@ -515,11 +454,11 @@ $statusMeta = [
                     class="pagination"
                     id="pagination">
 
-
                     <button
                         class="page-btn"
                         id="prevPage"
-                        type="button">
+                        type="button"
+                        aria-label="Previous page">
 
                         <i class="fa-solid fa-chevron-left"></i>
 
@@ -535,20 +474,18 @@ $statusMeta = [
                     <button
                         class="page-btn"
                         id="nextPage"
-                        type="button">
+                        type="button"
+                        aria-label="Next page">
 
                         <i class="fa-solid fa-chevron-right"></i>
 
                     </button>
 
-
                 </div>
 
             </div>
 
-
         </section>
-
 
     </div>
 
