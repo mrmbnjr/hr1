@@ -23,9 +23,23 @@ class EmployeeRequestsController
 
     public function employeeRequests(): void
     {
-        $requests = $this->employeeRequests->getAllRequests();
+        if (!isset($_SESSION['user_id'])) {
 
-        $departments = $this->employeeRequests->getDepartments();
+            header(
+                "Location: /hr1/public/?page=login"
+            );
+
+            exit;
+        }
+
+
+        $requests =
+            $this->employeeRequests->getAllRequests();
+
+
+        $departments =
+            $this->employeeRequests->getDepartments();
+
 
         require '../resources/views/employee-requests/index.php';
     }
@@ -39,12 +53,16 @@ class EmployeeRequestsController
 
     public function update(): void
     {
-        header('Content-Type: application/json; charset=utf-8');
+        header(
+            'Content-Type: application/json; charset=utf-8'
+        );
 
 
-        // ----------------------------------------------------------
-        // Require logged-in user
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Authentication
+        |--------------------------------------------------------------------------
+        */
 
         if (!isset($_SESSION['user_id'])) {
 
@@ -59,9 +77,11 @@ class EmployeeRequestsController
         }
 
 
-        // ----------------------------------------------------------
-        // Only allow POST
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Request method
+        |--------------------------------------------------------------------------
+        */
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
@@ -76,9 +96,11 @@ class EmployeeRequestsController
         }
 
 
-        // ----------------------------------------------------------
-        // Get submitted values
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Request ID
+        |--------------------------------------------------------------------------
+        */
 
         $requestId =
             filter_input(
@@ -87,10 +109,24 @@ class EmployeeRequestsController
                 FILTER_VALIDATE_INT
             );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status
+        |--------------------------------------------------------------------------
+        */
+
         $status =
             trim(
                 $_POST['status'] ?? ''
             );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HR Remarks
+        |--------------------------------------------------------------------------
+        */
 
         $hrRemarks =
             trim(
@@ -98,9 +134,11 @@ class EmployeeRequestsController
             );
 
 
-        // ----------------------------------------------------------
-        // Validate request ID
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Validate request ID
+        |--------------------------------------------------------------------------
+        */
 
         if (!$requestId) {
 
@@ -115,34 +153,91 @@ class EmployeeRequestsController
         }
 
 
-        // ----------------------------------------------------------
-        // Validate status
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Only final statuses may be saved
+        |--------------------------------------------------------------------------
+        */
 
         $allowedStatuses = [
-            'Pending',
             'Approved',
             'Rejected',
             'Completed'
         ];
 
 
-        if (!in_array($status, $allowedStatuses, true)) {
+        if (!in_array(
+            $status,
+            $allowedStatuses,
+            true
+        )) {
 
             http_response_code(422);
 
             echo json_encode([
                 'success' => false,
-                'message' => 'Invalid request status.'
+                'message' =>
+                    'Please select Approved, Rejected, or Completed before saving.'
             ]);
 
             return;
         }
 
 
-        // ----------------------------------------------------------
-        // Convert empty remarks to NULL
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Get current request
+        |--------------------------------------------------------------------------
+        */
+
+        $existingRequest =
+            $this->employeeRequests->getRequestById(
+                $requestId
+            );
+
+
+        if (!$existingRequest) {
+
+            http_response_code(404);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'Employee request not found.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Prevent changes to finalized requests
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            ($existingRequest['status'] ?? 'Pending')
+            !== 'Pending'
+        ) {
+
+            http_response_code(409);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'This request has already been finalized and cannot be changed.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Empty remarks become NULL
+        |--------------------------------------------------------------------------
+        */
 
         $hrRemarks =
             $hrRemarks === ''
@@ -150,29 +245,23 @@ class EmployeeRequestsController
                 : $hrRemarks;
 
 
-        // ----------------------------------------------------------
-        // Logged-in HR/Admin user
-        // ----------------------------------------------------------
+        /*
+        |--------------------------------------------------------------------------
+        | Current logged-in user
+        |--------------------------------------------------------------------------
+        */
 
         $resolvedBy =
-            in_array(
-                $status,
-                [
-                    'Approved',
-                    'Rejected',
-                    'Completed'
-                ],
-                true
-            )
-                ? (int) $_SESSION['user_id']
-                : null;
+            (int) $_SESSION['user_id'];
 
-
-        // ----------------------------------------------------------
-        // Update database
-        // ----------------------------------------------------------
 
         try {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update request
+            |--------------------------------------------------------------------------
+            */
 
             $updated =
                 $this->employeeRequests->updateStatus(
@@ -189,16 +278,19 @@ class EmployeeRequestsController
 
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Failed to update the employee request.'
+                    'message' =>
+                        'Failed to update the employee request.'
                 ]);
 
                 return;
             }
 
 
-            // ------------------------------------------------------
-            // Get updated request
-            // ------------------------------------------------------
+            /*
+            |--------------------------------------------------------------------------
+            | Get updated request
+            |--------------------------------------------------------------------------
+            */
 
             $request =
                 $this->employeeRequests->getRequestById(
@@ -212,20 +304,24 @@ class EmployeeRequestsController
 
                 echo json_encode([
                     'success' => false,
-                    'message' => 'Updated request could not be found.'
+                    'message' =>
+                        'Updated request could not be found.'
                 ]);
 
                 return;
             }
 
 
-            // ------------------------------------------------------
-            // Success
-            // ------------------------------------------------------
+            /*
+            |--------------------------------------------------------------------------
+            | Success
+            |--------------------------------------------------------------------------
+            */
 
             echo json_encode([
                 'success' => true,
-                'message' => 'Employee request updated successfully.',
+                'message' =>
+                    'Employee request finalized successfully.',
                 'request' => $request
             ]);
 
@@ -235,7 +331,8 @@ class EmployeeRequestsController
 
             echo json_encode([
                 'success' => false,
-                'message' => 'An error occurred while updating the request.'
+                'message' =>
+                    'An error occurred while updating the request.'
             ]);
         }
     }

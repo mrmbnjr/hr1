@@ -1,17 +1,34 @@
 <?php
 
-$pageTitle       = "Employee Requests";
-$pageCSS         = "employee-requests.css";
-$pageJS          = "employee-requests.js";
-$pageDescription = "Review and manage employee requests.";
+$pageTitle =
+    "Employee Requests";
+
+$pageCSS =
+    "employee-requests.css";
+
+$pageJS =
+    "employee-requests.js";
+
+$pageDescription =
+    "Review and manage employee requests.";
+
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: /hr1/public/?page=login");
+
+    header(
+        "Location: /hr1/public/?page=login"
+    );
+
     exit;
 }
 
-$requests    = $requests ?? [];
-$departments = $departments ?? [];
+
+$requests =
+    $requests ?? [];
+
+$departments =
+    $departments ?? [];
+
 
 $statusMeta = [
 
@@ -37,6 +54,7 @@ $statusMeta = [
 
 ];
 
+
 $requestTypes = [
 
     "Certificate of Employment",
@@ -51,21 +69,23 @@ $requestTypes = [
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
+
 <?php require '../resources/views/includes/sidebar.php'; ?>
+
 
 <div class="main-content">
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
+
     <div class="employee-request-page">
 
-        <!-- ==========================================================
+
+        <!-- ======================================================
             FILTER BAR
-        =========================================================== -->
+        ======================================================= -->
 
         <section class="filter-bar">
-
-            <!-- Department -->
 
             <select id="departmentFilter">
 
@@ -92,8 +112,6 @@ $requestTypes = [
             </select>
 
 
-            <!-- Request Type -->
-
             <select id="requestTypeFilter">
 
                 <option value="All">
@@ -103,10 +121,14 @@ $requestTypes = [
                 <?php foreach ($requestTypes as $requestType): ?>
 
                     <option
-                        value="<?= htmlspecialchars($requestType) ?>"
+                        value="<?= htmlspecialchars(
+                            $requestType
+                        ) ?>"
                     >
 
-                        <?= htmlspecialchars($requestType) ?>
+                        <?= htmlspecialchars(
+                            $requestType
+                        ) ?>
 
                     </option>
 
@@ -114,8 +136,6 @@ $requestTypes = [
 
             </select>
 
-
-            <!-- Status -->
 
             <select id="statusFilter">
 
@@ -141,8 +161,6 @@ $requestTypes = [
 
             </select>
 
-
-            <!-- Sort -->
 
             <select id="sortFilter">
 
@@ -171,9 +189,9 @@ $requestTypes = [
         </section>
 
 
-        <!-- ==========================================================
+        <!-- ======================================================
             REQUEST TABLE
-        =========================================================== -->
+        ======================================================= -->
 
         <section class="table-card">
 
@@ -212,6 +230,7 @@ $requestTypes = [
 
                     </thead>
 
+
                     <tbody>
 
                         <?php if (empty($requests)): ?>
@@ -244,21 +263,34 @@ $requestTypes = [
                                     $request['status']
                                     ?? 'Pending';
 
+
                                 $meta =
                                     $statusMeta[$status]
                                     ?? $statusMeta['Pending'];
 
-                                $fullName = trim(
-                                    $request['fullname'] ?? ''
-                                );
+
+                                $fullName =
+                                    trim(
+                                        $request['fullname']
+                                        ?? ''
+                                    );
+
 
                                 if ($fullName === '') {
-                                    $fullName = 'Unknown Employee';
+
+                                    $fullName =
+                                        'Unknown Employee';
                                 }
 
-                                $initial = strtoupper(
-                                    substr($fullName, 0, 1)
-                                );
+
+                                $initial =
+                                    strtoupper(
+                                        substr(
+                                            $fullName,
+                                            0,
+                                            1
+                                        )
+                                    );
 
                                 ?>
 
@@ -266,15 +298,18 @@ $requestTypes = [
                                     class="request-row"
 
                                     data-id="<?= htmlspecialchars(
-                                        $request['request_id'] ?? ''
+                                        $request['request_id']
+                                        ?? ''
                                     ) ?>"
 
                                     data-department="<?= htmlspecialchars(
-                                        $request['department_name'] ?? ''
+                                        $request['department_name']
+                                        ?? ''
                                     ) ?>"
 
                                     data-request-type="<?= htmlspecialchars(
-                                        $request['request_type'] ?? ''
+                                        $request['request_type']
+                                        ?? ''
                                     ) ?>"
 
                                     data-status="<?= htmlspecialchars(
@@ -286,25 +321,31 @@ $requestTypes = [
                                     ) ?>"
 
                                     data-employee-number="<?= htmlspecialchars(
-                                        $request['employee_number'] ?? ''
+                                        $request['employee_number']
+                                        ?? ''
                                     ) ?>"
 
                                     data-subject="<?= htmlspecialchars(
-                                        $request['subject'] ?? ''
+                                        $request['subject']
+                                        ?? ''
                                     ) ?>"
 
                                     data-description="<?= htmlspecialchars(
-                                        $request['description'] ?? ''
+                                        $request['description']
+                                        ?? ''
                                     ) ?>"
 
                                     data-hr-remarks="<?= htmlspecialchars(
-                                        $request['hr_remarks'] ?? ''
+                                        $request['hr_remarks']
+                                        ?? ''
                                     ) ?>"
 
                                     data-date="<?= htmlspecialchars(
-                                        $request['requested_at'] ?? ''
+                                        $request['requested_at']
+                                        ?? ''
                                     ) ?>"
                                 >
+
 
                                     <!-- Employee -->
 
@@ -320,6 +361,7 @@ $requestTypes = [
 
                                             </div>
 
+
                                             <div>
 
                                                 <strong>
@@ -330,10 +372,13 @@ $requestTypes = [
 
                                                 </strong>
 
+
                                                 <span class="sub-text">
 
                                                     <?= htmlspecialchars(
-                                                        $request['employee_number'] ?? ''
+                                                        $request[
+                                                            'employee_number'
+                                                        ] ?? ''
                                                     ) ?>
 
                                                 </span>
@@ -350,8 +395,9 @@ $requestTypes = [
                                     <td>
 
                                         <?= htmlspecialchars(
-                                            $request['department_name']
-                                            ?? '—'
+                                            $request[
+                                                'department_name'
+                                            ] ?? '—'
                                         ) ?>
 
                                     </td>
@@ -365,23 +411,33 @@ $requestTypes = [
                                             type="button"
                                             class="request-type request-view-btn"
                                             data-request-id="<?= htmlspecialchars(
-                                                $request['request_id'] ?? ''
+                                                $request[
+                                                    'request_id'
+                                                ] ?? ''
                                             ) ?>"
                                         >
 
                                             <?= htmlspecialchars(
-                                                $request['request_type']
-                                                ?? '—'
+                                                $request[
+                                                    'request_type'
+                                                ] ?? '—'
                                             ) ?>
 
                                         </button>
 
-                                        <?php if (!empty($request['subject'])): ?>
+
+                                        <?php if (
+                                            !empty(
+                                                $request['subject']
+                                            )
+                                        ): ?>
 
                                             <span class="sub-text">
 
                                                 <?= htmlspecialchars(
-                                                    $request['subject']
+                                                    $request[
+                                                        'subject'
+                                                    ]
                                                 ) ?>
 
                                             </span>
@@ -391,14 +447,22 @@ $requestTypes = [
                                     </td>
 
 
-                                    <!-- Date Submitted -->
+                                    <!-- Date -->
 
                                     <td>
 
-                                        <?php if (!empty($request['requested_at'])): ?>
+                                        <?php if (
+                                            !empty(
+                                                $request[
+                                                    'requested_at'
+                                                ]
+                                            )
+                                        ): ?>
 
                                             <?= htmlspecialchars(
-                                                $request['requested_at']
+                                                $request[
+                                                    'requested_at'
+                                                ]
                                             ) ?>
 
                                         <?php else: ?>
@@ -462,7 +526,6 @@ $requestTypes = [
                         class="page-btn"
                         id="prevPage"
                         type="button"
-                        aria-label="Previous page"
                     >
 
                         <i class="fa-solid fa-chevron-left"></i>
@@ -480,7 +543,6 @@ $requestTypes = [
                         class="page-btn"
                         id="nextPage"
                         type="button"
-                        aria-label="Next page"
                     >
 
                         <i class="fa-solid fa-chevron-right"></i>
@@ -500,7 +562,7 @@ $requestTypes = [
 
 
     <!-- ==========================================================
-        VIEW REQUEST MODAL
+        REQUEST MODAL
     =========================================================== -->
 
     <div
@@ -519,9 +581,10 @@ $requestTypes = [
             aria-labelledby="requestModalTitle"
         >
 
-            <!-- ======================================================
-                MODAL HEADER
-            ======================================================= -->
+
+            <!-- ==================================================
+                HEADER
+            =================================================== -->
 
             <div class="request-modal-header">
 
@@ -530,6 +593,7 @@ $requestTypes = [
                     <span class="modal-eyebrow">
                         Employee Request
                     </span>
+
 
                     <h2 id="requestModalTitle">
                         Request Details
@@ -552,21 +616,22 @@ $requestTypes = [
             </div>
 
 
-            <!-- ======================================================
-                MODAL BODY
-            ======================================================= -->
+            <!-- ==================================================
+                BODY
+            =================================================== -->
 
             <div class="request-modal-body">
 
 
                 <!-- ==================================================
-                    STEP 1 — REQUEST DETAILS
+                    STEP 1
                 =================================================== -->
 
                 <div
                     class="request-modal-step"
                     id="requestStepOne"
                 >
+
 
                     <!-- Employee -->
 
@@ -733,7 +798,7 @@ $requestTypes = [
 
 
                 <!-- ==================================================
-                    STEP 2 — STATUS & REMARKS
+                    STEP 2
                 =================================================== -->
 
                 <div
@@ -741,6 +806,7 @@ $requestTypes = [
                     id="requestStepTwo"
                     hidden
                 >
+
 
                     <!-- Status -->
 
@@ -758,7 +824,8 @@ $requestTypes = [
                         <div class="request-status-list">
 
 
-                            <div
+                            <button
+                                type="button"
                                 class="request-status-item"
                                 data-status="Pending"
                             >
@@ -777,10 +844,11 @@ $requestTypes = [
 
                                 </div>
 
-                            </div>
+                            </button>
 
 
-                            <div
+                            <button
+                                type="button"
                                 class="request-status-item"
                                 data-status="Approved"
                             >
@@ -799,10 +867,11 @@ $requestTypes = [
 
                                 </div>
 
-                            </div>
+                            </button>
 
 
-                            <div
+                            <button
+                                type="button"
                                 class="request-status-item"
                                 data-status="Rejected"
                             >
@@ -821,10 +890,11 @@ $requestTypes = [
 
                                 </div>
 
-                            </div>
+                            </button>
 
 
-                            <div
+                            <button
+                                type="button"
                                 class="request-status-item"
                                 data-status="Completed"
                             >
@@ -843,8 +913,7 @@ $requestTypes = [
 
                                 </div>
 
-                            </div>
-
+                            </button>
 
                         </div>
 
@@ -870,38 +939,61 @@ $requestTypes = [
                             rows="5"
                             placeholder="Enter HR remarks..."
                         ></textarea>
+
+
+                        <p
+                            class="request-readonly-message"
+                            id="requestReadonlyMessage"
+                            hidden
+                        >
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            This request has already been finalized
+                            and can no longer be changed.
+
+                        </p>
+
                     </div>
+
                 </div>
+
             </div>
 
 
-            <!-- ======================================================
-                MODAL FOOTER
-            ======================================================= -->
+            <!-- ==================================================
+                FOOTER
+            =================================================== -->
 
             <div class="request-modal-footer">
-                <div class="modal-footer-actions">
+                <button
+                    type="button"
+                    class="modal-btn modal-btn-primary"
+                    id="requestModalNext"
+                >
 
-                    <button
-                        type="button"
-                        class="modal-btn modal-btn-secondary"
-                        id="requestModalNext"
-                    >
-                        Next
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+                    Next
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
 
 
-                    <button
-                        type="button"
-                        class="modal-btn modal-btn-primary"
-                        id="requestModalSave"
-                    >
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        Save Changes
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    class="modal-btn modal-btn-primary"
+                    id="requestModalSave"
+                    hidden
+                >
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Save Changes
+
+                </button>
+
             </div>
+
         </div>
 
     </div>

@@ -887,17 +887,15 @@ body.modal-open {
     display: flex;
     align-items: flex-start;
     gap: 12px;
-
     padding: 13px 15px;
-
-    border: 1px solid #e5e5e5;
     border-radius: 10px;
-
-    background: #fafafa;
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
 }
 
 
@@ -948,51 +946,54 @@ body.modal-open {
 .request-status-item.active strong {
     color: #7a1f2b;
 }
+
+.request-status-item.is-disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+
+.request-status-item.is-disabled:hover {
+    transform: none;
+}
+
 /* =========================================================
-   HR REMARKS INPUT
+   HR REMARKS
    ========================================================= */
 
 .request-remarks-input {
     width: 100%;
-    min-height: 130px;
-    padding: 14px 16px;
-
-    border: 1px solid #d8d2cc;
-    border-radius: 10px;
-
-    background: #ffffff;
-
-    font-family: inherit;
-    font-size: 14px;
-    line-height: 1.6;
-
+    min-height: 120px;
     resize: vertical;
-
-    outline: none;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+    padding: 14px 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font: inherit;
+    line-height: 1.5;
+    box-sizing: border-box;
 }
 
 
-.request-remarks-input:focus {
-    border-color: #8b1e2d;
-
-    box-shadow:
-        0 0 0 3px rgba(139, 30, 45, 0.10);
+.request-remarks-input:read-only {
+    background: #f5f5f5;
+    cursor: default;
+    opacity: 0.8;
 }
-
 
 /* =========================================================
-   MODAL FOOTER ACTIONS
+   READ-ONLY MESSAGE
    ========================================================= */
 
-.modal-footer-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.request-readonly-message {
+    margin-top: 10px;
+    font-size: 13px;
+    opacity: 0.75;
 }
+
+.request-readonly-message i {
+    margin-right: 5px;
+}
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */

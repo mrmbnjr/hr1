@@ -9,9 +9,11 @@ class EmployeeRequests
 {
     private PDO $db;
 
+
     public function __construct()
     {
-        $this->db = Database::connection();
+        $this->db =
+            Database::connection();
     }
 
 
@@ -82,10 +84,17 @@ class EmployeeRequests
             ORDER BY er.requested_at DESC
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
+
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $stmt->fetchAll(
+            PDO::FETCH_ASSOC
+        );
     }
 
 
@@ -95,8 +104,10 @@ class EmployeeRequests
     |--------------------------------------------------------------------------
     */
 
-    public function getRequestById(int $requestId): ?array
-    {
+    public function getRequestById(
+        int $requestId
+    ): ?array {
+
         $sql = "
             SELECT
                 er.request_id,
@@ -159,7 +170,10 @@ class EmployeeRequests
             LIMIT 1
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
 
         $stmt->bindValue(
             ':request_id',
@@ -167,9 +181,15 @@ class EmployeeRequests
             PDO::PARAM_INT
         );
 
+
         $stmt->execute();
 
-        $request = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $request =
+            $stmt->fetch(
+                PDO::FETCH_ASSOC
+            );
+
 
         return $request ?: null;
     }
@@ -202,10 +222,17 @@ class EmployeeRequests
             ORDER BY d.department_name ASC
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
+
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $stmt->fetchAll(
+            PDO::FETCH_ASSOC
+        );
     }
 
 
@@ -215,8 +242,10 @@ class EmployeeRequests
     |--------------------------------------------------------------------------
     */
 
-    public function getRequestsByEmployee(int $employeeId): array
-    {
+    public function getRequestsByEmployee(
+        int $employeeId
+    ): array {
+
         $sql = "
             SELECT
                 request_id,
@@ -240,7 +269,10 @@ class EmployeeRequests
             ORDER BY requested_at DESC
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
 
         $stmt->bindValue(
             ':employee_id',
@@ -248,9 +280,13 @@ class EmployeeRequests
             PDO::PARAM_INT
         );
 
+
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $stmt->fetchAll(
+            PDO::FETCH_ASSOC
+        );
     }
 
 
@@ -283,20 +319,30 @@ class EmployeeRequests
             )
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
 
         return $stmt->execute([
-            ':employee_id'  => $employeeId,
-            ':request_type' => $requestType,
-            ':subject'      => $subject,
-            ':description'  => $description
+            ':employee_id' =>
+                $employeeId,
+
+            ':request_type' =>
+                $requestType,
+
+            ':subject' =>
+                $subject,
+
+            ':description' =>
+                $description
         ]);
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | UPDATE REQUEST STATUS
+    | UPDATE REQUEST STATUS + HR REMARKS
     |--------------------------------------------------------------------------
     */
 
@@ -307,22 +353,31 @@ class EmployeeRequests
         ?int $resolvedBy
     ): bool {
 
-        $resolvedAt = null;
+        /*
+        |--------------------------------------------------------------------------
+        | This method only accepts final statuses.
+        |--------------------------------------------------------------------------
+        */
 
-        if (
-            in_array(
-                $status,
-                [
-                    'Approved',
-                    'Rejected',
-                    'Completed'
-                ],
-                true
-            )
-        ) {
-            $resolvedAt =
-                date('Y-m-d H:i:s');
+        $allowedStatuses = [
+            'Approved',
+            'Rejected',
+            'Completed'
+        ];
+
+
+        if (!in_array(
+            $status,
+            $allowedStatuses,
+            true
+        )) {
+
+            return false;
         }
+
+
+        $resolvedAt =
+            date('Y-m-d H:i:s');
 
 
         $sql = "
@@ -334,7 +389,10 @@ class EmployeeRequests
                 resolved_at = :resolved_at,
                 resolved_by = :resolved_by
 
-            WHERE request_id = :request_id
+            WHERE
+                request_id = :request_id
+
+                AND status = 'Pending'
         ";
 
 
@@ -342,7 +400,7 @@ class EmployeeRequests
             $this->db->prepare($sql);
 
 
-        return $stmt->execute([
+        $stmt->execute([
             ':status' =>
                 $status,
 
@@ -358,33 +416,8 @@ class EmployeeRequests
             ':request_id' =>
                 $requestId
         ]);
-    }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE HR REMARKS
-    |--------------------------------------------------------------------------
-    */
 
-    public function updateRemarks(
-        int $requestId,
-        ?string $hrRemarks
-    ): bool {
-
-        $sql = "
-            UPDATE employee_requests
-
-            SET
-                hr_remarks = :hr_remarks
-
-            WHERE request_id = :request_id
-        ";
-
-        $stmt = $this->db->prepare($sql);
-
-        return $stmt->execute([
-            ':hr_remarks' => $hrRemarks,
-            ':request_id' => $requestId
-        ]);
+        return $stmt->rowCount() > 0;
     }
 }
