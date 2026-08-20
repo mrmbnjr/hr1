@@ -447,7 +447,7 @@ $statusMeta = [
 
                 <label>Interview Type
                     <select name="interview_type" id="scheduleType" required>
-                        <option value="">Select Type</option>
+                        <option value="" hidden>Select Type</option>
 
                         <option value="Phone"
                             <?= ($applicant['interview_type'] ?? '') === 'Phone' ? 'selected' : ''; ?>>
@@ -468,17 +468,17 @@ $statusMeta = [
 
                 <div class="form-row">                    
                     <label>Interview Date
-                        <input type="date" name="interview_date" id="scheduleDate" value="<?= !empty($applicant['interview_date']) ? date('Y-m-d', strtotime($applicant['interview_date'])) : ''; ?>" required>
+                        <input type="date" name="interview_date" id="scheduleDate" min="<?= date('Y-m-d') ?>" value="<?= !empty($applicant['interview_date']) ? date('Y-m-d', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                     <label>Interview Time
                         <input type="time" name="interview_time" id="scheduleTime" value="<?= !empty($applicant['interview_date']) ? date('H:i', strtotime($applicant['interview_date'])) : ''; ?>" required>
                     </label>
                 </div>
                 <label>Location
-                    <input type="text" name="location" value="<?= htmlspecialchars($applicant['location'] ?? ''); ?>" id="scheduleLocation" placeholder="e.g. HR Conference Room, Google Meet link" required>
+                    <input type="text" name="location" minlength="3" maxlength="64" value="<?= htmlspecialchars($applicant['location'] ?? ''); ?>" id="scheduleLocation" placeholder="e.g. HR Conference Room, Google Meet link" required>
                 </label>
                 <label>Notes
-                    <textarea name="notes"  id="scheduleNotes" rows="3" placeholder="Additional notes for the interview"><?= htmlspecialchars($applicant['remarks'] ?? ''); ?></textarea>
+                    <textarea name="notes" minlength="3" maxlength="500" id="scheduleNotes" rows="3" placeholder="Additional notes for the interview"><?= htmlspecialchars($applicant['remarks'] ?? ''); ?></textarea>
                 </label>
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="scheduleModal">Cancel</button>

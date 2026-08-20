@@ -12,6 +12,7 @@
 .employee-record-page {
     width: 100%;
     max-width: 1400px;
+    min-height: 84.34vh;
     margin: 0 auto;
     padding: 28px 32px 50px;
     box-sizing: border-box;

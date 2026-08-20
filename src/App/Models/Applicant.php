@@ -684,7 +684,6 @@ class Applicant
                     application_id,
                     employee_number,
                     position_id,
-                    department_id,
                     hire_date,
                     employment_status
                 )
@@ -693,7 +692,6 @@ class Applicant
                     :application_id,
                     :employee_number,
                     :position_id,
-                    :department_id,
                     CURDATE(),
                     :employment_status
                 )
@@ -703,7 +701,6 @@ class Applicant
                 ':application_id' => $applicationId,
                 ':employee_number' => $employeeNumber,
                 ':position_id' => $application['position_id'],
-                ':department_id' => $application['department_id'],
                 ':employment_status' => $employmentStatus
             ]);
 
