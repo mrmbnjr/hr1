@@ -203,11 +203,6 @@ $requestTypes = [
                             <th>
                                 Status
                             </th>
-
-                            <th class="col-actions">
-                                Actions
-                            </th>
-
                         </tr>
 
                     </thead>
@@ -405,26 +400,6 @@ $requestTypes = [
                                         </span>
 
                                     </td>
-
-
-                                    <!-- Actions -->
-
-                                    <td class="col-actions">
-
-                                        <a
-                                            href="?page=employee-request-view&id=<?= urlencode(
-                                                $request['request_id'] ?? ''
-                                            ) ?>"
-                                            class="btn-review">
-
-                                            <i class="fa-solid fa-eye"></i>
-
-                                            View
-
-                                        </a>
-
-                                    </td>
-
                                 </tr>
 
                             <?php endforeach; ?>

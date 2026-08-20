@@ -86,14 +86,6 @@ $statusMeta = [
         </section>
 
         <section class="table-card">
-
-            <div class="table-header">
-                <div>
-                    <h2>Employees</h2>
-                    <p>Employee information and current employment status.</p>
-                </div>
-            </div>
-
             <div class="table-scroll">
 
                 <table class="employee-records-table" id="employeeRecordsTable">
