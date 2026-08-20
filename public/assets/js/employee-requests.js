@@ -408,3 +408,243 @@
     applyFilters();
 
 })();
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modal = document.getElementById("requestModal");
+    const modalClose = document.getElementById("requestModalClose");
+    const modalCancel = document.getElementById("requestModalCancel");
+    const modalBackdrop = modal?.querySelector(
+        ".request-modal-backdrop"
+    );
+
+    if (!modal) {
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODAL ELEMENTS
+    |--------------------------------------------------------------------------
+    */
+
+    const employeeName = document.getElementById(
+        "modalEmployeeName"
+    );
+
+    const employeeNumber = document.getElementById(
+        "modalEmployeeNumber"
+    );
+
+    const department = document.getElementById(
+        "modalDepartment"
+    );
+
+    const requestType = document.getElementById(
+        "modalRequestType"
+    );
+
+    const requestDate = document.getElementById(
+        "modalRequestDate"
+    );
+
+    const requestStatus = document.getElementById(
+        "modalRequestStatus"
+    );
+
+    const requestSubject = document.getElementById(
+        "modalRequestSubject"
+    );
+
+    const requestDescription = document.getElementById(
+        "modalRequestDescription"
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OPEN MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    function openRequestModal(row) {
+
+        const data = row.dataset;
+
+        employeeName.textContent =
+            data.name || "Unknown Employee";
+
+        employeeNumber.textContent =
+            data.employeeNumber || "—";
+
+        department.textContent =
+            data.department || "—";
+
+        requestType.textContent =
+            data.requestType || "—";
+
+        requestDate.textContent =
+            data.date || "—";
+
+        requestSubject.textContent =
+            data.subject || "No subject provided.";
+
+        requestDescription.textContent =
+            data.description ||
+            "No additional details provided.";
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | STATUS BADGE
+        |--------------------------------------------------------------------------
+        */
+
+        const status = data.status || "Pending";
+
+        requestStatus.textContent = status;
+
+        requestStatus.className =
+            "badge " + getStatusClass(status);
+
+
+        modal.classList.add("is-open");
+
+        modal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS CLASS
+    |--------------------------------------------------------------------------
+    */
+
+    function getStatusClass(status) {
+
+        switch (status) {
+
+            case "Approved":
+            case "Completed":
+                return "badge-green";
+
+            case "Rejected":
+                return "badge-red";
+
+            case "Pending":
+            default:
+                return "badge-gray";
+
+        }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLOSE MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    function closeRequestModal() {
+
+        modal.classList.remove("is-open");
+
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | REQUEST CLICK
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        "click",
+        function (event) {
+
+            const button =
+                event.target.closest(
+                    ".request-view-btn"
+                );
+
+            if (!button) {
+                return;
+            }
+
+            const row =
+                button.closest(".request-row");
+
+            if (!row) {
+                return;
+            }
+
+            openRequestModal(row);
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CLOSE EVENTS
+    |--------------------------------------------------------------------------
+    */
+
+    modalClose?.addEventListener(
+        "click",
+        closeRequestModal
+    );
+
+    modalCancel?.addEventListener(
+        "click",
+        closeRequestModal
+    );
+
+    modalBackdrop?.addEventListener(
+        "click",
+        closeRequestModal
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ESCAPE KEY
+    |--------------------------------------------------------------------------
+    */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape" &&
+                modal.classList.contains("is-open")
+            ) {
+
+                closeRequestModal();
+
+            }
+
+        }
+    );
+
+});

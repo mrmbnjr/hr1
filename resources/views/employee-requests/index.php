@@ -211,8 +211,45 @@ $requestTypes = [
 
                         <?php if (empty($requests)): ?>
 
-                            <tr class="empty-row">
+                            <tr
+                                class="request-row"
 
+                                data-id="<?= htmlspecialchars(
+                                    $request['request_id'] ?? ''
+                                ) ?>"
+
+                                data-department="<?= htmlspecialchars(
+                                    $request['department_name'] ?? ''
+                                ) ?>"
+
+                                data-request-type="<?= htmlspecialchars(
+                                    $request['request_type'] ?? ''
+                                ) ?>"
+
+                                data-status="<?= htmlspecialchars(
+                                    $status
+                                ) ?>"
+
+                                data-name="<?= htmlspecialchars(
+                                    $fullName
+                                ) ?>"
+
+                                data-employee-number="<?= htmlspecialchars(
+                                    $request['employee_number'] ?? ''
+                                ) ?>"
+
+                                data-subject="<?= htmlspecialchars(
+                                    $request['subject'] ?? ''
+                                ) ?>"
+
+                                data-description="<?= htmlspecialchars(
+                                    $request['description'] ?? ''
+                                ) ?>"
+
+                                data-date="<?= htmlspecialchars(
+                                    $request['requested_at'] ?? ''
+                                ) ?>"
+                            >
                                 <td colspan="6">
 
                                     <div class="empty-state">
@@ -339,14 +376,17 @@ $requestTypes = [
 
                                     <td>
 
-                                        <strong class="request-type">
+                                        <button
+                                            type="button"
+                                            class="request-type request-view-btn"
+                                            data-request-id="<?= htmlspecialchars($request['request_id'] ?? '') ?>"
+                                        >
 
                                             <?= htmlspecialchars(
-                                                $request['request_type']
-                                                ?? '—'
+                                                $request['request_type'] ?? '—'
                                             ) ?>
 
-                                        </strong>
+                                        </button>
 
                                         <?php if (!empty($request['subject'])): ?>
 
@@ -361,7 +401,6 @@ $requestTypes = [
                                         <?php endif; ?>
 
                                     </td>
-
 
                                     <!-- Date Submitted -->
 
@@ -467,6 +506,220 @@ $requestTypes = [
 
     <?php require '../resources/views/includes/footer.php'; ?>
 
+    <!-- ==========================================================
+        VIEW REQUEST MODAL
+    =========================================================== -->
+
+    <div
+        class="request-modal"
+        id="requestModal"
+        aria-hidden="true"
+    >
+
+        <div class="request-modal-backdrop"></div>
+
+        <div
+            class="request-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="requestModalTitle"
+        >
+
+            <!-- Header -->
+
+            <div class="request-modal-header">
+
+                <div>
+
+                    <span class="modal-eyebrow">
+                        Employee Request
+                    </span>
+
+                    <h2 id="requestModalTitle">
+                        Request Details
+                    </h2>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="request-modal-close"
+                    id="requestModalClose"
+                    aria-label="Close request details"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- Body -->
+
+            <div class="request-modal-body">
+
+                <!-- Employee -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+                        <i class="fa-solid fa-user"></i>
+                        Employee Information
+                    </h3>
+
+                    <div class="request-detail-grid">
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Employee
+                            </span>
+
+                            <strong id="modalEmployeeName">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Employee Number
+                            </span>
+
+                            <strong id="modalEmployeeNumber">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Department
+                            </span>
+
+                            <strong id="modalDepartment">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Request -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+                        <i class="fa-solid fa-file-lines"></i>
+                        Request Information
+                    </h3>
+
+                    <div class="request-detail-grid">
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Request Type
+                            </span>
+
+                            <strong id="modalRequestType">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Date Submitted
+                            </span>
+
+                            <strong id="modalRequestDate">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Status
+                            </span>
+
+                            <span id="modalRequestStatus">
+                                —
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Subject -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+                        <i class="fa-solid fa-heading"></i>
+                        Subject
+                    </h3>
+
+                    <div
+                        class="request-detail-message"
+                        id="modalRequestSubject"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <!-- Description -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+                        <i class="fa-solid fa-align-left"></i>
+                        Request Details
+                    </h3>
+
+                    <div
+                        class="request-detail-message"
+                        id="modalRequestDescription"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+
+            <div class="request-modal-footer">
+
+                <button
+                    type="button"
+                    class="modal-btn modal-btn-secondary"
+                    id="requestModalCancel"
+                >
+                    Close
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
 
