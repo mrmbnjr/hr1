@@ -863,6 +863,91 @@ body.modal-open {
 
 }
 
+/* =========================================================
+   REQUEST MODAL STEPS
+========================================================= */
+
+.request-modal-step[hidden] {
+    display: none;
+}
+
+
+/* =========================================================
+   REQUEST STATUS LIST
+========================================================= */
+
+.request-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+
+.request-status-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    padding: 13px 15px;
+
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+
+    background: #fafafa;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.request-status-item .status-dot {
+    width: 10px;
+    height: 10px;
+
+    margin-top: 5px;
+
+    border-radius: 50%;
+
+    background: #cfcfcf;
+
+    flex-shrink: 0;
+}
+
+
+.request-status-item strong {
+    display: block;
+
+    font-size: 14px;
+}
+
+
+.request-status-item span:not(.status-dot) {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: #888;
+}
+
+
+.request-status-item.active {
+    border-color: #7a1f2b;
+
+    background: rgba(122, 31, 43, 0.05);
+}
+
+
+.request-status-item.active .status-dot {
+    background: #7a1f2b;
+}
+
+
+.request-status-item.active strong {
+    color: #7a1f2b;
+}
 
 /* =========================================================
    RESPONSIVE

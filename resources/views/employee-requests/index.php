@@ -78,7 +78,8 @@ $requestTypes = [
                     <option
                         value="<?= htmlspecialchars(
                             $department['department_name']
-                        ) ?>">
+                        ) ?>"
+                    >
 
                         <?= htmlspecialchars(
                             $department['department_name']
@@ -101,7 +102,9 @@ $requestTypes = [
 
                 <?php foreach ($requestTypes as $requestType): ?>
 
-                    <option value="<?= htmlspecialchars($requestType) ?>">
+                    <option
+                        value="<?= htmlspecialchars($requestType) ?>"
+                    >
 
                         <?= htmlspecialchars($requestType) ?>
 
@@ -178,7 +181,8 @@ $requestTypes = [
 
                 <table
                     class="employee-request-table"
-                    id="employeeRequestTable">
+                    id="employeeRequestTable"
+                >
 
                     <thead>
 
@@ -203,6 +207,7 @@ $requestTypes = [
                             <th>
                                 Status
                             </th>
+
                         </tr>
 
                     </thead>
@@ -211,46 +216,9 @@ $requestTypes = [
 
                         <?php if (empty($requests)): ?>
 
-                            <tr
-                                class="request-row"
+                            <tr>
 
-                                data-id="<?= htmlspecialchars(
-                                    $request['request_id'] ?? ''
-                                ) ?>"
-
-                                data-department="<?= htmlspecialchars(
-                                    $request['department_name'] ?? ''
-                                ) ?>"
-
-                                data-request-type="<?= htmlspecialchars(
-                                    $request['request_type'] ?? ''
-                                ) ?>"
-
-                                data-status="<?= htmlspecialchars(
-                                    $status
-                                ) ?>"
-
-                                data-name="<?= htmlspecialchars(
-                                    $fullName
-                                ) ?>"
-
-                                data-employee-number="<?= htmlspecialchars(
-                                    $request['employee_number'] ?? ''
-                                ) ?>"
-
-                                data-subject="<?= htmlspecialchars(
-                                    $request['subject'] ?? ''
-                                ) ?>"
-
-                                data-description="<?= htmlspecialchars(
-                                    $request['description'] ?? ''
-                                ) ?>"
-
-                                data-date="<?= htmlspecialchars(
-                                    $request['requested_at'] ?? ''
-                                ) ?>"
-                            >
-                                <td colspan="6">
+                                <td colspan="5">
 
                                     <div class="empty-state">
 
@@ -272,7 +240,9 @@ $requestTypes = [
 
                                 <?php
 
-                                $status = $request['status'] ?? 'Pending';
+                                $status =
+                                    $request['status']
+                                    ?? 'Pending';
 
                                 $meta =
                                     $statusMeta[$status]
@@ -315,9 +285,26 @@ $requestTypes = [
                                         $fullName
                                     ) ?>"
 
+                                    data-employee-number="<?= htmlspecialchars(
+                                        $request['employee_number'] ?? ''
+                                    ) ?>"
+
+                                    data-subject="<?= htmlspecialchars(
+                                        $request['subject'] ?? ''
+                                    ) ?>"
+
+                                    data-description="<?= htmlspecialchars(
+                                        $request['description'] ?? ''
+                                    ) ?>"
+
+                                    data-hr-remarks="<?= htmlspecialchars(
+                                        $request['hr_remarks'] ?? ''
+                                    ) ?>"
+
                                     data-date="<?= htmlspecialchars(
                                         $request['requested_at'] ?? ''
-                                    ) ?>">
+                                    ) ?>"
+                                >
 
                                     <!-- Employee -->
 
@@ -346,9 +333,7 @@ $requestTypes = [
                                                 <span class="sub-text">
 
                                                     <?= htmlspecialchars(
-                                                        $request[
-                                                            'employee_number'
-                                                        ] ?? ''
+                                                        $request['employee_number'] ?? ''
                                                     ) ?>
 
                                                 </span>
@@ -379,11 +364,14 @@ $requestTypes = [
                                         <button
                                             type="button"
                                             class="request-type request-view-btn"
-                                            data-request-id="<?= htmlspecialchars($request['request_id'] ?? '') ?>"
+                                            data-request-id="<?= htmlspecialchars(
+                                                $request['request_id'] ?? ''
+                                            ) ?>"
                                         >
 
                                             <?= htmlspecialchars(
-                                                $request['request_type'] ?? '—'
+                                                $request['request_type']
+                                                ?? '—'
                                             ) ?>
 
                                         </button>
@@ -402,13 +390,12 @@ $requestTypes = [
 
                                     </td>
 
+
                                     <!-- Date Submitted -->
 
                                     <td>
 
-                                        <?php if (!empty(
-                                            $request['requested_at']
-                                        )): ?>
+                                        <?php if (!empty($request['requested_at'])): ?>
 
                                             <?= htmlspecialchars(
                                                 $request['requested_at']
@@ -430,7 +417,8 @@ $requestTypes = [
                                         <span
                                             class="badge <?= htmlspecialchars(
                                                 $meta['class']
-                                            ) ?>">
+                                            ) ?>"
+                                        >
 
                                             <?= htmlspecialchars(
                                                 $meta['label']
@@ -439,6 +427,7 @@ $requestTypes = [
                                         </span>
 
                                     </td>
+
                                 </tr>
 
                             <?php endforeach; ?>
@@ -460,19 +449,21 @@ $requestTypes = [
 
                 <span
                     class="results-count"
-                    id="resultsCount">
-                </span>
+                    id="resultsCount"
+                ></span>
 
 
                 <div
                     class="pagination"
-                    id="pagination">
+                    id="pagination"
+                >
 
                     <button
                         class="page-btn"
                         id="prevPage"
                         type="button"
-                        aria-label="Previous page">
+                        aria-label="Previous page"
+                    >
 
                         <i class="fa-solid fa-chevron-left"></i>
 
@@ -481,15 +472,16 @@ $requestTypes = [
 
                     <div
                         class="page-numbers"
-                        id="pageNumbers">
-                    </div>
+                        id="pageNumbers"
+                    ></div>
 
 
                     <button
                         class="page-btn"
                         id="nextPage"
                         type="button"
-                        aria-label="Next page">
+                        aria-label="Next page"
+                    >
 
                         <i class="fa-solid fa-chevron-right"></i>
 
@@ -506,6 +498,7 @@ $requestTypes = [
 
     <?php require '../resources/views/includes/footer.php'; ?>
 
+
     <!-- ==========================================================
         VIEW REQUEST MODAL
     =========================================================== -->
@@ -518,6 +511,7 @@ $requestTypes = [
 
         <div class="request-modal-backdrop"></div>
 
+
         <div
             class="request-modal-content"
             role="dialog"
@@ -525,7 +519,9 @@ $requestTypes = [
             aria-labelledby="requestModalTitle"
         >
 
-            <!-- Header -->
+            <!-- ======================================================
+                MODAL HEADER
+            ======================================================= -->
 
             <div class="request-modal-header">
 
@@ -541,6 +537,7 @@ $requestTypes = [
 
                 </div>
 
+
                 <button
                     type="button"
                     class="request-modal-close"
@@ -555,55 +552,179 @@ $requestTypes = [
             </div>
 
 
-            <!-- Body -->
+            <!-- ======================================================
+                MODAL BODY
+            ======================================================= -->
 
             <div class="request-modal-body">
 
-                <!-- Employee -->
 
-                <div class="request-detail-section">
+                <!-- ==================================================
+                    STEP 1 — REQUEST DETAILS
+                =================================================== -->
 
-                    <h3>
-                        <i class="fa-solid fa-user"></i>
-                        Employee Information
-                    </h3>
+                <div
+                    class="request-modal-step"
+                    id="requestStepOne"
+                >
 
-                    <div class="request-detail-grid">
+                    <!-- Employee -->
 
-                        <div class="request-detail-item">
+                    <div class="request-detail-section">
 
-                            <span class="detail-label">
-                                Employee
-                            </span>
+                        <h3>
 
-                            <strong id="modalEmployeeName">
-                                —
-                            </strong>
+                            <i class="fa-solid fa-user"></i>
+
+                            Employee Information
+
+                        </h3>
+
+
+                        <div class="request-detail-grid">
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Employee
+                                </span>
+
+                                <strong id="modalEmployeeName">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Employee Number
+                                </span>
+
+                                <strong id="modalEmployeeNumber">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Department
+                                </span>
+
+                                <strong id="modalDepartment">
+                                    —
+                                </strong>
+
+                            </div>
 
                         </div>
 
-                        <div class="request-detail-item">
+                    </div>
 
-                            <span class="detail-label">
-                                Employee Number
-                            </span>
 
-                            <strong id="modalEmployeeNumber">
-                                —
-                            </strong>
+                    <!-- Request -->
+
+                    <div class="request-detail-section">
+
+                        <h3>
+
+                            <i class="fa-solid fa-file-lines"></i>
+
+                            Request Information
+
+                        </h3>
+
+
+                        <div class="request-detail-grid">
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Request Type
+                                </span>
+
+                                <strong id="modalRequestType">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Date Submitted
+                                </span>
+
+                                <strong id="modalRequestDate">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label">
+                                    Status
+                                </span>
+
+                                <span id="modalRequestStatus">
+                                    —
+                                </span>
+
+                            </div>
 
                         </div>
 
-                        <div class="request-detail-item">
+                    </div>
 
-                            <span class="detail-label">
-                                Department
-                            </span>
 
-                            <strong id="modalDepartment">
-                                —
-                            </strong>
+                    <!-- Subject -->
 
+                    <div class="request-detail-section">
+
+                        <h3>
+
+                            <i class="fa-solid fa-heading"></i>
+
+                            Subject
+
+                        </h3>
+
+
+                        <div
+                            class="request-detail-message"
+                            id="modalRequestSubject"
+                        >
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <!-- Description -->
+
+                    <div class="request-detail-section">
+
+                        <h3>
+
+                            <i class="fa-solid fa-align-left"></i>
+
+                            Request Details
+
+                        </h3>
+
+
+                        <div
+                            class="request-detail-message"
+                            id="modalRequestDescription"
+                        >
+                            —
                         </div>
 
                     </div>
@@ -611,91 +732,145 @@ $requestTypes = [
                 </div>
 
 
-                <!-- Request -->
+                <!-- ==================================================
+                    STEP 2 — STATUS & REMARKS
+                =================================================== -->
 
-                <div class="request-detail-section">
+                <div
+                    class="request-modal-step"
+                    id="requestStepTwo"
+                    hidden
+                >
 
-                    <h3>
-                        <i class="fa-solid fa-file-lines"></i>
-                        Request Information
-                    </h3>
+                    <!-- Status -->
 
-                    <div class="request-detail-grid">
+                    <div class="request-detail-section">
 
-                        <div class="request-detail-item">
+                        <h3>
 
-                            <span class="detail-label">
-                                Request Type
-                            </span>
+                            <i class="fa-solid fa-list-check"></i>
 
-                            <strong id="modalRequestType">
-                                —
-                            </strong>
+                            Request Status
 
-                        </div>
+                        </h3>
 
-                        <div class="request-detail-item">
 
-                            <span class="detail-label">
-                                Date Submitted
-                            </span>
+                        <div class="request-status-list">
 
-                            <strong id="modalRequestDate">
-                                —
-                            </strong>
 
-                        </div>
+                            <div
+                                class="request-status-item"
+                                data-status="Pending"
+                            >
 
-                        <div class="request-detail-item">
+                                <span class="status-dot"></span>
 
-                            <span class="detail-label">
-                                Status
-                            </span>
+                                <div>
 
-                            <span id="modalRequestStatus">
-                                —
-                            </span>
+                                    <strong>
+                                        Pending
+                                    </strong>
+
+                                    <span>
+                                        Request is waiting for HR review.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="request-status-item"
+                                data-status="Approved"
+                            >
+
+                                <span class="status-dot"></span>
+
+                                <div>
+
+                                    <strong>
+                                        Approved
+                                    </strong>
+
+                                    <span>
+                                        Request has been approved by HR.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="request-status-item"
+                                data-status="Rejected"
+                            >
+
+                                <span class="status-dot"></span>
+
+                                <div>
+
+                                    <strong>
+                                        Rejected
+                                    </strong>
+
+                                    <span>
+                                        Request has been rejected by HR.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="request-status-item"
+                                data-status="Completed"
+                            >
+
+                                <span class="status-dot"></span>
+
+                                <div>
+
+                                    <strong>
+                                        Completed
+                                    </strong>
+
+                                    <span>
+                                        Request has been completed.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
 
                         </div>
 
                     </div>
 
-                </div>
+
+                    <!-- HR Remarks -->
+
+                    <div class="request-detail-section">
+
+                        <h3>
+
+                            <i class="fa-solid fa-comment-dots"></i>
+
+                            HR Remarks
+
+                        </h3>
 
 
-                <!-- Subject -->
+                        <div
+                            class="request-detail-message"
+                            id="modalRequestRemarks"
+                        >
+                            No remarks provided.
+                        </div>
 
-                <div class="request-detail-section">
-
-                    <h3>
-                        <i class="fa-solid fa-heading"></i>
-                        Subject
-                    </h3>
-
-                    <div
-                        class="request-detail-message"
-                        id="modalRequestSubject"
-                    >
-                        —
-                    </div>
-
-                </div>
-
-
-                <!-- Description -->
-
-                <div class="request-detail-section">
-
-                    <h3>
-                        <i class="fa-solid fa-align-left"></i>
-                        Request Details
-                    </h3>
-
-                    <div
-                        class="request-detail-message"
-                        id="modalRequestDescription"
-                    >
-                        —
                     </div>
 
                 </div>
@@ -703,7 +878,9 @@ $requestTypes = [
             </div>
 
 
-            <!-- Footer -->
+            <!-- ======================================================
+                MODAL FOOTER
+            ======================================================= -->
 
             <div class="request-modal-footer">
 
@@ -715,11 +892,25 @@ $requestTypes = [
                     Close
                 </button>
 
+
+                <button
+                    type="button"
+                    class="modal-btn modal-btn-primary"
+                    id="requestModalNext"
+                >
+
+                    Next
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
             </div>
 
         </div>
 
     </div>
+
 </div>
 
 
