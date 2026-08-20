@@ -948,7 +948,51 @@ body.modal-open {
 .request-status-item.active strong {
     color: #7a1f2b;
 }
+/* =========================================================
+   HR REMARKS INPUT
+   ========================================================= */
 
+.request-remarks-input {
+    width: 100%;
+    min-height: 130px;
+    padding: 14px 16px;
+
+    border: 1px solid #d8d2cc;
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+
+    resize: vertical;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.request-remarks-input:focus {
+    border-color: #8b1e2d;
+
+    box-shadow:
+        0 0 0 3px rgba(139, 30, 45, 0.10);
+}
+
+
+/* =========================================================
+   MODAL FOOTER ACTIONS
+   ========================================================= */
+
+.modal-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 /* =========================================================
    RESPONSIVE
 ========================================================= */

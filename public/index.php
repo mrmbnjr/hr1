@@ -140,9 +140,11 @@ switch ($page) {
         (new EmployeeRequestsController())->employeeRequests();
         break;
 
-    case 'logout':
-        (new LogoutController())->logout();
-        break;
+    case 'employee-requests-update':
+        (new EmployeeRequestsController())->update();
+        break;    case 'logout':
+            (new LogoutController())->logout();
+            break;
 
     default:
         require '../resources/views/misc/soon.php';

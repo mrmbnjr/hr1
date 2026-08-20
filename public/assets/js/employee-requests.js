@@ -1,6 +1,7 @@
 // ==========================================================
 // RAM-YUM — Employee Requests
-// Filtering, sorting, pagination, and request details modal
+// Filtering, sorting, pagination, request details modal,
+// status updates, and HR remarks
 // ==========================================================
 
 (function () {
@@ -118,6 +119,12 @@
                 "requestModalNext"
             );
 
+        const requestModalSave =
+            document.getElementById(
+                "requestModalSave"
+            );
+
+
         const requestStepOne =
             document.getElementById(
                 "requestStepOne"
@@ -179,7 +186,17 @@
             );
 
 
+        // ======================================================
+        // MODAL STATE
+        // ======================================================
+
         let requestModalStep = 1;
+
+        let currentRequestRow = null;
+
+        let currentRequestId = null;
+
+        let selectedStatus = "Pending";
 
 
         // ======================================================
@@ -194,7 +211,7 @@
             const selectedRequestType =
                 requestTypeFilter?.value ?? "All";
 
-            const selectedStatus =
+            const selectedStatusFilter =
                 statusFilter?.value ?? "All";
 
             const selectedSort =
@@ -216,9 +233,9 @@
 
 
                 const matchesStatus =
-                    selectedStatus === "All" ||
+                    selectedStatusFilter === "All" ||
                     row.dataset.status ===
-                    selectedStatus;
+                    selectedStatusFilter;
 
 
                 return (
@@ -294,6 +311,7 @@
         function compareDates(dateA, dateB) {
 
             const timeA = parseDate(dateA);
+
             const timeB = parseDate(dateB);
 
             return timeA - timeB;
@@ -780,6 +798,28 @@
 
 
         // ======================================================
+        // HIGHLIGHT STATUS
+        // ======================================================
+
+        function highlightStatus(status) {
+
+            document
+                .querySelectorAll(
+                    ".request-status-item"
+                )
+                .forEach(item => {
+
+                    item.classList.toggle(
+                        "active",
+                        item.dataset.status === status
+                    );
+
+                });
+
+        }
+
+
+        // ======================================================
         // OPEN REQUEST MODAL
         // ======================================================
 
@@ -789,12 +829,20 @@
                 row.dataset;
 
 
-            // Always start at Step 1.
+            currentRequestRow =
+                row;
+
+
+            currentRequestId =
+                data.id || null;
+
 
             resetModalStep();
 
 
-            // Employee information.
+            // --------------------------------------------------
+            // Employee
+            // --------------------------------------------------
 
             if (employeeName) {
 
@@ -823,7 +871,9 @@
             }
 
 
-            // Request information.
+            // --------------------------------------------------
+            // Request
+            // --------------------------------------------------
 
             if (requestType) {
 
@@ -843,28 +893,6 @@
             }
 
 
-            // Status.
-
-            const status =
-                data.status ||
-                "Pending";
-
-
-            if (requestStatus) {
-
-                requestStatus.textContent =
-                    status;
-
-
-                requestStatus.className =
-                    "badge " +
-                    getStatusClass(status);
-
-            }
-
-
-            // Subject.
-
             if (requestSubject) {
 
                 requestSubject.textContent =
@@ -873,8 +901,6 @@
 
             }
 
-
-            // Description.
 
             if (requestDescription) {
 
@@ -885,39 +911,50 @@
             }
 
 
-            // HR remarks.
+            // --------------------------------------------------
+            // Status
+            // --------------------------------------------------
 
-            if (requestRemarks) {
+            selectedStatus =
+                data.status ||
+                "Pending";
 
-                requestRemarks.textContent =
-                    data.hrRemarks &&
-                    data.hrRemarks.trim() !== ""
 
-                        ? data.hrRemarks
+            if (requestStatus) {
 
-                        : "No remarks provided.";
+                requestStatus.textContent =
+                    selectedStatus;
+
+
+                requestStatus.className =
+                    "badge " +
+                    getStatusClass(
+                        selectedStatus
+                    );
 
             }
 
 
-            // Highlight current status.
-
-            document
-                .querySelectorAll(
-                    ".request-status-item"
-                )
-                .forEach(item => {
-
-                    item.classList.toggle(
-                        "active",
-                        item.dataset.status ===
-                        status
-                    );
-
-                });
+            highlightStatus(
+                selectedStatus
+            );
 
 
-            // Open modal.
+            // --------------------------------------------------
+            // HR Remarks
+            // --------------------------------------------------
+
+            if (requestRemarks) {
+
+                requestRemarks.value =
+                    data.hrRemarks || "";
+
+            }
+
+
+            // --------------------------------------------------
+            // Open modal
+            // --------------------------------------------------
 
             modal.classList.add(
                 "is-open"
@@ -943,6 +980,11 @@
 
         function closeRequestModal() {
 
+            if (!modal) {
+                return;
+            }
+
+
             modal.classList.remove(
                 "is-open"
             );
@@ -959,9 +1001,73 @@
             );
 
 
+            currentRequestRow =
+                null;
+
+
+            currentRequestId =
+                null;
+
+
+            selectedStatus =
+                "Pending";
+
+
             resetModalStep();
 
         }
+
+
+        // ======================================================
+        // STATUS SELECTION
+        // ======================================================
+
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                const statusItem =
+                    event.target.closest(
+                        ".request-status-item"
+                    );
+
+
+                if (!statusItem) {
+                    return;
+                }
+
+
+                if (!modal.classList.contains("is-open")) {
+                    return;
+                }
+
+
+                selectedStatus =
+                    statusItem.dataset.status ||
+                    "Pending";
+
+
+                highlightStatus(
+                    selectedStatus
+                );
+
+
+                if (requestStatus) {
+
+                    requestStatus.textContent =
+                        selectedStatus;
+
+
+                    requestStatus.className =
+                        "badge " +
+                        getStatusClass(
+                            selectedStatus
+                        );
+
+                }
+
+            }
+        );
 
 
         // ======================================================
@@ -998,6 +1104,232 @@
 
             }
         );
+
+
+        // ======================================================
+        // SAVE REQUEST
+        // ======================================================
+
+        requestModalSave?.addEventListener(
+            "click",
+            async function () {
+
+                if (!currentRequestId) {
+
+                    alert(
+                        "Unable to identify the employee request."
+                    );
+
+                    return;
+
+                }
+
+
+                const hrRemarks =
+                    requestRemarks?.value.trim() || "";
+
+
+                // ------------------------------------------------
+                // Disable button while saving
+                // ------------------------------------------------
+
+                requestModalSave.disabled =
+                    true;
+
+
+                const originalButtonText =
+                    requestModalSave.innerHTML;
+
+
+                requestModalSave.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+
+                try {
+
+                    const formData =
+                        new URLSearchParams();
+
+
+                    formData.append(
+                        "request_id",
+                        currentRequestId
+                    );
+
+
+                    formData.append(
+                        "status",
+                        selectedStatus
+                    );
+
+
+                    formData.append(
+                        "hr_remarks",
+                        hrRemarks
+                    );
+
+
+                    const response =
+                        await fetch(
+                            "/hr1/public/?page=employee-requests-update",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded; charset=UTF-8",
+
+                                    "X-Requested-With":
+                                        "XMLHttpRequest"
+                                },
+
+                                body:
+                                    formData.toString()
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to update request."
+                        );
+
+                    }
+
+
+                    // ------------------------------------------------
+                    // Update row from server response
+                    // ------------------------------------------------
+
+                    updateRequestRow(
+                        currentRequestRow,
+                        result.request
+                    );
+
+
+                    // ------------------------------------------------
+                    // Show success
+                    // ------------------------------------------------
+
+                    requestModalSave.innerHTML =
+                        '<i class="fa-solid fa-check"></i> Saved';
+
+
+                    setTimeout(
+                        () => {
+
+                            closeRequestModal();
+
+                            applyFilters();
+
+                        },
+                        500
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Employee request update error:",
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        "Unable to update the employee request."
+                    );
+
+
+                    requestModalSave.innerHTML =
+                        originalButtonText;
+
+                    requestModalSave.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+
+        // ======================================================
+        // UPDATE TABLE ROW
+        // ======================================================
+
+        function updateRequestRow(
+            row,
+            request
+        ) {
+
+            if (!row || !request) {
+                return;
+            }
+
+
+            const newStatus =
+                request.status ||
+                "Pending";
+
+
+            const newRemarks =
+                request.hr_remarks ||
+                "";
+
+
+            // --------------------------------------------------
+            // Update data attributes
+            // --------------------------------------------------
+
+            row.dataset.status =
+                newStatus;
+
+
+            row.dataset.hrRemarks =
+                newRemarks;
+
+
+            // --------------------------------------------------
+            // Update visible status badge
+            // --------------------------------------------------
+
+            const badge =
+                row.querySelector(
+                    "td:last-child .badge"
+                );
+
+
+            if (badge) {
+
+                badge.textContent =
+                    newStatus;
+
+
+                badge.className =
+                    "badge " +
+                    getStatusClass(
+                        newStatus
+                    );
+
+            }
+
+
+            // --------------------------------------------------
+            // Keep modal data synchronized
+            // --------------------------------------------------
+
+            selectedStatus =
+                newStatus;
+
+        }
 
 
         // ======================================================
@@ -1047,6 +1379,7 @@
 
 
                     return;
+
                 }
 
 

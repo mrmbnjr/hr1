@@ -864,17 +864,14 @@ $requestTypes = [
                         </h3>
 
 
-                        <div
-                            class="request-detail-message"
+                        <textarea
                             id="modalRequestRemarks"
-                        >
-                            No remarks provided.
-                        </div>
-
+                            class="request-remarks-input"
+                            rows="5"
+                            placeholder="Enter HR remarks..."
+                        ></textarea>
                     </div>
-
                 </div>
-
             </div>
 
 
@@ -883,30 +880,28 @@ $requestTypes = [
             ======================================================= -->
 
             <div class="request-modal-footer">
+                <div class="modal-footer-actions">
 
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-secondary"
-                    id="requestModalCancel"
-                >
-                    Close
-                </button>
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-secondary"
+                        id="requestModalNext"
+                    >
+                        Next
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
 
 
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-primary"
-                    id="requestModalNext"
-                >
-
-                    Next
-
-                    <i class="fa-solid fa-arrow-right"></i>
-
-                </button>
-
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-primary"
+                        id="requestModalSave"
+                    >
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Changes
+                    </button>
+                </div>
             </div>
-
         </div>
 
     </div>

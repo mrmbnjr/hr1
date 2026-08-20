@@ -320,8 +320,10 @@ class EmployeeRequests
                 true
             )
         ) {
-            $resolvedAt = date('Y-m-d H:i:s');
+            $resolvedAt =
+                date('Y-m-d H:i:s');
         }
+
 
         $sql = "
             UPDATE employee_requests
@@ -335,17 +337,28 @@ class EmployeeRequests
             WHERE request_id = :request_id
         ";
 
-        $stmt = $this->db->prepare($sql);
+
+        $stmt =
+            $this->db->prepare($sql);
+
 
         return $stmt->execute([
-            ':status'      => $status,
-            ':hr_remarks'  => $hrRemarks,
-            ':resolved_at' => $resolvedAt,
-            ':resolved_by' => $resolvedBy,
-            ':request_id'  => $requestId
+            ':status' =>
+                $status,
+
+            ':hr_remarks' =>
+                $hrRemarks,
+
+            ':resolved_at' =>
+                $resolvedAt,
+
+            ':resolved_by' =>
+                $resolvedBy,
+
+            ':request_id' =>
+                $requestId
         ]);
     }
-
 
     /*
     |--------------------------------------------------------------------------
