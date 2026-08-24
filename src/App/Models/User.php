@@ -11,10 +11,17 @@ class User
     {
         $db = Database::connection();
 
-        $sql = "SELECT *
-                FROM users
-                WHERE username = ?
-                LIMIT 1";
+        $sql = "
+            SELECT
+                u.*,
+                r.role_code,
+                r.role_name
+            FROM users u
+            INNER JOIN roles r
+                ON r.role_id = u.role_id
+            WHERE u.username = ?
+            LIMIT 1
+        ";
 
         $stmt = $db->prepare($sql);
         $stmt->execute([$username]);

@@ -12,8 +12,7 @@ class EmployeeRequests
 
     public function __construct()
     {
-        $this->db =
-            Database::connection();
+        $this->db = Database::connection();
     }
 
 
@@ -84,17 +83,11 @@ class EmployeeRequests
             ORDER BY er.requested_at DESC
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         $stmt->execute();
 
-
-        return $stmt->fetchAll(
-            PDO::FETCH_ASSOC
-        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
@@ -170,10 +163,7 @@ class EmployeeRequests
             LIMIT 1
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         $stmt->bindValue(
             ':request_id',
@@ -181,15 +171,11 @@ class EmployeeRequests
             PDO::PARAM_INT
         );
 
-
         $stmt->execute();
 
-
-        $request =
-            $stmt->fetch(
-                PDO::FETCH_ASSOC
-            );
-
+        $request = $stmt->fetch(
+            PDO::FETCH_ASSOC
+        );
 
         return $request ?: null;
     }
@@ -222,13 +208,9 @@ class EmployeeRequests
             ORDER BY d.department_name ASC
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         $stmt->execute();
-
 
         return $stmt->fetchAll(
             PDO::FETCH_ASSOC
@@ -269,10 +251,7 @@ class EmployeeRequests
             ORDER BY requested_at DESC
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         $stmt->bindValue(
             ':employee_id',
@@ -280,13 +259,125 @@ class EmployeeRequests
             PDO::PARAM_INT
         );
 
-
         $stmt->execute();
-
 
         return $stmt->fetchAll(
             PDO::FETCH_ASSOC
         );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET EMPLOYEE ID FROM USER ID
+    |--------------------------------------------------------------------------
+    |
+    | users.employee_id connects the logged-in account to employees.
+    |
+    */
+
+    public function getEmployeeIdByUserId(
+        int $userId
+    ): ?int {
+
+        $sql = "
+            SELECT employee_id
+
+            FROM users
+
+            WHERE user_id = :user_id
+
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bindValue(
+            ':user_id',
+            $userId,
+            PDO::PARAM_INT
+        );
+
+        $stmt->execute();
+
+        $employeeId = $stmt->fetchColumn();
+
+        if ($employeeId === false || $employeeId === null) {
+            return null;
+        }
+
+        return (int) $employeeId;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET EMPLOYEE INFORMATION
+    |--------------------------------------------------------------------------
+    */
+
+    public function getEmployeeInfo(
+        int $employeeId
+    ): ?array {
+
+        $sql = "
+            SELECT
+                e.employee_id,
+                e.employee_number,
+                e.application_id,
+                e.position_id,
+                e.hire_date,
+                e.employment_status,
+
+                CONCAT_WS(
+                    ' ',
+                    NULLIF(ap.first_name, ''),
+                    NULLIF(ap.middle_name, ''),
+                    NULLIF(ap.last_name, '')
+                ) AS fullname,
+
+                ap.email,
+                ap.phone,
+                ap.address,
+
+                d.department_name,
+
+                p.position_name AS job_title
+
+            FROM employees e
+
+            LEFT JOIN applications app
+                ON e.application_id = app.application_id
+
+            LEFT JOIN applicants ap
+                ON app.applicant_id = ap.applicant_id
+
+            LEFT JOIN positions p
+                ON e.position_id = p.position_id
+
+            LEFT JOIN departments d
+                ON p.department_id = d.department_id
+
+            WHERE e.employee_id = :employee_id
+
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bindValue(
+            ':employee_id',
+            $employeeId,
+            PDO::PARAM_INT
+        );
+
+        $stmt->execute();
+
+        $employee = $stmt->fetch(
+            PDO::FETCH_ASSOC
+        );
+
+        return $employee ?: null;
     }
 
 
@@ -319,10 +410,7 @@ class EmployeeRequests
             )
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
             ':employee_id' =>
@@ -353,32 +441,23 @@ class EmployeeRequests
         ?int $resolvedBy
     ): bool {
 
-        /*
-        |--------------------------------------------------------------------------
-        | This method only accepts final statuses.
-        |--------------------------------------------------------------------------
-        */
-
         $allowedStatuses = [
             'Approved',
             'Rejected',
             'Completed'
         ];
 
-
         if (!in_array(
             $status,
             $allowedStatuses,
             true
         )) {
-
             return false;
         }
 
-
-        $resolvedAt =
-            date('Y-m-d H:i:s');
-
+        $resolvedAt = date(
+            'Y-m-d H:i:s'
+        );
 
         $sql = "
             UPDATE employee_requests
@@ -395,10 +474,7 @@ class EmployeeRequests
                 AND status = 'Pending'
         ";
 
-
-        $stmt =
-            $this->db->prepare($sql);
-
+        $stmt = $this->db->prepare($sql);
 
         $stmt->execute([
             ':status' =>
@@ -416,7 +492,6 @@ class EmployeeRequests
             ':request_id' =>
                 $requestId
         ]);
-
 
         return $stmt->rowCount() > 0;
     }

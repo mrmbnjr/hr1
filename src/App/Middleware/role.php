@@ -1,22 +1,27 @@
 <?php
 
-defined('APP_STARTED') or exit('No direct script access allowed');
+use App\Services\Auth;
 
-function requireRole(array $allowedRoles): void
+
+/*
+|--------------------------------------------------------------------------
+| Require Login
+|--------------------------------------------------------------------------
+*/
+
+function requireLogin(): void
 {
-    // If the role doesn't exist, deny access.
-    if (!isset($_SESSION['role'])) {
+    Auth::requireLogin();
+}
 
-        http_response_code(403);
-        exit('Access denied.');
 
-    }
+/*
+|--------------------------------------------------------------------------
+| Require Role
+|--------------------------------------------------------------------------
+*/
 
-    // If the user's role is not allowed, deny access.
-    if (!in_array($_SESSION['role'], $allowedRoles, true)) {
-
-        http_response_code(403);
-        exit('You do not have permission to access this page.');
-
-    }
+function requireRole(array $roles): void
+{
+    Auth::requireRole($roles);
 }

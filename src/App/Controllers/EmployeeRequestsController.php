@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\EmployeeRequests;
+use App\Services\Auth;
 
 class EmployeeRequestsController
 {
@@ -11,7 +12,8 @@ class EmployeeRequestsController
 
     public function __construct()
     {
-        $this->employeeRequests = new EmployeeRequests();
+        $this->employeeRequests =
+            new EmployeeRequests();
     }
 
 
@@ -23,25 +25,261 @@ class EmployeeRequestsController
 
     public function employeeRequests(): void
     {
-        if (!isset($_SESSION['user_id'])) {
+        Auth::requireRole([
+            'ADMIN',
+            'HR',
+            'MGR'
+        ]);
+
+        $requests =
+            $this->employeeRequests->getAllRequests();
+
+        $departments =
+            $this->employeeRequests->getDepartments();
+
+        require '../resources/views/employee-requests/index.php';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPLOYEE — MY REQUESTS PAGE
+    |--------------------------------------------------------------------------
+    */
+
+    public function myRequests(): void
+    {
+        Auth::requireRole([
+            'EMP'
+        ]);
+
+        $userId =
+            (int) Auth::userId();
+
+        $employeeId =
+            $this->employeeRequests
+                ->getEmployeeIdByUserId(
+                    $userId
+                );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Account is not connected to an employee
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$employeeId) {
+
+            http_response_code(403);
+
+            exit(
+                'Your account is not connected to an employee record.'
+            );
+        }
+
+
+        $employee =
+            $this->employeeRequests
+                ->getEmployeeInfo(
+                    $employeeId
+                );
+
+
+        if (!$employee) {
+
+            http_response_code(404);
+
+            exit(
+                'Employee record not found.'
+            );
+        }
+
+
+        $requests =
+            $this->employeeRequests
+                ->getRequestsByEmployee(
+                    $employeeId
+                );
+
+
+        require '../resources/views/employee-requests/my-requests.php';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPLOYEE — CREATE REQUEST
+    |--------------------------------------------------------------------------
+    */
+
+    public function createMyRequest(): void
+    {
+        Auth::requireRole([
+            'EMP'
+        ]);
+
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
             header(
-                "Location: /hr1/public/?page=login"
+                "Location: /hr1/public/?page=my-requests"
             );
 
             exit;
         }
 
 
-        $requests =
-            $this->employeeRequests->getAllRequests();
+        $userId =
+            (int) Auth::userId();
 
 
-        $departments =
-            $this->employeeRequests->getDepartments();
+        $employeeId =
+            $this->employeeRequests
+                ->getEmployeeIdByUserId(
+                    $userId
+                );
 
 
-        require '../resources/views/employee-requests/index.php';
+        if (!$employeeId) {
+
+            http_response_code(403);
+
+            exit(
+                'Your account is not connected to an employee record.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Form values
+        |--------------------------------------------------------------------------
+        */
+
+        $requestType =
+            trim(
+                $_POST['request_type'] ?? ''
+            );
+
+        $subject =
+            trim(
+                $_POST['subject'] ?? ''
+            );
+
+        $description =
+            trim(
+                $_POST['description'] ?? ''
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Allowed request types
+        |--------------------------------------------------------------------------
+        */
+
+        $allowedRequestTypes = [
+
+            'Certificate of Employment',
+
+            'Document Request',
+
+            'Profile Update',
+
+            'Payroll Concern',
+
+            'Employment Concern',
+
+            'Other'
+
+        ];
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            !in_array(
+                $requestType,
+                $allowedRequestTypes,
+                true
+            )
+        ) {
+
+            header(
+                "Location: /hr1/public/?page=my-requests&error=invalid-type"
+            );
+
+            exit;
+        }
+
+
+        if ($subject === '') {
+
+            header(
+                "Location: /hr1/public/?page=my-requests&error=subject"
+            );
+
+            exit;
+        }
+
+
+        if ($description === '') {
+
+            header(
+                "Location: /hr1/public/?page=my-requests&error=description"
+            );
+
+            exit;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Create request
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $created =
+                $this->employeeRequests
+                    ->createRequest(
+                        $employeeId,
+                        $requestType,
+                        $subject,
+                        $description
+                    );
+
+
+            if (!$created) {
+
+                header(
+                    "Location: /hr1/public/?page=my-requests&error=create"
+                );
+
+                exit;
+            }
+
+
+            header(
+                "Location: /hr1/public/?page=my-requests&success=created"
+            );
+
+            exit;
+
+        } catch (\Throwable $e) {
+
+            header(
+                "Location: /hr1/public/?page=my-requests&error=create"
+            );
+
+            exit;
+        }
     }
 
 
@@ -64,17 +302,10 @@ class EmployeeRequestsController
         |--------------------------------------------------------------------------
         */
 
-        if (!isset($_SESSION['user_id'])) {
-
-            http_response_code(401);
-
-            echo json_encode([
-                'success' => false,
-                'message' => 'Unauthorized.'
-            ]);
-
-            return;
-        }
+        Auth::requireRole([
+            'ADMIN',
+            'HR'
+        ]);
 
 
         /*
@@ -89,7 +320,8 @@ class EmployeeRequestsController
 
             echo json_encode([
                 'success' => false,
-                'message' => 'Invalid request method.'
+                'message' =>
+                    'Invalid request method.'
             ]);
 
             return;
@@ -146,7 +378,8 @@ class EmployeeRequestsController
 
             echo json_encode([
                 'success' => false,
-                'message' => 'Invalid request ID.'
+                'message' =>
+                    'Invalid request ID.'
             ]);
 
             return;
@@ -191,9 +424,10 @@ class EmployeeRequestsController
         */
 
         $existingRequest =
-            $this->employeeRequests->getRequestById(
-                $requestId
-            );
+            $this->employeeRequests
+                ->getRequestById(
+                    $requestId
+                );
 
 
         if (!$existingRequest) {
@@ -252,7 +486,7 @@ class EmployeeRequestsController
         */
 
         $resolvedBy =
-            (int) $_SESSION['user_id'];
+            (int) Auth::userId();
 
 
         try {
@@ -264,12 +498,13 @@ class EmployeeRequestsController
             */
 
             $updated =
-                $this->employeeRequests->updateStatus(
-                    $requestId,
-                    $status,
-                    $hrRemarks,
-                    $resolvedBy
-                );
+                $this->employeeRequests
+                    ->updateStatus(
+                        $requestId,
+                        $status,
+                        $hrRemarks,
+                        $resolvedBy
+                    );
 
 
             if (!$updated) {
@@ -293,9 +528,10 @@ class EmployeeRequestsController
             */
 
             $request =
-                $this->employeeRequests->getRequestById(
-                    $requestId
-                );
+                $this->employeeRequests
+                    ->getRequestById(
+                        $requestId
+                    );
 
 
             if (!$request) {
@@ -322,7 +558,8 @@ class EmployeeRequestsController
                 'success' => true,
                 'message' =>
                     'Employee request finalized successfully.',
-                'request' => $request
+                'request' =>
+                    $request
             ]);
 
         } catch (\Throwable $e) {

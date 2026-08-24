@@ -15,8 +15,7 @@
 
         <div class="navbar-title">
             <h2>
-                <?= htmlspecialchars($pageTitle); ?> for
-                <strong><?= $_SESSION['username'] ?? 'User'; ?></strong>
+                <?= htmlspecialchars($pageTitle); ?>
             </h2>
 
             <p class="page-subtitle">
