@@ -51,40 +51,6 @@
     box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
 }
 
-
-/* ==========================================
-   PRIMARY BUTTON
-========================================== */
-
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .8rem 1.5rem;
-    height: 42px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-btn);
-    background: var(--maroon);
-    color: var(--white);
-    text-decoration: none;
-    font-family: inherit;
-    font-size: .88rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background .2s ease, transform .2s ease;
-    white-space: nowrap;
-}
-
-.btn-primary:hover {
-    background: var(--maroon-dark);
-    transform: translateY(-1px);
-}
-
-.btn-primary i {
-    font-size: .9rem;
-}
-
-
 /* ==========================================
    RECRUITMENT TABLE
    HUMAN CAPITAL STYLE

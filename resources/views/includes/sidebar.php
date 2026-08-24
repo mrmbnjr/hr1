@@ -301,29 +301,25 @@ $isEmployee =
                 Administration
             </p>
 
+            <a href="?page=user-management" class="<?= $currentPage == 'user-management' ? 'active' : '' ?>">
+                <i class="fa-solid fa-users"></i>
+                <span>User Management</span>
+            </a>
 
-            <!--
-        <a href="?page=user-management" class="<?= $currentPage == 'user-management' ? 'active' : '' ?>">
-            <i class="fa-solid fa-users"></i>
-            <span>User Management</span>
-        </a>
+            <a href="?page=system-settings" class="<?= $currentPage == 'system-settings' ? 'active' : '' ?>">
+                <i class="fa-solid fa-gear"></i>
+                <span>System Settings</span>
+            </a>
 
-        <a href="?page=system-settings" class="<?= $currentPage == 'system-settings' ? 'active' : '' ?>">
-            <i class="fa-solid fa-gear"></i>
-            <span>System Settings</span>
-        </a>
+            <a href="?page=reports" class="<?= $currentPage == 'reports' ? 'active' : '' ?>">
+                <i class="fa-solid fa-chart-column"></i>
+                <span>Reports</span>
+            </a>
 
-        <a href="?page=reports" class="<?= $currentPage == 'reports' ? 'active' : '' ?>">
-            <i class="fa-solid fa-chart-column"></i>
-            <span>Reports</span>
-        </a>
-
-        <a href="?page=profile" class="<?= $currentPage == 'profile' ? 'active' : '' ?>">
-            <i class="fa-solid fa-circle-user"></i>
-            <span>Profile</span>
-        </a>
-            -->
-
+            <a href="?page=profile" class="<?= $currentPage == 'profile' ? 'active' : '' ?>">
+                <i class="fa-solid fa-circle-user"></i>
+                <span>Profile</span>
+            </a>
 
         <?php endif; ?>
 
