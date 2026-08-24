@@ -5,7 +5,7 @@
 .recruitment-page {
     min-height: 84.34vh;
     padding: 18px 24px 40px;
-    font-family: "Nunito", "Segoe UI", sans-serif;
+    font-family: var(--font-body);
     color: var(--ink);
 }
 
@@ -29,19 +29,26 @@
     min-width: 170px;
     height: 42px;
     padding: 0 .9rem;
-    border: 1px solid #d9d9d9;
-    border-radius: 10px;
-    background: #fff;
-    color: #555;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: inherit;
     font-size: .9rem;
     cursor: pointer;
-    transition: .2s;
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition);
+}
+
+.toolbar-filters select:hover {
+    border-color: var(--gold-dark);
 }
 
 .toolbar-filters select:focus {
     outline: none;
-    border-color: var(--maroon);
-    box-shadow: 0 0 0 3px rgba(111, 20, 20, .12);
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
 }
 
 
@@ -55,20 +62,22 @@
     gap: .6rem;
     padding: .8rem 1.5rem;
     height: 42px;
-    border: none;
-    border-radius: 10px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-btn);
     background: var(--maroon);
-    color: #fff;
+    color: var(--white);
     text-decoration: none;
+    font-family: inherit;
     font-size: .88rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: .25s;
+    transition: background .2s ease, transform .2s ease;
     white-space: nowrap;
 }
 
 .btn-primary:hover {
     background: var(--maroon-dark);
+    transform: translateY(-1px);
 }
 
 .btn-primary i {
@@ -87,12 +96,12 @@
 
     background: var(--card-bg);
 
-    border: 1px solid rgba(111, 20, 20, .10);
-    border-radius: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 
     overflow: hidden;
 
-    box-shadow: 0 1px 3px rgba(20, 10, 5, .04);
+    box-shadow: var(--shadow);
 
     display: flex;
     flex-direction: column;
@@ -108,7 +117,7 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: auto;
-    font-size: 13px;
+    font-size: 13.5px;
 }
 
 
@@ -117,25 +126,25 @@
 ========================================== */
 
 .data-table thead {
-    background: #faf8f4;
+    background: rgba(242, 193, 78, 0.12);
 }
 
 .data-table thead th {
-    padding: 14px 20px;
+    padding: 13px 20px;
 
-    background: #faf8f4;
+    background: rgba(242, 193, 78, 0.12);
 
     color: var(--ink-soft);
 
     text-align: left;
 
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 11.5px;
+    font-weight: 800;
 
     text-transform: uppercase;
-    letter-spacing: 0;
+    letter-spacing: 0.05em;
 
-    border-bottom: 1px solid rgba(111, 20, 20, .08);
+    border-bottom: 1px solid var(--border);
 }
 
 
@@ -150,17 +159,17 @@
 
     font-size: 12.5px;
 
-    border-bottom: 1px solid rgba(111, 20, 20, .06);
+    border-bottom: 1px solid var(--border);
 
     vertical-align: middle;
 }
 
 .data-table tbody tr {
-    transition: background .2s ease;
+    transition: background var(--transition);
 }
 
 .data-table tbody tr:hover {
-    background: #faf7f2;
+    background: rgba(242, 193, 78, 0.08);
 }
 
 .data-table tbody tr:last-child td {
@@ -168,8 +177,8 @@
 }
 
 .data-table tbody td strong {
-    color: var(--ink);
-    font-weight: 600;
+    color: var(--maroon-dark);
+    font-weight: 800;
 }
 
 
@@ -182,13 +191,13 @@
     align-items: center;
     justify-content: center;
 
-    padding: 3px 10px;
+    padding: 5px 10px;
 
-    border-radius: 100px;
+    border-radius: 999px;
 
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.6;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .badge.employment {
@@ -196,10 +205,10 @@
     align-items: center;
     gap: 6px;
 
-    padding: 3px 10px 3px 8px;
+    padding: 5px 10px 5px 8px;
 
-    background: rgba(196, 140, 20, .12);
-    color: #a3730f;
+    background: rgba(242, 193, 78, 0.16);
+    color: var(--gold-dark);
 }
 
 /* ==========================================
@@ -211,13 +220,13 @@
     align-items: center;
     gap: 6px;
 
-    padding: 3px 10px 3px 8px;
+    padding: 5px 10px 5px 8px;
 
-    border-radius: 100px;
+    border-radius: 999px;
 
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.6;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .badge.status.open {
@@ -278,20 +287,21 @@
     cursor: pointer;
 
     transition:
-        background .15s ease,
-        color .15s ease,
-        border-color .15s ease;
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition);
 }
 
 .link-btn:hover {
-    background: #faf7f2;
-    color: var(--maroon);
-    border-color: rgba(111, 20, 20, .10);
+    background: rgba(242, 193, 78, 0.12);
+    color: var(--maroon-dark);
+    border-color: var(--border);
 }
 
 .no-link {
-    color: #b8b0a0;
+    color: var(--ink-soft);
     font-size: 12px;
+    opacity: .7;
 }
 
 
@@ -338,15 +348,15 @@
     font-size: 13px;
 
     transition:
-        background .15s ease,
-        color .15s ease,
-        border-color .15s ease;
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition);
 }
 
 .actions .dropdown-btn:hover {
-    background: #faf7f2;
-    color: var(--maroon);
-    border-color: rgba(111, 20, 20, .10);
+    background: rgba(242, 193, 78, 0.12);
+    color: var(--maroon-dark);
+    border-color: var(--border);
 }
 
 .actions .dropdown-menu {
@@ -361,10 +371,10 @@
 
     background: var(--card-bg);
 
-    border: 1px solid rgba(111, 20, 20, .10);
-    border-radius: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 
-    box-shadow: 0 8px 20px rgba(20, 10, 5, .10);
+    box-shadow: var(--shadow);
 
     overflow: hidden;
 
@@ -417,16 +427,16 @@
 
 .actions .dropdown-menu a:hover,
 .actions .dropdown-menu button:hover {
-    background: #faf7f2;
+    background: rgba(242, 193, 78, 0.12);
 }
 
 .actions .dropdown-menu button.delete:hover {
-    background: rgba(200, 50, 50, .08);
-    color: #c23434;
+    background: var(--red-bg);
+    color: var(--red);
 }
 
 .actions .dropdown-menu button.delete:hover i {
-    color: #c23434;
+    color: var(--red);
 }
 
 
@@ -457,7 +467,8 @@
 .empty-state h3 {
     margin: 0 0 6px;
 
-    color: var(--ink);
+    color: var(--maroon-dark);
+    font-family: var(--font-heading);
 
     font-size: 15px;
     font-weight: 700;
@@ -485,9 +496,9 @@
 
     color: var(--ink-soft);
 
-    font-size: 12px;
+    font-size: 12.5px;
 
-    border-top: 1px solid rgba(111, 20, 20, .08);
+    border-top: 1px solid var(--border);
 
     margin-top: 0;
 }
@@ -515,13 +526,13 @@
     cursor: pointer;
 
     transition:
-        background .15s ease,
-        color .15s ease;
+        background var(--transition),
+        color var(--transition);
 }
 
 .page-btn:hover {
-    background: #faf7f2;
-    color: var(--maroon);
+    background: rgba(242, 193, 78, 0.12);
+    color: var(--maroon-dark);
 }
 
 .page-btn.active {
@@ -535,10 +546,11 @@
 ========================================== */
 
 .form-card {
-    background: #fff;
-    border-radius: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
 
-    box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+    box-shadow: var(--shadow);
 
     padding: 2rem;
 
@@ -551,9 +563,10 @@
 ========================================== */
 
 .form-card h2 {
+    font-family: var(--font-heading);
     font-size: 1.1rem;
 
-    color: var(--maroon);
+    color: var(--maroon-dark);
 
     margin-bottom: 1.25rem;
 
@@ -562,7 +575,7 @@
 
 .form-card hr {
     border: none;
-    border-top: 1px solid #ececec;
+    border-top: 1px solid var(--border);
 
     margin: 2rem 0;
 }
@@ -593,15 +606,15 @@
 .form-group label {
     font-size: .9rem;
 
-    font-weight: 600;
+    font-weight: 700;
 
-    color: #444;
+    color: var(--ink);
 
     margin-bottom: .55rem;
 }
 
 .required {
-    color: #dc3545;
+    color: var(--red);
 }
 
 
@@ -616,16 +629,18 @@
 
     padding: .85rem 1rem;
 
-    border: 1px solid #d8d8d8;
-    border-radius: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
 
-    background: #fff;
-    color: #333;
+    background: var(--card-bg);
+    color: var(--ink);
 
     font-size: .92rem;
     font-family: inherit;
 
-    transition: .25s;
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition);
 
     resize: vertical;
 }
@@ -636,7 +651,8 @@
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-    color: #999;
+    color: var(--ink-soft);
+    opacity: .7;
 }
 
 .form-group input:focus,
@@ -644,9 +660,9 @@
 .form-group textarea:focus {
     outline: none;
 
-    border-color: var(--maroon);
+    border-color: var(--gold-dark);
 
-    box-shadow: 0 0 0 3px rgba(111, 20, 20, .12);
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
 }
 
 
@@ -676,20 +692,72 @@
 .btn-inline {
     padding: .8rem 1.5rem;
 
-    border: 1px solid #d8d8d8;
-    border-radius: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-btn);
 
     text-decoration: none;
 
-    color: #555;
+    color: var(--ink-soft);
 
-    font-weight: 600;
+    font-family: inherit;
+    font-weight: 700;
 
-    transition: .25s;
+    transition: background var(--transition), border-color var(--transition);
 }
 
 .btn-inline:hover {
-    background: #f4f4f4;
+    background: rgba(242, 193, 78, 0.12);
+    border-color: var(--gold-dark);
+}
+
+
+/* ==========================================
+   DARK MODE
+========================================== */
+
+[data-theme="dark"] .table-card,
+[data-theme="dark"] .form-card,
+[data-theme="dark"] .actions .dropdown-menu {
+    box-shadow: none;
+}
+
+[data-theme="dark"] .data-table thead,
+[data-theme="dark"] .data-table thead th {
+    background: rgba(242, 193, 78, 0.08);
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+    background: rgba(242, 193, 78, 0.05);
+}
+
+[data-theme="dark"] .data-table tbody td strong,
+[data-theme="dark"] .form-card h2,
+[data-theme="dark"] .empty-state h3 {
+    color: var(--gold);
+}
+
+[data-theme="dark"] .badge.employment {
+    background: rgba(242, 193, 78, 0.1);
+    color: var(--gold);
+}
+
+[data-theme="dark"] .badge.status.open {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+}
+
+[data-theme="dark"] .badge.status.closed {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .badge.status.draft {
+    background: rgba(249, 115, 22, 0.12);
+    color: #fb923c;
+}
+
+[data-theme="dark"] .page-btn.active {
+    color: var(--white);
 }
 
 
