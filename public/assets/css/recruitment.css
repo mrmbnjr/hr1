@@ -190,25 +190,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    padding: 5px 10px;
-
-    border-radius: 999px;
-
     font-size: 11.5px;
-    font-weight: 800;
-    line-height: 1.2;
 }
 
 .badge.employment {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-
-    padding: 5px 10px 5px 8px;
-
-    background: rgba(242, 193, 78, 0.16);
-    color: var(--gold-dark);
 }
 
 /* ==========================================

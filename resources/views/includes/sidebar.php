@@ -46,7 +46,7 @@ $currentPage = $_GET['page'] ?? 'dashboard';
 
         <a href="?page=onboarding" class="<?= $currentPage == 'onboarding' ? 'active' : '' ?>">
             <i class="fa-solid fa-user-check"></i>
-            <span>Employee Onboarding</span>
+            <span>Onboarding</span>
         </a>
 
         <p class="sidebar-title">

@@ -203,3 +203,42 @@ public/
 ├── .gitignore
 └── README.md
 ```
+
+
+### Important Updates
+
+```
+PHASE 1 — Security
+    ↓
+Role-based authorization
+Session hardening
+Upload protection
+    ↓
+PHASE 2 — Architecture
+    ↓
+Choose one router
+Integrate middleware properly
+Clean unused code
+    ↓
+PHASE 3 — Data integrity
+    ↓
+Recruitment validation
+Job lifecycle
+Archive/delete rules
+Role model
+    ↓
+PHASE 4 — Existing bugs
+    ↓
+Employee Requests
+Employee Records
+Recruitment edit
+Human Capital
+Applicant actions
+    ↓
+PHASE 5 — Quality
+    ↓
+Validation
+Error handling
+Testing
+UI/UX cleanup
+```

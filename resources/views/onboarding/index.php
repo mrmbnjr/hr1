@@ -254,15 +254,40 @@ $statusMeta = [
                 </table>
             </div>
 
+            <!-- ==========================================
+                TABLE FOOTER
+            =========================================== -->
             <div class="table-footer">
-                <span class="results-count" id="resultsCount"></span>
-                <div class="pagination" id="pagination">
-                    <button class="page-btn" id="prevPage" type="button"><i class="fa-solid fa-chevron-left"></i></button>
-                    <div class="page-numbers" id="pageNumbers"></div>
-                    <button class="page-btn" id="nextPage" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+
+                <?php
+                $totalEmployees = !empty($employees) ? count($employees) : 0;
+                ?>
+
+                <span>
+                    Showing
+                    <?= $totalEmployees ? 1 : 0 ?>
+                    to
+                    <?= $totalEmployees ?>
+                    of
+                    <?= $totalEmployees ?>
+                    employees
+                </span>
+
+                <div class="pagination">
+
+                    <button class="page-btn">
+                        <i class="fa-solid fa-angle-left"></i>
+                    </button>
+
+                    <button class="page-btn active">
+                        1
+                    </button>
+
+                    <button class="page-btn">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </button>
                 </div>
             </div>
-
         </section>
 
     </div>

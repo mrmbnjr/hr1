@@ -330,6 +330,7 @@ if (!isset($_SESSION['user_id'])) {
                     <?= $totalJobs ?>
                     of
                     <?= $totalJobs ?>
+                    postings
                 </span>
 
                 <div class="pagination">
