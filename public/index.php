@@ -94,7 +94,12 @@ switch ($page) {
 
         break;
 
+    case 'application-success':
 
+        require '../resources/views/public/application-success.php';
+
+        break;
+        
     case 'review':
 
         (new ApplicantController())->review();
