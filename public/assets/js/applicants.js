@@ -299,6 +299,48 @@
         });
     }
 
+    const evaluateResumeBtn = document.getElementById('evaluateResumeBtn');
+
+    if (evaluateResumeBtn) {
+        evaluateResumeBtn.addEventListener('click', async function () {
+            const applicationId = this.dataset.applicationId;
+
+            if (!applicationId) {
+                alert('Application ID is missing.');
+                return;
+            }
+
+            const originalText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Evaluating...';
+
+            try {
+                const formData = new FormData();
+                formData.append('application_id', applicationId);
+
+                const response = await fetch('?page=evaluate-resume', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Unable to evaluate this resume.');
+                }
+
+                alert('AI resume screening finished successfully.');
+                window.location.reload();
+
+            } catch (error) {
+                console.error('Resume evaluation error:', error);
+                alert(error.message || 'An error occurred while evaluating the resume.');
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+
     const editScheduleBtn = document.getElementById('editScheduleBtn');
 
     if (editScheduleBtn) {

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Applicant;
+use App\Services\ResumeEvaluationService;
 
 class ApplicantController
 {
@@ -298,14 +299,28 @@ class ApplicantController
             /*
              * Create safe unique filenames.
              */
+            $projectRoot = dirname(__DIR__, 3);
+
             $uploadDirectory =
-                dirname(__DIR__, 2) .
+                $projectRoot .
                 '/public/uploads/applications/';
+
+            $publicResumeDirectory =
+                $projectRoot .
+                '/public/uploads/resumes/';
 
 
             if (!is_dir($uploadDirectory)) {
                 mkdir(
                     $uploadDirectory,
+                    0755,
+                    true
+                );
+            }
+
+            if (!is_dir($publicResumeDirectory)) {
+                mkdir(
+                    $publicResumeDirectory,
                     0755,
                     true
                 );
@@ -333,6 +348,12 @@ class ApplicantController
                 throw new \Exception(
                     'Unable to save the uploaded resume.'
                 );
+            }
+
+            $publicResumePath = $publicResumeDirectory . $resumeFileName;
+
+            if (file_exists($resumePath) && !file_exists($publicResumePath)) {
+                copy($resumePath, $publicResumePath);
             }
 
 
@@ -366,6 +387,10 @@ class ApplicantController
                     $uploadDirectory .
                     $coverLetterFileName;
 
+                $publicCoverLetterPath =
+                    $publicResumeDirectory .
+                    $coverLetterFileName;
+
 
                 if (!move_uploaded_file(
                     $coverLetter['tmp_name'],
@@ -384,6 +409,10 @@ class ApplicantController
                         'Unable to save the uploaded cover letter.'
                     );
                 }
+
+                if (file_exists($coverLetterPath) && !file_exists($publicCoverLetterPath)) {
+                    copy($coverLetterPath, $publicCoverLetterPath);
+                }
             }
 
 
@@ -398,6 +427,13 @@ class ApplicantController
                     'cover_letter_file' => $coverLetterFileName
                 ]);
 
+            try {
+                $evaluationService = new \App\Services\ResumeEvaluationService();
+                $evaluationService->evaluate((int) $applicationId);
+            } catch (\Throwable $e) {
+                $_SESSION['ai_screening_error'] =
+                    'Application submitted successfully, but AI screening could not run right now.';
+            }
 
             /*
              * Redirect to success page.
@@ -536,6 +572,38 @@ class ApplicantController
 
             exit;
         }
+    }
+
+    public function evaluateResume()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $applicationId = (int) ($_POST['application_id'] ?? $_GET['id'] ?? 0);
+
+            if ($applicationId <= 0) {
+                throw new \Exception('Invalid application ID.');
+            }
+
+            $service = new ResumeEvaluationService();
+            $result = $service->evaluate($applicationId);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Resume screening completed.',
+                'data' => $result,
+            ]);
+
+        } catch (\Throwable $e) {
+            http_response_code(400);
+
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        exit;
     }
 
     public function hire()

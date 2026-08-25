@@ -15,6 +15,39 @@ session_start();
 
 require '../vendor/autoload.php';
 
+$envFile = dirname(__DIR__) . '/.env';
+
+if (is_file($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    if (is_array($lines)) {
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+                continue;
+            }
+
+            $parts = explode('=', $line, 2);
+
+            if (count($parts) !== 2) {
+                continue;
+            }
+
+            $name = trim($parts[0]);
+            $value = trim($parts[1]);
+
+            if ($name === '') {
+                continue;
+            }
+
+            putenv($name . '=' . $value);
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
+        }
+    }
+}
+
 $page = $_GET['page'] ?? 'login';
 
 $uri = $_SERVER['REQUEST_URI'];
@@ -103,6 +136,13 @@ switch ($page) {
     case 'review':
 
         (new ApplicantController())->review();
+
+        break;
+
+
+    case 'evaluate-resume':
+
+        (new ApplicantController())->evaluateResume();
 
         break;
 

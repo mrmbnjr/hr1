@@ -114,6 +114,18 @@ $statusMeta = [
                 AI Screening Results
             </h3>
 
+            <div class="ai-actions" style="margin-bottom: 1rem;">
+                <button
+                    type="button"
+                    class="btn-primary"
+                    id="evaluateResumeBtn"
+                    data-application-id="<?= (int) $applicant['application_id'] ?>"
+                >
+                    <i class="fa-solid fa-robot"></i>
+                    <?= !empty($applicant['ai_score']) ? 'Re-run AI Screening' : 'Evaluate Resume' ?>
+                </button>
+            </div>
+
             <?php
 
             $score = (float) ($applicant['ai_score'] ?? 0);
