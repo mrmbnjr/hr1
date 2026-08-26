@@ -545,31 +545,33 @@ class Applicant
      */
     private function generateEmployeeNumber(): string
     {
-        $stmt = $this->db->query("
-            SELECT employee_number
-            FROM employees
-            ORDER BY employee_id DESC
-            LIMIT 1
+        $sequenceStmt = $this->db->query("
+            SELECT next_number
+            FROM employee_number_sequence
+            WHERE sequence_id = 1
+            FOR UPDATE
         ");
 
-        $lastNumber = $stmt->fetchColumn();
+        $nextNumber = $sequenceStmt->fetchColumn();
 
-        if (!$lastNumber) {
-            return 'EMP-000001';
+        if ($nextNumber === false) {
+            throw new \Exception('Employee number sequence is not initialized.');
         }
 
-        if (preg_match('/(\d+)$/', $lastNumber, $matches)) {
-            $nextNumber = ((int) $matches[1]) + 1;
+        $updateStmt = $this->db->prepare("
+            UPDATE employee_number_sequence
+            SET next_number = next_number + 1
+            WHERE sequence_id = 1
+        ");
 
-            return 'EMP-' . str_pad(
-                $nextNumber,
-                6,
-                '0',
-                STR_PAD_LEFT
-            );
-        }
+        $updateStmt->execute();
 
-        return 'EMP-000001';
+        return 'EMP-' . str_pad(
+            (int) $nextNumber,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
     }
 
 
@@ -607,6 +609,19 @@ class Applicant
             if (!$application) {
                 throw new \Exception('Application not found.');
             }
+
+            $postingLockStmt = $this->db->prepare("
+                SELECT posting_id
+                FROM job_postings
+                WHERE posting_id = :posting_id
+                FOR UPDATE
+            ");
+
+            $postingLockStmt->execute([
+                ':posting_id' => $application['posting_id']
+            ]);
+
+            $application = $this->getApplicationForHiring($applicationId);
 
 
             /*

@@ -266,6 +266,14 @@ CREATE TABLE employees (
         REFERENCES positions(position_id)
 );
 
+CREATE TABLE employee_number_sequence (
+    sequence_id TINYINT UNSIGNED PRIMARY KEY,
+    next_number INT UNSIGNED NOT NULL
+);
+
+INSERT INTO employee_number_sequence (sequence_id, next_number)
+VALUES (1, 1);
+
 ALTER TABLE users
 ADD CONSTRAINT fk_users_employee
 FOREIGN KEY (employee_id)

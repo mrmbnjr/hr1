@@ -15,3 +15,20 @@ ALTER TABLE employees
     ADD CONSTRAINT fk_employees_applicant
         FOREIGN KEY (applicant_id)
         REFERENCES applicants(applicant_id);
+
+CREATE TABLE IF NOT EXISTS employee_number_sequence (
+    sequence_id TINYINT UNSIGNED PRIMARY KEY,
+    next_number INT UNSIGNED NOT NULL
+);
+
+INSERT INTO employee_number_sequence (sequence_id, next_number)
+SELECT
+    1,
+    COALESCE(
+        MAX(CAST(SUBSTRING(employee_number, 5) AS UNSIGNED)),
+        0
+    ) + 1
+FROM employees
+WHERE employee_number LIKE 'EMP-%'
+ON DUPLICATE KEY UPDATE
+    next_number = GREATEST(next_number, VALUES(next_number));
