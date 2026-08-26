@@ -113,13 +113,10 @@ hr1/
 │   │   │   ├── EmployeeSelfServiceController.php
 │   │   │   ├── LoginController.php
 │   │   │   ├── LogoutController.php
-│   │   │   ├── ReportController.php
-│   │   │   └── ProfileController.php
+│   │   │   └── ReportController.php
 │   │   ├── Middleware/
 │   │   ├── Models/
 │   │   └── Services/
-│   ├── Routes/
-│   │   └── router.php
 │   ├── Core/
 │   │   └── Database.php
 │   └── Config/

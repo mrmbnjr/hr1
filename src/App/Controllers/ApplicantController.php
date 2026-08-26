@@ -468,29 +468,6 @@ class ApplicantController
         exit;
     }
 
-
-    /**
-     * Edit Applicant
-     */
-    public function edit()
-    {
-        if (!isset($_GET['id'])) {
-            header("Location: ?page=applicants");
-            exit;
-        }
-
-        $applicant =
-            $this->applicant->getApplicantById(
-                $_GET['id']
-            );
-
-        $positions =
-            $this->applicant->getAllJobPostings();
-
-        require '../resources/views/applicants/edit.php';
-    }
-
-
     public function updateStatus()
     {
         Auth::requireRole(['HR', 'MGR']);

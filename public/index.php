@@ -9,7 +9,6 @@ use App\Controllers\OnboardingController;
 use App\Controllers\HumanCapitalController;
 use App\Controllers\EmployeeRecordsController;
 use App\Controllers\EmployeeRequestsController;
-use App\Controllers\ProfileController;
 
 session_start();
 

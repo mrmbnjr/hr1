@@ -72,11 +72,4 @@ class LoginController
     }
 
 
-    public function logout()
-    {
-        Auth::logout();
-
-        header("Location: /hr1/public/?page=login");
-        exit;
-    }
 }

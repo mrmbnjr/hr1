@@ -299,17 +299,6 @@ class Recruitment
         return $stmt->execute([$id]);
     }
 
-    public function changeStatus(int $id, string $status): bool
-    {
-        $stmt = $this->db->prepare("
-            UPDATE job_postings
-            SET status = ?
-            WHERE posting_id = ?
-        ");
-
-        return $stmt->execute([$status, $id]);
-    }
-
     public function getPositionsByDepartment(int $departmentId): array
     {
         $stmt = $this->db->prepare("
