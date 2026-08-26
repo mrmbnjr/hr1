@@ -531,6 +531,21 @@ class Applicant
         return $result ?: null;
     }
 
+    public function getApplicationFile(int $applicationId): ?array
+    {
+        $stmt = $this->db->prepare('
+            SELECT application_id, resume_file
+            FROM applications
+            WHERE application_id = :application_id
+            LIMIT 1
+        ');
+
+        $stmt->execute([':application_id' => $applicationId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result ?: null;
+    }
+
     /**
      * Generate the next employee number.
      */

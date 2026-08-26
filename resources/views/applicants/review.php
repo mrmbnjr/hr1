@@ -84,10 +84,10 @@ $statusMeta = [
                     </span>
                 </div>
                 <div class="resume-actions">
-                    <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" target="_blank" target="_blank" class="btn-outline">
+                    <a href="?page=download-resume&id=<?= (int) $applicant['application_id'] ?>" target="_blank" class="btn-outline">
                         <i class="fa-solid fa-eye"></i> View Resume
                     </a>
-                    <a href="/hr1/public/uploads/resumes/<?= urlencode($applicant['resume_file']) ?>" download class="btn-outline">
+                    <a href="?page=download-resume&id=<?= (int) $applicant['application_id'] ?>&download=1" class="btn-outline">
                         <i class="fa-solid fa-download"></i> Download
                     </a>
                 </div>

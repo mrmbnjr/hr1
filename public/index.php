@@ -140,6 +140,13 @@ switch ($page) {
         break;
 
 
+    case 'download-resume':
+
+        (new ApplicantController())->downloadResume();
+
+        break;
+
+
     case 'evaluate-resume':
 
         (new ApplicantController())->evaluateResume();

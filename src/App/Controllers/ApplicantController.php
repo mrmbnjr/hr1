@@ -3,7 +3,9 @@
 namespace App\Controllers;
 
 use App\Models\Applicant;
+use App\Services\Auth;
 use App\Services\ResumeEvaluationService;
+use App\Services\ResumeInputService;
 
 class ApplicantController
 {
@@ -303,11 +305,7 @@ class ApplicantController
 
             $uploadDirectory =
                 $projectRoot .
-                '/public/uploads/applications/';
-
-            $publicResumeDirectory =
-                $projectRoot .
-                '/public/uploads/resumes/';
+                '/storage/uploads/applications/';
 
 
             if (!is_dir($uploadDirectory)) {
@@ -317,15 +315,6 @@ class ApplicantController
                     true
                 );
             }
-
-            if (!is_dir($publicResumeDirectory)) {
-                mkdir(
-                    $publicResumeDirectory,
-                    0755,
-                    true
-                );
-            }
-
 
             $resumeFileName =
                 'resume_' .
@@ -349,13 +338,6 @@ class ApplicantController
                     'Unable to save the uploaded resume.'
                 );
             }
-
-            $publicResumePath = $publicResumeDirectory . $resumeFileName;
-
-            if (file_exists($resumePath) && !file_exists($publicResumePath)) {
-                copy($resumePath, $publicResumePath);
-            }
-
 
             /*
              * Cover letter.
@@ -387,11 +369,6 @@ class ApplicantController
                     $uploadDirectory .
                     $coverLetterFileName;
 
-                $publicCoverLetterPath =
-                    $publicResumeDirectory .
-                    $coverLetterFileName;
-
-
                 if (!move_uploaded_file(
                     $coverLetter['tmp_name'],
                     $coverLetterPath
@@ -410,9 +387,6 @@ class ApplicantController
                     );
                 }
 
-                if (file_exists($coverLetterPath) && !file_exists($publicCoverLetterPath)) {
-                    copy($coverLetterPath, $publicCoverLetterPath);
-                }
             }
 
 
@@ -485,6 +459,44 @@ class ApplicantController
             $this->applicant->getManagers();
 
         require '../resources/views/applicants/review.php';
+    }
+
+    public function downloadResume(): void
+    {
+        Auth::requireRole(['HR', 'MGR']);
+
+        $applicationId = (int) ($_GET['id'] ?? 0);
+
+        if ($applicationId <= 0) {
+            http_response_code(404);
+            exit('File not found.');
+        }
+
+        $application = $this->applicant->getApplicationFile($applicationId);
+
+        if (!$application) {
+            http_response_code(404);
+            exit('File not found.');
+        }
+
+        try {
+            $resume = (new ResumeInputService())->getResume($application);
+        } catch (\Throwable $e) {
+            http_response_code(404);
+            exit('File not found.');
+        }
+
+        $disposition = isset($_GET['download'])
+            ? 'attachment'
+            : 'inline';
+
+        header('Content-Type: ' . $resume['mime_type']);
+        header('Content-Length: ' . (string) filesize($resume['path']));
+        header('Content-Disposition: ' . $disposition . '; filename="' . basename($resume['filename']) . '"');
+        header('X-Content-Type-Options: nosniff');
+
+        readfile($resume['path']);
+        exit;
     }
 
 

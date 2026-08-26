@@ -18,7 +18,7 @@ class ResumeInputService
 
     public function __construct()
     {
-        $this->resumeDirectory = dirname(__DIR__, 3) . '/public/uploads/resumes';
+        $this->resumeDirectory = dirname(__DIR__, 3) . '/storage/uploads/applications';
     }
 
     public function getResume(array $applicantData): array
@@ -52,21 +52,10 @@ class ResumeInputService
             throw new RuntimeException('Unsupported resume format.');
         }
 
-        $candidatePaths = [
-            rtrim($this->resumeDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $resumeFileName,
-            dirname(__DIR__, 3) . '/public/uploads/applications/' . $resumeFileName,
-        ];
+        $resumePath = rtrim($this->resumeDirectory, DIRECTORY_SEPARATOR)
+            . DIRECTORY_SEPARATOR . $resumeFileName;
 
-        $resumePath = null;
-
-        foreach ($candidatePaths as $candidate) {
-            if (is_file($candidate)) {
-                $resumePath = $candidate;
-                break;
-            }
-        }
-
-        if ($resumePath === null) {
+        if (!is_file($resumePath)) {
             throw new RuntimeException('The uploaded resume file could not be found.');
         }
 
@@ -77,10 +66,7 @@ class ResumeInputService
             throw new RuntimeException('The resume path is invalid.');
         }
 
-        $allowedDirectories = [
-            realpath(dirname(__DIR__, 3) . '/public/uploads/resumes') ?: '',
-            realpath(dirname(__DIR__, 3) . '/public/uploads/applications') ?: '',
-        ];
+        $allowedDirectories = [realpath($this->resumeDirectory) ?: ''];
 
         $allowedDirectories = array_values(array_filter(array_unique($allowedDirectories), static fn ($dir) => $dir !== ''));
 

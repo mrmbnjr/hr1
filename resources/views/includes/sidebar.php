@@ -203,7 +203,7 @@ $isEmployee =
                 <i class="fa-solid fa-user-check"></i>
 
                 <span>
-                    Employee Onboarding
+                    Onboarding
                 </span>
 
             </a>
