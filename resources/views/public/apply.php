@@ -100,13 +100,71 @@ $applicationToken =
             margin-bottom: 8px;
         }
 
+        /*
+         * Application error / duplicate warning
+         */
         .error {
-            background: #fdeaea;
-            color: #9b1c1c;
-            border: 1px solid #efb5b5;
-            padding: 14px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+
+            background: #fff8e7;
+            color: #5d1515;
+
+            border: 1px solid #c89b3c;
+            border-left: 5px solid #741b1b;
+
+            padding: 18px 20px;
+            border-radius: 10px;
+
+            margin: 0 0 24px;
+        }
+
+        .error-icon {
+            flex-shrink: 0;
+
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #741b1b;
+            color: #ffffff;
+
+            border-radius: 50%;
+
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .error-content {
+            flex: 1;
+        }
+
+        .error-title {
+            margin: 0 0 6px;
+
+            font-size: 17px;
+            font-weight: 700;
+
+            color: #741b1b;
+        }
+
+        .error-message {
+            margin: 0;
+
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .error-help {
+            margin: 7px 0 0;
+
+            color: #704f4f;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         .form-grid {
@@ -134,9 +192,15 @@ $applicationToken =
         textarea {
             width: 100%;
             padding: 12px;
+
             border: 1px solid #d5ceca;
             border-radius: 7px;
+
             font-size: 14px;
+            font-family: inherit;
+
+            background: #ffffff;
+            color: #2d2424;
         }
 
         textarea {
@@ -156,19 +220,32 @@ $applicationToken =
 
         .submit-button {
             margin-top: 25px;
+
             width: 100%;
             padding: 14px;
+
             border: none;
             border-radius: 7px;
+
             background: #741b1b;
-            color: white;
+            color: #ffffff;
+
             font-size: 15px;
             font-weight: 700;
+
             cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.1s ease;
         }
 
         .submit-button:hover {
             background: #5d1515;
+        }
+
+        .submit-button:active {
+            transform: translateY(1px);
         }
 
         .file-note {
@@ -196,6 +273,20 @@ $applicationToken =
                 grid-column: auto;
             }
 
+            .error {
+                padding: 16px;
+            }
+
+            .error-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
+            }
+
+            .error-title {
+                font-size: 16px;
+            }
+
         }
 
     </style>
@@ -205,6 +296,7 @@ $applicationToken =
 <body>
 
 <div class="application-page">
+
     <div class="application-card">
 
         <h2>
@@ -215,6 +307,45 @@ $applicationToken =
             Please complete the form below and upload
             your resume.
         </p>
+
+
+        <?php if ($error !== null): ?>
+
+            <div
+                class="error"
+                role="alert"
+                aria-live="polite"
+            >
+
+                <div class="error-icon">
+                    !
+                </div>
+
+                <div class="error-content">
+
+                    <h3 class="error-title">
+                        Application Already Submitted
+                    </h3>
+
+                    <p class="error-message">
+                        <?= htmlspecialchars(
+                            $error,
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+                    </p>
+
+                    <p class="error-help">
+                        You cannot submit another application
+                        for the same position using the same
+                        email address.
+                    </p>
+
+                </div>
+
+            </div>
+
+        <?php endif; ?>
 
 
         <form
@@ -342,6 +473,7 @@ $applicationToken =
                     </span>
 
                 </div>
+
             </div>
 
 

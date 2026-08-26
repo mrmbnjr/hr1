@@ -362,6 +362,8 @@
     const rejectForm =
         document.getElementById('rejectForm');
 
+    let hireRequestInProgress = false;
+
 
     /* ----------------------------------------------------------
     OPEN HIRE MODAL
@@ -401,6 +403,10 @@
             'click',
             async function () {
 
+                if (hireRequestInProgress) {
+                    return;
+                }
+
                 const applicationId =
                     hireBtn.dataset.applicationId;
 
@@ -409,6 +415,7 @@
                     return;
                 }
 
+                hireRequestInProgress = true;
                 confirmHireBtn.disabled = true;
                 confirmHireBtn.innerHTML =
                     '<i class="fa-solid fa-spinner fa-spin"></i> Hiring...';
@@ -461,7 +468,7 @@
 
 
                     alert(
-                        'Applicant hired successfully!\n\n' +
+                        result.message + '\n\n' +
 
                         'Employee Number: ' +
                         result.data.employee_number +

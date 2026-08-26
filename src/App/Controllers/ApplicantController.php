@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Applicant;
+use App\Services\MailService;
 use App\Services\Auth;
 use App\Services\ResumeEvaluationService;
 use App\Services\ResumeInputService;
@@ -203,14 +204,6 @@ class ApplicantController
 
             if ($existingApplicant) {
 
-                /*
-                 * Because applications has:
-                 *
-                 * UNIQUE(applicant_id, posting_id)
-                 *
-                 * we must check whether this person
-                 * already applied to this specific job.
-                 */
                 if (
                     $this->applicant->hasApplied(
                         (int) $existingApplicant['applicant_id'],
@@ -218,12 +211,11 @@ class ApplicantController
                     )
                 ) {
                     throw new \Exception(
-                        'You have already submitted an application for this position.'
+                        'You have already submitted an application for this position using this email address. You cannot submit another application for the same position.'
                     );
                 }
 
-                $applicantId =
-                    (int) $existingApplicant['applicant_id'];
+                $applicantId = (int) $existingApplicant['applicant_id'];
 
             } else {
 
@@ -570,9 +562,21 @@ class ApplicantController
                 $applicationId
             );
 
+            $emailSent = true;
+
+            try {
+                (new MailService())->sendHiringCredentials($account);
+            } catch (\Throwable $mailError) {
+                error_log('Hiring credentials email failed: ' . $mailError->getMessage());
+                $emailSent = false;
+            }
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Applicant successfully hired.',
+                'message' => $emailSent
+                    ? 'Applicant successfully hired and credentials emailed.'
+                    : 'Applicant successfully hired, but the credentials email could not be sent.',
+                'email_sent' => $emailSent,
                 'data' => $account
             ]);
 

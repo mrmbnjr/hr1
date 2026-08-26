@@ -621,6 +621,17 @@ class Applicant
                 ':posting_id' => $application['posting_id']
             ]);
 
+            $applicationLockStmt = $this->db->prepare("
+                SELECT application_id
+                FROM applications
+                WHERE application_id = :application_id
+                FOR UPDATE
+            ");
+
+            $applicationLockStmt->execute([
+                ':application_id' => $applicationId
+            ]);
+
             $application = $this->getApplicationForHiring($applicationId);
 
 
@@ -936,6 +947,13 @@ class Applicant
 
 
             return [
+                'email' => $application['email'],
+                'fullname' => trim(
+                    $application['first_name'] . ' ' .
+                    ($application['middle_name'] ?? '') . ' ' .
+                    $application['last_name']
+                ),
+                'position' => $application['title'],
                 'employee_id' => $employeeId,
                 'employee_number' => $employeeNumber,
                 'user_id' => $userId,
