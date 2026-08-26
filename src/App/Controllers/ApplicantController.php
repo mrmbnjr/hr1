@@ -438,6 +438,8 @@ class ApplicantController
      */
     public function review()
     {
+        Auth::requireRole(['HR', 'MGR']);
+
         if (!isset($_GET['id'])) {
             header("Location:?page=applicants");
             exit;
@@ -502,6 +504,8 @@ class ApplicantController
 
     public function scheduleInterview()
     {
+        Auth::requireRole(['HR', 'MGR']);
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location:?page=applicants");
             exit;
@@ -542,6 +546,8 @@ class ApplicantController
 
     public function updateStatus()
     {
+        Auth::requireRole(['HR', 'MGR']);
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location:?page=applicants");
             exit;
@@ -620,6 +626,8 @@ class ApplicantController
 
     public function hire()
     {
+        Auth::requireRole(['HR']);
+
         header('Content-Type: application/json');
 
         try {
@@ -660,6 +668,8 @@ class ApplicantController
 
     public function reject()
     {
+        Auth::requireRole(['HR']);
+
         header('Content-Type: application/json');
 
         try {

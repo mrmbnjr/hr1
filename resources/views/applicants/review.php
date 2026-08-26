@@ -398,31 +398,33 @@ $statusMeta = [
 
         </section>
 
-            <!-- Decision -->
-            <section class="detail-section decision-section">
-                <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
-                <div class="decision-buttons">
-                    <button
-                        type="button"
-                        class="btn-success btn-block"
-                        id="hireBtn"
-                        data-application-id="<?= (int) $applicant['application_id'] ?>"
-                    >
-                        <i class="fa-solid fa-user-check"></i>
-                        Hire Applicant
-                    </button>
+            <?php if (!in_array($applicant['application_status'], ['Hired', 'Rejected'], true)): ?>
+                <!-- Decision -->
+                <section class="detail-section decision-section">
+                    <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
+                    <div class="decision-buttons">
+                        <button
+                            type="button"
+                            class="btn-success btn-block"
+                            id="hireBtn"
+                            data-application-id="<?= (int) $applicant['application_id'] ?>"
+                        >
+                            <i class="fa-solid fa-user-check"></i>
+                            Hire Applicant
+                        </button>
 
-                    <button
-                        type="button"
-                        class="btn-danger btn-block"
-                        id="rejectBtn"
-                        data-application-id="<?= (int) $applicant['application_id'] ?>"
-                    >
-                        <i class="fa-solid fa-user-xmark"></i>
-                        Reject Applicant
-                    </button>
-                </div>
-            </section>
+                        <button
+                            type="button"
+                            class="btn-danger btn-block"
+                            id="rejectBtn"
+                            data-application-id="<?= (int) $applicant['application_id'] ?>"
+                        >
+                            <i class="fa-solid fa-user-xmark"></i>
+                            Reject Applicant
+                        </button>
+                    </div>
+                </section>
+            <?php endif; ?>
         </div>
 
     <!-- ==========================================================
