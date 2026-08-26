@@ -172,35 +172,8 @@ class ApplicantController
             $resume = $_FILES['resume'];
             $coverLetter = $_FILES['cover_letter'] ?? null;
 
-
-            /*
-             * Allowed resume file types.
-             */
-            $allowedResumeExtensions = [
-                'pdf',
-                'doc',
-                'docx'
-            ];
-
-            $resumeExtension = strtolower(
-                pathinfo($resume['name'], PATHINFO_EXTENSION)
-            );
-
-            if (!in_array($resumeExtension, $allowedResumeExtensions, true)) {
-                throw new \Exception(
-                    'Resume must be a PDF, DOC, or DOCX file.'
-                );
-            }
-
-
-            /*
-             * Maximum resume size: 5 MB
-             */
-            if ($resume['size'] > 5 * 1024 * 1024) {
-                throw new \Exception(
-                    'Resume file must not exceed 5 MB.'
-                );
-            }
+            $resumeInput = new ResumeInputService();
+            $resumeExtension = $resumeInput->validateUploadedFile($resume);
 
 
             /*
@@ -217,33 +190,7 @@ class ApplicantController
                     );
                 }
 
-                $allowedCoverExtensions = [
-                    'pdf',
-                    'doc',
-                    'docx'
-                ];
-
-                $coverExtension = strtolower(
-                    pathinfo($coverLetter['name'], PATHINFO_EXTENSION)
-                );
-
-                if (
-                    !in_array(
-                        $coverExtension,
-                        $allowedCoverExtensions,
-                        true
-                    )
-                ) {
-                    throw new \Exception(
-                        'Cover letter must be a PDF, DOC, or DOCX file.'
-                    );
-                }
-
-                if ($coverLetter['size'] > 5 * 1024 * 1024) {
-                    throw new \Exception(
-                        'Cover letter must not exceed 5 MB.'
-                    );
-                }
+                $coverExtension = $resumeInput->validateUploadedFile($coverLetter, 'Cover letter');
             }
 
 

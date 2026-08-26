@@ -19,6 +19,7 @@ class GeminiService
     private const ALLOWED_MIME_TYPES = [
         'application/pdf',
         'application/msword',
+        'application/CDFV2',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
@@ -158,7 +159,8 @@ class GeminiService
 
     private function detectMimeType(string $path): string
     {
-        $mimeType = mime_content_type($path);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($path);
 
         if (is_string($mimeType) && $mimeType !== '') {
             return strtolower($mimeType);

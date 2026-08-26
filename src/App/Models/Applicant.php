@@ -149,11 +149,8 @@ class Applicant
             LEFT JOIN employees e
                 ON u.employee_id = e.employee_id
 
-            LEFT JOIN applications ia
-                ON e.application_id = ia.application_id
-
             LEFT JOIN applicants interviewer
-                ON ia.applicant_id = interviewer.applicant_id
+                ON e.applicant_id = interviewer.applicant_id
 
             WHERE a.applicant_id = :id
         ";
@@ -221,11 +218,8 @@ class Applicant
             LEFT JOIN employees e
                 ON u.employee_id = e.employee_id
 
-            LEFT JOIN applications ap
-                ON e.application_id = ap.application_id
-
             LEFT JOIN applicants a
-                ON ap.applicant_id = a.applicant_id
+                ON e.applicant_id = a.applicant_id
 
             WHERE u.status = 'Active'
             AND r.role_code IN ('ADMIN', 'HR', 'MGR')
@@ -697,6 +691,7 @@ class Applicant
                 INSERT INTO employees
                 (
                     application_id,
+                    applicant_id,
                     employee_number,
                     position_id,
                     hire_date,
@@ -705,6 +700,7 @@ class Applicant
                 VALUES
                 (
                     :application_id,
+                    :applicant_id,
                     :employee_number,
                     :position_id,
                     CURDATE(),
@@ -714,6 +710,7 @@ class Applicant
 
             $employeeStmt->execute([
                 ':application_id' => $applicationId,
+                ':applicant_id' => $application['applicant_id'],
                 ':employee_number' => $employeeNumber,
                 ':position_id' => $application['position_id'],
                 ':employment_status' => $employmentStatus

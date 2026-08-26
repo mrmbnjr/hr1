@@ -242,6 +242,7 @@ CREATE TABLE employees (
     employee_id INT AUTO_INCREMENT PRIMARY KEY,
 
     application_id INT UNIQUE,
+    applicant_id INT NOT NULL UNIQUE,
 
     employee_number VARCHAR(30) UNIQUE,
 
@@ -257,6 +258,9 @@ CREATE TABLE employees (
 
     FOREIGN KEY (application_id)
         REFERENCES applications(application_id),
+
+    FOREIGN KEY (applicant_id)
+        REFERENCES applicants(applicant_id),
 
     FOREIGN KEY (position_id)
         REFERENCES positions(position_id)

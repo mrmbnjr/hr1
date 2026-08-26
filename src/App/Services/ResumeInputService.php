@@ -6,6 +6,8 @@ use RuntimeException;
 
 class ResumeInputService
 {
+    private const MAX_FILE_SIZE = 5242880;
+
     private string $resumeDirectory;
 
     private array $allowedExtensions = [
@@ -14,11 +16,41 @@ class ResumeInputService
         'docx',
     ];
 
-    private int $maxFileSize = 5242880;
-
     public function __construct()
     {
         $this->resumeDirectory = dirname(__DIR__, 3) . '/storage/uploads/applications';
+    }
+
+    public function validateUploadedFile(array $file, string $label = 'Resume'): string
+    {
+        if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+            if (($file['error'] ?? null) === UPLOAD_ERR_INI_SIZE) {
+                throw new RuntimeException($label . ' exceeds the server upload limit.');
+            }
+
+            throw new RuntimeException($label . ' upload failed.');
+        }
+
+        $temporaryPath = (string) ($file['tmp_name'] ?? '');
+
+        if ($temporaryPath === '' || !is_uploaded_file($temporaryPath)) {
+            throw new RuntimeException($label . ' upload is invalid.');
+        }
+
+        $fileSize = filesize($temporaryPath);
+
+        if ($fileSize === false || $fileSize <= 0 || $fileSize > self::MAX_FILE_SIZE) {
+            throw new RuntimeException($label . ' must be a non-empty file no larger than 5 MB.');
+        }
+
+        $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
+        $mimeType = $this->detectMimeType($temporaryPath);
+
+        if (!$this->isValidDocument($temporaryPath, $extension, $mimeType)) {
+            throw new RuntimeException($label . ' must be a valid PDF, DOC, or DOCX file.');
+        }
+
+        return $extension;
     }
 
     public function getResume(array $applicantData): array
@@ -87,26 +119,72 @@ class ResumeInputService
 
         $fileSize = filesize($realResumePath);
 
-        if ($fileSize === false || $fileSize <= 0 || $fileSize > $this->maxFileSize) {
+        if ($fileSize === false || $fileSize <= 0 || $fileSize > self::MAX_FILE_SIZE) {
             throw new RuntimeException('The resume file is empty or exceeds the 5 MB size limit.');
+        }
+
+        $mimeType = $this->detectMimeType($realResumePath);
+
+        if (!$this->isValidDocument($realResumePath, $extension, $mimeType)) {
+            throw new RuntimeException('The stored resume content is invalid.');
         }
 
         return [
             'path' => $realResumePath,
             'filename' => $resumeFileName,
-            'mime_type' => $this->detectMimeType($realResumePath),
+            'mime_type' => $mimeType,
         ];
     }
 
     private function detectMimeType(string $filePath): string
     {
-        $mimeType = mime_content_type($filePath);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($filePath);
 
         if (is_string($mimeType) && $mimeType !== '') {
             return $mimeType;
         }
 
         return $this->fallbackMimeType($filePath);
+    }
+
+    private function isValidDocument(string $filePath, string $extension, string $mimeType): bool
+    {
+        $signature = file_get_contents($filePath, false, null, 0, 8);
+
+        if (!is_string($signature)) {
+            return false;
+        }
+
+        return match ($extension) {
+            'pdf' => str_starts_with($signature, '%PDF-') && $mimeType === 'application/pdf',
+            'doc' => $signature === "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
+                && in_array($mimeType, ['application/msword', 'application/CDFV2'], true),
+            'docx' => $this->isValidDocx($filePath, $mimeType),
+            default => false,
+        };
+    }
+
+    private function isValidDocx(string $filePath, string $mimeType): bool
+    {
+        if (!in_array($mimeType, [
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/zip',
+        ], true) || !class_exists('ZipArchive')) {
+            return false;
+        }
+
+        $archive = new \ZipArchive();
+
+        if ($archive->open($filePath) !== true) {
+            return false;
+        }
+
+        $hasContentTypes = $archive->locateName('[Content_Types].xml') !== false;
+        $hasWordDocument = $archive->locateName('word/document.xml') !== false;
+        $archive->close();
+
+        return $hasContentTypes && $hasWordDocument;
     }
 
     private function fallbackMimeType(string $filePath): string

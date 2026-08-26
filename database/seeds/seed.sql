@@ -832,6 +832,7 @@ INSERT INTO onboarding_documents (
 
 INSERT INTO employees (
     application_id,
+    applicant_id,
     employee_number,
     position_id,
     hire_date,
@@ -840,6 +841,7 @@ INSERT INTO employees (
 
 (
     1,
+    1,
     'EMP-2026-0001',
     1,
     '2026-08-17',
@@ -847,6 +849,7 @@ INSERT INTO employees (
 ),
 
 (
+    4,
     4,
     'EMP-2026-0002',
     4,
