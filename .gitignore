@@ -1,3 +1,7 @@
 /vendor/
 /storage/uploads/*
 !/storage/uploads/.htaccess
+
+.env
+.env.*
+!.env.example
