@@ -108,13 +108,13 @@ $statusMeta = [
                 return "low";
             }?>
         <section class="detail-section">
+            <div class="ai-actions">
 
-            <h3>
-                <i class="fa-solid fa-robot"></i>
-                AI Screening Results
-            </h3>
+                <h3>
+                    <i class="fa-solid fa-robot"></i>
+                    AI Screening Results
+                </h3>
 
-            <div class="ai-actions" style="margin-bottom: 1rem;">
                 <button
                     type="button"
                     class="btn-primary"

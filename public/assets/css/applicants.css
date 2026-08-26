@@ -302,21 +302,6 @@
     border-color: var(--border);
 }
 
-.btn-primary {
-    background: var(--gold);
-    color: var(--maroon-dark);
-}
-
-.btn-success {
-    background: var(--green);
-    color: var(--white);
-}
-
-.btn-danger {
-    background: var(--red);
-    color: var(--white);
-}
-
 .btn-block { width: 100%; justify-content: center; }
 
 /* ---------------- Table footer / pagination ---------------- */
@@ -517,6 +502,21 @@
 
 .resume-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* AI screening actions */
+
+.ai-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.ai-actions h3 {
+    margin: 0;
+}
+
 /* AI score circle */
 
 .ai-score-row {
@@ -555,7 +555,11 @@
     background: var(--card-bg);
 }
 
-.ai-score-circle span { position: relative; z-index: 1; }
+.ai-score-circle span { 
+    position: relative; 
+    z-index: 1; 
+    font-weight: 700;
+}
 
 .ai-recommendation { display: flex; flex-direction: column; gap: 6px; }
 
