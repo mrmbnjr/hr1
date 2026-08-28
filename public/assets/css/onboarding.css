@@ -10,6 +10,10 @@
     color: var(--ink);
 }
 
+.filter-bar {
+    margin-bottom: 20px;
+}
+
 .onboarding-table { min-width: 760px; }
 
 .employee-link {
@@ -29,25 +33,6 @@
 .col-actions { text-align: right; }
 
 .onboarding-cell { display: flex; align-items: center; gap: 12px; }
-
-.btn-block { width: 100%; justify-content: center; }
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    border-radius: 8px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 13px;
-    flex-shrink: 0;
-    color: var(--ink);
-    transition:
-        background var(--transition),
-        border-color var(--transition),
-        color var(--transition);
-}
 
 .page-btn:hover:not(:disabled),
 .page-num:hover {
