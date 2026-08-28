@@ -33,6 +33,18 @@ $statusMeta = [
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
+    <?php if (!empty($_SESSION['success'])): ?>
+        <div class="alert alert-success" role="status">
+            <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($_SESSION['error'])): ?>
+        <div class="alert alert-error" role="alert">
+            <?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+        </div>
+    <?php endif; ?>
+
     <!-- ==========================================================
         APPLICANT DETAILS PANEL
     ========================================================== -->

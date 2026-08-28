@@ -422,7 +422,7 @@ class ApplicantController
      */
     public function review()
     {
-        Auth::requireRole(['HR', 'MGR']);
+        Auth::requireRole(['ADMIN', 'HR', 'MGR']);
 
         if (!isset($_GET['id'])) {
             header("Location:?page=applicants");
@@ -515,18 +515,59 @@ class ApplicantController
 
     public function scheduleInterview()
     {
-        Auth::requireRole(['HR', 'MGR']);
+        Auth::requireRole(['ADMIN', 'HR', 'MGR']);
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location:?page=applicants");
             exit;
         }
 
+        $applicationId = (int) ($_POST['application_id'] ?? 0);
+        $applicantId = (int) ($_POST['applicant_id'] ?? 0);
+        $applicant = $this->applicant->getApplicantById($applicantId);
+
+        if (!$applicant || (int) $applicant['application_id'] !== $applicationId) {
+            $_SESSION['error'] = 'Applicant application could not be found.';
+            header('Location:?page=applicants');
+            exit;
+        }
+
         $this->applicant->scheduleInterview($_POST);
+
+        $emailSent = true;
+        $interviewerName = 'HR Recruitment Team';
+
+        foreach ($this->applicant->getManagers() as $manager) {
+            if ((int) $manager['user_id'] === (int) ($_POST['interviewer_id'] ?? 0)) {
+                $interviewerName = $manager['fullname'];
+                break;
+            }
+        }
+
+        try {
+            (new MailService())->sendInterviewSchedule([
+                'email' => $applicant['email'],
+                'fullname' => $applicant['fullname'],
+                'position' => $applicant['position'],
+                'interview_date' => date('F d, Y', strtotime($_POST['interview_date'])),
+                'interview_time' => date('g:i A', strtotime($_POST['interview_time'])),
+                'interview_type' => $_POST['interview_type'],
+                'location' => $_POST['location'],
+                'interviewer' => $interviewerName,
+                'notes' => $_POST['notes'] ?? '',
+            ]);
+        } catch (\Throwable $mailError) {
+            error_log('Interview schedule email failed: ' . $mailError->getMessage());
+            $emailSent = false;
+        }
+
+        $_SESSION['success'] = $emailSent
+            ? 'Interview scheduled and notification emailed to the applicant.'
+            : 'Interview scheduled, but the notification email could not be sent.';
 
         header(
             "Location:?page=review&id=" .
-            $_POST['applicant_id']
+            $applicantId
         );
 
         exit;
