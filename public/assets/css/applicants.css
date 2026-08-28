@@ -340,6 +340,112 @@
 .decision-buttons button { flex: 1; min-width: 160px; padding: 12px 16px; }
 
 
+/* ---------------- AI screening results ---------------- */
+
+/* AI screening actions */
+
+.ai-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.ai-actions h3 {
+    margin: 0;
+}
+
+/* AI score circle */
+
+.ai-score-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.ai-score-circle {
+    --score: 0;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 18px;
+    color: var(--maroon-dark);
+    background:
+        conic-gradient(
+            from -180deg,
+            var(--gold) 0%,
+            var(--maroon) calc(var(--score) * 1%),
+            var(--border) 0
+        );
+    position: relative;
+}
+
+.ai-score-circle::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--card-bg);
+}
+
+.ai-score-circle span { 
+    position: relative; 
+    z-index: 1; 
+    font-weight: 700;
+}
+
+.ai-recommendation { display: flex; flex-direction: column; gap: 6px; }
+
+.rec-badge {
+    display: inline-flex;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    width: fit-content;
+}
+
+.rec-high   { background: var(--green-bg); color: var(--green); }
+.rec-mid    { background: var(--blue-bg);  color: var(--blue); }
+.rec-review { background: var(--orange-bg); color: var(--orange); }
+.rec-low    { background: var(--red-bg);   color: var(--red); }
+
+.match-bars { display: flex; flex-direction: column; gap: 12px; }
+
+.match-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+}
+
+.match-label { font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+
+.progress-track {
+    height: 8px;
+    border-radius: 6px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--gold), var(--maroon));
+    transition: width 0.4s ease;
+}
+
+.match-value { font-size: 13px; font-weight: 800; color: var(--maroon-dark); text-align: right; }
+
+
 /* ==========================================================
    AI Analysis
 ========================================================== */
@@ -415,6 +521,15 @@
         flex-direction:row;
         align-items:center;
     }
+
+    .match-row {
+        grid-template-columns: 1fr auto;
+        gap: 7px 12px;
+    }
+
+    .match-label { grid-column: 1; }
+    .match-value { grid-column: 2; grid-row: 1; }
+    .progress-track { grid-column: 1 / -1; grid-row: 2; }
 }
 /* ---------------- Modals ---------------- */
 
