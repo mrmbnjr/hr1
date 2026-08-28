@@ -422,11 +422,11 @@ class Dashboard
 
     /*
     |--------------------------------------------------------------------------
-    | NEW EMPLOYEES
+    | RECENT HIRES
     |--------------------------------------------------------------------------
     */
 
-    public function getNewEmployees($limit = 5)
+    public function getRecentHires($limit = 5)
     {
         $sql = "
             SELECT

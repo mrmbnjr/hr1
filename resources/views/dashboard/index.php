@@ -99,6 +99,30 @@ if (
     ];
 }
 
+
+function activity_icon_class(?string $type): string
+{
+    return match ($type) {
+        'applicant' => 'applicant',
+        'employee' => 'employee',
+        'request' => 'request',
+        'system' => 'system',
+        default => 'default'
+    };
+}
+
+
+function activity_icon_glyph(?string $type): string
+{
+    return match ($type) {
+        'applicant' => 'fa-solid fa-user-plus',
+        'employee' => 'fa-solid fa-user-tie',
+        'request' => 'fa-solid fa-file-circle-check',
+        'system' => 'fa-solid fa-gear',
+        default => 'fa-solid fa-circle-info'
+    };
+}
+
 ?>
 
 
@@ -692,7 +716,7 @@ if (
         </article>
 
 
-        <!-- New Employees -->
+        <!-- Onboarding Progress -->
 
         <article class="dashboard-card">
 
@@ -701,18 +725,18 @@ if (
                 <div>
 
                     <h2>
-                        New Employees
+                        Onboarding Progress
                     </h2>
 
                     <p>
-                        Recently onboarded employees
+                        Employee onboarding status
                     </p>
 
                 </div>
 
 
                 <a
-                    href="/hr1/public/?page=employee-records"
+                    href="/hr1/public/?page=onboarding"
                 >
                     View All
                 </a>
@@ -720,7 +744,7 @@ if (
             </div>
 
 
-            <div class="employee-list">
+            <div class="onboarding-list">
 
 
                 <?php if (
@@ -733,100 +757,57 @@ if (
                         as $employee
                     ): ?>
 
-                        <div
-                            class="employee-item"
-                        >
+                        <?php
+                            $onboardingStatus = strtolower(
+                                $employee[
+                                    'onboarding_status'
+                                ] ?? 'pending'
+                            );
+                            
+                            $progressPercent = match($onboardingStatus) {
+                                'completed' => 100,
+                                'onboarding' => 70,
+                                'pending' => 30,
+                                default => 50
+                            };
+                            
+                            $statusLabel = match($onboardingStatus) {
+                                'completed' => 'Completed',
+                                'onboarding' => 'In Progress',
+                                'pending' => 'Pending',
+                                default => 'In Progress'
+                            };
+                        ?>
 
-                            <div
-                                class="employee-info"
-                            >
+                        <div class="onboarding-item">
 
-                                <h3>
-
-                                    <?= htmlspecialchars(
-                                        $employee[
-                                            'employee_name'
-                                        ]
-                                    ) ?>
-
-                                </h3>
-
-
-                                <p>
-
-                                    <?= htmlspecialchars(
-                                        $employee[
-                                            'title'
-                                        ]
-                                    ) ?>
-
-                                </p>
-
-
-                                <div
-                                    class="
-                                        employee-meta
-                                    "
-                                >
-
-                                    <span
-                                        class="
-                                            employment
-                                            <?= strtolower(
-                                                $employee[
-                                                    'employment_status'
-                                                ]
-                                            ) ?>
-                                        "
-                                    >
-
-                                        <?= htmlspecialchars(
-                                            $employee[
-                                                'employment_status'
-                                            ]
-                                        ) ?>
-
-                                    </span>
-
-
-                                    <span
-                                        class="
-                                            status
-                                            <?= strtolower(
-                                                $employee[
-                                                    'onboarding_status'
-                                                ]
-                                            ) ?>
-                                        "
-                                    >
-
-                                        <?= htmlspecialchars(
-                                            $employee[
-                                                'onboarding_status'
-                                            ]
-                                        ) ?>
-
-                                    </span>
-
-                                </div>
-
+                            <div class="onboarding-name">
+                                <?= htmlspecialchars(
+                                    $employee[
+                                        'employee_name'
+                                    ]
+                                ) ?>
                             </div>
 
+                            <div class="onboarding-bar-container">
+                                <div 
+                                    class="onboarding-bar-background"
+                                >
+                                    <div 
+                                        class="onboarding-bar-fill <?= $onboardingStatus ?>"
+                                        style="width: <?= $progressPercent ?>%"
+                                    ></div>
+                                </div>
+                            </div>
 
-                            <span
-                                class="employee-date"
-                            >
-
-                                <?= date(
-                                    'M d',
-                                    strtotime(
-                                        $employee[
-                                            'hire_date'
-                                        ]
-                                    )
-                                ) ?>
-
-                            </span>
+                            <div class="onboarding-info">
+                                <span class="onboarding-percent">
+                                    <?= $progressPercent ?>%
+                                </span>
+                                <span class="onboarding-status <?= $onboardingStatus ?>">
+                                    <?= $statusLabel ?>
+                                </span>
+                            </div>
 
                         </div>
 
@@ -836,8 +817,8 @@ if (
                 <?php else: ?>
 
 
-                    <p>
-                        No new employees found.
+                    <p class="no-onboarding">
+                        No employees in onboarding.
                     </p>
 
 
@@ -889,11 +870,24 @@ if (
                 <?php foreach (
                     $recentActivities
                     as $activity
-                ): ?>
+                ):
+                    $activityType = $activity['activity_type'] ?? null;
+                ?>
 
                     <div
                         class="activity-item"
                     >
+
+                        <div
+                            class="activity-type <?= htmlspecialchars(activity_icon_class($activityType)) ?>"
+                        >
+
+                            <i
+                                class="<?= htmlspecialchars(activity_icon_glyph($activityType)) ?>"
+                                aria-hidden="true"
+                            ></i>
+
+                        </div>
 
                         <div>
 

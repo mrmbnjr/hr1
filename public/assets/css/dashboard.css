@@ -517,94 +517,126 @@
 }
 
 /* ==========================================================
-   NEW EMPLOYEES
+   ONBOARDING PROGRESS
 ========================================================== */
-.employee-list{
-    padding:0px 20px;
+.onboarding-list {
+    padding: 16px 20px;
 }
 
-.employee-item{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:14px 0;
-    border-bottom:1px dashed #ecd8bc;
+.onboarding-item {
+    display: grid;
+    grid-template-columns: 140px 1fr 120px;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px dashed #ecd8bc;
 }
 
-.employee-item:last-child{
-    border-bottom:none;
+.onboarding-item:last-child {
+    border-bottom: none;
 }
 
-.employee-info{
-    flex:1;
+.onboarding-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--maroon);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.employee-info h3{
-    margin:0;
-    font-size:15px;
-    font-weight:700;
-    color:var(--maroon);
+.onboarding-bar-container {
+    display: flex;
+    align-items: center;
 }
 
-.employee-info p{
-    margin:3px 0 6;
-    font-size:13px;
-    color:var(--ink-soft);
+.onboarding-bar-background {
+    width: 100%;
+    height: 16px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.employee-meta{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
+.onboarding-bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.3s ease;
+    background: linear-gradient(
+        90deg,
+        var(--ry-gold),
+        var(--ry-gold-dark)
+    );
 }
 
-.employee-meta span{
-    padding:3px 10px;
-    font-size:12px;
-    font-weight:700;
-    border-radius: 16px;
+.onboarding-bar-fill.completed {
+    background: linear-gradient(
+        90deg,
+        #4caf50,
+        #45a049
+    );
 }
 
-/* Employment */
-
-.employment.probationary{
-    background:#edf4ff;
-    color:#285bb5;
+.onboarding-bar-fill.onboarding {
+    background: linear-gradient(
+        90deg,
+        #2196f3,
+        #1976d2
+    );
 }
 
-.employment.regular{
-    background:#e9f8ef;
-    color:#22884d;
+.onboarding-bar-fill.pending {
+    background: linear-gradient(
+        90deg,
+        #ff9800,
+        #f57c00
+    );
 }
 
-.employment.contract{
-    background:#f3ebff;
-    color:#7b2cbf;
+.onboarding-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
 }
 
-/* Status */
-
-.status.pending{
-    background:#fff6df;
-    color:#b7791f;
+.onboarding-percent {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--maroon);
+    min-width: 35px;
+    text-align: right;
 }
 
-.status.onboarding{
-    background:#e8f5ff;
-    color:#0077b6;
+.onboarding-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
 }
 
-.status.completed{
-    background:#e7f8ed;
-    color:#2e7d32;
+.onboarding-status.completed {
+    background: #e7f8ed;
+    color: #2e7d32;
 }
 
-.employee-date{
-    font-size:12px;
-    color:var(--ink-soft);
-    white-space:nowrap;
-    margin-left:auto;
-    font-weight:600;
+.onboarding-status.onboarding {
+    background: #e8f5ff;
+    color: #0077b6;
+}
+
+.onboarding-status.pending {
+    background: #fff6df;
+    color: #b7791f;
+}
+
+.no-onboarding {
+    padding: 20px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
 }
 /* ==========================================================
    Bar Graph
@@ -688,6 +720,46 @@
 
 .activity-item div{
     flex:1;
+}
+
+.activity-type {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 14px;
+}
+
+.activity-item .activity-type {
+    flex: 0 0 48px;
+}
+
+.activity-type i {
+    font-size: 18px;
+}
+
+.activity-type.applicant {
+    background: #EBF2FF;
+    color: #2B6CB0;
+}
+
+.activity-type.employee {
+    background: #E6F7ED;
+    color: #237A4B;
+}
+
+.activity-type.request {
+    background: #FDF0E2;
+    color: #B45309;
+}
+
+.activity-type.system,
+.activity-type.default {
+    background: #F1F3F5;
+    color: #59636E;
 }
 
 .activity-item h3{

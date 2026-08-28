@@ -51,8 +51,8 @@ class DashboardController
             $this->dashboard->getQuickStats();
 
 
-        $newEmployees =
-            $this->dashboard->getNewEmployees(5);
+        $recentHires =
+            $this->dashboard->getRecentHires(5);
 
 
         $recentActivities =
@@ -135,6 +135,10 @@ class DashboardController
 
         $chartSubtitle =
             $chart['subtitle'];
+
+
+        $newEmployees =
+            $recentHires;
 
 
         require '../resources/views/dashboard/index.php';
