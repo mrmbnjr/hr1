@@ -189,7 +189,26 @@ if (applicantChartCanvas) {
                     data:
                         window.applicantGrowthData?.data ?? [],
 
-                    backgroundColor: "#b5822fa4",
+                    backgroundColor: (context) => {
+                        const { chart } = context;
+                        const { chartArea, ctx } = chart;
+
+                        if (!chartArea) {
+                            return "rgba(181, 130, 47, 0.22)";
+                        }
+
+                        const gradient = ctx.createLinearGradient(
+                            0,
+                            chartArea.top,
+                            0,
+                            chartArea.bottom
+                        );
+
+                        gradient.addColorStop(0, "rgb(181, 130, 47)");
+                        gradient.addColorStop(1, "rgba(181, 130, 47, 0.09)");
+
+                        return gradient;
+                    },
                     borderColor: "#6F1414",
 
                     tension: 0.4,
