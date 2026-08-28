@@ -748,45 +748,33 @@ function activity_icon_glyph(?string $type): string
 
 
                 <?php if (
-                    !empty($newEmployees)
+                    !empty($onboardingProgress)
                 ): ?>
 
 
                     <?php foreach (
-                        $newEmployees
+                        $onboardingProgress
                         as $employee
                     ): ?>
 
                         <?php
-                            $onboardingStatus = strtolower(
-                                $employee[
-                                    'onboarding_status'
-                                ] ?? 'pending'
-                            );
-                            
-                            $progressPercent = match($onboardingStatus) {
-                                'completed' => 100,
-                                'onboarding' => 70,
-                                'pending' => 30,
-                                default => 50
-                            };
-                            
-                            $statusLabel = match($onboardingStatus) {
-                                'completed' => 'Completed',
-                                'onboarding' => 'In Progress',
-                                'pending' => 'Pending',
-                                default => 'In Progress'
-                            };
+                            $onboardingStatus = strtolower(str_replace(' ', '-', $employee['onboarding_status'] ?? 'pending'));
+                            $progressPercent = (int) ($employee['progress'] ?? 0);
+                            $pendingDocuments = (int) ($employee['pending_documents'] ?? 0);
+                            $currentDocument = $employee['current_document'] ?? null;
                         ?>
 
                         <div class="onboarding-item">
 
-                            <div class="onboarding-name">
-                                <?= htmlspecialchars(
-                                    $employee[
-                                        'employee_name'
-                                    ]
-                                ) ?>
+                            <div class="onboarding-identity">
+                                <strong class="onboarding-name">
+                                    <?= htmlspecialchars($employee['employee_name']) ?>
+                                </strong>
+                                <span class="onboarding-role">
+                                    <?= htmlspecialchars($employee['position_name']) ?>
+                                    <span aria-hidden="true">&middot;</span>
+                                    <?= htmlspecialchars($employee['department_name']) ?>
+                                </span>
                             </div>
 
                             <div class="onboarding-bar-container">
@@ -800,12 +788,28 @@ function activity_icon_glyph(?string $type): string
                                 </div>
                             </div>
 
+                            <div class="onboarding-progress-label">
+                                <strong><?= $progressPercent ?>%</strong>
+                            </div>
+
                             <div class="onboarding-info">
-                                <span class="onboarding-percent">
-                                    <?= $progressPercent ?>%
+                                <span>
+                                    <?php if ($onboardingStatus === 'completed'): ?>
+                                        Completed
+                                    <?php elseif ($currentDocument): ?>
+                                        <?= htmlspecialchars($currentDocument) ?>
+                                    <?php else: ?>
+                                        Documents &amp; Requirements
+                                    <?php endif; ?>
                                 </span>
-                                <span class="onboarding-status <?= $onboardingStatus ?>">
-                                    <?= $statusLabel ?>
+                                <span>
+                                    <?php if ($onboardingStatus === 'completed' && !empty($employee['completed_at'])): ?>
+                                        <?= date('M j, Y', strtotime($employee['completed_at'])) ?>
+                                    <?php elseif ($pendingDocuments > 0): ?>
+                                        <?= $pendingDocuments ?> document<?= $pendingDocuments === 1 ? '' : 's' ?> left
+                                    <?php else: ?>
+                                        In progress
+                                    <?php endif; ?>
                                 </span>
                             </div>
 

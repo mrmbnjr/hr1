@@ -426,15 +426,31 @@ class Dashboard
     |--------------------------------------------------------------------------
     */
 
-    public function getRecentHires($limit = 5)
+    public function getOnboardingProgress($limit = 5): array
     {
         $sql = "
             SELECT
-                CONCAT(ap.first_name, ' ', ap.last_name) AS employee_name,
-                jp.title,
-                e.employment_status,
+                e.employee_id,
+                CONCAT(
+                    ap.first_name,
+                    ' ',
+                    ap.last_name
+                ) AS employee_name,
+                p.position_name,
+                d.department_name,
                 o.onboarding_status,
-                e.hire_date
+                o.completed_at,
+                COALESCE(documents.total, 0) AS document_total,
+                COALESCE(documents.verified, 0) AS document_verified,
+                COALESCE(documents.pending, 0) AS pending_documents,
+                (
+                    SELECT od.document_name
+                    FROM onboarding_documents od
+                    WHERE od.onboarding_id = o.onboarding_id
+                    AND od.status = 'Pending'
+                    ORDER BY od.document_id ASC
+                    LIMIT 1
+                ) AS current_document
 
             FROM employees e
 
@@ -444,13 +460,27 @@ class Dashboard
             INNER JOIN applicants ap
                 ON app.applicant_id = ap.applicant_id
 
-            INNER JOIN job_postings jp
-                ON app.posting_id = jp.posting_id
+            INNER JOIN positions p
+                ON e.position_id = p.position_id
 
-            LEFT JOIN onboarding o
+            INNER JOIN departments d
+                ON p.department_id = d.department_id
+
+            INNER JOIN onboarding o
                 ON app.application_id = o.application_id
 
-            ORDER BY e.hire_date DESC
+            LEFT JOIN (
+                SELECT
+                    onboarding_id,
+                    COUNT(*) AS total,
+                    SUM(status = 'Verified') AS verified,
+                    SUM(status = 'Pending') AS pending
+                FROM onboarding_documents
+                GROUP BY onboarding_id
+            ) documents
+                ON o.onboarding_id = documents.onboarding_id
+
+            ORDER BY e.hire_date DESC, e.employee_id DESC
 
             LIMIT ?
         ";
@@ -467,7 +497,27 @@ class Dashboard
         $stmt->execute();
 
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($employees as &$employee) {
+            if ($employee['onboarding_status'] === 'Completed') {
+                $employee['progress'] = 100;
+            } elseif ((int) $employee['document_total'] > 0) {
+                $completedSteps = 3;
+
+                if ((int) $employee['document_verified'] === (int) $employee['document_total']) {
+                    $completedSteps++;
+                }
+
+                $employee['progress'] = (int) round(($completedSteps / 5) * 100);
+            } else {
+                $employee['progress'] = 40;
+            }
+        }
+
+        unset($employee);
+
+        return $employees;
     }
 
 
