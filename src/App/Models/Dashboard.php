@@ -593,4 +593,103 @@ class Dashboard
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getRecentApplicants(
+        string $view,
+        int $year,
+        int $month,
+        string $weekStart,
+        int $page = 1,
+        int $limit = 3
+    )
+    {
+        $bounds = $this->getApplicantPeriodBounds(
+            $view,
+            $year,
+            $month,
+            $weekStart
+        );
+
+        $page = max(1, $page);
+        $offset = ($page - 1) * $limit;
+
+        $countStmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM applications
+             WHERE applied_at >= :start
+             AND applied_at < :end"
+        );
+        $countStmt->bindValue(':start', $bounds['start']);
+        $countStmt->bindValue(':end', $bounds['end']);
+        $countStmt->execute();
+
+        $total = (int) $countStmt->fetchColumn();
+
+        $sql = "
+            SELECT
+                a.applicant_id,
+                CONCAT(a.first_name, ' ', a.last_name) AS fullname,
+                a.address,
+                jp.title AS position,
+                app.application_status,
+                app.applied_at
+
+            FROM applications app
+
+            INNER JOIN applicants a
+                ON app.applicant_id = a.applicant_id
+
+            INNER JOIN job_postings jp
+                ON app.posting_id = jp.posting_id
+
+            WHERE app.applied_at >= :start
+            AND app.applied_at < :end
+
+            ORDER BY app.applied_at DESC
+
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':start', $bounds['start']);
+        $stmt->bindValue(':end', $bounds['end']);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'items' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'page' => $page,
+            'total' => $total,
+            'totalPages' => max(1, (int) ceil($total / $limit))
+        ];
+    }
+
+    private function getApplicantPeriodBounds(
+        string $view,
+        int $year,
+        int $month,
+        string $weekStart
+    ): array
+    {
+        if ($view === 'month') {
+            $start = new DateTime(sprintf('%04d-%02d-01', $year, $month));
+            $end = clone $start;
+            $end->modify('+1 month');
+        } elseif ($view === 'week') {
+            $start = new DateTime($weekStart);
+            $start->modify('monday this week');
+            $end = clone $start;
+            $end->modify('+7 days');
+        } else {
+            $start = new DateTime(sprintf('%04d-01-01', $year));
+            $end = clone $start;
+            $end->modify('+1 year');
+        }
+
+        return [
+            'start' => $start->format('Y-m-d H:i:s'),
+            'end' => $end->format('Y-m-d H:i:s')
+        ];
+    }
 }

@@ -101,6 +101,17 @@ class DashboardController
             ?? date('Y-m-d');
 
 
+        $recentApplicants =
+            $this->dashboard->getRecentApplicants(
+                $view,
+                $year,
+                $month,
+                $weekStart,
+                1,
+                3
+            );
+
+
         $chart =
             $this->dashboard->getApplicantChart(
                 $view,
@@ -562,12 +573,29 @@ class DashboardController
             ?? date('Y-m-d');
 
 
+        $page =
+            isset($_GET['pageNumber'])
+                ? (int) $_GET['pageNumber']
+                : 1;
+
+
         $chart =
             $this->dashboard->getApplicantChart(
                 $view,
                 $year,
                 $month,
                 $weekStart
+            );
+
+
+        $recentApplicants =
+            $this->dashboard->getRecentApplicants(
+                $view,
+                $year,
+                $month,
+                $weekStart,
+                $page,
+                3
             );
 
 
@@ -588,7 +616,19 @@ class DashboardController
                 $chart['period'],
 
             'subtitle' =>
-                $chart['subtitle']
+                $chart['subtitle'],
+
+            'applicants' =>
+                $recentApplicants['items'],
+
+            'page' =>
+                $recentApplicants['page'],
+
+            'total' =>
+                $recentApplicants['total'],
+
+            'totalPages' =>
+                $recentApplicants['totalPages']
 
         ]);
 

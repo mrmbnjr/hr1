@@ -26,6 +26,45 @@ const growthSubtitle = document.getElementById(
     "growthSubtitle"
 );
 
+const submissionsTableBody = document.getElementById(
+    "submissionsTableBody"
+);
+
+const submissionsPageInfo = document.getElementById(
+    "submissionsPageInfo"
+);
+
+const submissionsPrev = document.getElementById(
+    "submissionsPrev"
+);
+
+const submissionsNext = document.getElementById(
+    "submissionsNext"
+);
+
+const applicationSubmissionsCard = document.getElementById(
+    "applicationSubmissionsCard"
+);
+
+const topAppliedJobsCard = document.getElementById(
+    "topAppliedJobsCard"
+);
+
+if (applicationSubmissionsCard && topAppliedJobsCard) {
+    const applicationGrid = applicationSubmissionsCard.parentElement;
+    const jobsGrid = topAppliedJobsCard.parentElement;
+
+    jobsGrid.insertBefore(
+        applicationSubmissionsCard,
+        jobsGrid.children[0]
+    );
+
+    applicationGrid.insertBefore(
+        topAppliedJobsCard,
+        applicationGrid.children[0]
+    );
+}
+
 
 let applicantChart;
 
@@ -42,9 +81,86 @@ let chartState = {
         window.applicantGrowthData?.month ?? new Date().getMonth() + 1,
 
     weekStart:
-        window.applicantGrowthData?.weekStart ?? null
+        window.applicantGrowthData?.weekStart ?? null,
+
+    page:
+        window.applicantGrowthData?.page ?? 1,
+
+    totalPages:
+        window.applicantGrowthData?.totalPages ?? 1
 
 };
+
+function escapeHtml(value) {
+    const element = document.createElement("div");
+    element.textContent = value ?? "";
+    return element.innerHTML;
+}
+
+function renderSubmissions(data) {
+    if (!submissionsTableBody) {
+        return;
+    }
+
+    const applicants = data.applicants ?? [];
+
+    if (!applicants.length) {
+        submissionsTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="submissions-empty">
+                    No application submissions for this period.
+                </td>
+            </tr>`;
+    } else {
+        submissionsTableBody.innerHTML = applicants.map((applicant) => {
+            const status = applicant.application_status ?? "Submitted";
+            const statusClass = status.toLowerCase().replaceAll(" ", "-");
+            const name = applicant.fullname ?? "";
+            const initial = name.charAt(0).toUpperCase() || "?";
+            const submitted = applicant.applied_at
+                ? new Date(applicant.applied_at).toLocaleDateString(
+                    "en-US",
+                    { month: "short", day: "numeric", year: "numeric" }
+                )
+                : "Not provided";
+
+            return `
+                <tr>
+                    <td>
+                        <a class="submission-applicant" href="?page=review&id=${Number(applicant.applicant_id)}">
+                            <span class="submission-avatar">${escapeHtml(initial)}</span>
+                            <strong>${escapeHtml(name)}</strong>
+                        </a>
+                    </td>
+                    <td>${escapeHtml(applicant.position)}</td>
+                    <td>${escapeHtml(applicant.address || "Not provided")}</td>
+                    <td class="submission-date">${escapeHtml(submitted)}</td>
+                    <td>
+                        <span class="submission-status ${escapeHtml(statusClass)}">
+                            ${escapeHtml(status)}
+                        </span>
+                    </td>
+                </tr>`;
+        }).join("");
+    }
+
+    const page = Number(data.page ?? 1);
+    const totalPages = Number(data.totalPages ?? 1);
+    chartState.page = page;
+    chartState.totalPages = totalPages;
+
+    if (submissionsPageInfo) {
+        submissionsPageInfo.textContent = `Page ${page} of ${totalPages}`;
+    }
+
+    if (submissionsPrev) {
+        submissionsPrev.disabled = page <= 1;
+    }
+
+    if (submissionsNext) {
+        submissionsNext.disabled = page >= totalPages;
+    }
+}
 
 
 
@@ -180,7 +296,9 @@ async function loadApplicantChart() {
 
         month: chartState.month,
 
-        weekStart: chartState.weekStart ?? ""
+        weekStart: chartState.weekStart ?? "",
+
+        pageNumber: chartState.page
 
     });
 
@@ -198,6 +316,8 @@ async function loadApplicantChart() {
 
 
         updateApplicantChart(data);
+
+        renderSubmissions(data);
 
 
 
@@ -224,6 +344,7 @@ growthFilter?.addEventListener(
     () => {
         chartState.view =
             growthFilter.value;
+        chartState.page = 1;
         loadApplicantChart();
     }
 );
@@ -253,6 +374,7 @@ prevPeriod?.addEventListener(
                 date.toISOString().split("T")[0];
         }
 
+        chartState.page = 1;
         loadApplicantChart();
     }
 );
@@ -285,9 +407,30 @@ nextPeriod?.addEventListener(
                 date.toISOString().split("T")[0];
         }
 
+        chartState.page = 1;
         loadApplicantChart();
     }
 );
+
+submissionsPrev?.addEventListener("click", () => {
+    if (chartState.page > 1) {
+        chartState.page--;
+        loadApplicantChart();
+    }
+});
+
+submissionsNext?.addEventListener("click", () => {
+    const totalPages = Number(
+        chartState.totalPages ?? chartState.page
+    );
+
+    if (chartState.page < totalPages) {
+        chartState.page++;
+        loadApplicantChart();
+    }
+});
+
+renderSubmissions(window.applicantGrowthData ?? {});
 
 // Calendar
 const calendarTitle = document.getElementById("calendarTitle");

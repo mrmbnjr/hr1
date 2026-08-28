@@ -86,6 +86,19 @@ if (
     ];
 }
 
+
+if (
+    !isset($recentApplicants) ||
+    !is_array($recentApplicants)
+) {
+    $recentApplicants = [
+        'items' => [],
+        'page' => 1,
+        'total' => 0,
+        'totalPages' => 1
+    ];
+}
+
 ?>
 
 
@@ -281,7 +294,10 @@ if (
              APPLICATION SUBMISSIONS
         =================================================== -->
 
-        <article class="dashboard-card">
+        <article
+            id="applicationSubmissionsCard"
+            class="dashboard-card"
+        >
 
             <div class="card-header">
 
@@ -382,6 +398,116 @@ if (
                 height="120"
             ></canvas>
 
+
+            <section class="recent-submissions">
+
+                <div class="submissions-header">
+
+                    <h3>Recent Application Submissions</h3>
+
+                    <a href="?page=applicants">View All</a>
+
+                </div>
+
+
+                <div class="table-scroll">
+
+                    <table class="submissions-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Position</th>
+                                <th>Location</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="submissionsTableBody">
+
+                        <?php if (empty($recentApplicants['items'])): ?>
+
+                            <tr>
+                                <td colspan="5" class="submissions-empty">
+                                    No application submissions yet.
+                                </td>
+                            </tr>
+
+                        <?php else: ?>
+
+                            <?php foreach ($recentApplicants['items'] as $recentApplicant):
+                                $status = $recentApplicant['application_status']
+                                    ?? 'Submitted';
+                                $statusClass = strtolower(
+                                    str_replace(' ', '-', $status)
+                                );
+                            ?>
+
+                                <tr>
+
+                                    <td>
+                                        <a
+                                            class="submission-applicant"
+                                            href="?page=review&id=<?= (int) $recentApplicant['applicant_id'] ?>"
+                                        >
+                                            <span class="submission-avatar">
+                                                <?= strtoupper(substr($recentApplicant['fullname'] ?? '?', 0, 1)) ?>
+                                            </span>
+                                            <strong><?= htmlspecialchars($recentApplicant['fullname'] ?? '') ?></strong>
+                                        </a>
+                                    </td>
+
+                                    <td><?= htmlspecialchars($recentApplicant['position'] ?? '') ?></td>
+
+                                    <td><?= htmlspecialchars($recentApplicant['address'] ?: 'Not provided') ?></td>
+
+                                    <td class="submission-date">
+                                        <?= date('M j, Y', strtotime($recentApplicant['applied_at'])) ?>
+                                    </td>
+
+                                    <td>
+                                        <span class="submission-status <?= htmlspecialchars($statusClass) ?>">
+                                            <?= htmlspecialchars($status) ?>
+                                        </span>
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
+                        <?php endif; ?>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="submissions-pagination" id="submissionsPagination">
+
+                    <span id="submissionsPageInfo">
+                        Page <?= (int) $recentApplicants['page'] ?>
+                        of <?= (int) $recentApplicants['totalPages'] ?>
+                    </span>
+
+                    <div>
+                        <button id="submissionsPrev" type="button" aria-label="Previous page">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button id="submissionsNext" type="button" aria-label="Next page">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+            </section>
+
 <script>
 
     window.applicantGrowthData = <?= json_encode([
@@ -393,7 +519,11 @@ if (
         'weekStart' => $weekStart ?? date('Y-m-d'),
         'period'    => $chartPeriod ?? date('Y'),
         'subtitle'  => $chartSubtitle
-            ?? 'Applications submitted throughout the year'
+            ?? 'Applications submitted throughout the year',
+        'applicants' => $recentApplicants['items'] ?? [],
+        'page'      => $recentApplicants['page'] ?? 1,
+        'total'     => $recentApplicants['total'] ?? 0,
+        'totalPages' => $recentApplicants['totalPages'] ?? 1
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
 </script>
@@ -493,7 +623,10 @@ if (
 
         <!-- Applicants Per Job -->
 
-        <article class="dashboard-card">
+        <article
+            id="topAppliedJobsCard"
+            class="dashboard-card"
+        >
 
             <div class="card-header">
 
