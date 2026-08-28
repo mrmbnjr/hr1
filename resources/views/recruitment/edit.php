@@ -10,6 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+$job = isset($job) && is_array($job) ? $job : [];
+
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -140,6 +142,14 @@ if (!isset($_SESSION['user_id'])) {
 
                 </select>
 
+            </div>
+
+            <div class="form-group">
+                <label>Academic Document Required</label>
+                <div>
+                    <label><input type="radio" name="academic_document_required" value="1" <?= !empty($job['academic_document_required']) ? 'checked' : '' ?>> Yes</label>
+                    <label><input type="radio" name="academic_document_required" value="0" <?= empty($job['academic_document_required']) ? 'checked' : '' ?>> No</label>
+                </div>
             </div>
 
             <div class="form-group">

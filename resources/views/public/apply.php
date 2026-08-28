@@ -1,5 +1,7 @@
 <?php
 
+$job = isset($job) && is_array($job) ? $job : [];
+
 $error = $_SESSION['application_error'] ?? null;
 
 unset($_SESSION['application_error']);
@@ -440,6 +442,26 @@ $applicationToken =
 
                 </div>
 
+
+                <div class="form-group full">
+
+                    <label>
+                        Academic Certificate / Diploma
+                        <?php if (!empty($job['academic_document_required'])): ?><span class="required">*</span><?php endif; ?>
+                    </label>
+
+                    <input
+                        type="file"
+                        name="academic_document"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        <?= !empty($job['academic_document_required']) ? 'required' : '' ?>
+                    >
+
+                    <span class="file-note">
+                        PDF, JPG, or PNG. <?= !empty($job['academic_document_required']) ? 'Required for this position.' : 'Optional.' ?>
+                    </span>
+
+                </div>
 
                 <div class="form-group full">
 

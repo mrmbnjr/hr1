@@ -35,6 +35,7 @@ class Applicant
 
                 ap.application_id,
                 ap.resume_file,
+                ap.academic_document_file,
                 ap.application_status,
                 ap.applied_at,
 
@@ -91,6 +92,7 @@ class Applicant
                 ap.application_id,
                 ap.resume_file,
                 ap.cover_letter_file,
+                ap.academic_document_file,
                 ap.application_status,
                 ap.applied_at,
 
@@ -104,6 +106,17 @@ class Applicant
                 ai.strengths,
                 ai.concerns,
                 ai.ai_summary,
+
+                ade.document_valid AS academic_document_valid,
+                ade.confidence_score AS academic_confidence_score,
+                ade.document_type AS academic_document_type,
+                ade.institution AS academic_institution,
+                ade.degree AS academic_degree,
+                ade.field_of_study AS academic_field_of_study,
+                ade.graduation_year AS academic_graduation_year,
+                ade.extracted_details AS academic_extracted_details,
+                ade.concerns AS academic_concerns,
+                ade.ai_summary AS academic_ai_summary,
 
                 i.interview_id,
                 i.interviewer_id,
@@ -136,6 +149,9 @@ class Applicant
 
             LEFT JOIN ai_screening ai
                 ON ap.application_id = ai.application_id
+
+            LEFT JOIN academic_document_evaluations ade
+                ON ap.application_id = ade.application_id
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
@@ -537,6 +553,14 @@ class Applicant
         $stmt->execute([':application_id' => $applicationId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        return $result ?: null;
+    }
+
+    public function getAcademicDocumentFile(int $applicationId): ?array
+    {
+        $stmt = $this->db->prepare('SELECT application_id, academic_document_file FROM applications WHERE application_id = :application_id LIMIT 1');
+        $stmt->execute([':application_id' => $applicationId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ?: null;
     }
 
@@ -1003,6 +1027,7 @@ class Applicant
                 jp.title,
                 jp.description,
                 jp.requirements,
+                jp.academic_document_required,
                 jp.employment_type,
                 jp.vacancies,
                 jp.status,
@@ -1037,6 +1062,7 @@ class Applicant
                 jp.title,
                 jp.description,
                 jp.requirements,
+                jp.academic_document_required,
                 jp.employment_type,
                 jp.vacancies,
                 jp.status,
@@ -1143,6 +1169,7 @@ class Applicant
                 posting_id,
                 resume_file,
                 cover_letter_file,
+                academic_document_file,
                 application_status
             )
             VALUES
@@ -1151,6 +1178,7 @@ class Applicant
                 :posting_id,
                 :resume_file,
                 :cover_letter_file,
+                :academic_document_file,
                 'Submitted'
             )
         ");
@@ -1159,7 +1187,8 @@ class Applicant
             ':applicant_id' => $data['applicant_id'],
             ':posting_id' => $data['posting_id'],
             ':resume_file' => $data['resume_file'],
-            ':cover_letter_file' => $data['cover_letter_file']
+            ':cover_letter_file' => $data['cover_letter_file'],
+            ':academic_document_file' => $data['academic_document_file']
         ]);
 
         return (int) $this->db->lastInsertId();

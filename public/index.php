@@ -145,10 +145,22 @@ switch ($page) {
 
         break;
 
+    case 'download-academic-document':
+
+        (new ApplicantController())->downloadAcademicDocument();
+
+        break;
+
 
     case 'evaluate-resume':
 
         (new ApplicantController())->evaluateResume();
+
+        break;
+
+    case 'evaluate-academic-document':
+
+        (new ApplicantController())->evaluateAcademicDocument();
 
         break;
 

@@ -341,6 +341,32 @@
         });
     }
 
+    const evaluateAcademicDocumentBtn = document.getElementById('evaluateAcademicDocumentBtn');
+
+    if (evaluateAcademicDocumentBtn) {
+        evaluateAcademicDocumentBtn.addEventListener('click', async function () {
+            const originalText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validating...';
+
+            try {
+                const formData = new FormData();
+                formData.append('application_id', this.dataset.applicationId);
+                const response = await fetch('?page=evaluate-academic-document', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Unable to validate the academic document.');
+                }
+                alert('Academic document validation finished successfully.');
+                window.location.reload();
+            } catch (error) {
+                alert(error.message || 'An error occurred while validating the academic document.');
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+
     const editScheduleBtn = document.getElementById('editScheduleBtn');
 
     if (editScheduleBtn) {

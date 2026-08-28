@@ -18,15 +18,15 @@ class GeminiService
 
     private const ALLOWED_MIME_TYPES = [
         'application/pdf',
-        'application/msword',
-        'application/CDFV2',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/png',
     ];
 
     private const ALLOWED_EXTENSIONS = [
         'pdf',
-        'doc',
-        'docx',
+        'jpg',
+        'jpeg',
+        'png',
     ];
 
     private const ALLOWED_RECOMMENDATIONS = [
@@ -56,6 +56,41 @@ class GeminiService
         $response = $this->sendRequest($resume, $prompt);
 
         return $this->parseEvaluationResponse($response);
+    }
+
+    public function evaluateAcademicDocument(string $documentPath): array
+    {
+        $this->validateConfiguration();
+        $document = $this->validateAcademicDocument($documentPath);
+        $prompt = <<<'PROMPT'
+You are an academic document verification assistant.
+
+Review the attached diploma, transcript, certificate, or academic record. Determine whether it appears to be a genuine, readable academic document based only on visible content. Do not infer protected personal characteristics. Do not treat this result as a final legal or institutional verification.
+
+Return only a valid JSON object matching the schema. Use an empty string when a field is not visible. List concrete reasons for uncertainty in concerns.
+PROMPT;
+
+        return $this->parseAcademicEvaluationResponse($this->sendRequest($document, $prompt, $this->getAcademicResponseSchema()));
+    }
+
+    private function getAcademicResponseSchema(): array
+    {
+        return [
+            'type' => 'OBJECT',
+            'properties' => [
+                'document_valid' => ['type' => 'BOOLEAN'],
+                'confidence_score' => ['type' => 'NUMBER'],
+                'document_type' => ['type' => 'STRING'],
+                'institution' => ['type' => 'STRING'],
+                'degree' => ['type' => 'STRING'],
+                'field_of_study' => ['type' => 'STRING'],
+                'graduation_year' => ['type' => 'STRING'],
+                'extracted_details' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']],
+                'concerns' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']],
+                'ai_summary' => ['type' => 'STRING'],
+            ],
+            'required' => ['document_valid', 'confidence_score', 'document_type', 'institution', 'degree', 'field_of_study', 'graduation_year', 'extracted_details', 'concerns', 'ai_summary'],
+        ];
     }
 
     private function getResponseSchema(): array
@@ -157,6 +192,32 @@ class GeminiService
         ];
     }
 
+    private function validateAcademicDocument(string $documentPath): array
+    {
+        $realPath = realpath($documentPath);
+        if ($realPath === false || !is_file($realPath) || !is_readable($realPath)) {
+            throw new RuntimeException('The academic document is invalid or unreadable.');
+        }
+
+        $fileSize = filesize($realPath);
+        if ($fileSize === false || $fileSize <= 0 || $fileSize > self::MAX_FILE_SIZE) {
+            throw new RuntimeException('The academic document is empty or exceeds the 5 MB limit.');
+        }
+
+        $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
+        $mimeType = $this->detectMimeType($realPath);
+        $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+        $allowedMimeTypes = [
+            'application/pdf', 'image/jpeg', 'image/png',
+        ];
+
+        if (!in_array($extension, $allowedExtensions, true) || !in_array($mimeType, $allowedMimeTypes, true)) {
+            throw new RuntimeException('Unsupported academic document format.');
+        }
+
+        return ['path' => $realPath, 'mimeType' => $mimeType, 'extension' => $extension];
+    }
+
     private function detectMimeType(string $path): string
     {
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -243,7 +304,7 @@ Evaluate the candidate fairly and return only a valid JSON object matching the s
 PROMPT;
     }
 
-    private function sendRequest(array $resume, string $prompt): array
+    private function sendRequest(array $resume, string $prompt, ?array $responseSchema = null): array
     {
         $payload = [
             'contents' => [[
@@ -259,7 +320,7 @@ PROMPT;
             ]],
             'generationConfig' => [
                 'responseMimeType' => 'application/json',
-                'responseSchema' => $this->getResponseSchema(),
+                'responseSchema' => $responseSchema ?? $this->getResponseSchema(),
             ],
         ];
 
@@ -335,6 +396,27 @@ PROMPT;
         ];
 
         return $normalized;
+    }
+
+    private function parseAcademicEvaluationResponse(array $response): array
+    {
+        $json = json_decode(trim((string) ($response['text'] ?? '')), true);
+        if (!is_array($json)) {
+            throw new RuntimeException('AI academic validation returned invalid JSON.');
+        }
+
+        return [
+            'document_valid' => (bool) ($json['document_valid'] ?? false),
+            'confidence_score' => $this->normalizeScore($json['confidence_score'] ?? 0),
+            'document_type' => $this->normalizeSummary($json['document_type'] ?? ''),
+            'institution' => $this->normalizeSummary($json['institution'] ?? ''),
+            'degree' => $this->normalizeSummary($json['degree'] ?? ''),
+            'field_of_study' => $this->normalizeSummary($json['field_of_study'] ?? ''),
+            'graduation_year' => $this->normalizeSummary($json['graduation_year'] ?? ''),
+            'extracted_details' => $this->normalizeList($json['extracted_details'] ?? []),
+            'concerns' => $this->normalizeList($json['concerns'] ?? []),
+            'ai_summary' => $this->normalizeSummary($json['ai_summary'] ?? ''),
+        ];
     }
 
     private function normalizeScore(mixed $value): float

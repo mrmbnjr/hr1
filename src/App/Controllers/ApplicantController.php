@@ -7,6 +7,8 @@ use App\Services\MailService;
 use App\Services\Auth;
 use App\Services\ResumeEvaluationService;
 use App\Services\ResumeInputService;
+use App\Services\AcademicDocumentInputService;
+use App\Services\AcademicDocumentEvaluationService;
 
 class ApplicantController
 {
@@ -171,10 +173,27 @@ class ApplicantController
              * Cover letter is optional.
              */
             $resume = $_FILES['resume'];
+            $academicDocument = $_FILES['academic_document'] ?? null;
             $coverLetter = $_FILES['cover_letter'] ?? null;
 
             $resumeInput = new ResumeInputService();
             $resumeExtension = $resumeInput->validateUploadedFile($resume);
+
+            $academicDocumentRequired = !empty($job['academic_document_required']);
+
+            if ($academicDocumentRequired && (!$academicDocument || $academicDocument['error'] !== UPLOAD_ERR_OK)) {
+                throw new \Exception('Please upload your academic document.');
+            }
+
+            $academicExtension = null;
+            if ($academicDocument && $academicDocument['error'] !== UPLOAD_ERR_NO_FILE) {
+                if ($academicDocument['error'] !== UPLOAD_ERR_OK) {
+                    throw new \Exception('There was a problem uploading your academic document.');
+                }
+
+                $academicInput = new AcademicDocumentInputService();
+                $academicExtension = $academicInput->validateUploadedFile($academicDocument);
+            }
 
 
             /*
@@ -278,6 +297,19 @@ class ApplicantController
                 );
             }
 
+            $academicDocumentFileName = null;
+            $academicDocumentPath = null;
+
+            if ($academicExtension !== null) {
+                $academicDocumentFileName = 'academic_' . $applicantId . '_' . bin2hex(random_bytes(8)) . '.' . $academicExtension;
+                $academicDocumentPath = $uploadDirectory . $academicDocumentFileName;
+
+                if (!move_uploaded_file($academicDocument['tmp_name'], $academicDocumentPath)) {
+                    unlink($resumePath);
+                    throw new \Exception('Unable to save the uploaded academic document.');
+                }
+            }
+
             /*
              * Cover letter.
              */
@@ -320,6 +352,9 @@ class ApplicantController
                     if (file_exists($resumePath)) {
                         unlink($resumePath);
                     }
+                    if ($academicDocumentPath && file_exists($academicDocumentPath)) {
+                        unlink($academicDocumentPath);
+                    }
 
                     throw new \Exception(
                         'Unable to save the uploaded cover letter.'
@@ -337,6 +372,7 @@ class ApplicantController
                     'applicant_id' => $applicantId,
                     'posting_id' => $job['posting_id'],
                     'resume_file' => $resumeFileName,
+                    'academic_document_file' => $academicDocumentFileName,
                     'cover_letter_file' => $coverLetterFileName
                 ]);
 
@@ -346,6 +382,15 @@ class ApplicantController
             } catch (\Throwable $e) {
                 $_SESSION['ai_screening_error'] =
                     'Application submitted successfully, but AI screening could not run right now.';
+            }
+
+            if ($academicDocumentFileName !== null) {
+                try {
+                    (new AcademicDocumentEvaluationService())->evaluate((int) $applicationId);
+                } catch (\Throwable $e) {
+                    $_SESSION['academic_validation_error'] =
+                        'Application submitted successfully, but academic document validation could not run right now.';
+                }
             }
 
             /*
@@ -437,6 +482,33 @@ class ApplicantController
         header('X-Content-Type-Options: nosniff');
 
         readfile($resume['path']);
+        exit;
+    }
+
+    public function downloadAcademicDocument(): void
+    {
+        Auth::requireRole(['HR', 'MGR']);
+        $applicationId = (int) ($_GET['id'] ?? 0);
+        $application = $this->applicant->getAcademicDocumentFile($applicationId);
+
+        if (!$application) {
+            http_response_code(404);
+            exit('File not found.');
+        }
+
+        try {
+            $document = (new AcademicDocumentInputService())->getDocument($application);
+        } catch (\Throwable $e) {
+            http_response_code(404);
+            exit('File not found.');
+        }
+
+        $disposition = isset($_GET['download']) ? 'attachment' : 'inline';
+        header('Content-Type: ' . $document['mime_type']);
+        header('Content-Length: ' . (string) filesize($document['path']));
+        header('Content-Disposition: ' . $disposition . '; filename="' . basename($document['filename']) . '"');
+        header('X-Content-Type-Options: nosniff');
+        readfile($document['path']);
         exit;
     }
 
@@ -535,6 +607,23 @@ class ApplicantController
                 'success' => false,
                 'message' => $e->getMessage(),
             ]);
+        }
+
+        exit;
+    }
+
+    public function evaluateAcademicDocument(): void
+    {
+        Auth::requireRole(['HR', 'MGR']);
+        header('Content-Type: application/json');
+
+        try {
+            $applicationId = (int) ($_POST['application_id'] ?? $_GET['id'] ?? 0);
+            $result = (new AcademicDocumentEvaluationService())->evaluate($applicationId);
+            echo json_encode(['success' => true, 'message' => 'Academic document validation completed.', 'data' => $result]);
+        } catch (\Throwable $e) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
 
         exit;

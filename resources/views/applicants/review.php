@@ -94,6 +94,47 @@ $statusMeta = [
             </div>
         </section>
 
+        <!-- Academic Document Validation -->
+        <section class="detail-section">
+            <div class="ai-actions">
+                <h3><i class="fa-solid fa-graduation-cap"></i> Academic Document Validation</h3>
+                <?php if (!empty($applicant['academic_document_file'])): ?>
+                    <button type="button" class="btn-primary" id="evaluateAcademicDocumentBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                        <?= isset($applicant['academic_confidence_score']) ? 'Re-run Validation' : 'Validate Document' ?>
+                    </button>
+                <?php endif; ?>
+            </div>
+            <div class="resume-row">
+                <div class="resume-file">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span><?= htmlspecialchars(basename($applicant['academic_document_file'] ?? 'No document uploaded')) ?></span>
+                </div>
+                <?php if (!empty($applicant['academic_document_file'])): ?>
+                    <div class="resume-actions">
+                        <a href="?page=download-academic-document&id=<?= (int) $applicant['application_id'] ?>" target="_blank" class="btn-outline"><i class="fa-solid fa-eye"></i> View Document</a>
+                        <a href="?page=download-academic-document&id=<?= (int) $applicant['application_id'] ?>&download=1" class="btn-outline"><i class="fa-solid fa-download"></i> Download</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <?php if (isset($applicant['academic_confidence_score'])): ?>
+                <div class="ai-score-row">
+                    <div class="ai-score-circle" style="--score: <?= number_format((float) $applicant['academic_confidence_score'], 2, '.', '') ?>;"><span><?= number_format((float) $applicant['academic_confidence_score'], 2) ?>%</span></div>
+                    <div class="ai-recommendation"><span class="info-label">Document Status</span><span class="rec-badge"><?= !empty($applicant['academic_document_valid']) ? 'Appears Valid' : 'Needs Review' ?></span></div>
+                </div>
+                <div class="info-grid">
+                    <div><span class="info-label">Document Type</span><span class="info-value"><?= htmlspecialchars($applicant['academic_document_type'] ?? '') ?></span></div>
+                    <div><span class="info-label">Institution</span><span class="info-value"><?= htmlspecialchars($applicant['academic_institution'] ?? '') ?></span></div>
+                    <div><span class="info-label">Degree</span><span class="info-value"><?= htmlspecialchars($applicant['academic_degree'] ?? '') ?></span></div>
+                    <div><span class="info-label">Field of Study</span><span class="info-value"><?= htmlspecialchars($applicant['academic_field_of_study'] ?? '') ?></span></div>
+                    <div><span class="info-label">Graduation Year</span><span class="info-value"><?= htmlspecialchars($applicant['academic_graduation_year'] ?? '') ?></span></div>
+                    <div class="full-width"><span class="info-label">AI Summary</span><span class="info-value"><?= htmlspecialchars($applicant['academic_ai_summary'] ?? '') ?></span></div>
+                </div>
+            <?php else: ?>
+                <p class="file-note">No academic validation result is available yet.</p>
+            <?php endif; ?>
+        </section>
+
         <!-- AI Screening -->
         <?php
             function getMatchClass(int $score): string
