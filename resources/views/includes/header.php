@@ -16,6 +16,7 @@
 
       <!-- Global CSS -->
       <link rel="stylesheet" href="/hr1/public/assets/css/variables.css">
+      <link rel="stylesheet" href="/hr1/public/assets/css/components.css">
       <link rel="stylesheet" href="/hr1/public/assets/css/style.css">
       <link rel="stylesheet" href="/hr1/public/assets/css/layout.css">
 
