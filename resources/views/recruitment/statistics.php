@@ -23,6 +23,19 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 
+$applicationTrend = $applicationTrend ?? [];
+$job = $job ?? [];
+$summary = $summary ?? [];
+$interviewCount = $interviewCount ?? 0;
+$totalApplications = $totalApplications ?? 0;
+$statusBreakdown = $statusBreakdown ?? [];
+$hired = $hired ?? 0;
+$remainingVacancies = $remainingVacancies ?? 0;
+$hiringRate = $hiringRate ?? 0;
+$recentApplicants = $recentApplicants ?? [];
+$vacancies = $vacancies ?? 0;
+
+
 $statusLabels = [
     'Submitted',
     'Under Review',
