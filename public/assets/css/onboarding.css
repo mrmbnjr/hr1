@@ -10,6 +10,58 @@
     color: var(--ink);
 }
 
+.table-card { margin-top: 12px; }
+
+.onboarding-table .employee-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.onboarding-table .employee-link:hover,
+.onboarding-table .employee-link:focus,
+.onboarding-table .employee-link:active {
+    text-decoration: none;
+}
+
+.onboarding-table .onboarding-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 240px;
+}
+
+.onboarding-table .onboarding-cell > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.onboarding-table .onboarding-cell strong {
+    display: block;
+    color: var(--maroon-dark);
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.onboarding-table .onboarding-cell .sub-text {
+    display: block;
+    margin-top: 2px;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.onboarding-table .employee-link:hover strong {
+    color: var(--maroon);
+}
+
 /* Table and pagination styles are defined in components.css */
 
 /* Empty state is defined in components.css */

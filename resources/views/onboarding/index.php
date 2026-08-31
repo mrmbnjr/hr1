@@ -166,6 +166,8 @@ $statusMeta = [
                         data-status="<?= htmlspecialchars($status) ?>"
                         data-department="<?= htmlspecialchars($employee['department_name'] ?? '') ?>"
                         data-progress="<?= $progress ?>"
+                        data-start-date="<?= htmlspecialchars($employee['start_date'] ?? '') ?>"
+                        data-fullname="<?= htmlspecialchars($employee['fullname'] ?? '') ?>"
                         data-id="<?= $employee['employee_id'] ?>">
 
                         <!-- Employee -->

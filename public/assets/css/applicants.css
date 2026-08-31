@@ -15,7 +15,7 @@
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 12px;
 }
 
 .summary-card {
@@ -77,6 +77,7 @@
 
 /* Filter bar and search styles are defined in components.css */
 
+.table-card { margin-top: 12px ;}
 .applicant-table { min-width: 760px; }
 
 .col-actions { text-align: right; }

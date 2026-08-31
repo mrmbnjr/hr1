@@ -18,7 +18,7 @@
 
     const rows = Array.from(
         document.querySelectorAll(
-            '#applicantTable tbody tr.employee-row'
+            '#onboardingTable tbody tr.employee-row'
         )
     );
 
@@ -43,8 +43,8 @@
     const nextPageBtn =
         document.getElementById('nextPage');
 
-    const isApplicantListPage =
-        document.getElementById('applicantTable');
+    const isOnboardingListPage =
+        document.getElementById('onboardingTable');
 
 
     const PAGE_SIZE = 8;
@@ -58,7 +58,7 @@
     |--------------------------------------------------------------------------
     */
 
-    if (isApplicantListPage) {
+    if (isOnboardingListPage) {
 
         function applyFilters() {
 
@@ -172,7 +172,7 @@
 
             const tbody =
                 document.querySelector(
-                    '#applicantTable tbody'
+                    '#onboardingTable tbody'
                 );
 
 
