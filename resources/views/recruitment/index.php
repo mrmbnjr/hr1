@@ -206,11 +206,11 @@ if (!isset($_SESSION['user_id'])) {
 
                                                 <div class="dropdown-menu">
 
-                                                    <!-- View -->
+                                                    <!-- View Statistics -->
                                                     <a
-                                                        href="?page=view&id=<?= $job['posting_id'] ?>"
+                                                        href="?page=statistics&id=<?= (int) $job['posting_id'] ?>"
                                                     >
-                                                        <i class="fa-solid fa-eye"></i>
+                                                        <i class="fa-solid fa-chart-column"></i>
                                                         View
                                                     </a>
 

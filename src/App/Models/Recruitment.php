@@ -413,4 +413,318 @@ class Recruitment
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getJob(int $postingId): ?array
+    {
+        $sql = "
+            SELECT
+                jp.posting_id,
+                jp.title,
+                jp.description,
+                jp.requirements,
+                jp.employment_type,
+                jp.vacancies,
+                jp.status,
+                jp.application_deadline,
+                jp.created_at,
+
+                p.position_name,
+
+                d.department_name
+
+            FROM job_postings jp
+
+            LEFT JOIN positions p
+                ON p.position_id = jp.position_id
+
+            LEFT JOIN departments d
+                ON d.department_id = p.department_id
+
+            WHERE jp.posting_id = :posting_id
+
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $job ?: null;
+    }
+
+
+    /**
+     * Get overall statistics for a job posting.
+     */
+    public function getSummary(int $postingId): array
+    {
+        $sql = "
+            SELECT
+
+                COUNT(ap.application_id) AS total_applications,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Submitted'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS submitted,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Under Review'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS under_review,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Interview'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS interview,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Hired'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS hired,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Rejected'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS rejected
+
+            FROM applications ap
+
+            WHERE ap.posting_id = :posting_id
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$summary) {
+            return [
+                'total_applications' => 0,
+                'submitted' => 0,
+                'under_review' => 0,
+                'interview' => 0,
+                'hired' => 0,
+                'rejected' => 0
+            ];
+        }
+
+        return [
+            'total_applications' => (int) ($summary['total_applications'] ?? 0),
+            'submitted' => (int) ($summary['submitted'] ?? 0),
+            'under_review' => (int) ($summary['under_review'] ?? 0),
+            'interview' => (int) ($summary['interview'] ?? 0),
+            'hired' => (int) ($summary['hired'] ?? 0),
+            'rejected' => (int) ($summary['rejected'] ?? 0)
+        ];
+    }
+
+
+    /**
+     * Get the number of scheduled interviews.
+     */
+    public function getInterviewCount(int $postingId): int
+    {
+        $sql = "
+            SELECT COUNT(i.interview_id)
+
+            FROM interviews i
+
+            INNER JOIN applications ap
+                ON ap.application_id = i.application_id
+
+            WHERE ap.posting_id = :posting_id
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+
+    /**
+     * Get applications grouped by status.
+     */
+    public function getStatusBreakdown(int $postingId): array
+    {
+        $sql = "
+            SELECT
+                ap.application_status,
+                COUNT(*) AS total
+
+            FROM applications ap
+
+            WHERE ap.posting_id = :posting_id
+
+            GROUP BY ap.application_status
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $statuses = [
+            'Submitted' => 0,
+            'Under Review' => 0,
+            'Interview' => 0,
+            'Hired' => 0,
+            'Rejected' => 0
+        ];
+
+        foreach ($results as $row) {
+
+            $status = $row['application_status'];
+
+            if (array_key_exists($status, $statuses)) {
+                $statuses[$status] = (int) $row['total'];
+            }
+        }
+
+        return $statuses;
+    }
+
+
+    /**
+     * Get daily application totals for the last 14 days.
+     */
+    public function getApplicationTrend(int $postingId): array
+    {
+        $sql = "
+            SELECT
+                DATE(ap.applied_at) AS application_date,
+                COUNT(*) AS total
+
+            FROM applications ap
+
+            WHERE ap.posting_id = :posting_id
+
+            AND ap.applied_at >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+
+            GROUP BY DATE(ap.applied_at)
+
+            ORDER BY application_date ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        /*
+        |----------------------------------------------------------------------
+        | Build all 14 dates.
+        |----------------------------------------------------------------------
+        */
+
+        $trend = [];
+
+        for ($i = 13; $i >= 0; $i--) {
+
+            $date = date(
+                'Y-m-d',
+                strtotime("-{$i} days")
+            );
+
+            $trend[$date] = 0;
+        }
+
+        foreach ($rows as $row) {
+
+            $date = $row['application_date'];
+
+            if (array_key_exists($date, $trend)) {
+                $trend[$date] = (int) $row['total'];
+            }
+        }
+
+        return $trend;
+    }
+
+
+    /**
+     * Get recent applicants for this job posting.
+     */
+    public function getRecentApplicants(
+        int $postingId,
+        int $limit = 8
+    ): array {
+
+        $limit = max(1, min($limit, 50));
+
+        $sql = "
+            SELECT
+                ap.application_id,
+                ap.applicant_id,
+                ap.application_status,
+                ap.applied_at,
+
+                CONCAT(
+                    a.first_name,
+                    ' ',
+                    COALESCE(a.middle_name, ''),
+                    CASE
+                        WHEN a.middle_name IS NOT NULL
+                        AND a.middle_name <> ''
+                        THEN ' '
+                        ELSE ''
+                    END,
+                    a.last_name
+                ) AS fullname,
+
+                a.email
+
+            FROM applications ap
+
+            INNER JOIN applicants a
+                ON a.applicant_id = ap.applicant_id
+
+            WHERE ap.posting_id = :posting_id
+
+            ORDER BY ap.applied_at DESC
+
+            LIMIT {$limit}
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':posting_id' => $postingId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }

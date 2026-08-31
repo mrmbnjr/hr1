@@ -75,65 +75,7 @@
 
 /* ---------------- Filter bar ---------------- */
 
-.filter-bar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.filter-search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    padding: 10px 14px;
-    flex: 1;
-    min-width: 220px;
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition);
-}
-
-.filter-search i { color: var(--ink-soft); }
-
-.filter-search input {
-    border: none;
-    outline: none;
-    font-family: inherit;
-    font-size: 14px;
-    width: 100%;
-    background: transparent;
-    color: var(--ink);
-}
-
-.filter-bar select {
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    border-radius: var(--radius-field);
-    padding: 10px 14px;
-    font-family: inherit;
-    font-size: 14px;
-    color: var(--ink);
-    min-width: 180px;
-    cursor: pointer;
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition);
-}
-
-.filter-bar select:hover {
-    border-color: var(--gold-dark);
-}
-
-.filter-bar select:focus,
-.filter-search:focus-within {
-    outline: none;
-    border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
-}
+/* Filter bar and search styles are defined in components.css */
 
 .applicant-table { min-width: 760px; }
 

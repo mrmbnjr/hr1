@@ -375,79 +375,9 @@
     font-size:13.5px;
 }
 
-.cs-table thead th{
-    padding:13px 20px;
-    background:rgba(242, 193, 78, 0.12);
-    color:var(--ink-soft);
-    text-align:left;
-    font-size:11.5px;
-    font-weight:800;
-    letter-spacing:0.05em;
-    text-transform:uppercase;
-    border-bottom:1px solid var(--border);
-    white-space:nowrap;
-}
+/* Table styles are defined in components.css */
 
-.cs-table tbody td{
-    padding:14px 20px;
-    border-bottom:1px solid var(--border);
-    vertical-align:middle;
-    color:var(--ink);
-    font-size:13.5px;
-}
-
-.cs-table tbody tr:last-child td{
-    border-bottom:none;
-}
-
-.cs-table tbody tr{
-    transition:background var(--transition);
-}
-
-.cs-table tbody tr:hover{
-    background:rgba(242, 193, 78, 0.08);
-}
-
-.cs-table tbody td strong{
-    font-weight:800;
-    color:var(--maroon-dark);
-}
-.cs-table tbody td:not(:first-child){
-    color:var(--ink-soft);
-    font-size:12.5px;
-}
-
-/* Status badges — mirrors .badge / .badge-* */
-.status-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:5px 10px;
-    border-radius:999px;
-    font-size:11.5px;
-    font-weight:800;
-    line-height:1.2;
-    background:var(--gray-bg);
-    color:var(--gray);
-}
-
-.status-badge.open,
-.status-badge.active{
-    background:var(--green-bg);
-    color:var(--green);
-}
-
-.status-badge.closed,
-.status-badge.inactive{
-    background:var(--gray-bg);
-    color:var(--gray);
-}
-
-.status-badge.pending,
-.status-badge.draft{
-    background:var(--orange-bg);
-    color:var(--orange);
-}
+/* Status badges are defined in components.css */
 
 /* Row actions */
 .dropdown{
@@ -810,23 +740,7 @@
     color:var(--gold);
 }
 
-[data-theme="dark"] .status-badge.open,
-[data-theme="dark"] .status-badge.active{
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-}
 
-[data-theme="dark"] .status-badge.closed,
-[data-theme="dark"] .status-badge.inactive{
-    background: rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
-}
-
-[data-theme="dark"] .status-badge.pending,
-[data-theme="dark"] .status-badge.draft{
-    background: rgba(249, 115, 22, 0.12);
-    color: #fb923c;
-}
 
 /* =====================================================
    RESPONSIVE

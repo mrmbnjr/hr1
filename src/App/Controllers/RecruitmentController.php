@@ -130,4 +130,176 @@ class RecruitmentController
 
         exit;
     }
+
+    public function statistics()
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Authentication
+        |--------------------------------------------------------------------------
+        */
+
+        if (!isset($_SESSION['user_id'])) {
+
+            header(
+                "Location: /hr1/public/?page=login"
+            );
+
+            exit;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Posting ID
+        |--------------------------------------------------------------------------
+        */
+
+        if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+
+            header(
+                "Location: /hr1/public/?page=recruitment"
+            );
+
+            exit;
+        }
+
+
+        $postingId = (int) $_GET['id'];
+
+
+        if ($postingId <= 0) {
+
+            header(
+                "Location: /hr1/public/?page=recruitment"
+            );
+
+            exit;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Model
+        |--------------------------------------------------------------------------
+        */
+
+        $statistics = new Recruitment();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Job
+        |--------------------------------------------------------------------------
+        */
+
+        $job = $statistics->getJob($postingId);
+
+
+        if (!$job) {
+
+            header(
+                "Location: /hr1/public/?page=recruitment"
+            );
+
+            exit;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Statistics
+        |--------------------------------------------------------------------------
+        */
+
+        $summary = $statistics->getSummary(
+            $postingId
+        );
+
+
+        $interviewCount =
+            $statistics->getInterviewCount(
+                $postingId
+            );
+
+
+        $statusBreakdown =
+            $statistics->getStatusBreakdown(
+                $postingId
+            );
+
+
+        $applicationTrend =
+            $statistics->getApplicationTrend(
+                $postingId
+            );
+
+
+        $recentApplicants =
+            $statistics->getRecentApplicants(
+                $postingId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Calculated Values
+        |--------------------------------------------------------------------------
+        */
+
+        $vacancies =
+            (int) ($job['vacancies'] ?? 0);
+
+        $hired =
+            (int) ($summary['hired'] ?? 0);
+
+        $totalApplications =
+            (int) ($summary['total_applications'] ?? 0);
+
+
+        $remainingVacancies = max(
+            0,
+            $vacancies - $hired
+        );
+
+
+        $hiringRate = 0;
+
+        if ($totalApplications > 0) {
+
+            $hiringRate = round(
+                ($hired / $totalApplications) * 100,
+                1
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Page Configuration
+        |--------------------------------------------------------------------------
+        */
+
+        $pageTitle =
+            "Job Statistics";
+
+        $pageCSS =
+            "statistics.css";
+
+        $pageJS =
+            "statistics.js";
+
+        $pageDescription =
+            "View recruitment statistics for this job posting.";
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | View
+        |--------------------------------------------------------------------------
+        */
+
+        require '../resources/views/recruitment/statistics.php';
+    }
+
 }

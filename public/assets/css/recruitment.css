@@ -25,31 +25,7 @@
     flex: 1;
 }
 
-.toolbar-filters select {
-    min-width: 170px;
-    height: 42px;
-    padding: 0 .9rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-field);
-    background: var(--card-bg);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: .9rem;
-    cursor: pointer;
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition);
-}
 
-.toolbar-filters select:hover {
-    border-color: var(--gold-dark);
-}
-
-.toolbar-filters select:focus {
-    outline: none;
-    border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
-}
 
 /* ==========================================
    RECRUITMENT TABLE
@@ -78,95 +54,10 @@
 }
 
 
-/* ==========================================
-   TABLE HEADER
-========================================== */
-
-.data-table thead {
-    background: rgba(242, 193, 78, 0.12);
-}
-
-.data-table thead th {
-    padding: 13px 20px;
-
-    background: rgba(242, 193, 78, 0.12);
-
-    color: var(--ink-soft);
-
-    text-align: left;
-
-    font-size: 11.5px;
-    font-weight: 800;
-
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-
-    border-bottom: 1px solid var(--border);
-}
+/* Table header, body, and row styles are defined in components.css */
 
 
-/* ==========================================
-   TABLE BODY
-========================================== */
-
-.data-table tbody td {
-    padding: 16px 20px;
-
-    color: var(--ink-soft);
-
-    font-size: 12.5px;
-
-    border-bottom: 1px solid var(--border);
-
-    vertical-align: middle;
-}
-
-.data-table tbody tr {
-    transition: background var(--transition);
-}
-
-.data-table tbody tr:hover {
-    background: rgba(242, 193, 78, 0.08);
-}
-
-.data-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.data-table tbody td strong {
-    color: var(--maroon-dark);
-    font-weight: 800;
-}
-
-
-/* ==========================================
-   EMPLOYMENT TYPE BADGE
-========================================== */
-
-.badge.employment {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* ==========================================
-   STATUS BADGE
-========================================== */
-
-.badge.status.open {
-    background: var(--green-bg); 
-    color: var(--green);
-}
-
-.badge.status.closed {
-    background: var(--gray-bg);
-    color: var(--gray);
-}
-
-.badge.status.draft {
-    background: var(--orange-bg); 
-    color: var(--orange);
-}
+/* Badge styles are defined in components.css */
 
 
 /* ==========================================
