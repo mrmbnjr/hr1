@@ -74,6 +74,97 @@ $createdAt = $job['created_at']
     )
     : '—';
 
+
+$vacancyPercentage = 0;
+
+if ($vacancies > 0) {
+
+    $vacancyPercentage = min(
+        100,
+        round(
+            ($hired / $vacancies) * 100,
+            1
+        )
+    );
+}
+
+
+$trendVolume = array_sum($trendValues);
+
+
+$funnelStages = [
+    [
+        'label' => 'Submitted',
+        'count' => (int) ($summary['submitted'] ?? 0),
+        'class' => 'submitted',
+    ],
+    [
+        'label' => 'Under Review',
+        'count' => (int) ($summary['under_review'] ?? 0),
+        'class' => 'under-review',
+    ],
+    [
+        'label' => 'Interview',
+        'count' => (int) ($summary['interview'] ?? 0),
+        'class' => 'interview',
+    ],
+    [
+        'label' => 'Hired',
+        'count' => (int) ($summary['hired'] ?? $hired),
+        'class' => 'hired',
+    ],
+];
+
+
+$aiScreened = 0;
+$aiScoreSum = 0.0;
+$aiRecommendations = [
+    'Highly Recommended' => 0,
+    'Recommended' => 0,
+    'Consider' => 0,
+    'Not Recommended' => 0,
+];
+
+foreach ($recentApplicants as $applicantRow) {
+
+    if (
+        !isset($applicantRow['ai_score'])
+        || $applicantRow['ai_score'] === null
+        || $applicantRow['ai_score'] === ''
+    ) {
+        continue;
+    }
+
+    $aiScreened++;
+    $aiScoreSum += (float) $applicantRow['ai_score'];
+
+    $recommendation = $applicantRow['recommendation'] ?? '';
+
+    if (array_key_exists($recommendation, $aiRecommendations)) {
+        $aiRecommendations[$recommendation]++;
+    }
+}
+
+$aiRecentCount = count($recentApplicants);
+$aiAverage = $aiScreened > 0
+    ? round($aiScoreSum / $aiScreened, 1)
+    : 0;
+
+
+if (!function_exists('statistics_recommendation_class')) {
+
+    function statistics_recommendation_class(?string $recommendation): string
+    {
+        return match ($recommendation) {
+            'Highly Recommended' => 'rec-high',
+            'Recommended' => 'rec-mid',
+            'Consider' => 'rec-review',
+            'Not Recommended' => 'rec-low',
+            default => 'rec-none',
+        };
+    }
+}
+
 ?>
 
 <?php require '../resources/views/includes/header.php'; ?>
@@ -87,80 +178,6 @@ $createdAt = $job['created_at']
 
 
     <div class="statistics-page">
-
-
-        <!-- ==========================================================
-            PAGE HEADER
-        =========================================================== -->
-
-        <section class="statistics-header">
-
-            <div class="header-left">
-
-                <a
-                    href="?page=recruitment"
-                    class="back-link"
-                >
-                    <i class="fa-solid fa-arrow-left"></i>
-                    Back to Recruitment
-                </a>
-
-
-                <div class="title-row">
-
-                    <div>
-
-                        <span class="eyebrow">
-                            Recruitment Statistics
-                        </span>
-
-                        <h1>
-                            <?= htmlspecialchars(
-                                $job['title']
-                            ) ?>
-                        </h1>
-
-                        <p>
-                            Detailed performance overview
-                            for this job posting.
-                        </p>
-
-                    </div>
-
-
-                    <span
-                        class="status-badge
-                        <?= strtolower(
-                            htmlspecialchars(
-                                $job['status']
-                            )
-                        ) ?>"
-                    >
-                        <?= htmlspecialchars(
-                            $job['status']
-                        ) ?>
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="header-action">
-
-                <a
-                    href="?page=edit&id=<?= (int) $job['posting_id'] ?>"
-                    class="btn-secondary"
-                >
-                    <i class="fa-solid fa-pen"></i>
-                    Edit Post
-                </a>
-
-            </div>
-
-        </section>
-
-
 
         <!-- ==========================================================
             JOB INFORMATION
@@ -266,8 +283,6 @@ $createdAt = $job['created_at']
         <section class="statistics-grid">
 
 
-            <!-- Total Applications -->
-
             <div class="stat-card">
 
                 <div class="stat-icon applications">
@@ -292,9 +307,6 @@ $createdAt = $job['created_at']
 
             </div>
 
-
-
-            <!-- Under Review -->
 
             <div class="stat-card">
 
@@ -321,9 +333,6 @@ $createdAt = $job['created_at']
             </div>
 
 
-
-            <!-- Interviews -->
-
             <div class="stat-card">
 
                 <div class="stat-icon interview">
@@ -349,9 +358,6 @@ $createdAt = $job['created_at']
             </div>
 
 
-
-            <!-- Hired -->
-
             <div class="stat-card">
 
                 <div class="stat-icon hired">
@@ -370,8 +376,7 @@ $createdAt = $job['created_at']
 
                     <small>
                         <?= $remainingVacancies ?>
-                        vacancy
-                        <?= $remainingVacancies == 1 ? '' : 'ies' ?>
+                        <?= $remainingVacancies === 1 ? 'vacancy' : 'vacancies' ?>
                         remaining
                     </small>
 
@@ -379,37 +384,6 @@ $createdAt = $job['created_at']
 
             </div>
 
-
-
-            <!-- Rejected -->
-
-            <div class="stat-card">
-
-                <div class="stat-icon rejected">
-                    <i class="fa-solid fa-user-xmark"></i>
-                </div>
-
-                <div class="stat-content">
-
-                    <span>
-                        Rejected
-                    </span>
-
-                    <strong>
-                        <?= (int) $summary['rejected'] ?>
-                    </strong>
-
-                    <small>
-                        Applications not selected
-                    </small>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- Hiring Rate -->
 
             <div class="stat-card">
 
@@ -440,13 +414,139 @@ $createdAt = $job['created_at']
 
 
         <!-- ==========================================================
+            RECRUITMENT FUNNEL
+        =========================================================== -->
+
+        <section class="progress-card funnel-card">
+
+            <div class="progress-header">
+
+                <div>
+
+                    <h2>
+                        Recruitment Funnel
+                    </h2>
+
+                    <p>
+                        Current pipeline by application status.
+                    </p>
+
+                </div>
+
+                <div class="funnel-rejected">
+                    <span>Rejected</span>
+                    <strong>
+                        <?= (int) ($summary['rejected'] ?? 0) ?>
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="funnel-track">
+
+                <?php foreach ($funnelStages as $stage): ?>
+
+                    <?php
+
+                    $stageShare = 0;
+
+                    if ($totalApplications > 0) {
+
+                        $stageShare = round(
+                            ($stage['count'] / $totalApplications) * 100,
+                            1
+                        );
+                    }
+
+                    ?>
+
+                    <div class="funnel-stage stage-<?= htmlspecialchars($stage['class']) ?>">
+
+                        <span class="funnel-label">
+                            <?= htmlspecialchars($stage['label']) ?>
+                        </span>
+
+                        <strong class="funnel-count">
+                            <?= (int) $stage['count'] ?>
+                        </strong>
+
+                        <div class="funnel-bar">
+                            <div
+                                class="funnel-bar-fill"
+                                style="width: <?= $stageShare ?>%;"
+                            ></div>
+                        </div>
+
+                        <span class="funnel-share">
+                            <?= $stageShare ?>% of applicants
+                        </span>
+
+                    </div>
+
+                <?php endforeach; ?>
+
+            </div>
+
+
+            <div class="progress-header vacancy-header">
+
+                <div>
+
+                    <h2>
+                        Vacancy Progress
+                    </h2>
+
+                    <p>
+                        Hiring progress against the
+                        available positions.
+                    </p>
+
+                </div>
+
+                <strong>
+                    <?= $hired ?>
+                    /
+                    <?= $vacancies ?>
+                </strong>
+
+            </div>
+
+
+            <div class="progress-track">
+
+                <div
+                    class="progress-fill"
+                    style="width: <?= $vacancyPercentage ?>%;"
+                ></div>
+
+            </div>
+
+
+            <div class="progress-footer">
+
+                <span>
+                    <?= $hired ?>
+                    hired
+                </span>
+
+                <span>
+                    <?= $remainingVacancies ?>
+                    remaining
+                </span>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==========================================================
             CHARTS
         =========================================================== -->
 
         <section class="charts-grid">
 
-
-            <!-- Application Trend -->
 
             <div class="chart-card trend-card">
 
@@ -478,9 +578,6 @@ $createdAt = $job['created_at']
 
             </div>
 
-
-
-            <!-- Status Breakdown -->
 
             <div class="chart-card status-card">
 
@@ -553,75 +650,207 @@ $createdAt = $job['created_at']
 
 
         <!-- ==========================================================
-            VACANCY PROGRESS
+            AI SCREENING + JOB PERFORMANCE
         =========================================================== -->
 
-        <section class="progress-card">
+        <section class="insights-grid">
 
-            <div class="progress-header">
 
-                <div>
+            <div class="chart-card ai-card">
 
-                    <h2>
-                        Vacancy Progress
-                    </h2>
+                <div class="chart-header">
 
-                    <p>
-                        Hiring progress against the
-                        available positions.
-                    </p>
+                    <div>
+
+                        <h2>
+                            AI Screening Results
+                        </h2>
+
+                        <p>
+                            Scores for the latest applicants
+                            on this posting.
+                        </p>
+
+                    </div>
 
                 </div>
 
-                <strong>
-                    <?= $hired ?>
-                    /
-                    <?= $vacancies ?>
-                </strong>
+
+                <?php if ($aiRecentCount === 0): ?>
+
+                    <div class="ai-empty">
+                        <i class="fa-solid fa-robot"></i>
+                        <strong>No applicants to screen</strong>
+                        <span>AI results will appear as applications arrive.</span>
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="ai-summary-row">
+
+                        <div class="ai-metric">
+                            <span>Screened</span>
+                            <strong>
+                                <?= $aiScreened ?>
+                                /
+                                <?= $aiRecentCount ?>
+                            </strong>
+                        </div>
+
+                        <div class="ai-metric">
+                            <span>Average score</span>
+                            <strong>
+                                <?= $aiScreened > 0 ? $aiAverage . '%' : '—' ?>
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="ai-rec-mix">
+
+                        <?php foreach ($aiRecommendations as $label => $count): ?>
+
+                            <div class="ai-rec-item">
+                                <span class="rec-badge <?= statistics_recommendation_class($label) ?>">
+                                    <?= htmlspecialchars($label) ?>
+                                </span>
+                                <strong><?= (int) $count ?></strong>
+                            </div>
+
+                        <?php endforeach; ?>
+
+                    </div>
+
+
+                    <ul class="ai-applicant-list">
+
+                        <?php foreach ($recentApplicants as $applicant): ?>
+
+                            <?php
+                            $hasScore = isset($applicant['ai_score'])
+                                && $applicant['ai_score'] !== null
+                                && $applicant['ai_score'] !== '';
+                            ?>
+
+                            <li>
+
+                                <div class="ai-applicant-name">
+                                    <?= htmlspecialchars($applicant['fullname']) ?>
+                                </div>
+
+                                <?php if ($hasScore): ?>
+
+                                    <div class="score-pill">
+                                        <span
+                                            class="score-dot"
+                                            style="--score: <?= (int) $applicant['ai_score'] ?>"
+                                        ></span>
+                                        <?= number_format((float) $applicant['ai_score'], 0) ?>%
+                                    </div>
+
+                                    <span class="rec-badge <?= statistics_recommendation_class($applicant['recommendation'] ?? '') ?>">
+                                        <?= htmlspecialchars($applicant['recommendation'] ?? '') ?>
+                                    </span>
+
+                                <?php else: ?>
+
+                                    <span class="ai-pending">Not screened</span>
+
+                                <?php endif; ?>
+
+                            </li>
+
+                        <?php endforeach; ?>
+
+                    </ul>
+
+                <?php endif; ?>
 
             </div>
 
 
-            <?php
+            <div class="chart-card performance-card">
 
-            $vacancyPercentage = 0;
+                <div class="chart-header">
 
-            if ($vacancies > 0) {
+                    <div>
 
-                $vacancyPercentage =
-                    min(
-                        100,
-                        round(
-                            ($hired / $vacancies) * 100,
-                            1
-                        )
-                    );
-            }
+                        <h2>
+                            Job Performance
+                        </h2>
 
-            ?>
+                        <p>
+                            Key hiring metrics for this posting.
+                        </p>
 
+                    </div>
 
-            <div class="progress-track">
-
-                <div
-                    class="progress-fill"
-                    style="width: <?= $vacancyPercentage ?>%;"
-                ></div>
-
-            </div>
+                </div>
 
 
-            <div class="progress-footer">
+                <table class="performance-table">
 
-                <span>
-                    <?= $hired ?>
-                    hired
-                </span>
+                    <tbody>
 
-                <span>
-                    <?= $remainingVacancies ?>
-                    remaining
-                </span>
+                        <tr>
+                            <th>Total applications</th>
+                            <td><?= $totalApplications ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Submitted</th>
+                            <td><?= (int) ($summary['submitted'] ?? 0) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Under review</th>
+                            <td><?= (int) ($summary['under_review'] ?? 0) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Interview (status)</th>
+                            <td><?= (int) ($summary['interview'] ?? 0) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Scheduled interviews</th>
+                            <td><?= $interviewCount ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Hired</th>
+                            <td><?= $hired ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Rejected</th>
+                            <td><?= (int) ($summary['rejected'] ?? 0) ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Vacancies</th>
+                            <td><?= $vacancies ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Remaining vacancies</th>
+                            <td><?= $remainingVacancies ?></td>
+                        </tr>
+
+                        <tr>
+                            <th>Hiring rate</th>
+                            <td><?= $hiringRate ?>%</td>
+                        </tr>
+
+                        <tr>
+                            <th>Applications (14 days)</th>
+                            <td><?= (int) $trendVolume ?></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
 
             </div>
 

@@ -69,7 +69,22 @@ document.addEventListener(
                                     5,
 
                                 borderWidth:
-                                    2
+                                    2,
+
+                                borderColor:
+                                    '#6f1414',
+
+                                backgroundColor:
+                                    'rgba(242, 193, 78, 0.22)',
+
+                                pointBackgroundColor:
+                                    '#6f1414',
+
+                                pointBorderColor:
+                                    '#faf6ee',
+
+                                pointHoverBackgroundColor:
+                                    '#cf9a2c'
                             }
                         ]
 
@@ -193,6 +208,27 @@ document.addEventListener(
                             {
                                 data:
                                     data.statusValues,
+
+                                backgroundColor:
+                                    data.statusLabels.map(
+                                        function (label) {
+                                            const colors = {
+                                                'Submitted':
+                                                    '#6b7280',
+                                                'Under Review':
+                                                    '#cf9a2c',
+                                                'Interview':
+                                                    '#6f1414',
+                                                'Hired':
+                                                    '#1a7d4c',
+                                                'Rejected':
+                                                    '#c45c56'
+                                            };
+
+                                            return colors[label]
+                                                || '#6b7280';
+                                        }
+                                    ),
 
                                 borderWidth:
                                     3,

@@ -704,12 +704,18 @@ class Recruitment
                     a.last_name
                 ) AS fullname,
 
-                a.email
+                a.email,
+
+                ai.overall_score AS ai_score,
+                ai.recommendation
 
             FROM applications ap
 
             INNER JOIN applicants a
                 ON a.applicant_id = ap.applicant_id
+
+            LEFT JOIN ai_screening ai
+                ON ai.application_id = ap.application_id
 
             WHERE ap.posting_id = :posting_id
 

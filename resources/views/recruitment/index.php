@@ -110,7 +110,14 @@ if (!isset($_SESSION['user_id'])) {
 
                             <?php foreach ($jobs as $job): ?>
 
-                                <tr>
+                                <tr
+                                    class="job-row"
+                                    data-job="<?= htmlspecialchars(strtolower($job['title'])) ?>"
+                                    data-department="<?= htmlspecialchars($job['department_name']) ?>"
+                                    data-employment-type="<?= htmlspecialchars($job['employment_type']) ?>"
+                                    data-status="<?= htmlspecialchars($job['status']) ?>"
+                                    data-deadline="<?= htmlspecialchars($job['application_deadline']) ?>"
+                                >
 
                                     <!-- Job Title -->
                                     <td>
@@ -319,32 +326,28 @@ if (!isset($_SESSION['user_id'])) {
 
             <div class="table-footer">
 
-                <?php
-                $totalJobs = !empty($jobs) ? count($jobs) : 0;
-                ?>
+                <span class="results-count" id="resultsCount"></span>
 
-                <span>
-                    Showing
-                    <?= $totalJobs ? 1 : 0 ?>
-                    to
-                    <?= $totalJobs ?>
-                    of
-                    <?= $totalJobs ?>
-                    postings
-                </span>
+                <div class="pagination" id="pagination">
 
-                <div class="pagination">
-
-                    <button class="page-btn">
-                        <i class="fa-solid fa-angle-left"></i>
+                    <button
+                        class="page-btn"
+                        id="prevPage"
+                        type="button"
+                        aria-label="Previous page"
+                    >
+                        <i class="fa-solid fa-chevron-left"></i>
                     </button>
 
-                    <button class="page-btn active">
-                        1
-                    </button>
+                    <div class="page-numbers" id="pageNumbers"></div>
 
-                    <button class="page-btn">
-                        <i class="fa-solid fa-angle-right"></i>
+                    <button
+                        class="page-btn"
+                        id="nextPage"
+                        type="button"
+                        aria-label="Next page"
+                    >
+                        <i class="fa-solid fa-chevron-right"></i>
                     </button>
 
                 </div>
