@@ -2,444 +2,182 @@
 
 use App\Services\Auth;
 
-
 /*
 |--------------------------------------------------------------------------
 | Page Configuration
 |--------------------------------------------------------------------------
 */
-
-$pageTitle =
-    "Dashboard";
-
-$pageCSS =
-    "dashboard.css";
-
-$pageJS =
-    "dashboard.js";
-
-$pageDescription =
-    "Welcome to RAM-YUM Store — Korean and Japanese Store.";
-
+$pageTitle       = "Dashboard";
+$pageCSS         = "dashboard.css";
+$pageJS          = "dashboard.js";
+$pageDescription = "Welcome to RAM-YUM Store — Korean and Japanese Store.";
 
 /*
 |--------------------------------------------------------------------------
 | Authentication
 |--------------------------------------------------------------------------
 */
-
 if (!isset($_SESSION['user_id'])) {
-
-    header(
-        "Location: /hr1/public/?page=login"
-    );
-
+    header("Location: /hr1/public/?page=login");
     exit;
 }
-
 
 /*
 |--------------------------------------------------------------------------
 | Prevent Employee From Using Admin Dashboard
 |--------------------------------------------------------------------------
 */
-
-if (
-    method_exists(
-        Auth::class,
-        'role'
-    )
-) {
-
-    if (Auth::role() === 'EMP') {
-
-        header(
-            "Location: /hr1/public/?page=dashboard"
-        );
-
-        exit;
-    }
+if (method_exists(Auth::class, 'role') && Auth::role() === 'EMP') {
+    header("Location: /hr1/public/?page=dashboard");
+    exit;
 }
-
 
 /*
 |--------------------------------------------------------------------------
 | Initialize Stats
 |--------------------------------------------------------------------------
 */
-
-if (
-    !isset($stats) ||
-    !is_array($stats)
-) {
-
+if (!isset($stats) || !is_array($stats)) {
     $stats = [
-
         'applicants' => 0,
-
-        'postings' => 0,
-
-        'employees' => 0,
-
-        'requests' => 0
-
+        'postings'   => 0,
+        'employees'  => 0,
+        'requests'   => 0,
     ];
 }
 
-
-if (
-    !isset($recentApplicants) ||
-    !is_array($recentApplicants)
-) {
+if (!isset($recentApplicants) || !is_array($recentApplicants)) {
     $recentApplicants = [
-        'items' => [],
-        'page' => 1,
-        'total' => 0,
-        'totalPages' => 1
+        'items'      => [],
+        'page'       => 1,
+        'total'      => 0,
+        'totalPages' => 1,
     ];
 }
-
 
 function activity_icon_class(?string $type): string
 {
     return match ($type) {
         'applicant' => 'applicant',
-        'employee' => 'employee',
-        'request' => 'request',
-        'system' => 'system',
-        default => 'default'
+        'employee'  => 'employee',
+        'request'   => 'request',
+        'system'    => 'system',
+        default     => 'default',
     };
 }
-
 
 function activity_icon_glyph(?string $type): string
 {
     return match ($type) {
         'applicant' => 'fa-solid fa-user-plus',
-        'employee' => 'fa-solid fa-user-tie',
-        'request' => 'fa-solid fa-file-circle-check',
-        'system' => 'fa-solid fa-gear',
-        default => 'fa-solid fa-circle-info'
+        'employee'  => 'fa-solid fa-user-tie',
+        'request'   => 'fa-solid fa-file-circle-check',
+        'system'    => 'fa-solid fa-gear',
+        default     => 'fa-solid fa-circle-info',
     };
 }
 
+/*
+|--------------------------------------------------------------------------
+| Quick Stat Cards
+|--------------------------------------------------------------------------
+*/
+$statCards = [
+    [
+        'href'  => '/hr1/public/?page=applicants',
+        'icon'  => 'fa-users',
+        'label' => 'Total Applicants',
+        'value' => $stats['applicants'],
+        'note'  => '<span class="increase"><i class="fa-solid fa-arrow-trend-up"></i> +18 this week</span>',
+    ],
+    [
+        'href'  => '/hr1/public/?page=recruitment',
+        'icon'  => 'fa-briefcase',
+        'label' => 'Open Positions',
+        'value' => $stats['postings'],
+        'note'  => '<span>Across all branches</span>',
+    ],
+    [
+        'href'  => '/hr1/public/?page=employee-records',
+        'icon'  => 'fa-user-tie',
+        'label' => 'Employees',
+        'value' => $stats['employees'],
+        'note'  => '<span class="warning">Active employees only</span>',
+    ],
+    [
+        'href'  => '/hr1/public/?page=employee-requests',
+        'icon'  => 'fa-file-circle-check',
+        'label' => 'Requests',
+        'value' => $stats['requests'],
+        'note'  => '<span>Recent employee requests</span>',
+    ],
+];
+
 ?>
-
-
 <?php require '../resources/views/includes/header.php'; ?>
-
 <?php require '../resources/views/includes/sidebar.php'; ?>
-
 
 <div class="main-content">
 
     <?php require '../resources/views/includes/navbar.php'; ?>
 
-
-    <!-- ======================================================
-         QUICK STATS
-    ======================================================= -->
-
+    <!-- Quick Stats -->
     <section class="stats-grid">
-
-
-        <!-- Applicants -->
-
-        <a
-            href="/hr1/public/?page=applicants"
-            class="stat-card-link"
-        >
-
-            <article class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i
-                        class="fa-solid fa-users"
-                    ></i>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        Total Applicants
-                    </small>
-
-                    <h2>
-                        <?= $stats['applicants']; ?>
-                    </h2>
-
-                    <span class="increase">
-
-                        <i
-                            class="fa-solid fa-arrow-trend-up"
-                        ></i>
-
-                        +18 this week
-
-                    </span>
-
-                </div>
-
-            </article>
-
-        </a>
-
-
-        <!-- Open Positions -->
-
-        <a
-            href="/hr1/public/?page=recruitment"
-            class="stat-card-link"
-        >
-
-            <article class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i
-                        class="fa-solid fa-briefcase"
-                    ></i>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        Open Positions
-                    </small>
-
-                    <h2>
-                        <?= $stats['postings']; ?>
-                    </h2>
-
-                    <span>
-                        Across all branches
-                    </span>
-
-                </div>
-
-            </article>
-
-        </a>
-
-
-        <!-- Employees -->
-
-        <a
-            href="/hr1/public/?page=employee-records"
-            class="stat-card-link"
-        >
-
-            <article class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i
-                        class="fa-solid fa-user-tie"
-                    ></i>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        Employees
-                    </small>
-
-                    <h2>
-                        <?= $stats['employees']; ?>
-                    </h2>
-
-                    <span class="warning">
-                        Active employees only
-                    </span>
-
-                </div>
-
-            </article>
-
-        </a>
-
-
-        <!-- Requests -->
-
-        <a
-            href="/hr1/public/?page=employee-requests"
-            class="stat-card-link"
-        >
-
-            <article class="stat-card">
-
-                <div class="stat-icon">
-
-                    <i
-                        class="fa-solid fa-file-circle-check"
-                    ></i>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        Requests
-                    </small>
-
-                    <h2>
-                        <?= $stats['requests']; ?>
-                    </h2>
-
-                    <span>
-                        Recent employee requests
-                    </span>
-
-                </div>
-
-            </article>
-
-        </a>
-
+        <?php foreach ($statCards as $card): ?>
+            <a href="<?= htmlspecialchars($card['href']) ?>" class="stat-card-link">
+                <article class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid <?= htmlspecialchars($card['icon']) ?>"></i>
+                    </div>
+                    <div>
+                        <small><?= htmlspecialchars($card['label']) ?></small>
+                        <h2><?= (int) $card['value'] ?></h2>
+                        <?= $card['note'] ?>
+                    </div>
+                </article>
+            </a>
+        <?php endforeach; ?>
     </section>
 
-
-    <!-- ======================================================
-         MAIN GRID
-    ======================================================= -->
-
+    <!-- Main Grid -->
     <section class="dashboard-grid">
 
-
-        <!-- ==================================================
-             APPLICATION SUBMISSIONS
-        =================================================== -->
-
-        <article
-            id="applicationSubmissionsCard"
-            class="dashboard-card"
-        >
-
+        <!-- Application Submissions -->
+        <article id="applicationSubmissionsCard" class="dashboard-card">
             <div class="card-header">
-
                 <div>
-
-                    <h2>
-                        Application Submissions
-                    </h2>
-
-                    <p id="growthSubtitle">
-                        Applications submitted
-                        throughout the year
-                    </p>
-
+                    <h2>Application Submissions</h2>
+                    <p id="growthSubtitle">Applications submitted throughout the year</p>
                 </div>
-
-
                 <div class="chart-controls">
-
-
                     <div class="chart-navigation">
-
-                        <button
-                            id="prevPeriod"
-                            class="nav-btn"
-                            type="button"
-                        >
-
-                            <i
-                                class="fa-solid fa-chevron-left"
-                            ></i>
-
+                        <button id="prevPeriod" class="nav-btn" type="button">
+                            <i class="fa-solid fa-chevron-left"></i>
                         </button>
-
-
-                        <span id="currentPeriod">
-
-                            <?= date('Y') ?>
-
-                        </span>
-
-
-                        <button
-                            id="nextPeriod"
-                            class="nav-btn"
-                            type="button"
-                        >
-
-                            <i
-                                class="fa-solid fa-chevron-right"
-                            ></i>
-
+                        <span id="currentPeriod"><?= date('Y') ?></span>
+                        <button id="nextPeriod" class="nav-btn" type="button">
+                            <i class="fa-solid fa-chevron-right"></i>
                         </button>
-
                     </div>
-
-
                     <select id="growthFilter">
-
-                        <option
-                            value="year"
-                            <?= ($view ?? 'year') === 'year'
-                                ? 'selected'
-                                : '' ?>
-                        >
-                            Year
-                        </option>
-
-
-                        <option
-                            value="month"
-                            <?= ($view ?? '') === 'month'
-                                ? 'selected'
-                                : '' ?>
-                        >
-                            Month
-                        </option>
-
-
-                        <option
-                            value="week"
-                            <?= ($view ?? '') === 'week'
-                                ? 'selected'
-                                : '' ?>
-                        >
-                            Week
-                        </option>
-
+                        <option value="year" <?= ($view ?? 'year') === 'year' ? 'selected' : '' ?>>Year</option>
+                        <option value="month" <?= ($view ?? '') === 'month' ? 'selected' : '' ?>>Month</option>
+                        <option value="week" <?= ($view ?? '') === 'week' ? 'selected' : '' ?>>Week</option>
                     </select>
-
                 </div>
-
             </div>
 
-
-            <canvas
-                id="applicantGrowthChart"
-                height="120"
-            ></canvas>
-
+            <canvas id="applicantGrowthChart" height="120"></canvas>
 
             <section class="recent-submissions">
-
                 <div class="submissions-header">
-
                     <h3>Recent Application Submissions</h3>
-
                     <a href="?page=applicants">View All</a>
-
                 </div>
 
-
                 <div class="table-scroll">
-
                     <table class="submissions-table">
-
                         <thead>
-
                             <tr>
                                 <th>Applicant</th>
                                 <th>Position</th>
@@ -447,78 +185,46 @@ function activity_icon_glyph(?string $type): string
                                 <th>Submitted</th>
                                 <th>Status</th>
                             </tr>
-
                         </thead>
-
-
                         <tbody id="submissionsTableBody">
-
-                        <?php if (empty($recentApplicants['items'])): ?>
-
-                            <tr>
-                                <td colspan="5" class="submissions-empty">
-                                    No application submissions yet.
-                                </td>
-                            </tr>
-
-                        <?php else: ?>
-
-                            <?php foreach ($recentApplicants['items'] as $recentApplicant):
-                                $status = $recentApplicant['application_status']
-                                    ?? 'Submitted';
-                                $statusClass = strtolower(
-                                    str_replace(' ', '-', $status)
-                                );
-                            ?>
-
+                            <?php if (empty($recentApplicants['items'])): ?>
                                 <tr>
-
-                                    <td>
-                                        <a
-                                            class="submission-applicant"
-                                            href="?page=review&id=<?= (int) $recentApplicant['applicant_id'] ?>"
-                                        >
-                                            <span class="submission-avatar">
-                                                <?= strtoupper(substr($recentApplicant['fullname'] ?? '?', 0, 1)) ?>
-                                            </span>
-                                            <strong><?= htmlspecialchars($recentApplicant['fullname'] ?? '') ?></strong>
-                                        </a>
-                                    </td>
-
-                                    <td><?= htmlspecialchars($recentApplicant['position'] ?? '') ?></td>
-
-                                    <td><?= htmlspecialchars($recentApplicant['address'] ?: 'Not provided') ?></td>
-
-                                    <td class="submission-date">
-                                        <?= date('M j, Y', strtotime($recentApplicant['applied_at'])) ?>
-                                    </td>
-
-                                    <td>
-                                        <span class="submission-status <?= htmlspecialchars($statusClass) ?>">
-                                            <?= htmlspecialchars($status) ?>
-                                        </span>
-                                    </td>
-
+                                    <td colspan="5" class="submissions-empty">No application submissions yet.</td>
                                 </tr>
-
-                            <?php endforeach; ?>
-
-                        <?php endif; ?>
-
+                            <?php else: ?>
+                                <?php foreach ($recentApplicants['items'] as $recentApplicant): ?>
+                                    <?php
+                                    $status      = $recentApplicant['application_status'] ?? 'Submitted';
+                                    $statusClass = strtolower(str_replace(' ', '-', $status));
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <a class="submission-applicant" href="?page=review&id=<?= (int) $recentApplicant['applicant_id'] ?>">
+                                                <span class="submission-avatar">
+                                                    <?= strtoupper(substr($recentApplicant['fullname'] ?? '?', 0, 1)) ?>
+                                                </span>
+                                                <strong><?= htmlspecialchars($recentApplicant['fullname'] ?? '') ?></strong>
+                                            </a>
+                                        </td>
+                                        <td><?= htmlspecialchars($recentApplicant['position'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($recentApplicant['address'] ?: 'Not provided') ?></td>
+                                        <td class="submission-date"><?= date('M j, Y', strtotime($recentApplicant['applied_at'])) ?></td>
+                                        <td>
+                                            <span class="submission-status <?= htmlspecialchars($statusClass) ?>">
+                                                <?= htmlspecialchars($status) ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
-
                     </table>
-
                 </div>
 
-
                 <div class="submissions-pagination" id="submissionsPagination">
-
                     <span id="submissionsPageInfo">
-                        Page <?= (int) $recentApplicants['page'] ?>
-                        of <?= (int) $recentApplicants['totalPages'] ?>
+                        Page <?= (int) $recentApplicants['page'] ?> of <?= (int) $recentApplicants['totalPages'] ?>
                     </span>
-
                     <div>
                         <button id="submissionsPrev" type="button" aria-label="Previous page">
                             <i class="fa-solid fa-chevron-left"></i>
@@ -527,271 +233,118 @@ function activity_icon_glyph(?string $type): string
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
-
                 </div>
-
             </section>
 
-<script>
-
-    window.applicantGrowthData = <?= json_encode([
-        'labels'    => $growthLabels ?? [],
-        'data'      => $growthData ?? [],
-        'view'      => $view ?? 'year',
-        'year'      => $year ?? date('Y'),
-        'month'     => $month ?? date('n'),
-        'weekStart' => $weekStart ?? date('Y-m-d'),
-        'period'    => $chartPeriod ?? date('Y'),
-        'subtitle'  => $chartSubtitle
-            ?? 'Applications submitted throughout the year',
-        'applicants' => $recentApplicants['items'] ?? [],
-        'page'      => $recentApplicants['page'] ?? 1,
-        'total'     => $recentApplicants['total'] ?? 0,
-        'totalPages' => $recentApplicants['totalPages'] ?? 1
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-
-</script>
+            <script>
+                window.applicantGrowthData = <?= json_encode([
+                    'labels'     => $growthLabels ?? [],
+                    'data'       => $growthData ?? [],
+                    'view'       => $view ?? 'year',
+                    'year'       => $year ?? date('Y'),
+                    'month'      => $month ?? date('n'),
+                    'weekStart'  => $weekStart ?? date('Y-m-d'),
+                    'period'     => $chartPeriod ?? date('Y'),
+                    'subtitle'   => $chartSubtitle ?? 'Applications submitted throughout the year',
+                    'applicants' => $recentApplicants['items'] ?? [],
+                    'page'       => $recentApplicants['page'] ?? 1,
+                    'total'      => $recentApplicants['total'] ?? 0,
+                    'totalPages' => $recentApplicants['totalPages'] ?? 1,
+                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+            </script>
         </article>
 
-
-        <!-- ==================================================
-             CALENDAR
-        =================================================== -->
-
+        <!-- Calendar -->
         <article class="dashboard-card">
-
-            <div
-                class="
-                    card-header
-                    calendar-header
-                "
-            >
-
-                <button
-                    class="calendar-nav"
-                    id="prevMonth"
-                    type="button"
-                >
-
-                    <i
-                        class="fa-solid fa-chevron-left"
-                    ></i>
-
+            <div class="card-header calendar-header">
+                <button class="calendar-nav" id="prevMonth" type="button">
+                    <i class="fa-solid fa-chevron-left"></i>
                 </button>
-
-
                 <div class="calendar-title">
-
                     <h2 id="calendarTitle"></h2>
-
                 </div>
-
-
-                <button
-                    class="calendar-nav"
-                    id="nextMonth"
-                    type="button"
-                >
-
-                    <i
-                        class="fa-solid fa-chevron-right"
-                    ></i>
-
+                <button class="calendar-nav" id="nextMonth" type="button">
+                    <i class="fa-solid fa-chevron-right"></i>
                 </button>
-
             </div>
-
-
             <table class="calendar">
-
                 <thead>
-
                     <tr>
-
                         <th>Mon</th>
-
                         <th>Tue</th>
-
                         <th>Wed</th>
-
                         <th>Thu</th>
-
                         <th>Fri</th>
-
                         <th>Sat</th>
-
                         <th>Sun</th>
-
                     </tr>
-
                 </thead>
-
-
-                <tbody
-                    id="calendarBody"
-                ></tbody>
-
+                <tbody id="calendarBody"></tbody>
             </table>
-
         </article>
 
     </section>
 
-
-    <!-- ======================================================
-         SECOND GRID
-    ======================================================= -->
-
+    <!-- Second Grid -->
     <section class="dashboard-grid">
 
-
         <!-- Applicants Per Job -->
-
-        <article
-            id="topAppliedJobsCard"
-            class="dashboard-card"
-        >
-
+        <article id="topAppliedJobsCard" class="dashboard-card">
             <div class="card-header">
-
                 <div>
-
-                    <h2>
-                        Top 5 Most Applied Jobs
-                    </h2>
-
-                    <p>
-                        Open positions with the
-                        highest number of applicants
-                    </p>
-
+                    <h2>Top 5 Most Applied Jobs</h2>
+                    <p>Open positions with the highest number of applicants</p>
                 </div>
-
-
-                <a
-                    href="/hr1/public/?page=recruitment"
-                    class="view-all-btn"
-                >
-
-                    View All
-
-                    <i
-                        class="fa-solid fa-arrow-right"
-                    ></i>
-
+                <a href="/hr1/public/?page=recruitment" class="view-all-btn">
+                    View All <i class="fa-solid fa-arrow-right"></i>
                 </a>
-
             </div>
-
-
-            <div
-                class="job-chart-wrapper"
-            >
-
-                <canvas
-                    id="jobApplicantsChart"
-                ></canvas>
-
+            <div class="job-chart-wrapper">
+                <canvas id="jobApplicantsChart"></canvas>
             </div>
-
-
             <script>
-
                 window.jobApplicantsChart = {
-
-                    labels:
-                        <?= json_encode(
-                            $jobLabels ?? []
-                        ) ?>,
-
-                    data:
-                        <?= json_encode(
-                            $jobData ?? []
-                        ) ?>
-
+                    labels: <?= json_encode($jobLabels ?? []) ?>,
+                    data: <?= json_encode($jobData ?? []) ?>
                 };
-
             </script>
-
         </article>
 
-
         <!-- Onboarding Progress -->
-
         <article class="dashboard-card">
-
             <div class="card-header">
-
                 <div>
-
-                    <h2>
-                        Onboarding Progress
-                    </h2>
-
-                    <p>
-                        Employee onboarding status
-                    </p>
-
+                    <h2>Onboarding Progress</h2>
+                    <p>Employee onboarding status</p>
                 </div>
-
-
-                <a
-                    href="/hr1/public/?page=onboarding"
-                >
-                    View All
-                </a>
-
+                <a href="/hr1/public/?page=onboarding">View All</a>
             </div>
-
-
             <div class="onboarding-list">
-
-
-                <?php if (
-                    !empty($onboardingProgress)
-                ): ?>
-
-
-                    <?php foreach (
-                        $onboardingProgress
-                        as $employee
-                    ): ?>
-
+                <?php if (!empty($onboardingProgress)): ?>
+                    <?php foreach ($onboardingProgress as $employee): ?>
                         <?php
-                            $onboardingStatus = strtolower(str_replace(' ', '-', $employee['onboarding_status'] ?? 'pending'));
-                            $progressPercent = (int) ($employee['progress'] ?? 0);
-                            $pendingDocuments = (int) ($employee['pending_documents'] ?? 0);
-                            $currentDocument = $employee['current_document'] ?? null;
+                        $onboardingStatus = strtolower(str_replace(' ', '-', $employee['onboarding_status'] ?? 'pending'));
+                        $progressPercent  = (int) ($employee['progress'] ?? 0);
+                        $pendingDocuments = (int) ($employee['pending_documents'] ?? 0);
+                        $currentDocument  = $employee['current_document'] ?? null;
                         ?>
-
                         <div class="onboarding-item">
-
                             <div class="onboarding-identity">
-                                <strong class="onboarding-name">
-                                    <?= htmlspecialchars($employee['employee_name']) ?>
-                                </strong>
+                                <strong class="onboarding-name"><?= htmlspecialchars($employee['employee_name']) ?></strong>
                                 <span class="onboarding-role">
                                     <?= htmlspecialchars($employee['position_name']) ?>
                                     <span aria-hidden="true">&middot;</span>
                                     <?= htmlspecialchars($employee['department_name']) ?>
                                 </span>
                             </div>
-
                             <div class="onboarding-bar-container">
-                                <div 
-                                    class="onboarding-bar-background"
-                                >
-                                    <div 
-                                        class="onboarding-bar-fill <?= $onboardingStatus ?>"
-                                        style="width: <?= $progressPercent ?>%"
-                                    ></div>
+                                <div class="onboarding-bar-background">
+                                    <div class="onboarding-bar-fill <?= $onboardingStatus ?>" style="width: <?= $progressPercent ?>%"></div>
                                 </div>
                             </div>
-
                             <div class="onboarding-progress-label">
                                 <strong><?= $progressPercent ?>%</strong>
                             </div>
-
                             <div class="onboarding-info">
                                 <span>
                                     <?php if ($onboardingStatus === 'completed'): ?>
@@ -812,149 +365,46 @@ function activity_icon_glyph(?string $type): string
                                     <?php endif; ?>
                                 </span>
                             </div>
-
                         </div>
-
                     <?php endforeach; ?>
-
-
                 <?php else: ?>
-
-
-                    <p class="no-onboarding">
-                        No employees in onboarding.
-                    </p>
-
-
+                    <p class="no-onboarding">No employees in onboarding.</p>
                 <?php endif; ?>
-
             </div>
-
         </article>
 
     </section>
 
-
-    <!-- ======================================================
-         TOTAL ACTIVITIES
-    ======================================================= -->
-
-    <section
-        class="
-            dashboard-card
-            activity-card
-        "
-    >
-
+    <!-- Total Activities -->
+    <section class="dashboard-card activity-card">
         <div class="card-header">
-
             <div>
-
-                <h2>
-                    Total Activities
-                </h2>
-
-                <p>
-                    Recent HR system activities
-                </p>
-
+                <h2>Total Activities</h2>
+                <p>Recent HR system activities</p>
             </div>
-
         </div>
-
-
         <div class="activity-list">
-
-
-            <?php if (
-                !empty($recentActivities)
-            ): ?>
-
-
-                <?php foreach (
-                    $recentActivities
-                    as $activity
-                ):
-                    $activityType = $activity['activity_type'] ?? null;
-                ?>
-
-                    <div
-                        class="activity-item"
-                    >
-
-                        <div
-                            class="activity-type <?= htmlspecialchars(activity_icon_class($activityType)) ?>"
-                        >
-
-                            <i
-                                class="<?= htmlspecialchars(activity_icon_glyph($activityType)) ?>"
-                                aria-hidden="true"
-                            ></i>
-
+            <?php if (!empty($recentActivities)): ?>
+                <?php foreach ($recentActivities as $activity): ?>
+                    <?php $activityType = $activity['activity_type'] ?? null; ?>
+                    <div class="activity-item">
+                        <div class="activity-type <?= htmlspecialchars(activity_icon_class($activityType)) ?>">
+                            <i class="<?= htmlspecialchars(activity_icon_glyph($activityType)) ?>" aria-hidden="true"></i>
                         </div>
-
                         <div>
-
-                            <h3>
-
-                                <?= htmlspecialchars(
-                                    $activity[
-                                        'activity_title'
-                                    ]
-                                ) ?>
-
-                            </h3>
-
-
-                            <p>
-
-                                <?= htmlspecialchars(
-                                    $activity[
-                                        'activity_description'
-                                    ]
-                                ) ?>
-
-                            </p>
-
+                            <h3><?= htmlspecialchars($activity['activity_title']) ?></h3>
+                            <p><?= htmlspecialchars($activity['activity_description']) ?></p>
                         </div>
-
-
-                        <span>
-
-                            <?= date(
-                                'M d, Y',
-                                strtotime(
-                                    $activity[
-                                        'activity_date'
-                                    ]
-                                )
-                            ) ?>
-
-                        </span>
-
+                        <span><?= date('M d, Y', strtotime($activity['activity_date'])) ?></span>
                     </div>
-
                 <?php endforeach; ?>
-
-
             <?php else: ?>
-
-
-                <p>
-                    No recent activities found.
-                </p>
-
-
+                <p>No recent activities found.</p>
             <?php endif; ?>
-
         </div>
-
     </section>
 
-
     <?php require '../resources/views/includes/footer.php'; ?>
-
 </div>
-
 
 <?php require '../resources/views/includes/scripts.php'; ?>
