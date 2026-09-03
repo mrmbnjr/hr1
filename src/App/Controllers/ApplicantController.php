@@ -182,13 +182,13 @@ class ApplicantController
             $academicDocumentRequired = !empty($job['academic_document_required']);
 
             if ($academicDocumentRequired && (!$academicDocument || $academicDocument['error'] !== UPLOAD_ERR_OK)) {
-                throw new \Exception('Please upload your academic document.');
+                throw new \Exception('Please upload your certificate.');
             }
 
             $academicExtension = null;
             if ($academicDocument && $academicDocument['error'] !== UPLOAD_ERR_NO_FILE) {
                 if ($academicDocument['error'] !== UPLOAD_ERR_OK) {
-                    throw new \Exception('There was a problem uploading your academic document.');
+                    throw new \Exception('There was a problem uploading your certificate.');
                 }
 
                 $academicInput = new AcademicDocumentInputService();
@@ -389,7 +389,7 @@ class ApplicantController
                     (new AcademicDocumentEvaluationService())->evaluate((int) $applicationId);
                 } catch (\Throwable $e) {
                     $_SESSION['academic_validation_error'] =
-                        'Application submitted successfully, but academic document validation could not run right now.';
+                        'Application submitted successfully, but certificate verification could not run right now.';
                 }
             }
 
@@ -661,7 +661,7 @@ class ApplicantController
         try {
             $applicationId = (int) ($_POST['application_id'] ?? $_GET['id'] ?? 0);
             $result = (new AcademicDocumentEvaluationService())->evaluate($applicationId);
-            echo json_encode(['success' => true, 'message' => 'Academic document validation completed.', 'data' => $result]);
+            echo json_encode(['success' => true, 'message' => 'Certificate verification completed.', 'data' => $result]);
         } catch (\Throwable $e) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);

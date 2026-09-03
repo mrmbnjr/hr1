@@ -122,7 +122,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <div class="form-group">
-                <label>Academic Document Required</label>
+                <label>Certificate Required</label>
                 <div>
                     <label><input type="radio" name="academic_document_required" value="1" <?= ($_POST['academic_document_required'] ?? '0') === '1' ? 'checked' : '' ?>> Yes</label>
                     <label><input type="radio" name="academic_document_required" value="0" <?= ($_POST['academic_document_required'] ?? '0') !== '1' ? 'checked' : '' ?>> No</label>

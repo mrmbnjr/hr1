@@ -738,7 +738,7 @@ $requirements = trim((string)($job['requirements'] ?? ''));
                     <div class="form-group full">
 
                         <label>
-                            Academic Certificate / Diploma
+                            Certificate / Diploma
                             <?php if (!empty($job['academic_document_required'])): ?><span class="required">*</span><?php endif; ?>
                         </label>
 

@@ -106,10 +106,10 @@ $statusMeta = [
             </div>
         </section>
 
-        <!-- Academic Document Validation -->
+        <!-- Certificate Verification -->
         <section class="detail-section">
             <div class="ai-actions">
-                <h3><i class="fa-solid fa-graduation-cap"></i> Academic Document Validation</h3>
+                <h3><i class="fa-solid fa-graduation-cap"></i> Certificate Verification</h3>
                 <?php if (!empty($applicant['academic_document_file'])): ?>
                     <button type="button" class="btn-primary" id="evaluateAcademicDocumentBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
                         <i class="fa-solid fa-file-circle-check"></i>
@@ -143,7 +143,7 @@ $statusMeta = [
                     <div class="full-width"><span class="info-label">AI Summary</span><span class="info-value"><?= htmlspecialchars($applicant['academic_ai_summary'] ?? '') ?></span></div>
                 </div>
             <?php else: ?>
-                <p class="file-note">No academic validation result is available yet.</p>
+                <p class="file-note">No certificate verification result is available yet.</p>
             <?php endif; ?>
         </section>
 

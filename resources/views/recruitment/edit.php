@@ -145,7 +145,7 @@ $job = isset($job) && is_array($job) ? $job : [];
             </div>
 
             <div class="form-group">
-                <label>Academic Document Required</label>
+                <label>Certificate Required</label>
                 <div>
                     <label><input type="radio" name="academic_document_required" value="1" <?= !empty($job['academic_document_required']) ? 'checked' : '' ?>> Yes</label>
                     <label><input type="radio" name="academic_document_required" value="0" <?= empty($job['academic_document_required']) ? 'checked' : '' ?>> No</label>

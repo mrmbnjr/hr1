@@ -26,17 +26,17 @@ class AcademicDocumentInputService
     public function validateUploadedFile(array $file): string
     {
         if (($file['error'] ?? null) !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('Academic document upload failed.');
+            throw new RuntimeException('Certificate upload failed.');
         }
 
         $path = (string) ($file['tmp_name'] ?? '');
         if ($path === '' || !is_uploaded_file($path)) {
-            throw new RuntimeException('Academic document upload is invalid.');
+            throw new RuntimeException('Certificate upload is invalid.');
         }
 
         $size = filesize($path);
         if ($size === false || $size <= 0 || $size > self::MAX_FILE_SIZE) {
-            throw new RuntimeException('Academic document must be a non-empty file no larger than 5 MB.');
+            throw new RuntimeException('Certificate must be a non-empty file no larger than 5 MB.');
         }
 
         $extension = strtolower(pathinfo((string) ($file['name'] ?? ''), PATHINFO_EXTENSION));
@@ -44,7 +44,7 @@ class AcademicDocumentInputService
         if (!in_array($extension, $this->allowedExtensions, true)
             || !in_array($mimeType, $this->allowedMimeTypes, true)
             || !$this->hasValidSignature($path, $extension)) {
-            throw new RuntimeException('Academic document must be a valid PDF, JPG, JPEG, or PNG file.');
+            throw new RuntimeException('Certificate must be a valid PDF, JPG, JPEG, or PNG file.');
         }
 
         return $extension;
@@ -54,13 +54,13 @@ class AcademicDocumentInputService
     {
         $filename = trim((string) ($application['academic_document_file'] ?? ''));
         if ($filename === '' || str_contains($filename, '/') || str_contains($filename, '\\') || str_contains($filename, "\0") || str_contains($filename, '..')) {
-            throw new RuntimeException('No academic document was found for this application.');
+            throw new RuntimeException('No certificate was found for this application.');
         }
 
         $path = realpath($this->directory . DIRECTORY_SEPARATOR . $filename);
         $directory = realpath($this->directory);
         if ($path === false || $directory === false || dirname($path) !== $directory || !is_readable($path)) {
-            throw new RuntimeException('The academic document could not be found.');
+            throw new RuntimeException('The certificate could not be found.');
         }
 
         return [

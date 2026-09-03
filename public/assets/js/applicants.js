@@ -355,12 +355,12 @@
                 const response = await fetch('?page=evaluate-academic-document', { method: 'POST', body: formData });
                 const result = await response.json();
                 if (!response.ok || !result.success) {
-                    throw new Error(result.message || 'Unable to validate the academic document.');
+                    throw new Error(result.message || 'Unable to verify the certificate.');
                 }
-                alert('Academic document validation finished successfully.');
+                alert('Certificate verification completed successfully.');
                 window.location.reload();
             } catch (error) {
-                alert(error.message || 'An error occurred while validating the academic document.');
+                alert(error.message || 'An error occurred while verifying the certificate.');
                 this.disabled = false;
                 this.innerHTML = originalText;
             }

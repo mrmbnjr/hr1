@@ -63,9 +63,9 @@ class GeminiService
         $this->validateConfiguration();
         $document = $this->validateAcademicDocument($documentPath);
         $prompt = <<<'PROMPT'
-You are an academic document verification assistant.
+You are a certificate verification assistant.
 
-Review the attached diploma, transcript, certificate, or academic record. Determine whether it appears to be a genuine, readable academic document based only on visible content. Do not infer protected personal characteristics. Do not treat this result as a final legal or institutional verification.
+Review the attached diploma, transcript, certificate, or academic record. Determine whether it appears to be a genuine, readable certificate based only on visible content. Do not infer protected personal characteristics. Do not treat this result as a final legal or institutional verification.
 
 Return only a valid JSON object matching the schema. Use an empty string when a field is not visible. List concrete reasons for uncertainty in concerns.
 PROMPT;
