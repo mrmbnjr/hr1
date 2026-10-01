@@ -1,0 +1,62 @@
+# ======================================================================
+# HR1 — Apache / LiteSpeed rules
+# Deployed as the document root of the subdomain (e.g. hr1.yourdomain.com)
+# index.php is the front controller; only /index.php and /public/assets/*
+# are meant to be reachable from the browser.
+# ======================================================================
+
+DirectoryIndex index.php
+Options -Indexes -MultiViews
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Force HTTPS (skipped on localhost; also safe behind Hostinger's proxy/CDN)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # 2. Private application folders — never served directly
+    RewriteRule ^(src|resources|vendor|storage|database|tests|\.git)(/|$) - [F,L]
+
+    # 3. Dotfiles (.env, .gitignore, .user.ini ...) except /.well-known/ (SSL validation)
+    RewriteRule (^|/)\.(?!well-known(/|$)) - [F,L]
+
+    # 4. Only index.php may execute directly
+    RewriteRule ^(?!index\.php$).+\.(php|phtml|phar|php[0-9])$ - [F,L]
+
+    # 5. Non-web files (SQL dumps, docs, lock/config files, logs)
+    RewriteRule \.(sql|md|lock|json|log|ini|sh|bak|dist|ya?ml)$ - [NC,F,L]
+</IfModule>
+
+# Fallback if mod_rewrite is unavailable: block the sensitive file types anyway
+<FilesMatch "(^\.|\.(sql|md|lock|log|ini|sh|bak|dist|ya?ml)$|^composer\.json$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ---- Security headers -------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header unset X-Powered-By
+
+    # Assets are versioned with ?v=<mtime> by asset(), so they can be cached
+    <FilesMatch "\.(css|js|png|jpe?g|gif|svg|webp|ico|woff2?)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+</IfModule>
+
+# ---- Compression ------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript text/javascript application/json image/svg+xml
+</IfModule>

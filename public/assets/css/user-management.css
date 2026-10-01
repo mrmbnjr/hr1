@@ -1,0 +1,330 @@
+/* User management
+   Builds on the shared components (.table-card, .data-table, .filter-bar, .filter-search,
+   .avatar-circle, .sub-text, .page-btn/.page-num/.page-numbers, .table-footer, .btn-*).
+   Only page-specific pieces live here, using the existing tokens. */
+
+.user-management-page {
+    /* Page-local tokens. Promote to :root if other pages need them. */
+    --um-gutter: 16px;                       /* one left/right edge for heading, toolbar, cells, footer */
+    --um-tint: rgba(242, 193, 78, 0.12);     /* same gold tint the shared table header/hover uses */
+
+    min-height: 84vh;
+    padding: 28px 32px 60px;
+    color: var(--ink);
+}
+
+.user-management-page .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* One visible focus treatment for every custom button on the page and in its dialogs. */
+.user-management-page button:focus-visible,
+.modal-backdrop button:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: 2px;
+}
+
+/* ---------- Flash ---------- */
+.user-flash { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius-field); font-size: 13.5px; font-weight: 700; }
+.user-flash i { flex: none; }
+.user-flash.success { background: var(--green-bg); color: var(--green); }
+.user-flash.error { background: var(--red-bg); color: var(--red); }
+
+/* ---------- Card header ----------
+   The overview lives inside the table card: a headline in plain language, then the few
+   situations worth reviewing. Each is a one-click filter for the table below. */
+.section-heading { padding: 18px var(--um-gutter) 14px; }
+.account-headline { margin: 0 0 4px; color: var(--maroon-dark); font-family: var(--font-heading); font-size: 22px; }
+.account-note { margin: 0; color: var(--ink-soft); font-size: 13.5px; }
+
+.attention { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; padding: 6px 0; }
+.attention-title { margin-right: 2px; color: var(--ink-soft); font-size: 12.5px; font-weight: 700; }
+.attention-clear { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: var(--ink-soft); font-size: 13px; }
+.attention-clear i { color: var(--green); }
+
+.attention-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px 4px 4px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+}
+.attention-item:hover,
+.attention-item[aria-pressed="true"] { border-color: var(--gold-dark); background: var(--um-tint); }
+.attention-count {
+    display: grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--orange-bg);
+    color: var(--orange);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* ---------- Status tabs + proportion strip ----------
+   Tabs filter by status. The strip below them is the same numbers as proportions; picking a
+   tab dims every segment except that status. Colors match the pills and dots exactly. */
+/* Tabs on the left, "Needs attention" on the right. They are sibling groups, so the tabs can scroll
+   on their own without carrying the chips away. */
+.status-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; padding: 0 var(--um-gutter); }
+.tab-row { display: flex; gap: 2px; min-width: 0; overflow-x: auto; }
+.status-tab {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--transition), background var(--transition);
+}
+.status-tab:hover { background: var(--um-tint); color: var(--ink); }
+.status-tab.active { color: var(--maroon-dark); box-shadow: inset 0 -2px 0 var(--maroon); }
+.tab-count {
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--gray-bg);
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    font-weight: 800;
+    text-align: center;
+}
+.status-tab.active .tab-count { background: var(--maroon); color: var(--white); }
+.tab-dot { width: 8px; height: 8px; border-radius: 50%; }
+.tab-dot.is-active { background: var(--green); }
+.tab-dot.is-pending { background: var(--orange); }
+.tab-dot.is-inactive { background: var(--gray); }
+
+/* ---------- Table card ----------
+   overflow is visible so the row menu can't be clipped; the card is a size
+   container so the table adapts to the space it really has (sidebar included). */
+.user-accounts-card {
+    overflow: visible;
+    container: user-card / inline-size;
+}
+.user-accounts-card .table-scroll { overflow: visible; }
+
+
+.user-toolbar { padding: 0 var(--um-gutter) 16px; }
+.user-toolbar .filter-search { min-width: 240px; }
+
+.user-accounts-card .user-table { min-width: 0; }
+.user-accounts-card .user-table thead th,
+.user-accounts-card .user-row > td { padding: 12px var(--um-gutter); white-space: nowrap; }
+.user-accounts-card .user-table th.actions-heading,
+.user-accounts-card .user-row > td.actions-cell { text-align: right; }
+
+/* Identity + login cells */
+.cell-text { display: flex; flex-direction: column; min-width: 0; text-align: left; }
+.cell-text strong { display: flex; align-items: center; gap: 6px; color: var(--maroon-dark); font-size: 13.5px; }
+.cell-text .sub-text { max-width: 200px; }
+.unlinked-flag { color: var(--orange); font-size: 11.5px; }
+
+.user-identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.user-identity:hover strong { color: var(--maroon); }
+
+/* One neutral chip for every role. Color is reserved for status, so it always means something. */
+.role-tag {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--cream);
+    color: var(--maroon-dark);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Status pill: same size and weight as the shared .status-badge. Class names (is-*) are kept
+   because the details dialog sets them from JS. */
+.status-pill {
+    --pill-bg: var(--gray-bg);
+    --pill-fg: var(--gray);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--pill-bg);
+    color: var(--pill-fg);
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.status-pill.is-active   { --pill-bg: var(--green-bg);  --pill-fg: var(--green); }
+.status-pill.is-pending  { --pill-bg: var(--orange-bg); --pill-fg: var(--orange); }
+.status-pill.is-inactive { --pill-bg: var(--gray-bg);   --pill-fg: var(--gray); }
+.status-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Disabled accounts recede; the status pill stays at full strength. */
+.user-row[data-status="Inactive"] > td:not(.status-cell, .actions-cell) { opacity: 0.6; }
+.user-row[data-status="Inactive"] .avatar-circle { filter: grayscale(1); }
+
+.last-login { color: var(--ink-soft); font-size: 12px; }
+
+/* Row actions */
+.actions-cell { position: relative; }
+.icon-action { width: 32px; height: 32px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.icon-action:hover, .icon-action:focus-visible { border-color: var(--border); background: var(--um-tint); color: var(--maroon); }
+
+.row-menu {
+    position: absolute;
+    top: calc(50% + 18px);
+    right: var(--um-gutter);
+    z-index: 10;
+    min-width: 172px;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-lg);
+    text-align: left;
+}
+.row-menu button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.row-menu button:hover { background: var(--um-tint); color: var(--maroon); }
+.row-menu button.is-danger { color: var(--red); }
+.row-menu button.is-danger:hover { background: var(--red-bg); color: var(--red); }
+
+.empty-state { padding: 48px 20px; text-align: center; color: var(--ink-soft); }
+.empty-state i { color: var(--gold-dark); font-size: 28px; }
+.empty-state h3 { margin: 10px 0 4px; color: var(--maroon-dark); font-family: var(--font-heading); }
+.empty-state p { margin: 0 0 16px; font-size: 13.5px; }
+
+.user-accounts-card .table-footer { flex-wrap: wrap; padding: 12px var(--um-gutter); }
+
+/* ---------- Responsive table (by card width, not viewport) ---------- */
+
+/* Tight: Last login is one click away in the details dialog. */
+@container user-card (max-width: 1119px) {
+    .user-table .last-login { display: none; }
+
+    /* Not enough room beside the tabs: the attention row moves above them, so tabs and strip stay together. */
+    .attention { order: -1; width: 100%; margin-left: 0; padding: 0 0 10px; }
+    .tab-row { width: 100%; }
+}
+
+/* Narrow: each row becomes a labelled card, so nothing scrolls sideways and the menu never clips. */
+@container user-card (max-width: 979px) {
+    .user-table, .user-table tbody { display: block; }
+    .user-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+    .user-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 12px;
+        padding: 14px var(--um-gutter);
+        border-bottom: 1px solid var(--border);
+    }
+    .user-row[hidden] { display: none; }
+    .user-row:last-child { border-bottom: 0; }
+
+    .user-accounts-card .user-row > td {
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 5px 0;
+        border: 0;
+        white-space: normal;
+    }
+    .user-accounts-card .user-row > td[data-label]::before { content: attr(data-label); color: var(--ink-soft); font-size: 11.5px; font-weight: 800; }
+    .user-accounts-card .user-row > td:first-child { grid-column: 1; grid-row: 1; padding-top: 0; }
+    .user-accounts-card .user-row > td:first-child::before { content: none; }
+    .user-accounts-card .user-row > td.actions-cell { grid-column: 2; grid-row: 1; justify-content: flex-end; padding-top: 0; }
+    .user-table .last-login { display: flex; }
+
+    .row-menu { top: 38px; right: 0; }
+}
+
+@container user-card (max-width: 640px) {
+    .user-toolbar .filter-search,
+    .user-toolbar select { flex: 1 1 100%; min-width: 100%; }
+}
+
+/* ---------- Dialogs ---------- */
+.modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(36, 19, 17, 0.55); }
+.modal-backdrop[hidden] { display: none; }
+
+/* Header and footer stay put; only the body scrolls. */
+.user-modal {
+    display: flex;
+    flex-direction: column;
+    width: min(520px, 100%);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-lg);
+}
+.user-modal > form { display: flex; flex-direction: column; min-height: 0; }
+
+.modal-header { flex: none; display: flex; justify-content: space-between; gap: 16px; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
+.modal-header h2 { margin: 0 0 2px; color: var(--maroon-dark); font-family: var(--font-heading); font-size: 22px; }
+.modal-header p { margin: 0; color: var(--ink-soft); font-size: 13px; }
+.modal-close { align-self: flex-start; flex: none; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.modal-close:hover { background: var(--um-tint); color: var(--maroon); }
+
+.modal-body, .details-content { display: grid; gap: 16px; padding: 20px 24px; overflow-y: auto; }
+.form-group { display: grid; gap: 6px; }
+.form-group label { color: var(--maroon-dark); font-size: 13px; font-weight: 800; }
+.form-group label span { color: var(--red); }
+.form-group input[readonly] { background: var(--gray-bg); color: var(--ink-soft); cursor: default; }
+.field-help { color: var(--ink-soft); font-size: 12px; }
+
+.modal-footer { flex: none; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--border); }
+
+.details-identity { display: flex; align-items: center; gap: 14px; }
+.details-identity h3 { margin: 0 0 2px; color: var(--maroon-dark); font-family: var(--font-heading); font-size: 20px; }
+.details-identity p { margin: 0 0 8px; color: var(--ink-soft); font-size: 13px; }
+.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0; padding-top: 16px; border-top: 1px solid var(--border); }
+.details-grid div { display: grid; gap: 3px; }
+.details-grid dt { color: var(--ink-soft); font-size: 12px; font-weight: 700; }
+.details-grid dd { margin: 0; color: var(--ink); font-size: 13.5px; font-weight: 700; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+    .user-management-page { padding: 20px 14px 40px; }
+    .details-grid { grid-template-columns: 1fr; }
+    .modal-header, .modal-body, .details-content, .modal-footer { padding-left: 18px; padding-right: 18px; }
+}

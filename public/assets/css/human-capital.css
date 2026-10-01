@@ -1,0 +1,811 @@
+/* =====================================================
+   HUMAN CAPITAL MANAGEMENT — Enterprise Redesign
+   Restyled to match RAM-YUM Employee Requests design system
+   Structural classes/IDs unchanged (JS-dependent)
+===================================================== */
+
+.page-content{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    padding:24px 28px;
+    font-family:var(--font-body);
+}
+
+/* =====================================================
+   CARD SHELL
+===================================================== */
+.dashboard-card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+}
+
+.card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:20px 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.card-header h2{
+    margin:0;
+    color:var(--maroon-dark);
+    font-family:var(--font-heading);
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:-.01em;
+}
+
+.card-header p{
+    margin-top:3px;
+    color:var(--ink-soft);
+    font-size:13px;
+}
+
+/* =====================================================
+   VIEW NAVIGATION — segmented control instead of buttons
+===================================================== */
+.cs-view-navigation{
+    display:flex;
+    gap:4px;
+    padding:4px;
+    background:rgba(242, 193, 78, 0.10);
+    border:1px solid var(--border);
+    border-radius:var(--radius-field);
+    width:fit-content;
+}
+
+.cs-view-tab{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    border:none;
+    border-radius:7px;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    transition:
+        background var(--transition),
+        color var(--transition),
+        box-shadow var(--transition);
+}
+
+.cs-view-tab i{
+    font-size:12px;
+}
+
+.cs-view-tab:hover{
+    color:var(--maroon-dark);
+}
+
+.cs-view-tab.active{
+    background:var(--card-bg);
+    color:var(--maroon-dark);
+    box-shadow:0 1px 2px rgba(20,10,5,.08);
+}
+
+/* =====================================================
+   SLIDER MECHANICS — unchanged behavior, cleaned visuals
+===================================================== */
+.cs-view-wrapper{
+    width:100%;
+    overflow:hidden;
+    position:relative;
+    transition:height .35s ease;
+}
+
+.cs-view-slider{
+    display:flex;
+    transition:transform .45s ease;
+    will-change:transform;
+}
+
+.cs-view-panel{
+    flex:0 0 100%;
+    max-width:100%;
+}
+
+/* =====================================================
+   ORGANIZATION TREE
+===================================================== */
+
+.organization-tree{
+    padding:32px;
+}
+
+.organization-root{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+    gap:0;
+}
+
+
+/* =====================================================
+   COMPANY ROOT
+===================================================== */
+
+.organization-company{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 24px;
+    background:var(--maroon);
+    color:var(--white);
+    border-radius:var(--radius-btn);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.02em;
+    position:relative;
+}
+
+.organization-company::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:100%;
+    width:1px;
+    height:32px;
+    transform:translateX(-50%);
+    background:var(--border);
+}
+
+.organization-company i{
+    color:var(--gold);
+    font-size:12px;
+}
+
+
+/* =====================================================
+   ORGANIZATION OWNER
+===================================================== */
+
+.organization-owner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    position:relative;
+    padding-top:32px;
+    padding-bottom:32px;
+}
+
+.organization-owner::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:0;
+    width:1px;
+    height:32px;
+    transform:translateX(-50%);
+    background:var(--border);
+}
+
+
+.owner-node{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:180px;
+    padding:9px 14px;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:7px;
+    font-size:12px;
+    color:var(--ink);
+}
+
+.owner-node i{
+    color:var(--gold-dark);
+    font-size:11px;
+}
+
+
+/* Owner label */
+.owner-node:first-child{
+    font-weight:500;
+    text-transform:none;
+    letter-spacing:normal;
+}
+
+
+/* Owner's name */
+.owner-node:last-child i{
+    color:var(--maroon);
+}
+
+/* =====================================================
+   DEPARTMENTS
+===================================================== */
+
+.organization-departments{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:32px;
+    position:relative;
+    width:100%;
+    padding-top:32px;
+}
+
+.organization-departments::before{
+    content:"";
+    position:absolute;
+    left:10%;
+    right:10%;
+    top:0;
+    height:1px;
+    background:var(--border);
+}
+
+.organization-department{
+    position:relative;
+    width:230px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.organization-department::before{
+    content:"";
+    position:absolute;
+    top:-32px;
+    left:50%;
+    width:1px;
+    height:32px;
+    transform:translateX(-50%);
+    background:var(--border);
+}
+
+.department-node{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    padding:11px 16px;
+    background:rgba(242, 193, 78, 0.08);
+    border:1px solid var(--border);
+    border-radius:var(--radius-btn);
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--maroon-dark);
+}
+
+.department-node i{
+    color:var(--maroon);
+    font-size:12px;
+}
+
+.organization-positions{
+    margin-top:16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    width:100%;
+}
+
+.organization-position{
+    list-style:none;
+    margin:0;
+    padding:0;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.position-node{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 14px;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:7px;
+    font-size:12px;
+    color:var(--ink);
+}
+
+.position-node i{
+    color:var(--gold-dark);
+    font-size:11px;
+}
+
+.organization-employees{
+    margin-top:6px;
+    padding-left:14px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.employee-node{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 10px;
+    background:rgba(242, 193, 78, 0.05);
+    border-radius:6px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+}
+
+.employee-node i{
+    font-size:10px;
+    color:var(--gold-dark);
+}
+
+.organization-empty{
+    margin-top:10px;
+    padding:12px;
+    border-radius:8px;
+    background:rgba(242, 193, 78, 0.04);
+    border:1px dashed var(--border);
+    color:var(--ink-soft);
+    text-align:center;
+    font-size:11.5px;
+}
+
+/* =====================================================
+   TABLES — matches .employee-request-table
+===================================================== */
+
+.table-responsive{
+    width:100%;
+    overflow-x:auto;
+    border-top:1px solid var(--border);
+}
+
+.cs-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:auto;
+    font-size:13.5px;
+}
+
+/* Table styles are defined in components.css */
+
+/* Status badges are defined in components.css */
+
+/* Row actions */
+.dropdown{
+    position:relative;
+}
+
+.dropdown-btn{
+    width:28px;
+    height:28px;
+    border:1px solid transparent;
+    border-radius:7px;
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition);
+}
+
+.dropdown-btn:hover{
+    background:rgba(242, 193, 78, 0.12);
+    color:var(--maroon-dark);
+    border-color:var(--border);
+}
+
+.dropdown-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 4px);
+    display:none;
+    min-width:150px;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    z-index:20;
+    padding:4px;
+}
+
+.dropdown:hover .dropdown-menu{
+    display:block;
+}
+
+.dropdown-menu a,
+.dropdown-menu button{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+    padding:8px 10px;
+    border:none;
+    border-radius:6px;
+    background:none;
+    color:var(--ink);
+    text-align:left;
+    cursor:pointer;
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:500;
+}
+
+.dropdown-menu a i,
+.dropdown-menu button i{
+    width:14px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover{
+    background:rgba(242, 193, 78, 0.12);
+}
+
+.dropdown-menu .deleteDepartment:hover,
+.deletePosition:hover{
+    background:var(--red-bg);
+    color:var(--red);
+}
+
+.dropdown-menu .deleteDepartment:hover,
+.deletePosition:hover i{
+    color:var(--red);
+}
+
+/* =====================================================
+   EMPTY STATE — matches .empty-state
+===================================================== */
+.cs-empty-state{
+    min-height:220px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px;
+    text-align:center;
+    box-sizing:border-box;
+}
+
+.cs-empty-state i{
+    margin-bottom:7px;
+    font-size:30px;
+    color:var(--gold-dark);
+}
+
+.cs-empty-state h3{
+    margin:16px 0 6px;
+    color:var(--maroon-dark);
+    font-family:var(--font-heading);
+    font-size:15px;
+    font-weight:700;
+}
+
+.cs-empty-state p{
+    max-width:460px;
+    margin:0 0 18px;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    line-height:1.6;
+}
+
+/* =====================================================
+   MODAL — matches .request-modal / .request-modal-content
+===================================================== */
+.cs-modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+    z-index:500;
+}
+
+.cs-modal.show{
+    display:flex;
+}
+
+.modal-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(20, 20, 20, 0.55);
+    backdrop-filter:blur(3px);
+}
+
+.modal-content{
+    position:relative;
+    width:min(400px,92vw);
+    max-height:calc(100vh - 48px);
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:0 24px 70px rgba(0, 0, 0, 0.2);
+    overflow:hidden;
+    z-index:1;
+}
+
+.modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:20px 24px;
+    border-bottom:1px solid var(--border);
+}
+
+.modal-header h3{
+    margin:0;
+    color:var(--maroon-dark);
+    font-family:var(--font-heading);
+    font-size:16px;
+    font-weight:700;
+}
+
+.modal-close{
+    width:32px;
+    height:32px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:8px;
+    background:rgba(242, 193, 78, 0.12);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:background var(--transition), color var(--transition);
+}
+
+.modal-close:hover{
+    background:rgba(242, 193, 78, 0.2);
+    color:var(--maroon-dark);
+}
+
+.modal-body{
+    padding:20px 24px;
+    font-size:13px;
+    color:var(--ink-soft);
+}
+
+.modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    padding:16px 24px;
+    border-top:1px solid var(--border);
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: var(--radius-btn);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 13px;
+
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-success i {
+    color: var(--green);
+}
+
+.toast-error {
+    border-color: var(--red);
+}
+
+.toast-error i {
+    color: var(--red);
+}
+
+/* =====================================================
+   MODAL FORM ELEMENTS
+===================================================== */
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:16px;
+}
+
+.form-group:last-child{
+    margin-bottom:0;
+}
+
+.form-row{
+    display:flex;
+    gap:12px;
+}
+
+.form-row .form-group{
+    flex:1;
+}
+
+.form-group label{
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ink);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    padding:9px 13px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-field);
+    font-family:inherit;
+    font-size:13px;
+    color:var(--ink);
+    background:var(--card-bg);
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:var(--gold-dark);
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+.form-group textarea{
+    resize:vertical;
+    min-height:70px;
+}
+
+@keyframes slideIn{
+    from{ opacity:0; transform:translateX(30px); }
+    to{ opacity:1; transform:none; }
+}
+
+/* =====================================================
+   DARK MODE
+===================================================== */
+[data-theme="dark"] .dashboard-card{
+    box-shadow:none;
+}
+
+[data-theme="dark"] .card-header h2,
+[data-theme="dark"] .cs-table tbody td strong,
+[data-theme="dark"] .modal-header h3,
+[data-theme="dark"] .cs-empty-state h3{
+    color:var(--gold);
+}
+
+[data-theme="dark"] .cs-view-navigation{
+    background:rgba(242, 193, 78, 0.06);
+}
+
+[data-theme="dark"] .cs-view-tab.active{
+    color:var(--gold);
+}
+
+[data-theme="dark"] .cs-table thead th{
+    background:rgba(242, 193, 78, 0.08);
+}
+
+[data-theme="dark"] .cs-table tbody tr:hover{
+    background:rgba(242, 193, 78, 0.05);
+}
+
+[data-theme="dark"] .department-node,
+[data-theme="dark"] .employee-node,
+[data-theme="dark"] .organization-empty{
+    background:rgba(242, 193, 78, 0.05);
+}
+
+[data-theme="dark"] .department-node{
+    color:var(--gold);
+}
+
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+@media (max-width:1000px){
+    .page-content{
+        padding:24px 24px;
+    }
+}
+
+@media (max-width:900px){
+    .card-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .organization-tree{
+        padding:20px;
+    }
+
+    .organization-department{
+        max-width:none;
+    }
+
+    .cs-table{
+        min-width:640px;
+    }
+}
+
+@media (max-width:700px){
+    .page-content{
+        padding:20px 16px 32px;
+    }
+
+    .cs-view-navigation{
+        width:100%;
+        flex-direction:column;
+    }
+
+    .cs-view-tab{
+        width:100%;
+        justify-content:center;
+    }
+
+    .organization-company,
+    .department-node{
+        width:100%;
+        justify-content:center;
+    }
+
+    .cs-table{
+        min-width:520px;
+    }
+
+    .cs-modal{
+        padding:12px;
+    }
+
+    .modal-content{
+        max-height:calc(100vh - 24px);
+        border-radius:12px;
+    }
+
+    .form-row{
+        flex-direction:column;
+        gap:0;
+    }
+}

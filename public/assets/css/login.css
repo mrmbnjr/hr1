@@ -1,0 +1,487 @@
+/* =========================================================
+   RAM-YUM Store — Login page styles
+   Font roles:
+     --font-display  Luckiest Guy  -> brand wordmark / badge wordmark (bubble outline look)
+     --font-heading  Baloo 2       -> Login title, field labels, buttons
+     --font-body     Nunito        -> footer, small print, form text
+   ========================================================= */
+
+
+/* --- theme toggle --- */
+.theme-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--white);
+  color: var(--maroon);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.theme-toggle:hover { transform: translateY(-2px) rotate(8deg); }
+.theme-toggle:active { transform: translateY(0) scale(0.94); }
+.theme-toggle .icon { width: 20px; height: 20px; }
+.theme-toggle .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+/* --- page layout --- */
+.page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 90px 20px;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='100'%20viewBox='0%200%20200%20100'%3E%3Cg%20fill='none'%20stroke='%23b5822f'%20stroke-opacity='0.30'%20stroke-width='2.2'%20stroke-linecap='round'%3E%3Cpath%20d='M-10,30%20C15,10%2065,10%2090,30%20C115,50%20165,50%20190,30%20C215,10%20240,10%20240,10'/%3E%3Cpath%20d='M-10,80%20C15,100%2065,100%2090,80%20C115,60%20165,60%20190,80%20C215,100%20240,100%20240,100'/%3E%3C/g%3E%3Cg%20fill='none'%20stroke='%23b5822f'%20stroke-opacity='0.16'%20stroke-width='1.6'%20stroke-linecap='round'%3E%3Cpath%20d='M-10,38%20C15,20%2065,20%2090,38%20C115,56%20165,56%20190,38%20C215,20%20240,20%20240,20'/%3E%3Cpath%20d='M-10,72%20C15,90%2065,90%2090,72%20C115,54%20165,54%20190,72%20C215,90%20240,90%20240,90'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* --- login card --- */
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  border: 4px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: 0 18px 40px var(--card-shadow);
+  padding: 76px 34px 34px;
+  text-align: center;
+  animation: card-in 520ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- badge / seal logo --- */
+.badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 132px;
+  height: 132px;
+  transform: translate(-50%, -58%);
+  filter: drop-shadow(0 6px 10px rgba(74, 15, 15, 0.25));
+}
+.badge-svg { width: 100%; height: 100%; overflow: visible; }
+.badge-seal { fill: var(--badge-seal); }
+.badge-gold-ring { fill: var(--gold); }
+.badge-face { fill: var(--white); }
+.badge-inner-line { fill: none; stroke: var(--gold-dark); stroke-width: 1.5; }
+
+.badge-text-top {
+  font-family: var(--font-display);
+  font-size: 27px;
+  fill: var(--gold);
+  stroke: var(--maroon);
+  stroke-width: 3px;
+  paint-order: stroke fill;
+  letter-spacing: 0.5px;
+}
+.badge-text-bottom {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 10.5px;
+  fill: var(--maroon);
+}
+.badge-bowl {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+  line-height: 1;
+  transform: translateY(3px);
+}
+
+/* --- brand + title --- */
+.brand {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1.05;
+  color: var(--red);
+  text-shadow:
+    -1.5px -1.5px 0 var(--ink),
+    1.5px -1.5px 0 var(--ink),
+    -1.5px 1.5px 0 var(--ink),
+    1.5px 1.5px 0 var(--ink),
+    0 2px 0 var(--ink);
+  -webkit-text-stroke: 1.6px var(--ink);
+  paint-order: stroke fill;
+  letter-spacing: 0.5px;
+}
+.brand span { display: inline; }
+
+.page-title {
+  margin-top: 6px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* --- form --- */
+.login-form {
+  margin-top: 26px;
+  text-align: left;
+}
+.field { margin-bottom: 12px; }
+.field label {
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink);
+}
+.field input {
+  width: 100%;
+  height: 50px;
+  padding: 0 16px;
+  background: var(--pink);
+  border: 2px solid var(--pink-border);
+  border-radius: var(--radius-field);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.field input::placeholder { color: var(--ink-soft); }
+.field input:hover { border-color: var(--pink-border-focus); }
+.field input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px rgba(224, 54, 44, 0.16);
+}
+.field.has-error input {
+  border-color: var(--red);
+  animation: shake 340ms ease;
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.form-message {
+  min-height: 18px;
+  margin-bottom: 5px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--red);
+}
+.form-message.is-success { color: #2f8f4e; }
+
+/* --- login button --- */
+.login-btn{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    width:100%;
+    height:58px;
+
+    border:1px solid rgba(0,0,0,.45);
+    border-radius:11px;
+
+    background: url("../images/loginbtn.png") center/cover no-repeat;
+
+    color:#fff;
+    cursor:pointer;
+    overflow:hidden;
+
+    text-shadow:0 2px 4px rgba(0,0,0,.7);
+
+    box-shadow:
+        0 2px 0 #4a1a1a,
+        0 8px 18px rgba(0,0,0,.35);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        filter .18s ease;
+}
+
+/* Text */
+.btn-label{
+    position:relative;
+    z-index:2;
+
+    font-family:var(--font-heading);
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+/* Hover */
+.login-btn:hover{
+    transform:translateY(-3px);
+    filter:brightness(1.08);
+
+}
+
+/* Press */
+.login-btn:active{
+    transform:translateY(3px);
+
+}
+
+/* Keyboard focus */
+.login-btn:focus-visible{
+    outline:3px solid gold;
+    outline-offset:4px;
+}
+
+/* Disabled */
+.login-btn:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+    transform:none;
+}
+
+/* Loading */
+.login-btn.is-loading .btn-label{
+    opacity:0;
+}
+
+.login-btn::after{
+    content:"";
+    position:absolute;
+
+    width:22px;
+    height:22px;
+
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.35);
+    border-top-color:#fff;
+
+    opacity:0;
+}
+
+.login-btn.is-loading::after{
+    opacity:1;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}@keyframes spin { to { transform: rotate(360deg); } }
+
+/* =========================================================
+   OTP Verification
+========================================================= */
+
+.otp-step {
+    animation: otp-step-in 320ms ease both;
+}
+
+@keyframes otp-step-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.otp-description {
+    margin: 10px auto 6px;
+    max-width: 310px;
+
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 700;
+
+    color: var(--ink-soft);
+    text-align: center;
+}
+
+.otp-email {
+    margin: 0 0 20px;
+
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 800;
+
+    color: var(--maroon);
+    text-align: center;
+
+    word-break: break-word;
+}
+
+.otp-icon {
+    width: 58px;
+    height: 58px;
+
+    margin: 18px auto 12px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: var(--pink);
+    border: 2px solid var(--pink-border);
+
+    color: var(--red);
+
+    box-shadow:
+        0 6px 14px rgba(74, 15, 15, 0.10);
+}
+
+.otp-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.otp-form {
+    margin-top: 8px;
+}
+
+/* OTP input */
+
+#otp {
+    text-align: center;
+
+    font-family: var(--font-heading);
+    font-size: 25px;
+    font-weight: 800;
+
+    letter-spacing: 8px;
+
+    padding-left: 20px;
+    padding-right: 12px;
+}
+
+#otp::placeholder {
+    letter-spacing: 7px;
+    color: var(--ink-soft);
+    opacity: .55;
+}
+
+/* OTP actions */
+
+.otp-actions {
+    margin-top: 13px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.resend-btn,
+.back-login-btn {
+    border: none;
+    background: transparent;
+
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.resend-btn {
+    color: var(--maroon);
+    padding: 7px 12px;
+}
+
+.resend-btn:hover {
+    text-decoration: underline;
+}
+
+.resend-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.otp-timer {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+
+    color: var(--ink-soft);
+}
+
+.back-login-btn {
+    display: block;
+    margin: 14px auto 0;
+
+    padding: 6px 12px;
+
+    color: var(--ink-soft);
+}
+
+.back-login-btn:hover {
+    color: var(--red);
+    text-decoration: underline;
+}
+
+/* OTP error */
+
+#otpMessage {
+    text-align: center;
+}
+
+/* Mobile */
+
+@media (max-width: 480px) {
+
+    .otp-description {
+        max-width: 275px;
+    }
+
+    #otp {
+        font-size: 22px;
+        letter-spacing: 6px;
+    }
+
+    #otp::placeholder {
+        letter-spacing: 5px;
+    }
+
+}
+
+/* --- responsive --- */
+@media (max-width: 480px) {
+  .page { padding: 84px 14px 100px; }
+  .login-card { padding: 70px 22px 28px; max-width: 360px; }
+  .badge { width: 112px; height: 112px; }
+  .badge-bowl { font-size: 34px; }
+  .brand { font-size: 27px; }
+  .page-title { font-size: 19px; }
+}
+@media (max-width: 360px) {
+  .footer-icons { display: none; }
+}
+
+/* --- reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

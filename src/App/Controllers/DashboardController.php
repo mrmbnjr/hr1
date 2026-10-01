@@ -1,0 +1,726 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Models\AssignedRequests;
+use App\Models\Dashboard;
+use App\Models\Onboarding;
+use App\Services\Auth;
+
+class DashboardController
+{
+    private Dashboard $dashboard;
+
+
+    public function __construct()
+    {
+        $this->dashboard = new Dashboard();
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD
+    |--------------------------------------------------------------------------
+    */
+
+    public function index(): void
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Employee Dashboard
+        |--------------------------------------------------------------------------
+        |
+        | Employees should not see the Admin / HR / Manager dashboard.
+        |
+        */
+
+        if ($this->isEmployee()) {
+
+            $this->employeeDashboard();
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EXISTING ADMIN / HR / MANAGER DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        $stats =
+            $this->dashboard->getQuickStats();
+
+
+        $recentActivities =
+            $this->dashboard->getRecentActivities(5);
+
+
+        $jobApplicants =
+            $this->dashboard->getApplicantsPerJob();
+
+
+        $jobLabels =
+            array_column(
+                $jobApplicants,
+                'title'
+            );
+
+
+        $jobData =
+            array_map(
+                'intval',
+                array_column(
+                    $jobApplicants,
+                    'total_applicants'
+                )
+            );
+
+
+        $view =
+            $_GET['view'] ?? 'year';
+
+
+        $year =
+            isset($_GET['year'])
+                ? (int) $_GET['year']
+                : date('Y');
+
+
+        $month =
+            isset($_GET['month'])
+                ? (int) $_GET['month']
+                : date('n');
+
+
+        $weekStart =
+            $_GET['weekStart']
+            ?? date('Y-m-d');
+
+
+        $recentApplicants =
+            $this->dashboard->getRecentApplicants(
+                $view,
+                $year,
+                $month,
+                $weekStart,
+                1,
+                3
+            );
+
+
+        $chart =
+            $this->dashboard->getApplicantChart(
+                $view,
+                $year,
+                $month,
+                $weekStart
+            );
+
+
+        $growthLabels =
+            $chart['labels'];
+
+
+        $growthData =
+            $chart['data'];
+
+
+        $chartPeriod =
+            $chart['period'];
+
+
+        $chartSubtitle =
+            $chart['subtitle'];
+
+
+        $onboardingProgress =
+            $this->dashboard->getOnboardingProgress(5);
+
+
+        require BASE_PATH . '/resources/views/dashboard/index.php';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPLOYEE DASHBOARD
+    |--------------------------------------------------------------------------
+    */
+
+    private function employeeDashboard(): void
+    {
+        $userId =
+            (int) Auth::userId();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get employee information
+        |--------------------------------------------------------------------------
+        |
+        | We use users.employee_id instead of allowing the employee
+        | to provide an employee ID manually.
+        |
+        */
+
+        $employeeId =
+            $this->getEmployeeId(
+                $userId
+            );
+
+
+        if (!$employeeId) {
+
+            http_response_code(403);
+
+            exit(
+                'Your account is not connected to an employee record.'
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employee information
+        |--------------------------------------------------------------------------
+        */
+
+        $employee =
+            $this->getEmployeeInfo(
+                $employeeId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employee requests
+        |--------------------------------------------------------------------------
+        */
+
+        $requests =
+            $this->getEmployeeRequests(
+                $employeeId
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Request statistics
+        |--------------------------------------------------------------------------
+        */
+
+        $totalRequests =
+            count($requests);
+
+
+        $pendingRequests = 0;
+
+        $approvedRequests = 0;
+
+        $rejectedRequests = 0;
+
+        $completedRequests = 0;
+
+
+        foreach ($requests as $request) {
+
+            $status =
+                $request['status']
+                ?? 'Pending';
+
+
+            switch ($status) {
+
+                case 'Pending':
+
+                    $pendingRequests++;
+
+                    break;
+
+
+                case 'Approved':
+
+                    $approvedRequests++;
+
+                    break;
+
+
+                case 'Rejected':
+
+                    $rejectedRequests++;
+
+                    break;
+
+
+                case 'Completed':
+
+                    $completedRequests++;
+
+                    break;
+
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recent requests
+        |--------------------------------------------------------------------------
+        */
+
+        $recentRequests =
+            array_slice(
+                $requests,
+                0,
+                5
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Assigned requests
+        |--------------------------------------------------------------------------
+        |
+        | Work HR or Admin assigned to this employee. Read through the
+        | AssignedRequests model so the derived status, priority and
+        | overdue flag can never disagree with the Assigned Requests page.
+        |
+        */
+
+        $assignedRequests =
+            (new AssignedRequests())
+                ->getRequestsForEmployee(
+                    $employeeId
+                );
+
+
+        $totalAssigned =
+            count($assignedRequests);
+
+
+        $assignedPending = 0;
+
+        $assignedInProgress = 0;
+
+        $assignedCompleted = 0;
+
+        $assignedOverdue = 0;
+
+
+        foreach ($assignedRequests as $assigned) {
+
+            switch ($assigned['status'] ?? '') {
+
+                case 'Pending Action':
+
+                    $assignedPending++;
+
+                    break;
+
+
+                case 'In Progress':
+
+                    $assignedInProgress++;
+
+                    break;
+
+
+                case 'Completed':
+
+                    $assignedCompleted++;
+
+                    break;
+
+            }
+
+
+            if (!empty($assigned['is_overdue'])) {
+                $assignedOverdue++;
+            }
+        }
+
+
+        /*
+         * The model already returns actionable items first, so the top of
+         * this slice is what actually needs the employee's attention.
+         */
+
+        $recentAssignedRequests =
+            array_slice(
+                $assignedRequests,
+                0,
+                5
+            );
+
+
+        /*
+         * Type icons, shared with the Onboarding "Request Document" form
+         * and the Assigned Requests page.
+         */
+
+        $assignedTypes =
+            Onboarding::REQUEST_TYPES;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Employee dashboard
+        |--------------------------------------------------------------------------
+        */
+
+        require BASE_PATH . '/resources/views/dashboard/employee.php';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECK EMPLOYEE ROLE
+    |--------------------------------------------------------------------------
+    */
+
+    private function isEmployee(): bool
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Preferred role method
+        |--------------------------------------------------------------------------
+        */
+
+        if (method_exists(
+            Auth::class,
+            'role'
+        )) {
+
+            return Auth::role() === 'EMP';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Fallback for current GitHub Auth implementation
+        |--------------------------------------------------------------------------
+        |
+        | Current Auth.php stores role_id in the session.
+        |
+        */
+
+        if (
+            isset($_SESSION['role']) &&
+            $_SESSION['role'] === 'EMP'
+        ) {
+
+            return true;
+        }
+
+
+        return false;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET EMPLOYEE ID
+    |--------------------------------------------------------------------------
+    */
+
+    private function getEmployeeId(
+        int $userId
+    ): ?int {
+
+        $pdo =
+            \Core\Database::connection();
+
+
+        $sql = "
+            SELECT employee_id
+
+            FROM users
+
+            WHERE user_id = :user_id
+
+            LIMIT 1
+        ";
+
+
+        $stmt =
+            $pdo->prepare($sql);
+
+
+        $stmt->bindValue(
+            ':user_id',
+            $userId,
+            \PDO::PARAM_INT
+        );
+
+
+        $stmt->execute();
+
+
+        $employeeId =
+            $stmt->fetchColumn();
+
+
+        if (
+            $employeeId === false ||
+            $employeeId === null
+        ) {
+
+            return null;
+        }
+
+
+        return (int) $employeeId;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET EMPLOYEE INFORMATION
+    |--------------------------------------------------------------------------
+    */
+
+    private function getEmployeeInfo(
+        int $employeeId
+    ): ?array {
+
+        $pdo =
+            \Core\Database::connection();
+
+
+        $sql = "
+            SELECT
+
+                e.employee_id,
+
+                e.employee_number,
+
+                e.application_id,
+
+                e.position_id,
+
+                e.hire_date,
+
+                e.employment_status,
+
+                CONCAT_WS(
+                    ' ',
+                    NULLIF(ap.first_name, ''),
+                    NULLIF(ap.middle_name, ''),
+                    NULLIF(ap.last_name, '')
+                ) AS fullname,
+
+                ap.email,
+
+                ap.phone,
+
+                d.department_name,
+
+                p.position_name AS job_title
+
+            FROM employees e
+
+            LEFT JOIN applications app
+                ON e.application_id =
+                   app.application_id
+
+            LEFT JOIN applicants ap
+                ON app.applicant_id =
+                   ap.applicant_id
+
+            LEFT JOIN positions p
+                ON e.position_id =
+                   p.position_id
+
+            LEFT JOIN departments d
+                ON p.department_id =
+                   d.department_id
+
+            WHERE e.employee_id =
+                  :employee_id
+
+            LIMIT 1
+        ";
+
+
+        $stmt =
+            $pdo->prepare($sql);
+
+
+        $stmt->bindValue(
+            ':employee_id',
+            $employeeId,
+            \PDO::PARAM_INT
+        );
+
+
+        $stmt->execute();
+
+
+        $employee =
+            $stmt->fetch(
+                \PDO::FETCH_ASSOC
+            );
+
+
+        return $employee ?: null;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GET EMPLOYEE REQUESTS
+    |--------------------------------------------------------------------------
+    */
+
+    private function getEmployeeRequests(
+        int $employeeId
+    ): array {
+
+        $pdo =
+            \Core\Database::connection();
+
+
+        $sql = "
+            SELECT
+
+                request_id,
+
+                employee_id,
+
+                request_type,
+
+                subject,
+
+                description,
+
+                status,
+
+                hr_remarks,
+
+                requested_at,
+
+                resolved_at
+
+            FROM employee_requests
+
+            WHERE employee_id =
+                  :employee_id
+
+            ORDER BY requested_at DESC
+        ";
+
+
+        $stmt =
+            $pdo->prepare($sql);
+
+
+        $stmt->bindValue(
+            ':employee_id',
+            $employeeId,
+            \PDO::PARAM_INT
+        );
+
+
+        $stmt->execute();
+
+
+        return $stmt->fetchAll(
+            \PDO::FETCH_ASSOC
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | APPLICANT GROWTH DATA
+    |--------------------------------------------------------------------------
+    */
+
+    public function growthData(): void
+    {
+        $view =
+            $_GET['view'] ?? 'year';
+
+
+        $year =
+            isset($_GET['year'])
+                ? (int) $_GET['year']
+                : date('Y');
+
+
+        $month =
+            isset($_GET['month'])
+                ? (int) $_GET['month']
+                : date('n');
+
+
+        $weekStart =
+            $_GET['weekStart']
+            ?? date('Y-m-d');
+
+
+        $page =
+            isset($_GET['pageNumber'])
+                ? (int) $_GET['pageNumber']
+                : 1;
+
+
+        $chart =
+            $this->dashboard->getApplicantChart(
+                $view,
+                $year,
+                $month,
+                $weekStart
+            );
+
+
+        $recentApplicants =
+            $this->dashboard->getRecentApplicants(
+                $view,
+                $year,
+                $month,
+                $weekStart,
+                $page,
+                3
+            );
+
+
+        header(
+            'Content-Type: application/json'
+        );
+
+
+        echo json_encode([
+
+            'labels' =>
+                $chart['labels'],
+
+            'data' =>
+                $chart['data'],
+
+            'period' =>
+                $chart['period'],
+
+            'subtitle' =>
+                $chart['subtitle'],
+
+            'applicants' =>
+                $recentApplicants['items'],
+
+            'page' =>
+                $recentApplicants['page'],
+
+            'total' =>
+                $recentApplicants['total'],
+
+            'totalPages' =>
+                $recentApplicants['totalPages']
+
+        ]);
+
+
+        exit;
+    }
+}

@@ -1,0 +1,409 @@
+/*
+  employee-requests.css
+  Page-specific styles for resources/views/requests (my-requests.php).
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+.employee-request-page {
+    width: 100%;
+    max-width: 1400px;
+    min-height: 84.34vh;
+    margin: 0 auto;
+    padding: 28px 32px 50px;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.employee-request-page h1,
+.employee-request-page h2 {
+    font-family: var(--font-heading);
+}
+
+/* ---------- header ---------- */
+
+.requests-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.requests-header h1 {
+    margin: 0 0 4px;
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.requests-header p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+}
+
+/* ---------- alerts ---------- */
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: var(--accent-tint);
+    color: var(--accent-dark);
+    border: 1px solid #C6DED4;
+}
+
+.alert-error {
+    background: var(--rejected-tint);
+    color: #7C3A2B;
+    border: 1px solid #E4C3B8;
+}
+
+/* ---------- employee strip ---------- */
+
+.employee-strip {
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+.employee-strip strong {
+    color: var(--ink);
+}
+
+.employee-strip .dot {
+    margin: 0 8px;
+    color: var(--line);
+}
+
+/* ---------- table filters ---------- */
+
+.employee-request-page .filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 4px;
+}
+
+.employee-request-page .filter-controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    flex: 1;
+}
+
+.employee-request-page .filter-bar select {
+    min-width: 0;
+}
+
+/* ---------- table styles ---------- */
+
+.employee-request-page .employee-request-table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+}
+
+.employee-request-page .request-row {
+    cursor: pointer;
+}
+
+.employee-request-page .request-row:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: -2px;
+}
+
+.employee-request-page .request-view-btn {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 800;
+    color: var(--maroon-dark);
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.employee-request-page .request-view-btn:hover {
+    color: var(--maroon);
+    text-decoration: none;
+}
+
+.employee-request-page .request-view-btn:focus-visible {
+    outline: 2px solid var(--primary-color, #7b1e2b);
+    outline-offset: 3px;
+}
+
+.employee-request-page .sub-text {
+    display: block;
+    margin-top: 2px;
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.muted {
+    color: var(--ink-soft);
+}
+
+/* ==========================================================
+   AR-MODAL DESIGN SYSTEM (Modernized)
+========================================================== */
+
+.ar-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.ar-modal.is-open {
+    visibility: visible;
+    opacity: 1;
+}
+
+.ar-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(36, 19, 17, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+.ar-modal__dialog {
+    position: relative;
+    z-index: 1;
+    width: min(720px, 100%);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: translateY(14px);
+    transition: transform 0.2s ease;
+}
+
+.ar-modal.is-open .ar-modal__dialog {
+    transform: translateY(0);
+}
+
+.ar-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 26px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(242, 193, 78, 0.14), transparent);
+}
+
+.ar-modal__eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+}
+
+.ar-modal__head h2 {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.3;
+}
+
+.ar-modal__close {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.ar-modal__close:hover {
+    background: var(--maroon);
+    border-color: var(--maroon);
+    color: var(--white);
+}
+
+.ar-modal__body {
+    padding: 24px 26px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.ar-modal__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 26px;
+    border-top: 1px solid var(--border);
+    background: rgba(242, 193, 78, 0.08);
+}
+
+body.modal-open { overflow: hidden; }
+
+/* ---------- sections ---------- */
+
+.ar-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 14px;
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+.ar-section h3 i {
+    font-size: 13px;
+    color: var(--maroon);
+}
+
+/* ---------- request information grid ---------- */
+
+.ar-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px 14px;
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid var(--border);
+}
+
+.ar-info__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.ar-info__value {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* ---------- form fields ---------- */
+
+.ar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ar-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.ar-field__label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ar-field input,
+.ar-field select,
+.ar-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.ar-field textarea {
+    resize: vertical;
+}
+
+.ar-field__hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- remarks ---------- */
+
+.ar-remarks {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius-field);
+    background: rgba(37, 99, 235, 0.07);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.ar-remarks h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.ar-remarks p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+    .employee-request-page .filter-bar {
+        grid-template-columns: 1fr;
+    }
+    .ar-info-grid {
+        grid-template-columns: 1fr;
+    }
+    .ar-modal { padding: 10px; }
+    .ar-modal__dialog { max-height: calc(100vh - 20px); }
+}

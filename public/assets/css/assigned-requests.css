@@ -1,0 +1,879 @@
+/*
+  assigned-requests.css
+  Page styles for resources/views/assigned-requests/index.php — the
+  employee's Assigned Requests page.
+
+  Requests / required actions assigned to an employee by HR or Admin.
+  They are backed by HR's onboarding document requests, so there is no
+  separate HR screen for this feature; HR manages them in Onboarding.
+
+  Built entirely on the shared RAM-YUM tokens (variables.css) and the
+  existing component classes (.btn-primary, .btn-secondary, .badge).
+  No new :root block is introduced — the few local surfaces are
+  gold/cream tints that read correctly in both the light and dark
+  themes.
+*/
+
+/* ==========================================================
+   PAGE SHELL
+========================================================== */
+
+.assigned-requests-page {
+    width: 100%;
+    max-width: 1400px;
+    min-height: 84.34vh;
+    margin: 0 auto;
+    padding: 28px 32px 50px;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.assigned-requests-page h1,
+.assigned-requests-page h2,
+.assigned-requests-page h3 {
+    font-family: var(--font-heading);
+}
+
+/* ---------- alerts ---------- */
+
+.assigned-requests-page .alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-radius: var(--radius-field);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.assigned-requests-page .alert-success {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(26, 125, 76, 0.25);
+}
+
+.assigned-requests-page .alert-error {
+    background: var(--red-bg);
+    color: var(--red);
+    border: 1px solid rgba(224, 54, 44, 0.25);
+}
+
+/* ==========================================================
+   FILTER BAR
+   Mirrors the My Requests page: a row of selects above the table.
+========================================================== */
+
+.assigned-requests-page .filter-bar {
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 4px;
+}
+
+.assigned-requests-page .filter-controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    flex: 1;
+}
+
+.assigned-requests-page .filter-bar select { min-width: 0; }
+
+/* ==========================================================
+   REQUEST TABLE
+========================================================== */
+
+.assigned-requests-page .employee-request-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+/* Slightly tighter cells than the shared default, so all seven columns
+   fit a desktop screen without horizontal scrolling. Narrower screens
+   still scroll inside .table-scroll. */
+.assigned-requests-page .employee-request-table thead th,
+.assigned-requests-page .employee-request-table tbody td {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.assigned-requests-page .request-row { cursor: pointer; }
+
+.assigned-requests-page .request-row:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: -2px;
+}
+
+/* ---------- request cell (title + short description) ---------- */
+
+.request-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 240px;
+}
+
+.request-cell > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.request-cell strong {
+    display: block;
+    color: var(--maroon-dark);
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.assigned-requests-page .request-row:hover .request-cell strong {
+    color: var(--maroon);
+}
+
+/* ---------- request type button ---------- */
+
+.request-type {
+    display: block;
+    color: var(--maroon-dark);
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.request-view-btn {
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: 800;
+    color: var(--maroon-dark);
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--transition);
+}
+
+.request-view-btn:hover { color: var(--maroon); }
+
+.request-view-btn:focus-visible {
+    outline: 2px solid var(--maroon);
+    outline-offset: 3px;
+}
+
+/* ---------- table cell helpers ---------- */
+
+.assigned-requests-page .due-date { white-space: nowrap; }
+
+.assigned-requests-page .due-date.is-overdue {
+    color: var(--red);
+    font-weight: 700;
+}
+
+.assigned-requests-page .due-date .ar-overdue-chip { margin-left: 8px; }
+
+
+/* ==========================================================
+   EMPTY STATES
+========================================================== */
+
+.empty-state {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 32px 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.empty-state > i {
+    margin-bottom: 7px;
+    color: var(--gold-dark);
+    font-size: 30px;
+}
+
+.empty-state h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    color: var(--ink);
+}
+
+.empty-state p {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+}
+
+/* The empty state is a full-width table row, so drop the cell chrome. */
+.empty-row td {
+    padding: 0;
+    border-bottom: 0;
+}
+
+/* ---------- priority (small, not overwhelming) ---------- */
+
+.ar-priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.ar-priority::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ar-priority--normal { background: var(--gray-bg); color: var(--gray); }
+.ar-priority--high { background: var(--orange-bg); color: var(--orange); }
+.ar-priority--urgent { background: var(--red-bg); color: var(--red); }
+
+.ar-overdue-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px dashed var(--red);
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+/* ==========================================================
+   HIDDEN ATTRIBUTE
+========================================================== */
+
+/*
+  The detail modal toggles whole blocks with the `hidden` attribute, but
+  several of those blocks set `display` below (.ar-field, .ar-file,
+  .ar-submission, .ar-submission__file). An author `display` rule beats
+  the user-agent `[hidden] { display: none }`, so without this the blocks
+  would stay visible. Scoped tightly to the two containers that use it.
+*/
+
+.assigned-requests-page [hidden],
+.ar-modal [hidden] {
+    display: none !important;
+}
+
+/* ==========================================================
+   REQUEST DETAIL MODAL
+========================================================== */
+
+.ar-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.ar-modal.is-open {
+    visibility: visible;
+    opacity: 1;
+}
+
+.ar-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(36, 19, 17, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+.ar-modal__dialog {
+    position: relative;
+    z-index: 1;
+    width: min(720px, 100%);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    transform: translateY(14px);
+    transition: transform 0.2s ease;
+}
+
+.ar-modal.is-open .ar-modal__dialog {
+    transform: translateY(0);
+}
+
+.ar-modal__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 26px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(242, 193, 78, 0.14), transparent);
+}
+
+.ar-modal__eyebrow {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+}
+
+.ar-modal__head h2 {
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.3;
+}
+
+.ar-modal__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ar-modal__type {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(242, 193, 78, 0.18);
+    border: 1px solid rgba(207, 154, 44, 0.35);
+    color: var(--maroon-dark);
+    font-size: 11.5px;
+    font-weight: 800;
+}
+
+.ar-modal__close {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.ar-modal__close:hover {
+    background: var(--maroon);
+    border-color: var(--maroon);
+    color: var(--white);
+}
+
+.ar-modal__body {
+    padding: 24px 26px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.ar-modal__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 26px;
+    border-top: 1px solid var(--border);
+    background: rgba(242, 193, 78, 0.08);
+}
+
+body.ar-modal-open { overflow: hidden; }
+
+/* ---------- sections ---------- */
+
+.ar-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 14px;
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+.ar-section h3 i {
+    font-size: 13px;
+    color: var(--maroon);
+}
+
+/* ---------- request information grid ---------- */
+
+.ar-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 12px 14px;
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid var(--border);
+}
+
+.ar-info__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.ar-info__value {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* ---------- required action ---------- */
+
+.ar-instruction {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.ar-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ar-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.ar-field__label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ar-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    line-height: 1.5;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.ar-field textarea:focus {
+    outline: none;
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+}
+
+.ar-field textarea::placeholder { color: var(--ink-soft); }
+
+.ar-field__hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- upload ---------- */
+
+.ar-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 22px 18px;
+    border: 2px dashed rgba(207, 154, 44, 0.5);
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.07);
+    color: var(--ink-soft);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.ar-upload:hover {
+    border-color: var(--gold-dark);
+    background: rgba(242, 193, 78, 0.14);
+}
+
+.ar-upload i {
+    font-size: 22px;
+    color: var(--gold-dark);
+}
+
+.ar-upload__title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--maroon-dark);
+}
+
+.ar-upload__hint { font-size: 12px; }
+
+.ar-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid var(--border);
+}
+
+.ar-file__icon {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(242, 193, 78, 0.22);
+    color: var(--maroon-dark);
+}
+
+.ar-file__info {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ar-file__info strong {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ar-file__info span {
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.ar-file__remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--red);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.ar-file__remove:hover {
+    background: var(--red-bg);
+    border-color: var(--red);
+}
+
+/* ---------- confirmation-only notice ---------- */
+
+.ar-field--confirm {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius-field);
+    background: var(--green-bg);
+    border: 1px solid rgba(26, 125, 76, 0.25);
+}
+
+.ar-field--confirm i {
+    margin-top: 1px;
+    font-size: 18px;
+    color: var(--green);
+}
+
+.ar-field--confirm p {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--green);
+}
+
+/* ---------- submitted response / document ---------- */
+
+.ar-submission {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border-radius: var(--radius-field);
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid var(--border);
+}
+
+.ar-submission h4 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--maroon-dark);
+}
+
+.ar-submission__text {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.ar-submission__file {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 10px 13px;
+    border-radius: var(--radius-field);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--maroon-dark);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color var(--transition), background var(--transition);
+}
+
+.ar-submission__file:hover {
+    border-color: var(--gold-dark);
+    background: rgba(242, 193, 78, 0.14);
+}
+
+.ar-submission__file i { color: var(--gold-dark); }
+
+.ar-submission__size {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+.ar-submission__meta {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- HR remarks ---------- */
+
+.ar-remarks {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius-field);
+    background: rgba(37, 99, 235, 0.07);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.ar-remarks h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--blue);
+}
+
+.ar-remarks p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+    white-space: pre-line;
+}
+
+/* ---------- activity timeline ---------- */
+
+.ar-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ar-timeline__item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-bottom: 18px;
+}
+
+.ar-timeline__item:last-child { padding-bottom: 0; }
+
+.ar-timeline__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.ar-timeline__dot {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(242, 193, 78, 0.14);
+    border: 1px solid var(--border);
+    color: var(--gold-dark);
+    font-size: 12px;
+}
+
+.ar-timeline__body {
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.ar-timeline__time {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--maroon-dark);
+}
+
+.ar-timeline__text {
+    margin: 2px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+}
+
+.ar-timeline__empty {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+/* ==========================================================
+   DARK THEME TOUCH-UPS
+   (--gray-bg / --cream are not redefined for dark mode)
+========================================================== */
+
+[data-theme="dark"] .ar-priority--normal {
+    background: rgba(255, 250, 243, 0.12);
+    color: var(--ink-soft);
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 900px) {
+
+    .assigned-requests-page {
+        padding: 22px 20px 40px;
+    }
+
+    /* The table keeps its own horizontal scroll inside .table-scroll,
+       exactly like My Requests, so the page never overflows. */
+    .assigned-requests-page .filter-controls {
+        gap: 12px;
+    }
+
+    .ar-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+
+    .assigned-requests-page {
+        padding: 18px 14px 32px;
+    }
+
+    .assigned-requests-page .filter-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .ar-info-grid { grid-template-columns: 1fr; }
+
+    .ar-file { flex-wrap: wrap; }
+
+    .ar-modal { padding: 10px; }
+
+    .ar-modal__dialog { max-height: calc(100vh - 20px); }
+
+    .ar-modal__head,
+    .ar-modal__body,
+    .ar-modal__foot {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .ar-modal__foot {
+        flex-direction: column-reverse;
+    }
+
+    .ar-modal__foot .btn-primary,
+    .ar-modal__foot .btn-secondary {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ar-modal,
+    .ar-modal__dialog {
+        transition: none;
+    }
+}

@@ -1,0 +1,156 @@
+:root {
+  /* ==========================
+     Color Palette
+  ========================== */
+
+  --bg: #f2dd9c;
+  --bg-wave-color: #b5822f;
+  --bg-wave-opacity-1: 0.30;
+  --bg-wave-opacity-2: 0.16;
+
+  --card-bg: #fbf3e6;
+  --card-border: #6f1414;
+  --card-shadow: rgba(74, 15, 15, 0.28);
+
+  --border: #e6d5bd;
+
+  --maroon: #6f1414;
+  --maroon-dark: #4a0d0d;
+  --maroon-dark-white: #4a0d0d;
+  --red-bright: #ff5c50;
+
+  --gold: #f2c14e;
+  --gold-dark: #cf9a2c;
+
+  --pink: #f8d9de;
+  --pink-border: #f0c0c7;
+  --pink-border-focus: var(--red);
+
+  --ink: #241311;
+  --ink-soft: #6b4a44;
+  --white: #fff;
+
+   --gold-light:    #f0d78c;
+   --cream:         #faf6ee;
+
+   --gray:   #6b7280;  --gray-bg:   #eef0f2;
+   --blue:   #2563eb;  --blue-bg:   #e5edff;
+   --orange: #c2660d;  --orange-bg: #feebd3;
+   --green:  #1a7d4c;  --green-bg:  #e2f6ea;
+   --red: #e0362c;     --red-bg: #f3dbdb;
+
+
+   --radius: 14px;
+   --shadow: 0 4px 16px rgba(74, 14, 24, 0.08);
+   --shadow-lg: 0 16px 48px rgba(74, 14, 24, 0.18);
+
+
+  --badge-seal: var(--maroon);
+
+  /* ==========================
+     Royyan Theme Aliases
+     (Optional: keep only if existing CSS uses them)
+  ========================== */
+
+  --ry-maroon: var(--maroon);
+  --ry-maroon-dark: var(--maroon-dark);
+  --ry-red: var(--red);
+  --ry-gold: var(--gold);
+  --ry-gold-dark: var(--gold-dark);
+  --ry-cream: var(--card-bg);
+  --ry-white: var(--white);
+
+  /* ==========================
+     Layout
+  ========================== */
+
+  --sidebar-width: 264px;
+
+    /* ==========================
+     Navbar
+  ========================== */
+
+    --navbar-bg: var(--ry-white);
+    --navbar-surface: var(--ry-cream);
+    --navbar-border: #ecd8bc;
+    --navbar-text: var(--ink);
+    --navbar-text-soft: var(--ink-soft);
+
+  /* ==========================
+     Border Radius
+  ========================== */
+
+  --radius-card: 26px;
+  --radius-field: 12px;
+  --radius-btn: 14px;
+
+  /* ==========================
+     Effects
+  ========================== */
+
+  --shadow-soft: 0 10px 30px rgba(74, 15, 15, 0.16);
+  --transition: 180ms cubic-bezier(.4, 0, .2, 1);
+
+  /* ==========================
+     Typography
+  ========================== */
+
+  --font-display: "Luckiest Guy", "Baloo 2", cursive;
+  --font-heading: "Baloo 2", "Nunito", sans-serif;
+  --font-body: "Nunito", "Baloo 2", sans-serif;
+
+/* ==========================
+   Buttons
+========================== */
+
+--button-bg: linear-gradient(180deg, #f7cf67 0%, #f2c14e 100%);
+--button-bg-hover: linear-gradient(180deg, #ffd978 0%, #f5c84d 100%);
+--button-bg-active: #cf9a2c;
+
+--button-text: #4a0d0d;
+
+--button-border: 2px solid #b67f1f;
+
+--button-shadow:
+  0 5px 0 #9a6915,
+  0 10px 20px rgba(74,15,15,.18);
+
+--button-shadow-hover:
+  0 6px 0 #9a6915,
+  0 14px 24px rgba(74,15,15,.25);
+
+--button-radius: 14px;
+}
+
+[data-theme="dark"] {
+  --bg: #241511;
+  --bg-wave-color: #4a2f1e;
+  --bg-wave-opacity-1: 0.55;
+  --bg-wave-opacity-2: 0.35;
+
+  --card-bg: #2f1c17;
+  --card-border: #e0362c;
+  --card-shadow: rgba(0, 0, 0, 0.45);
+
+  --maroon: #4a1212;
+  --maroon-dark: #2a0a0a;
+   --maroon-dark-white: #ecd8bc;
+
+  --red: #e0362c;
+  --red-bright: #ff5c50;
+
+  --gold: #f2c14e;
+  --gold-dark: #cf9a2c;
+
+  --pink: #4a2a2c;
+  --pink-border: #6b3338;
+  --pink-border-focus: var(--red);
+
+  --ink: #f6e9e2;
+  --ink-soft: #d8b9ae;
+  --white: rgba(255,250,243,.75);
+
+  --badge-seal: var(--red);
+
+  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
