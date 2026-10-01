@@ -151,9 +151,22 @@ switch ($page) {
 
 
     case 'apply':
+        if (!isset($_GET['token'])) {
+            header("Location: ?page=careers");
+            exit;
+        }
 
-        (new ApplicantController())->apply();
+        $token = $_GET['token'];
+        $recruitment = new \App\Models\Recruitment();
 
+        $job = $recruitment->getJobById((int)$token);
+
+        if (!$job) {
+            header("Location: ?page=careers");
+            exit;
+        }
+
+        require BASE_PATH . '/resources/views/public/apply.php';
         break;
 
     case 'submit-application':
@@ -167,6 +180,92 @@ switch ($page) {
         require BASE_PATH . '/resources/views/public/application-success.php';
 
         break;
+
+    case 'careers':
+        $recruitment = new \App\Models\Recruitment();
+        $jobs = $recruitment->getAllJobs();
+
+        // Map database columns to the format expected by job-list.php
+        $formattedJobs = [];
+        foreach ($jobs as $job) {
+            $formattedJobs[] = [
+                'id' => $job['posting_id'],
+                'title' => $job['title'],
+                'department' => $job['department_name'],
+                'location' => 'Quezon City', // Database doesn't have location in getAllJobs, defaulting to QC
+                'employment_type' => $job['employment_type'],
+                'vacancies' => $job['vacancies'],
+                'applied_count' => $job['applicants'],
+                'closing_date' => $job['application_deadline'],
+            ];
+        }
+
+        // Use $jobs variable so the view picks it up
+        $jobs = $formattedJobs;
+
+        require BASE_PATH . '/resources/views/public/job-list.php';
+        break;
+
+    case 'job-details':
+        if (!isset($_GET['id'])) {
+            header('Content-Type: text/html');
+            echo '<p>Invalid job ID.</p>';
+            exit;
+        }
+
+        $recruitment = new \App\Models\Recruitment();
+        $job = $recruitment->getJobById((int)$_GET['id']);
+
+        if (!$job) {
+            header('Content-Type: text/html');
+            echo '<p>Job not found.</p>';
+            exit;
+        }
+
+        // Return a snippet suitable for the modal
+        $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+        ?>
+        <div class="job-detail-content">
+            <div class="job-detail-heading">
+                <div class="job-detail-avatar">
+                    <?= $h(strtoupper(substr($job['title'], 0, 1))) ?>
+                </div>
+                <div>
+                    <h2><?= $h($job['title']) ?></h2>
+                    <p class="job-detail-department"><?= $h($job['department_name']) ?></p>
+                    <?php if (!empty($job['position_name']) || !empty($job['role_name'])): ?>
+                        <p class="job-detail-context">
+                            <?= $h($job['position_name'] ?? '') ?>
+                            <?= !empty($job['position_name']) && !empty($job['role_name']) ? ' &middot; ' : '' ?>
+                            <?= $h($job['role_name'] ?? '') ?>
+                        </p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <dl class="job__meta job-detail-meta">
+                <div><dt>Location</dt><dd>Quezon City</dd></div>
+                <div><dt>Type</dt><dd><?= $h($job['employment_type']) ?></dd></div>
+                <div><dt>Vacancies</dt><dd><?= (int)$job['vacancies'] ?> <?= (int)$job['vacancies'] === 1 ? 'opening' : 'openings' ?></dd></div>
+                <div><dt>Deadline</dt><dd><?= $h(date('M j, Y', strtotime($job['application_deadline']))) ?></dd></div>
+            </dl>
+
+            <div class="job-detail-section">
+                <h3>Job Description</h3>
+                <p><?= $h($job['description'] ?? 'No description provided.') ?></p>
+            </div>
+
+            <div class="job-detail-section">
+                <h3>Requirements</h3>
+                <p><?= $h($job['requirements'] ?? 'No specific requirements provided.') ?></p>
+            </div>
+
+            <div class="job-detail-actions">
+                <a class="btn btn--primary" href="index.php?page=apply&token=<?= (int)$job['posting_id'] ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            </div>
+        </div>
+        <?php
+        exit;
 
     case 'review':
 
