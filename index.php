@@ -64,6 +64,12 @@ switch ($page) {
 
         break;
 
+    case 'reset-password':
+
+        require BASE_PATH . '/resources/reset-password/index.php';
+
+        break;
+
 
     /*
     |--------------------------------------------------------------------------

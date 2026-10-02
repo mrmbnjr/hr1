@@ -36,6 +36,15 @@ class MailService
 		$position = htmlspecialchars((string) $account['position'], ENT_QUOTES, 'UTF-8');
 		$username = htmlspecialchars((string) $account['username'], ENT_QUOTES, 'UTF-8');
 		$temporaryPassword = htmlspecialchars((string) $account['temporary_password'], ENT_QUOTES, 'UTF-8');
+		$appUrl = rtrim((string) config('app.url', ''), '/');
+		if ($appUrl === '') {
+			$scheme = !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off'
+				? 'https'
+				: 'http';
+			$appUrl = $scheme . '://' . (string) ($_SERVER['HTTP_HOST'] ?? 'localhost') . base_url();
+		}
+		$resetUrl = $appUrl . '/?page=reset-password&username=' . rawurlencode((string) $account['username']);
+		$safeResetUrl = htmlspecialchars($resetUrl, ENT_QUOTES, 'UTF-8');
 
 		$mailer->Body = <<<HTML
 			<p>Dear {$name},</p>
@@ -45,7 +54,8 @@ class MailService
 				<li><strong>Username:</strong> {$username}</li>
 				<li><strong>Temporary password:</strong> {$temporaryPassword}</li>
 			</ul>
-			<p>Please sign in and change your password when prompted. Keep these credentials confidential.</p>
+			<p><a href="{$safeResetUrl}">Reset your password</a></p>
+			<p>Use the username and temporary password above if you choose the username option. Keep these credentials confidential.</p>
 			<p>Regards,<br>RAM-YUM Recruitment</p>
 		HTML;
 
@@ -53,7 +63,8 @@ class MailService
 			. "You have been hired for the {$account['position']} position.\n\n"
 			. "Username: {$account['username']}\n"
 			. "Temporary password: {$account['temporary_password']}\n\n"
-			. "Please sign in and change your password when prompted.";
+			. "Reset your password: {$resetUrl}\n\n"
+			. "Use the username and temporary password above if you choose the username option.";
 
 		$mailer->send();
 	}

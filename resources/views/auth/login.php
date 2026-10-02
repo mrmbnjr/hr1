@@ -79,6 +79,7 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
                         type="text"
                         id="username"
                         name="username"
+                        value="<?= htmlspecialchars((string) ($_GET['username'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
                         autocomplete="username"
                         spellcheck="false"
                         minlength="3"
