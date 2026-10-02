@@ -196,7 +196,7 @@
     z-index: 100;
 }
 
-.actions .dropdown:hover .dropdown-menu {
+.actions .dropdown.open .dropdown-menu {
     display: block;
 }
 

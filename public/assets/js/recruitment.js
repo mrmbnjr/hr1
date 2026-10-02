@@ -392,3 +392,32 @@ function copyApplicationLink(path) {
 
     update();
 })();
+
+// ==========================================================
+// ROW ACTION DROPDOWNS (click to toggle)
+// ==========================================================
+
+document.addEventListener('click', function (e) {
+
+    const btn = e.target.closest('.dropdown-btn');
+
+    // Close all other open dropdowns
+    document.querySelectorAll('.dropdown.open').forEach(dropdown => {
+        if (!btn || dropdown !== btn.closest('.dropdown')) {
+            dropdown.classList.remove('open');
+        }
+    });
+
+    // Toggle the clicked one
+    if (btn) {
+        btn.closest('.dropdown').classList.toggle('open');
+    }
+});
+
+// Close with the Escape key
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.dropdown.open')
+            .forEach(d => d.classList.remove('open'));
+    }
+});

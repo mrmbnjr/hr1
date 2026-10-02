@@ -149,6 +149,7 @@
     font-weight: 800;
     line-height: 1.2;
     white-space: nowrap;
+    gap: 3px;
 }
 
 .badge-gray,
