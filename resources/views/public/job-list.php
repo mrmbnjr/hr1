@@ -38,7 +38,7 @@ function timeLeft(string $date): array {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $h($pageTitle) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="public/assets/css/login.css">
     <link rel="stylesheet" href="public/assets/css/job-list.css">
@@ -205,22 +205,37 @@ function timeLeft(string $date): array {
     }
     [q, loc, type].forEach(el => el.addEventListener('input', apply));
 
-    // Theme Toggle Logic (matching login.php)
+    // Share the persisted theme preference used by the login page.
     const themeToggle = document.getElementById('themeToggle');
+    const themeRoot = document.documentElement;
+    const themeKey = 'ramyum-theme';
+    let savedTheme = null;
+
+    try {
+        savedTheme = localStorage.getItem(themeKey);
+    } catch {}
+
+    function applyTheme(theme) {
+        const isDark = theme === 'dark';
+        if (isDark) {
+            themeRoot.setAttribute('data-theme', 'dark');
+        } else {
+            themeRoot.removeAttribute('data-theme');
+        }
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    const initialTheme = savedTheme ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(initialTheme);
 
     themeToggle.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme',
-            document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
-        );
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        themeToggle.setAttribute('aria-pressed', isDark);
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        const nextTheme = themeRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try {
+            localStorage.setItem(themeKey, nextTheme);
+        } catch {}
     });
-
-    if (localStorage.getItem('theme') === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggle.setAttribute('aria-pressed', 'true');
-    }
 
     // Modal Logic
     const modal = document.getElementById('jobModal');

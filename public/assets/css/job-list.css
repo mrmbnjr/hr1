@@ -1,5 +1,6 @@
 /* Public careers page – Royyan theme (maroon / gold / cream) */
 :root {
+    color-scheme: light;
     --maroon: #7a1f2b;
     --maroon-dark: #5a1520;
     --gold: #c9a24b;
@@ -16,6 +17,7 @@
 }
 
 [data-theme="dark"] {
+    color-scheme: dark;
     --cream: #1b1315; --ink: #f5ece6; --ink-soft: #b8a8a4;
     --card-bg: #261b1e; --border: #3c2b30; --gold-light: #3a2f1a;
     --shadow: none;
@@ -39,20 +41,35 @@ a { color: inherit; text-decoration: none; }
     -webkit-text-stroke: 0;
     letter-spacing: normal;
 }
-.brand-text { display: flex; flex-direction: column; }
-.brand-title {
-    margin: 0;
-    font-family: 'Baloo 2', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.05;
+.careers-top .theme-toggle {
+    position: static;
+    top: auto;
+    right: auto;
+    z-index: auto;
+    flex: none;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
     color: var(--maroon);
+    box-shadow: var(--shadow);
+}
+[data-theme="dark"] .careers-top .theme-toggle { color: var(--gold); }
+.careers-top .brand-text { display: flex; flex-direction: column; }
+.careers-top .brand-title {
+    margin: 0;
+    font-family: 'Luckiest Guy', 'Baloo 2', cursive;
+    font-size: 20px;
+    line-height: 1.05;
+    color: #e0362c;
+    text-shadow: -1.2px -1.2px 0 #241311, 1.2px -1.2px 0 #241311,
+        -1.2px 1.2px 0 #241311, 1.2px 1.2px 0 #241311, 0 2px 0 #241311;
+    -webkit-text-stroke: 1.3px #241311;
+    paint-order: stroke fill;
     letter-spacing: .5px;
 }
-.brand-title span {
-    color: var(--gold);
-}
-.brand-subtitle {
+.careers-top .brand-title span { color: var(--gold); }
+.careers-top .brand-subtitle {
     margin: 4px 0 0;
     font-family: 'Baloo 2', sans-serif;
     font-size: 11.5px;
@@ -66,7 +83,7 @@ a { color: inherit; text-decoration: none; }
 /* Hero */
 .hero { padding: 40px 0 20px; }
 .hero h1 { font-size: clamp(2rem, 4.5vw, 2.8rem); color: var(--maroon); }
-@media (prefers-color-scheme: dark) { .hero h1 { color: var(--gold); } }
+[data-theme="dark"] .hero h1 { color: var(--gold); }
 .hero p { margin: 6px 0 0; color: var(--ink-soft); }
 
 /* Toolbar */
@@ -86,7 +103,7 @@ a { color: inherit; text-decoration: none; }
 .job[hidden] { display: none; }
 .job__head { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .job__avatar { flex: none; width: 50px; height: 50px; border-radius: 50%; background: var(--gold-light); color: var(--maroon); display: grid; place-items: center; font: 700 1rem 'Baloo 2', sans-serif; }
-@media (prefers-color-scheme: dark) { .job__avatar { color: var(--gold); } }
+[data-theme="dark"] .job__avatar { color: var(--gold); }
 .job__title { flex: 1; min-width: 0; }
 .job__title h2 { font-size: 1.25rem; }
 .job__title p { margin: 0; color: var(--ink-soft); }
