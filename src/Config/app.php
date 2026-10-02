@@ -10,4 +10,9 @@ return [
 
     // Philippine deployment; override with APP_TIMEZONE in .env.
     'timezone' => env('APP_TIMEZONE', 'Asia/Manila'),
+
+    'rejected_applicant_retention_days' => max(
+        1,
+        (int) env('REJECTED_APPLICANT_RETENTION_DAYS', 30)
+    ),
 ];

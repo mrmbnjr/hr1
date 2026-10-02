@@ -23,6 +23,11 @@ class Applicant
 
     public function getAllApplicants()
     {
+        $retentionDays = max(
+            1,
+            (int) config('app.rejected_applicant_retention_days', 30)
+        );
+
         $sql = "
             SELECT
                 a.applicant_id,
@@ -92,6 +97,10 @@ class Applicant
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
+
+            WHERE ap.application_status IS NULL
+                OR ap.application_status <> 'Rejected'
+                OR ap.rejected_at >= DATE_SUB(NOW(), INTERVAL {$retentionDays} DAY)
 
             ORDER BY
                 ap.applied_at DESC
@@ -576,7 +585,8 @@ class Applicant
              */
             $status = $this->db->prepare("
                 UPDATE applications
-                SET application_status = 'Interview'
+                SET application_status = 'Interview',
+                    rejected_at = NULL
                 WHERE application_id = :application_id
             ");
 
@@ -1102,7 +1112,8 @@ class Applicant
              */
             $statusStmt = $this->db->prepare("
                 UPDATE applications
-                SET application_status = 'Hired'
+                SET application_status = 'Hired',
+                    rejected_at = NULL
                 WHERE application_id = :application_id
             ");
 
@@ -1211,7 +1222,11 @@ class Applicant
 
         $stmt = $this->db->prepare("
             UPDATE applications
-            SET application_status = 'Rejected'
+            SET application_status = 'Rejected',
+                rejected_at = CASE
+                    WHEN application_status <> 'Rejected' THEN CURRENT_TIMESTAMP
+                    ELSE rejected_at
+                END
             WHERE application_id = :application_id
             AND application_status <> 'Hired'
         ");
@@ -1261,7 +1276,16 @@ class Applicant
                     END
                 ) AS hired_count,
 
-                COUNT(ap.application_id) AS applicant_count
+                COUNT(
+                    CASE
+                        WHEN ap.application_id IS NOT NULL
+                            AND (
+                                ap.application_status IS NULL
+                                OR ap.application_status <> 'Rejected'
+                            )
+                        THEN 1
+                    END
+                ) AS applicant_count
 
             FROM job_postings jp
 
@@ -1493,6 +1517,10 @@ class Applicant
                 SELECT COUNT(*)
                 FROM applications
                 WHERE posting_id = :posting_id
+                AND (
+                    application_status IS NULL
+                    OR application_status <> 'Rejected'
+                )
             ");
 
             $countStmt->execute([
@@ -1547,23 +1575,6 @@ class Applicant
 
             $applicationId =
                 (int) $this->db->lastInsertId();
-
-            if (
-                $applicantCount + 1 >=
-                (int) $posting['max_applicants']
-            ) {
-                $closeStmt = $this->db->prepare("
-                    UPDATE job_postings
-                    SET status = 'Closed'
-                    WHERE posting_id = :posting_id
-                    AND status = 'Open'
-                ");
-
-                $closeStmt->execute([
-                    ':posting_id' => $data['posting_id']
-                ]);
-            }
-
 
             /*
              * 2. Academic documents

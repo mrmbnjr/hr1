@@ -48,10 +48,23 @@ class Recruitment
                 d.department_name,
                 jp.employment_type,
                 jp.vacancies,
+                jp.max_applicants,
                 jp.status,
                 jp.application_deadline,
 
-                COALESCE(COUNT(a.application_id),0) AS applicants,
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN a.application_id IS NOT NULL
+                                AND (
+                                    a.application_status IS NULL
+                                    OR a.application_status <> 'Rejected'
+                                )
+                            THEN 1 ELSE 0
+                        END
+                    ),
+                    0
+                ) AS applicants,
 
                 SUM(
                     CASE

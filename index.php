@@ -173,6 +173,14 @@ switch ($page) {
         // Map database columns to the format expected by job-list.php
         $formattedJobs = [];
         foreach ($jobs as $job) {
+            if (
+                ($job['status'] ?? '') !== 'Open'
+                || (int) ($job['applicants'] ?? 0) >= (int) ($job['max_applicants'] ?? 0)
+                || (int) ($job['hired'] ?? 0) >= (int) ($job['vacancies'] ?? 0)
+            ) {
+                continue;
+            }
+
             $formattedJobs[] = [
                 'id' => $job['posting_id'],
                 'title' => $job['title'],

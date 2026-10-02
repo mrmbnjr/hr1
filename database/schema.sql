@@ -140,6 +140,8 @@ CREATE TABLE applications (
         'Rejected'
     ) DEFAULT 'Submitted',
 
+    rejected_at DATETIME NULL,
+
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (applicant_id, posting_id),

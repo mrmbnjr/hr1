@@ -35,6 +35,8 @@ index.php  .htaccess  .user.ini  .env  src/  resources/  public/  storage/  vend
 
 ## 6. Edit `.env` (File Manager → right-click → Edit)
 Set `APP_URL`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Keep `APP_ENV=production`, `APP_DEBUG=false`.
+Rejected applicants are hidden from the applicant list after 30 days by default; set
+`REJECTED_APPLICANT_RETENTION_DAYS` to change that period.
 Leave `APP_BASE_PATH` empty. For Gmail OTP emails, `MAIL_PASSWORD` must be a Google **App Password**.
 
 ## 7. Permissions
