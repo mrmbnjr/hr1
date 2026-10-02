@@ -53,11 +53,33 @@
     font-size: 13.5px;
 }
 
+/* Emphasis inside a cell uses the shared accent token. */
+.data-table tbody td strong { color: var(--accent); }
+
 
 /* Table header, body, and row styles are defined in components.css */
 
 
-/* Badge styles are defined in components.css */
+/* Employment types use distinct badge tones. */
+.badge.employment.full-time {
+    background: var(--badge-green-bg);
+    color: var(--badge-green-fg);
+}
+
+.badge.employment.part-time {
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-fg);
+}
+
+.badge.employment.contract {
+    background: var(--badge-orange-bg);
+    color: var(--badge-orange-fg);
+}
+
+.badge.employment.internship {
+    background: var(--badge-gold-bg);
+    color: var(--badge-gold-fg);
+}
 
 
 /* ==========================================
@@ -108,8 +130,8 @@
 }
 
 .link-btn:hover {
-    background: rgba(242, 193, 78, 0.12);
-    color: var(--maroon-dark);
+    background: var(--tint-gold-12);
+    color: var(--accent);
     border-color: var(--border);
 }
 
@@ -169,8 +191,8 @@
 }
 
 .actions .dropdown-btn:hover {
-    background: rgba(242, 193, 78, 0.12);
-    color: var(--maroon-dark);
+    background: var(--tint-gold-12);
+    color: var(--accent);
     border-color: var(--border);
 }
 
@@ -246,12 +268,12 @@
 }
 
 .actions .dropdown-menu button.delete:hover {
-    background: var(--red-bg);
-    color: var(--red);
+    background: var(--badge-red-bg);
+    color: var(--badge-red-fg);
 }
 
 .actions .dropdown-menu button.delete:hover i {
-    color: var(--red);
+    color: var(--badge-red-fg);
 }
 
 
@@ -282,7 +304,7 @@
 .empty-state h3 {
     margin: 0 0 6px;
 
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
 
     font-size: 15px;
@@ -324,8 +346,8 @@
 }
 
 .page-btn:hover {
-    background: rgba(242, 193, 78, 0.12);
-    color: var(--maroon-dark);
+    background: var(--tint-gold-12);
+    color: var(--accent);
 }
 
 .page-btn.active {
@@ -359,7 +381,7 @@
     font-family: var(--font-heading);
     font-size: 1.1rem;
 
-    color: var(--maroon-dark);
+    color: var(--accent);
 
     margin-bottom: 1.25rem;
 
@@ -455,7 +477,7 @@
 
     border-color: var(--gold-dark);
 
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+    box-shadow: var(--focus-ring);
 }
 
 
@@ -501,56 +523,6 @@
 .btn-inline:hover {
     background: rgba(242, 193, 78, 0.12);
     border-color: var(--gold-dark);
-}
-
-
-/* ==========================================
-   DARK MODE
-========================================== */
-
-[data-theme="dark"] .table-card,
-[data-theme="dark"] .form-card,
-[data-theme="dark"] .actions .dropdown-menu {
-    box-shadow: none;
-}
-
-[data-theme="dark"] .data-table thead,
-[data-theme="dark"] .data-table thead th {
-    background: rgba(242, 193, 78, 0.08);
-}
-
-[data-theme="dark"] .data-table tbody tr:hover {
-    background: rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .data-table tbody td strong,
-[data-theme="dark"] .form-card h2,
-[data-theme="dark"] .empty-state h3 {
-    color: var(--gold);
-}
-
-[data-theme="dark"] .badge.employment {
-    background: rgba(242, 193, 78, 0.1);
-    color: var(--gold);
-}
-
-[data-theme="dark"] .badge.status.open {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-}
-
-[data-theme="dark"] .badge.status.closed {
-    background: rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
-}
-
-[data-theme="dark"] .badge.status.draft {
-    background: rgba(249, 115, 22, 0.12);
-    color: #fb923c;
-}
-
-[data-theme="dark"] .page-btn.active {
-    color: var(--white);
 }
 
 
@@ -648,7 +620,7 @@
 .section-icon-gold { background: var(--gold); color: var(--maroon-dark); }
 .form-group > div:has(input[type="radio"]) { display: flex; gap: 1rem; align-items: center; min-height: 47px; }
 .form-group > div:has(input[type="radio"]) label { display: inline-flex; align-items: center; gap: .4rem; margin: 0; font-size: .83rem; font-weight: 600; }
-.form-group input[type="radio"] { width: auto; accent-color: var(--maroon); }
+.form-group input[type="radio"] { width: auto; accent-color: var(--accent); }
 .posting-preview { position: sticky; top: calc(73px + 1rem); }
 .preview-card { position: relative; overflow: hidden; padding: 1.35rem; border: 1px solid var(--card-border); border-radius: 20px; background: linear-gradient(150deg, var(--maroon-dark) 0%, var(--maroon) 72%, #8b2920 100%); color: var(--white); box-shadow: 0 16px 28px rgba(74,15,15,.2); }
 .preview-card::after { position: absolute; right: -35px; bottom: -55px; width: 150px; height: 150px; border: 1px solid rgba(242,193,78,.32); border-radius: 50%; content: ""; }
@@ -665,13 +637,13 @@
 .preview-deadline b { color: var(--white); }
 .preview-tip { display: flex; gap: .55rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,250,243,.15); color: #f6dcae; font-size: .72rem; line-height: 1.45; }
 .preview-tip i { color: var(--gold); margin-top: .12rem; }
-.posting-checklist { margin-top: .9rem; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 14px; background: rgba(251,243,230,.72); }
-.posting-checklist h3 { margin: 0 0 .75rem; color: var(--maroon-dark); font-family: var(--font-heading); font-size: .85rem; }
+.posting-checklist { margin-top: .9rem; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 14px; background: var(--cream); }
+.posting-checklist h3 { margin: 0 0 .75rem; color: var(--accent); font-family: var(--font-heading); font-size: .85rem; }
 .posting-checklist h3 i { margin-right: .35rem; color: var(--gold-dark); }
 .checklist-item { display: flex; align-items: center; gap: .5rem; margin: .55rem 0 0; color: var(--ink-soft); font-size: .74rem; }
 .checklist-item i { color: var(--gold-dark); font-size: .8rem; }
-.checklist-item.is-complete { color: var(--green); }
-.checklist-item.is-complete i { color: var(--green); }
+.checklist-item.is-complete { color: var(--status-approved); }
+.checklist-item.is-complete i { color: var(--status-approved); }
 
 @media (max-width: 900px) {
     .posting-layout { grid-template-columns: 1fr; }

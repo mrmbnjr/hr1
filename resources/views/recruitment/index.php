@@ -133,7 +133,7 @@ if (!isset($_SESSION['user_id'])) {
 
                                     <!-- Employment Type -->
                                     <td>
-                                        <span class="badge employment">
+                                        <span class="badge employment <?= htmlspecialchars(strtolower(str_replace(' ', '-', $job['employment_type']))) ?>">
                                             <?= htmlspecialchars($job['employment_type']) ?>
                                         </span>
                                     </td>

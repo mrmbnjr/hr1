@@ -33,7 +33,7 @@
 
 .summary-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(74, 14, 24, 0.14);
+    box-shadow: var(--shadow-hover);
 }
 
 .summary-card.active {
@@ -63,7 +63,7 @@
 .summary-count {
     font-family: "Luckiest Guy", cursive;
     font-size: 22px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     line-height: 1.1;
 }
 
@@ -122,14 +122,14 @@
 
 .applicant-cell strong {
     display: block;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 13.5px;
     font-weight: 800;
     line-height: 1.4;
 }
 
 .applicant-link:hover strong {
-    color: var(--maroon);
+    color: var(--gold-dark);
 }
 
 .score-pill {
@@ -137,7 +137,7 @@
     align-items: center;
     gap: 8px;
     font-weight: 800;
-    color: var(--maroon-dark);
+    color: var(--accent);
 }
 
 .score-dot {
@@ -250,7 +250,7 @@
 .detail-section {
     overflow: hidden;
     background: var(--card-bg);
-    border: 1px solid rgba(111, 20, 20, 0.09);
+    border: 1px solid var(--border);
     border-top: 3px solid var(--ry-gold);
     border-radius: 20px;
     padding: 0 24px 24px;
@@ -259,7 +259,7 @@
 }
 
 .detail-section:hover {
-    box-shadow: 0 10px 32px rgba(74, 15, 15, 0.11);
+    box-shadow: var(--shadow-hover);
 }
 
 .detail-section h3 {
@@ -271,7 +271,7 @@
     gap: 8px;
     margin: 0;
     padding: 20px 24px 14px;
-    border-bottom: 1px solid rgba(230, 213, 189, 0.8);
+    border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
 }
 
@@ -295,7 +295,7 @@
 .detail-section > .ai-actions {
     margin: 0 -24px 18px;
     padding: 20px 24px 14px;
-    border-bottom: 1px solid rgba(230, 213, 189, 0.8);
+    border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
 }
 
@@ -361,7 +361,7 @@
 .document-file-row {
     margin-bottom: 20px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(230, 213, 189, 0.8);
+    border-bottom: 1px solid var(--border);
 }
 
 .document-file-row .resume-file {
@@ -516,7 +516,7 @@
     justify-content: center;
     font-family: var(--font-heading);
     font-size: 18px;
-    color: var(--maroon-dark);
+    color: var(--ink);
     background:
         conic-gradient(
             from -180deg,
@@ -552,10 +552,10 @@
     width: fit-content;
 }
 
-.rec-high   { background: var(--green-bg); color: var(--green); }
-.rec-mid    { background: var(--blue-bg);  color: var(--blue); }
-.rec-review { background: var(--orange-bg); color: var(--orange); }
-.rec-low    { background: var(--red-bg);   color: var(--red); }
+.rec-high   { background: var(--badge-green-bg);  color: var(--badge-green-fg); }
+.rec-mid    { background: var(--badge-blue-bg);   color: var(--badge-blue-fg); }
+.rec-review { background: var(--badge-orange-bg); color: var(--badge-orange-fg); }
+.rec-low    { background: var(--badge-red-bg);    color: var(--badge-red-fg); }
 
 .match-bars { display: flex; flex-direction: column; gap: 12px; }
 
@@ -583,7 +583,7 @@
     transition: width 0.4s ease;
 }
 
-.match-value { font-size: 13px; font-weight: 800; color: var(--maroon-dark); text-align: right; }
+.match-value { font-size: 13px; font-weight: 800; color: var(--accent); text-align: right; }
 
 
 /* ==========================================================
@@ -611,7 +611,7 @@
     margin:0 0 14px;
     font-size:14px;
     font-weight:800;
-    color:var(--maroon-dark);
+    color:var(--accent);
 }
 
 .analysis-card h4 i{
@@ -713,7 +713,7 @@
 .modal-header h3 {
     font-family: var(--font-heading);
     font-size: 16.5px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     margin: 0;
     display: flex;
     align-items: center;
@@ -729,7 +729,7 @@
 
 .modal-header .close-btn:hover {
     background: rgba(242, 193, 78, 0.2);
-    color: var(--maroon-dark);
+    color: var(--accent);
 }
 
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -763,7 +763,7 @@
 .modal-body textarea:focus {
     outline: none;
     border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+    box-shadow: var(--focus-ring);
 }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -788,69 +788,7 @@
     color: var(--ink);
 }
 
-.confirm-list i { color: var(--green); margin-right: 8px; }
-
-/* ==========================================================
-   DARK MODE
-========================================================== */
-
-[data-theme="dark"] .summary-card,
-[data-theme="dark"] .table-card,
-[data-theme="dark"] .detail-section,
-[data-theme="dark"] .analysis-card {
-    box-shadow: none;
-}
-
-[data-theme="dark"] .applicant-table thead th {
-    background: rgba(242, 193, 78, 0.08);
-}
-
-[data-theme="dark"] .applicant-table tbody tr:hover {
-    background: rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .summary-count,
-[data-theme="dark"] .score-pill,
-[data-theme="dark"] .details-header h2,
-[data-theme="dark"] .detail-section h3,
-[data-theme="dark"] .modal-header h3,
-[data-theme="dark"] .analysis-card h4,
-[data-theme="dark"] .match-value {
-    color: var(--gold);
-}
-
-[data-theme="dark"] .avatar-circle {
-    color: var(--maroon-dark-white);
-}
-
-[data-theme="dark"] .badge-green,
-[data-theme="dark"] .rec-high {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-}
-
-[data-theme="dark"] .badge-red,
-[data-theme="dark"] .rec-low {
-    background: rgba(239, 68, 68, 0.12);
-    color: #f87171;
-}
-
-[data-theme="dark"] .badge-gray {
-    background: rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
-}
-
-[data-theme="dark"] .badge-blue,
-[data-theme="dark"] .rec-mid {
-    background: rgba(59, 130, 246, 0.12);
-    color: #60a5fa;
-}
-
-[data-theme="dark"] .badge-orange,
-[data-theme="dark"] .rec-review {
-    background: rgba(249, 115, 22, 0.12);
-    color: #fb923c;
-}
+.confirm-list i { color: var(--status-approved); margin-right: 8px; }
 
 /* ---------------- Responsive ---------------- */
 

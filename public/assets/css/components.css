@@ -34,7 +34,7 @@
 .data-table thead th,
 .cs-table thead th {
     padding: 13px 18px;
-    background: rgba(242, 193, 78, 0.12);
+    background: var(--table-head-bg);
     border-bottom: 1px solid var(--border);
     color: var(--ink-soft);
     font-size: 11.5px;
@@ -88,7 +88,7 @@
 .employee-request-table tbody tr:hover,
 .data-table tbody tr:hover,
 .cs-table tbody tr:hover {
-    background: rgba(242, 193, 78, 0.08);
+    background: var(--row-hover-bg);
 }
 
 .applicant-table tbody tr:last-child td,
@@ -109,7 +109,7 @@
     border: 1px solid rgba(207, 154, 44, 0.55);
     border-radius: 50%;
     background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    color: var(--maroon-dark);
+    color: var(--avatar-fg);
     font-family: var(--font-heading);
     font-weight: 800;
 }
@@ -157,20 +157,21 @@
 .status-badge.closed,
 .status-badge.inactive,
 .badge.status.closed {
-    background: var(--gray-bg);
-    color: var(--gray);
+    background: var(--badge-gray-bg);
+    color: var(--badge-gray-fg);
 }
 
-.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-blue { background: var(--badge-blue-bg); color: var(--badge-blue-fg); }
 .badge-orange,
 .status-badge.pending,
 .status-badge.draft,
-.badge.status.draft { background: var(--orange-bg); color: var(--orange); }
+.badge.status.draft { background: var(--badge-orange-bg); color: var(--badge-orange-fg); }
 .badge-green,
 .status-badge.open,
 .status-badge.active,
-.badge.status.open { background: var(--green-bg); color: var(--green); }
-.badge-red { background: var(--red-bg); color: var(--red); }
+.badge.status.open { background: var(--badge-green-bg); color: var(--badge-green-fg); }
+.badge-red { background: var(--badge-red-bg); color: var(--badge-red-fg); }
+.badge.employment { background: var(--badge-gold-bg); color: var(--badge-gold-fg); }
 
 .btn-review,
 .btn-outline,
@@ -205,7 +206,7 @@
 .btn-review,
 .btn-primary { background: var(--maroon); color: var(--white); }
 .btn-outline,
-.btn-secondary { background: transparent; color: var(--maroon-dark); border-color: var(--border); }
+.btn-secondary { background: transparent; color: var(--accent); border-color: var(--border); }
 .btn-success { background: var(--green); color: var(--white); }
 .btn-danger { background: var(--red); color: var(--white); }
 .btn-block { width: 100%; }
@@ -284,7 +285,7 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+    box-shadow: var(--focus-ring);
 }
 
 .form-group input,
@@ -332,7 +333,7 @@
 }
 
 .page-btn:hover:not(:disabled),
-.page-num:hover { border-color: var(--gold-dark); background: rgba(242, 193, 78, 0.12); }
+.page-num:hover { border-color: var(--gold-dark); background: var(--tint-gold-12); }
 .page-num.active,
 .page-btn.active { border-color: var(--maroon); background: var(--maroon); color: var(--white); }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -348,14 +349,14 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--cream);
-    color: var(--maroon-dark);
+    color: var(--ink);
     font-size: 12px;
     font-weight: 700;
 }
 
 .status-pill {
-    --pill-bg: var(--gray-bg);
-    --pill-fg: var(--gray);
+    --pill-bg: var(--badge-gray-bg);
+    --pill-fg: var(--badge-gray-fg);
 
     display: inline-flex;
     align-items: center;
@@ -371,9 +372,9 @@
     white-space: nowrap;
 }
 
-.status-pill.is-active   { --pill-bg: var(--green-bg);  --pill-fg: var(--green); }
-.status-pill.is-pending  { --pill-bg: var(--orange-bg); --pill-fg: var(--orange); }
-.status-pill.is-inactive { --pill-bg: var(--gray-bg);   --pill-fg: var(--gray); }
+.status-pill.is-active   { --pill-bg: var(--badge-green-bg);  --pill-fg: var(--badge-green-fg); }
+.status-pill.is-pending  { --pill-bg: var(--badge-orange-bg); --pill-fg: var(--badge-orange-fg); }
+.status-pill.is-inactive { --pill-bg: var(--badge-gray-bg);   --pill-fg: var(--badge-gray-fg); }
 
 .status-dot {
     flex: none;
@@ -382,20 +383,3 @@
     border-radius: 50%;
     background: currentColor;
 }
-
-/* --gray-bg and --cream are not redefined for dark mode, so the neutral
-   variants need an explicit dark treatment. The :not() chain keeps the
-   coloured variants (is-active / is-pending) untouched. */
-[data-theme="dark"] .status-pill:not(.is-active):not(.is-pending) {
-    --pill-bg: rgba(255, 250, 243, 0.12);
-    --pill-fg: var(--ink-soft);
-}
-
-[data-theme="dark"] .role-tag {
-    background: rgba(242, 193, 78, 0.10);
-    color: var(--ink);
-}
-
-[data-theme="dark"] .table-card { box-shadow: none; }
-[data-theme="dark"] .avatar-circle,
-[data-theme="dark"] .avatar-large { color: var(--maroon-dark-white); }

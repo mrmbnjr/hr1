@@ -1,4 +1,19 @@
+/* ==========================================================
+   DESIGN TOKENS  —  single source of truth for theming
+   ----------------------------------------------------------
+   Light values  ->  :root
+   Dark values   ->  [data-theme="dark"]
+
+   RULE: this is the ONLY file that may contain a
+   [data-theme="dark"] selector. Components and pages must
+   consume the tokens below (var(--token)) and never hard-code
+   a theme colour themselves. That is what keeps every page on
+   the same design.
+========================================================== */
+
 :root {
+  color-scheme: light;
+
   /* ==========================
      Color Palette
   ========================== */
@@ -36,8 +51,12 @@
    --gray:   #6b7280;  --gray-bg:   #eef0f2;
    --blue:   #2563eb;  --blue-bg:   #e5edff;
    --orange: #c2660d;  --orange-bg: #feebd3;
-   --green:  #1a7d4c;  --green-bg:  #e2f6ea;
-   --red: #e0362c;     --red-bg: #f3dbdb;
+   --green:  #1a7d4c;  --green-bg:  #e2f6ea;  --green-dark: #246b45;
+   --red: #e0362c;     --red-bg: #f3dbdb;      --red-dark: #8f241e;
+
+   /* Job listing status colours */
+   --ok-bg: #d9f2dd;   --ok-ink: #1f6b33;
+   --soon-bg: #fbe8b5; --soon-ink: #8a5a00;
 
 
    --radius: 14px;
@@ -120,9 +139,74 @@
   0 14px 24px rgba(74,15,15,.25);
 
 --button-radius: 14px;
+
+  /* ==========================
+     Semantic surfaces & tints
+     (shared by every page so dark mode looks identical)
+  ========================== */
+
+  /* Table surfaces */
+  --table-head-bg: rgba(242, 193, 78, 0.12);
+  --row-hover-bg: rgba(242, 193, 78, 0.08);
+
+  /* Translucent overlays */
+  --tint-gold-10: rgba(242, 193, 78, 0.10);
+  --tint-gold-12: rgba(242, 193, 78, 0.12);
+  --tint-neutral: rgba(107, 74, 68, 0.05);
+
+  /* Muted / read-only fields */
+  --surface-muted: rgba(107, 74, 68, 0.05);
+  --field-readonly-bg: rgba(107, 74, 68, 0.06);
+  --field-readonly-border: rgba(107, 74, 68, 0.16);
+
+  /* Emphasised text (links, ids, active tabs) */
+  --accent: var(--maroon-dark);
+
+  /* Feedback text */
+  --success-text: #2f8f4e;
+
+  /* Avatar text */
+  --avatar-fg: var(--maroon-dark);
+
+  /* Badge / pill tokens (soft bg + readable fg) */
+  --badge-gray-bg: var(--gray-bg);     --badge-gray-fg: var(--gray);
+  --badge-blue-bg: var(--blue-bg);     --badge-blue-fg: var(--blue);
+  --badge-orange-bg: var(--orange-bg); --badge-orange-fg: var(--orange);
+  --badge-green-bg: var(--green-bg);   --badge-green-fg: var(--green);
+  --badge-red-bg: var(--red-bg);       --badge-red-fg: var(--red);
+  --badge-gold-bg: rgba(242, 193, 78, 0.18); --badge-gold-fg: var(--maroon-dark);
+
+  /* Status tones (workflow states) */
+  --status-pending: #b45309;    --status-pending-bg: #fdf0d9;
+  --status-approved: #1a7d4c;   --status-approved-bg: #e2f6ea;
+  --status-completed: #2563eb;  --status-completed-bg: #e5edff;
+  --status-rejected: #c2413b;   --status-rejected-bg: #f7e0de;
+
+  /* Secondary surface & progress track */
+  --surface-2: rgba(242, 193, 78, 0.08);
+  --track-bg: rgba(111, 20, 20, 0.07);
+
+  /* Elevation for hover states */
+  --shadow-card: 0 6px 22px rgba(74, 15, 15, 0.07);
+  --shadow-hover: 0 14px 32px rgba(74, 15, 15, 0.14);
+
+  /* Focus ring */
+  --focus-ring: rgba(242, 193, 78, 0.18);
+
+  /* Theme icon visibility (avoids a [data-theme] selector) */
+  --icon-sun-display: block;
+  --icon-moon-display: none;
 }
 
+/* ==========================================================
+   DARK THEME
+   Every token that needs a dark value is overridden here.
+   Components/pages never branch on the theme themselves.
+========================================================== */
+
 [data-theme="dark"] {
+  color-scheme: dark;
+
   --bg: #241511;
   --bg-wave-color: #4a2f1e;
   --bg-wave-opacity-1: 0.55;
@@ -132,9 +216,11 @@
   --card-border: #e0362c;
   --card-shadow: rgba(0, 0, 0, 0.45);
 
+  --border: #4a3129;
+
   --maroon: #4a1212;
   --maroon-dark: #2a0a0a;
-   --maroon-dark-white: #ecd8bc;
+  --maroon-dark-white: #ecd8bc;
 
   --red: #e0362c;
   --red-bright: #ff5c50;
@@ -148,9 +234,78 @@
 
   --ink: #f6e9e2;
   --ink-soft: #d8b9ae;
-  --white: rgba(255,250,243,.75);
+  --white: rgba(255, 250, 243, .75);
+
+  --gold-light: #3a2f1a;
+  --cream: #241715;
 
   --badge-seal: var(--red);
 
+  /* Shadows: cards flatten, overlays stay deep */
+  --shadow: none;
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
   --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.5);
+
+  /* Navbar */
+  --navbar-bg: #2f1c17;
+  --navbar-surface: #3a241d;
+  --navbar-border: #5a3a2d;
+  --navbar-text: var(--ink);
+  --navbar-text-soft: var(--ink-soft);
+
+  /* Table surfaces */
+  --table-head-bg: rgba(242, 193, 78, 0.08);
+  --row-hover-bg: rgba(242, 193, 78, 0.05);
+
+  /* Translucent overlays */
+  --tint-gold-10: rgba(242, 193, 78, 0.08);
+  --tint-gold-12: rgba(242, 193, 78, 0.10);
+  --tint-neutral: rgba(255, 250, 243, 0.06);
+
+  /* Muted / read-only fields */
+  --surface-muted: rgba(255, 250, 243, 0.04);
+  --field-readonly-bg: rgba(255, 250, 243, 0.06);
+  --field-readonly-border: rgba(255, 250, 243, 0.14);
+
+  /* Emphasised text */
+  --accent: var(--gold);
+
+  /* Feedback text */
+  --success-text: #4ade80;
+
+  /* Avatar text */
+  --avatar-fg: var(--maroon-dark-white);
+
+  /* Badge / pill tokens */
+  --badge-gray-bg: rgba(148, 163, 184, 0.12);  --badge-gray-fg: #94a3b8;
+  --badge-blue-bg: rgba(59, 130, 246, 0.12);   --badge-blue-fg: #60a5fa;
+  --badge-orange-bg: rgba(249, 115, 22, 0.12); --badge-orange-fg: #fb923c;
+  --badge-green-bg: rgba(34, 197, 94, 0.12);   --badge-green-fg: #4ade80;
+  --badge-red-bg: rgba(224, 54, 44, 0.16);     --badge-red-fg: #f87171;
+  --badge-gold-bg: rgba(242, 193, 78, 0.12);   --badge-gold-fg: var(--gold);
+
+  /* Status tones (workflow states) */
+  --status-pending: #f0b357;    --status-pending-bg: rgba(217, 119, 6, 0.20);
+  --status-approved: #6fd39b;   --status-approved-bg: rgba(26, 125, 76, 0.24);
+  --status-completed: #93b4ff;  --status-completed-bg: rgba(37, 99, 235, 0.22);
+  --status-rejected: #ff9086;   --status-rejected-bg: rgba(224, 54, 44, 0.22);
+
+  /* Secondary surface & progress track */
+  --surface-2: rgba(242, 193, 78, 0.06);
+  --track-bg: rgba(255, 250, 243, 0.10);
+
+  /* Elevation for hover states */
+  --shadow-card: 0 6px 22px rgba(0, 0, 0, 0.40);
+  --shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.45);
+
+  /* Focus ring */
+  --focus-ring: rgba(242, 193, 78, 0.22);
+
+  /* Job listing status colours */
+  --ok-bg: #1f3d27;   --ok-ink: #8fe3a4;
+  --soon-bg: #4a3a14; --soon-ink: #f2cf72;
+
+  /* Theme icon visibility */
+  --icon-sun-display: none;
+  --icon-moon-display: block;
 }
