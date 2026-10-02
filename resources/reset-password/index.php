@@ -8,51 +8,79 @@ $pageTitle = 'Reset your password';
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= htmlspecialchars($pageTitle) ?> | Ram Yum HRMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{--maroon:#7a1523;--maroon-dark:#560d18;--gold:#d9a441;--gold-light:#f3deaa;--cream:#fbf5e9;--ink:#2b1a1d;--ink-soft:#6f5c5f;--card-bg:#fff;--border:#e6d9c3;--radius:14px;--shadow:0 12px 32px rgba(86,13,24,.14);--err:#b3261e;--ok:#2e7d4f}
-@media (prefers-color-scheme:dark){:root{--cream:#1d1214;--ink:#f6ece0;--ink-soft:#c2aeb0;--card-bg:#2a1a1d;--border:#4a3237;--shadow:0 12px 32px rgba(0,0,0,.5);--gold-light:#4a3a1c}}
+:root{color-scheme:light;--maroon:#701824;--maroon-dark:#50101a;--gold:#d9a441;--gold-light:#f5e5be;--cream:#fbf7ef;--ink:#2b1a1d;--ink-soft:#715e60;--card-bg:#fffefa;--border:#e8ddcc;--field-bg:#fff;--radius:16px;--shadow:0 22px 60px rgba(68,20,25,.12);--err:#b3261e;--ok:#28774b}
+[data-theme="dark"]{color-scheme:dark;--cream:#191416;--ink:#f6ece7;--ink-soft:#c6b4b5;--card-bg:#261d20;--border:#4a393d;--field-bg:#20191b;--gold-light:#48391f;--shadow:0 22px 60px rgba(0,0,0,.42)}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
-.brand{background:var(--maroon);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between;border-right:6px solid var(--gold)}
-.brand h1{font-family:'Baloo 2',sans-serif;font-size:2.6rem;line-height:1.1;margin:0 0 12px}
-.brand p{color:var(--gold-light);max-width:34ch;line-height:1.6;margin:0}
-.brand .logo{font-family:'Baloo 2',sans-serif;font-size:1.4rem;color:var(--gold)}
-.main{display:flex;align-items:center;justify-content:center;padding:32px 20px}
-.card{width:100%;max-width:520px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
-.card h2{font-family:'Baloo 2',sans-serif;margin:0 0 4px;font-size:1.5rem}
-.sub{color:var(--ink-soft);margin:0 0 20px;font-size:.95rem}
-.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
-.tab{border:1.5px solid var(--border);background:transparent;color:var(--ink);border-radius:10px;padding:12px 6px;cursor:pointer;font:600 .85rem 'Nunito',sans-serif;display:flex;flex-direction:column;align-items:center;gap:6px}
-.tab i{font-size:1.2rem;color:var(--maroon)}
+body{margin:0;min-height:100vh;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);display:grid;grid-template-columns:minmax(310px, .78fr) minmax(0, 1.22fr);transition:background .2s,color .2s}
+.brand{position:relative;overflow:hidden;background:var(--maroon);color:#fff;padding:clamp(28px,5vw,68px);display:flex;flex-direction:column;justify-content:space-between;border-right:6px solid var(--gold)}
+.brand:after{content:"";position:absolute;width:360px;height:360px;right:-150px;bottom:10%;border:1px solid rgba(245,229,190,.22);border-radius:50%;box-shadow:0 0 0 28px rgba(245,229,190,.04),0 0 0 58px rgba(245,229,190,.035),0 0 0 92px rgba(245,229,190,.025);pointer-events:none}
+.brand h1{font-family:'Baloo 2',sans-serif;font-size:clamp(2rem,3vw,3rem);line-height:1.08;margin:0 0 16px;max-width:12ch}
+.brand p{color:var(--ink-soft); max-width:34ch;line-height:1.7;margin:0;font-size:1.02rem}
+.brand-lockup{display:flex;align-items:center;gap:14px}
+.brand-lockup img{display:block;width:72px;height:72px;object-fit:contain;flex-shrink:0}
+.sidebar-header-text{display:flex;flex-direction:column}
+.brand-copy{flex:1;display:flex;flex-direction:column;justify-content:center}
+.brand-title{margin:0;font-family:'Luckiest Guy',cursive;font-size:20px;line-height:1.05;color:#e0362c;text-shadow:-1.2px -1.2px 0 #241311,1.2px -1.2px 0 #241311,-1.2px 1.2px 0 #241311,1.2px 1.2px 0 #241311,0 2px 0 #241311;-webkit-text-stroke:1.3px #241311;paint-order:stroke fill;letter-spacing:.5px}
+.brand-title span{display:inline}
+.sidebar-header-text p{margin:4px 0 0;font-family:'Baloo 2',sans-serif;font-size:12px;font-weight:600;color:#fff}
+.main{display:flex;align-items:center;justify-content:center;padding:52px 34px}
+.card{width:100%;max-width:570px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:clamp(24px,3vw,38px);animation:card-in .45s ease-out both}
+@keyframes card-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card h2{font-family:'Baloo 2',sans-serif;margin:0 0 2px;font-size:1.8rem;line-height:1.2}
+.sub{color:var(--ink-soft);margin:0 0 24px;font-size:.98rem}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:24px}
+.tab{min-height:82px;border:1.5px solid var(--border);background:var(--field-bg);color:var(--ink);border-radius:11px;padding:11px 6px;cursor:pointer;font:700 .84rem 'Nunito',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;transition:border-color .16s,background .16s,transform .16s}
+.tab:hover{border-color:var(--gold);transform:translateY(-1px)}
+.tab i{font-size:1.15rem;color:var(--maroon)}
+[data-theme="dark"] .tab i{color:var(--gold)}
 .tab[aria-selected="true"]{border-color:var(--maroon);background:var(--gold-light);color:var(--ink)}
-.tab:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+[data-theme="dark"] .tab[aria-selected="true"]{border-color:var(--gold)}
+.tab:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible,.theme-toggle:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .panel{display:none}.panel.active{display:block}
-label{display:block;font-weight:700;font-size:.9rem;margin:14px 0 6px}
-input,textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:transparent;color:var(--ink);font:inherit}
+label{display:block;font-weight:800;font-size:.9rem;margin:15px 0 7px}
+input,textarea{width:100%;min-height:46px;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;background:var(--field-bg);color:var(--ink);font:inherit;transition:border-color .16s,box-shadow .16s}
+input::placeholder,textarea::placeholder{color:var(--ink-soft);opacity:.8}
+input:focus,textarea:focus{outline:none;border-color:var(--maroon);box-shadow:0 0 0 3px rgba(112,24,36,.12)}
+[data-theme="dark"] input:focus,[data-theme="dark"] textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,164,65,.15)}
 textarea{min-height:96px;resize:vertical}
-.pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--ink-soft);cursor:pointer;padding:6px}
-.btn{width:100%;margin-top:20px;padding:12px;border:0;border-radius:10px;background:var(--maroon);color:#fff;font:700 1rem 'Nunito',sans-serif;cursor:pointer}
-.btn:hover{background:var(--maroon-dark)}.btn:disabled{opacity:.6;cursor:wait}
+.pw{position:relative}.pw input{padding-right:48px}.pw button{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:36px;height:36px;background:none;border:0;border-radius:7px;color:var(--ink-soft);cursor:pointer}
+.btn{width:100%;min-height:48px;margin-top:20px;padding:12px;border:0;border-radius:9px;background:var(--maroon);color:#fff;font:800 1rem 'Nunito',sans-serif;cursor:pointer;transition:background .16s,transform .16s}
+.btn:hover{background:var(--maroon-dark);transform:translateY(-1px)}.btn:disabled{opacity:.6;cursor:wait;transform:none}
 .btn.ghost{background:transparent;color:var(--maroon);border:1.5px solid var(--maroon);margin-top:10px}
-.hint{font-size:.82rem;color:var(--ink-soft);margin-top:6px}
-.msg{display:none;margin-top:16px;padding:11px 13px;border-radius:10px;font-size:.92rem}
-.msg.show{display:block}.msg.err{background:rgba(179,38,30,.1);color:var(--err)}.msg.ok{background:rgba(46,125,79,.12);color:var(--ok)}
+[data-theme="dark"] .btn.ghost{color:var(--gold);border-color:var(--gold)}
+.hint{font-size:.84rem;color:var(--ink-soft);margin:8px 0 0;line-height:1.45}
+.msg{display:none;margin-top:16px;padding:12px 14px;border-radius:9px;font-size:.92rem;line-height:1.45}
+.msg.show{display:block}.msg.err{background:rgba(179,38,30,.1);color:var(--err)}.msg.ok{background:rgba(40,119,75,.12);color:var(--ok)}
 .code{letter-spacing:.5em;text-align:center;font:700 1.4rem 'Baloo 2',sans-serif}
-.back{display:block;text-align:center;margin-top:22px;color:var(--maroon);font-weight:700;text-decoration:none}
-@media (prefers-color-scheme:dark){.back,.tab i{color:var(--gold)}.btn.ghost{color:var(--gold);border-color:var(--gold)}}
-@media (max-width:820px){body{grid-template-columns:1fr}.brand{padding:24px;border-right:0;border-bottom:6px solid var(--gold)}.brand h1{font-size:1.8rem}.brand p{display:none}}
+.back{display:block;text-align:center;margin-top:22px;color:var(--maroon);font-weight:800;text-decoration:none}
+[data-theme="dark"] .back{color:var(--gold)}
+.theme-toggle{position:fixed;top:18px;right:18px;z-index:20;width:44px;height:44px;border:0;border-radius:50%;background:var(--card-bg);color:var(--maroon);box-shadow:0 5px 18px rgba(0,0,0,.16);display:grid;place-items:center;cursor:pointer;transition:transform .18s,background .18s,color .18s}
+.theme-toggle:hover{transform:translateY(-2px) rotate(8deg)}.theme-toggle:active{transform:translateY(0) scale(.94)}.theme-toggle .icon{width:20px;height:20px}.theme-toggle .icon-moon{display:none}
+[data-theme="dark"] .theme-toggle{color:var(--gold)}[data-theme="dark"] .theme-toggle .icon-sun{display:none}[data-theme="dark"] .theme-toggle .icon-moon{display:block}
+@media(max-width:820px){body{grid-template-columns:1fr}.brand{min-height:190px;padding:25px 28px;border-right:0;border-bottom:5px solid var(--gold)}.brand h1{font-size:1.8rem;max-width:22ch;margin:20px 0 8px}.brand p{display:none}.brand small{font-size:.78rem}.main{padding:34px 18px}.card{max-width:560px}}
+@media(max-width:480px){.brand{min-height:150px;padding:19px 20px}.brand h1{font-size:1.55rem;margin:12px 0 4px}.brand-lockup{gap:14px}.brand-lockup img{width:64px;height:64px}.brand-title{font-size:18px}.sidebar-header-text p{font-size:11px}.main{padding:22px 12px}.card{padding:23px 18px}.card h2{font-size:1.55rem}.tabs{gap:6px}.tab{min-height:76px;font-size:.76rem}.theme-toggle{top:12px;right:12px;width:40px;height:40px}}
 </style>
 </head>
 <body>
+<button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" aria-pressed="false">
+  <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path></svg>
+  <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 14.3A8.5 8.5 0 1 1 9.7 3.2a6.8 6.8 0 0 0 11.1 11.1z"></path></svg>
+</button>
 <aside class="brand">
-  <div class="logo"><i class="fa-solid fa-bowl-food"></i> Ram Yum</div>
-  <div>
+  <div class="brand-lockup">
+    <img src="<?= asset('images/logo.png') ?>" alt="RAM-YUM Logo">
+    <div class="sidebar-header-text">
+      <h2 class="brand-title">RAM-YUM <span>Store</span></h2>
+      <p>Korean &amp; Japanese Store</p>
+    </div>
+  </div>
+  <div class="brand-copy">
     <h1>Locked out? Pick the way back in.</h1>
     <p>Choose the option that works for you. If none of them do, HR can reset your account.</p>
   </div>
-  <small style="color:var(--gold-light)">Ram Yum HR Management System</small>
 </aside>
 
 <main class="main">
@@ -71,7 +99,7 @@ textarea{min-height:96px;resize:vertical}
     <form id="f-send" data-url="reset-send-code">
       <label for="em">Gmail address</label>
       <input id="em" name="email" type="email" placeholder="you@gmail.com" required autocomplete="email">
-      <p class="hint">We'll send a 6-digit code to this address. It expires in 10 minutes.</p>
+      <p class="hint">We'll send a 6-digit code to this address. It expires in 5 minutes.</p>
       <button class="btn" type="submit">Send code</button>
     </form>
     <form id="f-verify" data-url="reset-verify-code" hidden>
@@ -126,6 +154,23 @@ textarea{min-height:96px;resize:vertical}
 </main>
 
 <script>
+// Keep the theme preference consistent with the login page.
+const themeToggle=document.getElementById('themeToggle');
+const themeRoot=document.documentElement;
+const themeKey='ramyum-theme';
+let savedTheme=null;
+try{savedTheme=localStorage.getItem(themeKey)}catch(e){}
+const initialTheme=savedTheme||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+function applyTheme(theme){
+  if(theme==='dark'){themeRoot.setAttribute('data-theme','dark');themeToggle.setAttribute('aria-pressed','true')}
+  else{themeRoot.removeAttribute('data-theme');themeToggle.setAttribute('aria-pressed','false')}
+}
+applyTheme(initialTheme);
+themeToggle.addEventListener('click',()=>{
+  const next=themeRoot.getAttribute('data-theme')==='dark'?'light':'dark';
+  applyTheme(next);
+  try{localStorage.setItem(themeKey,next)}catch(e){}
+});
 // Tabs
 const tabs=document.querySelectorAll('.tab');
 tabs.forEach(t=>t.addEventListener('click',()=>{
