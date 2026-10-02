@@ -79,6 +79,7 @@ class Applicant
 
                 ai.overall_score AS ai_score,
                 ai.ai_summary AS screening_summary,
+                av.validation_status,
 
                 i.interview_date,
 
@@ -94,6 +95,9 @@ class Applicant
 
             LEFT JOIN ai_screening ai
                 ON ap.application_id = ai.application_id
+
+            LEFT JOIN application_validations av
+                ON av.application_id = ap.application_id
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
@@ -328,6 +332,20 @@ class Applicant
                 ai.concerns,
                 ai.ai_summary,
 
+                                /*
+                 * AI validation
+                 */
+                av.validation_status,
+                av.submission_reference AS validation_reference,
+                av.identity_status,
+                av.education_status,
+                av.experience_status,
+                av.credential_status,
+                av.consistency_score AS validation_score,
+                av.findings AS validation_findings,
+                av.validation_summary,
+                av.processed_at AS validation_processed_at,
+
                 /*
                  * Interview
                  */
@@ -362,6 +380,9 @@ class Applicant
 
             LEFT JOIN ai_screening ai
                 ON ap.application_id = ai.application_id
+                
+            LEFT JOIN application_validations av
+                ON av.application_id = ap.application_id
 
             LEFT JOIN interviews i
                 ON ap.application_id = i.application_id
@@ -1369,6 +1390,25 @@ class Applicant
         );
     }
 
+        /*
+    |--------------------------------------------------------------------------
+    | Find Applicant By Phone
+    |--------------------------------------------------------------------------
+    */
+
+    public function getApplicantByPhone(string $phone)
+    {
+        $stmt = $this->db->prepare("
+            SELECT applicant_id
+            FROM applicants
+            WHERE phone = ?
+            LIMIT 1
+        ");
+
+        $stmt->execute([$phone]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -1490,7 +1530,11 @@ class Applicant
         array $data
     ): int {
 
-        $this->db->beginTransaction();
+        $ownsTransaction = !$this->db->inTransaction();
+
+        if ($ownsTransaction) {
+            $this->db->beginTransaction();
+        }
 
         try {
 
@@ -1693,14 +1737,16 @@ class Applicant
             }
 
 
-            $this->db->commit();
+            if ($ownsTransaction) {
+                $this->db->commit();
+            }
 
 
             return $applicationId;
 
         } catch (\Throwable $e) {
 
-            if ($this->db->inTransaction()) {
+            if ($ownsTransaction && $this->db->inTransaction()) {
                 $this->db->rollBack();
             }
 

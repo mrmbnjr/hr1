@@ -22,6 +22,8 @@ hPanel → **phpMyAdmin** → open your new database → **Import**:
 3. `database/seeds/onboarding_assigned_requests_seed.sql` (optional, only with the demo seed)
 
 The `migrations/` files are not needed on a fresh database; `schema.sql` already includes them.
+For an existing installation that already created `application_validations`, run
+`database/migrations/20261002_extend_ai_validation_for_processing.sql` once.
 
 ## 5. Upload the files
 Upload the **contents** of the `hr1` folder (not the folder itself) into the subdomain folder.

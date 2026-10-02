@@ -9,9 +9,14 @@ use App\Services\ResumeEvaluationService;
 use App\Services\ResumeInputService;
 use App\Services\AcademicDocumentInputService;
 use App\Services\AcademicDocumentEvaluationService;
+use App\Models\ApplicationValidation;
+use App\Services\ApplicationValidationService;
 
 class ApplicantController
 {
+
+    private const MAX_INVALID_ATTEMPTS = 3;
+    private const MAX_ATTEMPTS_PER_HOUR = 10;
     private Applicant $applicant;
 
     public function __construct()
@@ -79,7 +84,7 @@ class ApplicantController
     |--------------------------------------------------------------------------
     */
 
-    public function submitApplication()
+     public function submitApplication()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: ?page=login");
@@ -89,46 +94,36 @@ class ApplicantController
         $token = trim($_POST['application_token'] ?? '');
 
         if ($token === '') {
-            $_SESSION['application_error'] =
-                'Invalid application link.';
+            $_SESSION['application_error'] = 'Invalid application link.';
 
             header("Location: ?page=login");
             exit;
         }
 
-
         /*
-         * Keep track of saved files so they can be removed
-         * if something fails after the upload succeeds.
+         * Validation plus screening can take a while. Keep running (and
+         * cleaning up) even if the browser is closed.
          */
-        $savedFilePaths = [];
+        @set_time_limit(180);
+        ignore_user_abort(true);
 
+        $savedFilePaths = [];
+        $stagingDirectory = null;
+        $validationId = null;
 
         try {
 
             /*
             |--------------------------------------------------------------------------
-            | 1. Find job posting
+            | 1. Job posting
             |--------------------------------------------------------------------------
             */
 
-            $job =
-                $this->applicant
-                    ->getJobByApplicationToken($token);
-
+            $job = $this->applicant->getJobByApplicationToken($token);
 
             if (!$job) {
-                throw new \Exception(
-                    'Invalid application link.'
-                );
+                throw new \Exception('Invalid application link.');
             }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 2. Make sure job is accepting applications
-            |--------------------------------------------------------------------------
-            */
 
             $closedReason = $this->jobClosedReason($job);
 
@@ -139,63 +134,37 @@ class ApplicantController
 
             /*
             |--------------------------------------------------------------------------
-            | 3. Applicant information
+            | 2. Basic validation: applicant information
             |--------------------------------------------------------------------------
             */
 
-            $firstName =
-                trim($_POST['first_name'] ?? '');
-
-            $middleName =
-                trim($_POST['middle_name'] ?? '');
-
-            $lastName =
-                trim($_POST['last_name'] ?? '');
-
-            $email =
-                trim($_POST['email'] ?? '');
-
-            $phone =
-                trim($_POST['phone'] ?? '');
-
-            $address =
-                trim($_POST['address'] ?? '');
-
+            $firstName = trim($_POST['first_name'] ?? '');
+            $middleName = trim($_POST['middle_name'] ?? '');
+            $lastName = trim($_POST['last_name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $phone = trim($_POST['phone'] ?? '');
+            $address = trim($_POST['address'] ?? '');
 
             if ($firstName === '') {
-                throw new \Exception(
-                    'First name is required.'
-                );
+                throw new \Exception('First name is required.');
             }
 
             if ($lastName === '') {
-                throw new \Exception(
-                    'Last name is required.'
-                );
+                throw new \Exception('Last name is required.');
             }
 
-            if (
-                $email === '' ||
-                !filter_var(
-                    $email,
-                    FILTER_VALIDATE_EMAIL
-                )
-            ) {
-                throw new \Exception(
-                    'Please provide a valid email address.'
-                );
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new \Exception('Please provide a valid email address.');
             }
 
             if ($phone === '') {
-                throw new \Exception(
-                    'Phone number is required.'
-                );
+                throw new \Exception('Phone number is required.');
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | 6. Resume
+            | 3. Basic validation: resume (PDF only, the AI cannot read DOC/DOCX)
             |--------------------------------------------------------------------------
             */
 
@@ -203,57 +172,30 @@ class ApplicantController
                 !isset($_FILES['resume']) ||
                 $_FILES['resume']['error'] !== UPLOAD_ERR_OK
             ) {
-                throw new \Exception(
-                    'Please upload your resume.'
-                );
+                throw new \Exception('Please upload your resume.');
+            }
+
+            $resume = $_FILES['resume'];
+            $academicDocuments = $_FILES['academic_documents'] ?? null;
+            $coverLetter = $_FILES['cover_letter'] ?? null;
+
+            $resumeInput = new ResumeInputService();
+
+            $resumeExtension = $resumeInput->validateUploadedFile($resume);
+
+            if ($resumeExtension !== 'pdf') {
+                throw new \Exception('Please upload your resume as a PDF file.');
             }
 
 
-            $resume =
-                $_FILES['resume'];
-
-            $academicDocuments =
-                $_FILES['academic_documents'] ?? null;
-
-            $coverLetter =
-                $_FILES['cover_letter'] ?? null;
-
-
             /*
             |--------------------------------------------------------------------------
-            | 7. Validate resume
+            | 4. Basic validation: academic documents (academic_documents[])
             |--------------------------------------------------------------------------
             */
 
-            $resumeInput =
-                new ResumeInputService();
-
-            $resumeExtension =
-                $resumeInput->validateUploadedFile(
-                    $resume
-                );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 8. Validate academic documents
-            |--------------------------------------------------------------------------
-            |
-            | The form uses:
-            |
-            | academic_documents[]
-            |
-            | Multiple files are allowed.
-            |
-            */
-
-            $academicDocumentRequired =
-                !empty(
-                    $job['academic_document_required']
-                );
-
+            $academicDocumentRequired = !empty($job['academic_document_required']);
             $academicFiles = [];
-
 
             if (
                 $academicDocuments !== null &&
@@ -261,177 +203,80 @@ class ApplicantController
                 is_array($academicDocuments['name'])
             ) {
 
-                $academicInput =
-                    new AcademicDocumentInputService();
+                $academicInput = new AcademicDocumentInputService();
 
+                foreach ($academicDocuments['name'] as $index => $originalName) {
 
-                foreach (
-                    $academicDocuments['name']
-                    as $index => $originalName
-                ) {
+                    $fileError = $academicDocuments['error'][$index] ?? UPLOAD_ERR_NO_FILE;
 
-                    $fileError =
-                        $academicDocuments['error'][$index]
-                        ?? UPLOAD_ERR_NO_FILE;
-
-
-                    /*
-                     * Ignore empty file slots.
-                     */
-                    if (
-                        $fileError ===
-                        UPLOAD_ERR_NO_FILE
-                    ) {
+                    if ($fileError === UPLOAD_ERR_NO_FILE) {
                         continue;
                     }
 
-
-                    /*
-                     * Handle upload errors.
-                     */
-                    if (
-                        $fileError !==
-                        UPLOAD_ERR_OK
-                    ) {
+                    if ($fileError !== UPLOAD_ERR_OK) {
                         throw new \Exception(
                             'There was a problem uploading one of your certificates or diplomas.'
                         );
                     }
 
-
-                    /*
-                     * Rebuild a normal $_FILES-style array.
-                     */
                     $academicFile = [
-
-                        'name' =>
-                            $academicDocuments['name'][$index]
-                            ?? '',
-
-                        'type' =>
-                            $academicDocuments['type'][$index]
-                            ?? '',
-
-                        'tmp_name' =>
-                            $academicDocuments['tmp_name'][$index]
-                            ?? '',
-
-                        'error' =>
-                            $fileError,
-
-                        'size' =>
-                            $academicDocuments['size'][$index]
-                            ?? 0
+                        'name' => $academicDocuments['name'][$index] ?? '',
+                        'type' => $academicDocuments['type'][$index] ?? '',
+                        'tmp_name' => $academicDocuments['tmp_name'][$index] ?? '',
+                        'error' => $fileError,
+                        'size' => $academicDocuments['size'][$index] ?? 0,
                     ];
 
+                    $extension = $academicInput->validateUploadedFile($academicFile);
 
-                    /*
-                     * Validate individual document.
-                     */
-                    $extension =
-                        $academicInput
-                            ->validateUploadedFile(
-                                $academicFile
-                            );
-
-
-                    /*
-                     * Keep the validated document
-                     * until it is moved into storage.
-                     */
                     $academicFiles[] = [
-
-                        'file' =>
-                            $academicFile,
-
-                        'extension' =>
-                            $extension,
-
-                        'original_file_name' =>
-                            basename(
-                                $academicFile['name']
-                            )
+                        'file' => $academicFile,
+                        'extension' => $extension,
+                        'original_file_name' => basename($academicFile['name']),
                     ];
                 }
+            }
+
+            if ($academicDocumentRequired && empty($academicFiles)) {
+                throw new \Exception('Please upload at least one certificate or diploma.');
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | 9. Required academic document check
+            | 5. Basic validation: optional cover letter
             |--------------------------------------------------------------------------
             */
 
-            if (
-                $academicDocumentRequired &&
-                empty($academicFiles)
-            ) {
-                throw new \Exception(
-                    'Please upload at least one certificate or diploma.'
+            $coverExtension = null;
+
+            if ($coverLetter && $coverLetter['error'] !== UPLOAD_ERR_NO_FILE) {
+
+                if ($coverLetter['error'] !== UPLOAD_ERR_OK) {
+                    throw new \Exception('There was a problem uploading your cover letter.');
+                }
+
+                $coverExtension = $resumeInput->validateUploadedFile(
+                    $coverLetter,
+                    'Cover letter'
                 );
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | 10. Validate optional cover letter
+            | 6. Duplicate checks (before any AI call is spent)
             |--------------------------------------------------------------------------
             */
 
-            $coverExtension = null;
-
-
-            if (
-                $coverLetter &&
-                $coverLetter['error'] !==
-                UPLOAD_ERR_NO_FILE
-            ) {
-
-                if (
-                    $coverLetter['error'] !==
-                    UPLOAD_ERR_OK
-                ) {
-                    throw new \Exception(
-                        'There was a problem uploading your cover letter.'
-                    );
-                }
-
-
-                $coverExtension =
-                    $resumeInput
-                        ->validateUploadedFile(
-                            $coverLetter,
-                            'Cover letter'
-                        );
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 11. Find or create applicant
-            |--------------------------------------------------------------------------
-            */
-
-            $existingApplicant =
-                $this->applicant
-                    ->getApplicantByEmail(
-                        $email
-                    );
-
+            $existingApplicant = $this->applicant->getApplicantByEmail($email);
 
             if ($existingApplicant) {
 
-                /*
-                 * Prevent duplicate application
-                 * for the same position.
-                 */
                 if (
                     $this->applicant->hasApplied(
-                        (int)
-                        $existingApplicant['applicant_id'],
-
-                        (int)
-                        $job['posting_id']
+                        (int) $existingApplicant['applicant_id'],
+                        (int) $job['posting_id']
                     )
                 ) {
                     throw new \Exception(
@@ -439,284 +284,330 @@ class ApplicantController
                     );
                 }
 
+            } elseif ($this->applicant->getApplicantByPhone($phone)) {
 
-                $applicantId =
-                    (int)
-                    $existingApplicant['applicant_id'];
-
-            } else {
-
-                $applicantId =
-                    $this->applicant
-                        ->createApplicant([
-                            'first_name' =>
-                                $firstName,
-
-                            'middle_name' =>
-                                $middleName !== ''
-                                    ? $middleName
-                                    : null,
-
-                            'last_name' =>
-                                $lastName,
-
-                            'email' =>
-                                $email,
-
-                            'phone' =>
-                                $phone,
-
-                            'address' =>
-                                $address !== ''
-                                    ? $address
-                                    : null
-                        ]);
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 12. Create upload directory
-            |--------------------------------------------------------------------------
-            */
-
-            $projectRoot =
-                dirname(__DIR__, 3);
-
-            $uploadDirectory =
-                $projectRoot .
-                '/storage/uploads/applications/';
-
-
-            if (!is_dir($uploadDirectory)) {
-
-                if (
-                    !mkdir(
-                        $uploadDirectory,
-                        0755,
-                        true
-                    ) &&
-                    !is_dir($uploadDirectory)
-                ) {
-                    throw new \Exception(
-                        'Unable to create the application upload directory.'
-                    );
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 13. Save resume
-            |--------------------------------------------------------------------------
-            */
-
-            $resumeFileName =
-                'resume_' .
-                $applicantId .
-                '_' .
-                bin2hex(
-                    random_bytes(8)
-                ) .
-                '.' .
-                $resumeExtension;
-
-
-            $resumePath =
-                $uploadDirectory .
-                $resumeFileName;
-
-
-            if (
-                !move_uploaded_file(
-                    $resume['tmp_name'],
-                    $resumePath
-                )
-            ) {
                 throw new \Exception(
-                    'Unable to save the uploaded resume.'
+                    'This phone number is already registered with another applicant. Please use a different phone number or contact the recruitment team.'
                 );
             }
 
 
-            $savedFilePaths[] =
-                $resumePath;
+            /*
+            |--------------------------------------------------------------------------
+            | 7. Rate limit (this endpoint is public and calls the AI)
+            |--------------------------------------------------------------------------
+            */
+
+            $validations = new ApplicationValidation();
+            $ipAddress = $this->clientIp();
+
+            $validations->purgeExpiredInvalid(
+                max(1, (int) config('app.rejected_applicant_retention_days', 30))
+            );
+            $validations->purgeExpiredUnlinked();
 
 
             /*
             |--------------------------------------------------------------------------
-            | 14. Save academic documents
+            | 8. Stage the files (no applicant or application exists yet)
             |--------------------------------------------------------------------------
             |
-            | Every uploaded certificate/diploma gets:
-            |
-            | - generated storage filename
-            | - original filename
-            |
-            | The first document becomes primary.
+            | Files wait in storage/uploads/pending/{reference}/ with real file
+            | extensions so the AI service can read them.
             |
             */
 
-            $academicDocumentsForDatabase = [];
+            $projectRoot = dirname(__DIR__, 3);
+            $pendingRoot = $projectRoot . '/storage/uploads/pending';
 
+            $this->purgeStalePending($pendingRoot);
 
-            foreach (
-                $academicFiles
-                as $academicFile
+            $reference = 'VAL-' . strtoupper(bin2hex(random_bytes(5)));
+
+            $applicantName = trim(implode(' ', array_filter([
+                $firstName,
+                $middleName,
+                $lastName,
+            ])));
+
+            $validationId = $validations->reserveAttempt([
+                'submission_reference' => $reference,
+                'posting_id' => (int) $job['posting_id'],
+                'applicant_name' => $applicantName,
+                'applicant_email' => $email,
+                'ip_address' => $ipAddress,
+            ], self::MAX_INVALID_ATTEMPTS, self::MAX_ATTEMPTS_PER_HOUR);
+
+            $stagingDirectory = $pendingRoot . '/' . $reference;
+
+            if (
+                !mkdir($stagingDirectory, 0755, true) &&
+                !is_dir($stagingDirectory)
             ) {
+                throw new \Exception('Unable to prepare your application for processing.');
+            }
 
-                $academicFileName =
-                    'academic_' .
-                    $applicantId .
-                    '_' .
-                    bin2hex(
-                        random_bytes(8)
-                    ) .
-                    '.' .
-                    $academicFile['extension'];
+            $stagedResumePath = $stagingDirectory . '/resume.pdf';
 
+            if (!move_uploaded_file($resume['tmp_name'], $stagedResumePath)) {
+                throw new \Exception('Unable to save the uploaded resume.');
+            }
 
-                $academicFilePath =
-                    $uploadDirectory .
-                    $academicFileName;
+            $stagedDocuments = [];
 
+            foreach ($academicFiles as $position => $academicFile) {
 
-                if (
-                    !move_uploaded_file(
-                        $academicFile['file']['tmp_name'],
-                        $academicFilePath
-                    )
-                ) {
+                $stagedPath = $stagingDirectory
+                    . '/document_' . $position . '.' . $academicFile['extension'];
 
+                if (!move_uploaded_file($academicFile['file']['tmp_name'], $stagedPath)) {
                     throw new \Exception(
                         'Unable to save one of the uploaded certificates or diplomas.'
                     );
                 }
 
-
-                $savedFilePaths[] =
-                    $academicFilePath;
-
-
-                $academicDocumentsForDatabase[] = [
-
-                    'file_name' =>
-                        $academicFileName,
-
-                    'original_file_name' =>
-                        $academicFile['original_file_name']
+                $stagedDocuments[] = [
+                    'path' => $stagedPath,
+                    'label' => $academicFile['original_file_name'],
                 ];
             }
 
+            $stagedCoverPath = null;
 
-            /*
-            |--------------------------------------------------------------------------
-            | 15. Save optional cover letter
-            |--------------------------------------------------------------------------
-            */
+            if ($coverExtension !== null) {
 
-            $coverLetterFileName =
-                null;
+                $stagedCoverPath = $stagingDirectory . '/cover.' . $coverExtension;
 
-
-            if (
-                $coverLetter &&
-                $coverLetter['error'] ===
-                UPLOAD_ERR_OK
-            ) {
-
-                $coverLetterFileName =
-                    'cover_' .
-                    $applicantId .
-                    '_' .
-                    bin2hex(
-                        random_bytes(8)
-                    ) .
-                    '.' .
-                    $coverExtension;
-
-
-                $coverLetterPath =
-                    $uploadDirectory .
-                    $coverLetterFileName;
-
-
-                if (
-                    !move_uploaded_file(
-                        $coverLetter['tmp_name'],
-                        $coverLetterPath
-                    )
-                ) {
-                    throw new \Exception(
-                        'Unable to save the uploaded cover letter.'
-                    );
+                if (!move_uploaded_file($coverLetter['tmp_name'], $stagedCoverPath)) {
+                    throw new \Exception('Unable to save the uploaded cover letter.');
                 }
-
-
-                $savedFilePaths[] =
-                    $coverLetterPath;
             }
 
 
             /*
             |--------------------------------------------------------------------------
-            | 16. Create application
+            | 9. AI validation
             |--------------------------------------------------------------------------
-            |
-            | IMPORTANT:
-            |
-            | We no longer send:
-            |
-            | academic_document_file
-            |
-            | Instead, all academic documents are passed
-            | to the Applicant model.
-            |
             */
 
-            $applicationId =
-                $this->applicant
-                    ->createApplication([
+            $validation = (new ApplicationValidationService())->validate(
+                $stagedResumePath,
+                $stagedDocuments,
+                [
+                    'name' => $applicantName,
+                    'email' => $email,
+                    'phone' => $phone,
+                ],
+                $job
+            );
 
-                        'applicant_id' =>
-                            $applicantId,
-
-                        'posting_id' =>
-                            $job['posting_id'],
-
-                        'resume_file' =>
-                            $resumeFileName,
-
-                        'cover_letter_file' =>
-                            $coverLetterFileName,
-
-                        'academic_documents' =>
-                            $academicDocumentsForDatabase
-                    ]);
+            $validations->updateResult($validationId, [
+                'validation_status' => $validation['status'],
+                'identity_status' => $validation['identity_status'],
+                'education_status' => $validation['education_status'],
+                'experience_status' => $validation['experience_status'],
+                'credential_status' => $validation['credential_status'],
+                'consistency_score' => $validation['consistency_score'],
+                'findings' => $validation['findings'],
+                'validation_summary' => $validation['summary'],
+                'ai_model' => $validation['ai_model'],
+            ]);
 
 
             /*
             |--------------------------------------------------------------------------
-            | 17. Resume AI screening
+            | 10. INVALID: stop here. No applicant, no application, no files kept.
+            |--------------------------------------------------------------------------
+            */
+
+            if ($validation['status'] === 'INVALID') {
+
+                $this->removeDirectory($stagingDirectory);
+                $stagingDirectory = null;
+
+                throw new \Exception(
+                    'We could not verify that the information and documents you submitted are consistent with each other, so your application was not accepted. Please make sure your resume and certificates belong to you and match the details you entered, then try again. Reference: '
+                    . $reference . '.'
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 11. VALID / REVIEW: find or create applicant
+            |--------------------------------------------------------------------------
+            */
+
+            $database = \Core\Database::connection();
+            $database->beginTransaction();
+
+            if ($existingApplicant) {
+
+                $applicantId = (int) $existingApplicant['applicant_id'];
+
+            } else {
+
+                $applicantId = $this->applicant->createApplicant([
+                    'first_name' => $firstName,
+                    'middle_name' => $middleName !== '' ? $middleName : null,
+                    'last_name' => $lastName,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'address' => $address !== '' ? $address : null,
+                ]);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 12. Move staged files into permanent storage
+            |--------------------------------------------------------------------------
+            */
+
+            $uploadDirectory = $projectRoot . '/storage/uploads/applications/';
+
+            if (!is_dir($uploadDirectory)) {
+
+                if (
+                    !mkdir($uploadDirectory, 0755, true) &&
+                    !is_dir($uploadDirectory)
+                ) {
+                    throw new \Exception('Unable to create the application upload directory.');
+                }
+            }
+
+            $resumeFileName = 'resume_' . $applicantId . '_' . bin2hex(random_bytes(8)) . '.pdf';
+
+            $this->moveStagedFile(
+                $stagedResumePath,
+                $uploadDirectory . $resumeFileName,
+                'resume'
+            );
+
+            $savedFilePaths[] = $uploadDirectory . $resumeFileName;
+
+            $academicDocumentsForDatabase = [];
+            $finalAcademicFileNames = [];
+
+            foreach ($academicFiles as $position => $academicFile) {
+
+                $academicFileName = 'academic_' . $applicantId . '_'
+                    . bin2hex(random_bytes(8)) . '.' . $academicFile['extension'];
+
+                $this->moveStagedFile(
+                    $stagedDocuments[$position]['path'],
+                    $uploadDirectory . $academicFileName,
+                    'certificate or diploma'
+                );
+
+                $savedFilePaths[] = $uploadDirectory . $academicFileName;
+
+                $finalAcademicFileNames[$position] = $academicFileName;
+
+                $academicDocumentsForDatabase[] = [
+                    'file_name' => $academicFileName,
+                    'original_file_name' => $academicFile['original_file_name'],
+                ];
+            }
+
+            $coverLetterFileName = null;
+
+            if ($stagedCoverPath !== null) {
+
+                $coverLetterFileName = 'cover_' . $applicantId . '_'
+                    . bin2hex(random_bytes(8)) . '.' . $coverExtension;
+
+                $this->moveStagedFile(
+                    $stagedCoverPath,
+                    $uploadDirectory . $coverLetterFileName,
+                    'cover letter'
+                );
+
+                $savedFilePaths[] = $uploadDirectory . $coverLetterFileName;
+            }
+
+            $this->removeDirectory($stagingDirectory);
+            $stagingDirectory = null;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 13. Create application and link the validation record
+            |--------------------------------------------------------------------------
+            */
+
+            $applicationId = $this->applicant->createApplication([
+                'applicant_id' => $applicantId,
+                'posting_id' => $job['posting_id'],
+                'resume_file' => $resumeFileName,
+                'cover_letter_file' => $coverLetterFileName,
+                'academic_documents' => $academicDocumentsForDatabase,
+            ]);
+
+            $validations->linkToApplication($validationId, (int) $applicationId);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 14. Credential results
+            |--------------------------------------------------------------------------
+            |
+            | The validation call already read every credential, so its results
+            | are stored and the separate academic evaluation is skipped. If the
+            | AI was unavailable, fall back to the existing evaluation service.
+            |
+            */
+
+            $academicRows = [];
+
+            if (!empty($academicDocumentsForDatabase)) {
+
+                $academicRows = $validation['ai_available']
+                    ? (new ApplicationValidationService())->academicRows(
+                        $validation,
+                        $finalAcademicFileNames
+                    )
+                    : [];
+
+                if (!empty($academicRows)) {
+                    $validations->applyToAcademicDocuments((int) $applicationId, $academicRows);
+                }
+            }
+
+            $database->commit();
+
+            if (!empty($academicDocumentsForDatabase)) {
+
+                if (count($academicRows) < count($academicDocumentsForDatabase)) {
+
+                    try {
+
+                        (new AcademicDocumentEvaluationService())->evaluate((int) $applicationId);
+
+                    } catch (\Throwable $e) {
+
+                        error_log('Academic document evaluation failed: ' . $e->getMessage());
+
+                        $_SESSION['academic_validation_error'] =
+                            'Application submitted successfully, but certificate verification could not run right now.';
+                    }
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 15. AI screening (unchanged)
             |--------------------------------------------------------------------------
             */
 
             try {
 
-                $evaluationService =
-                    new ResumeEvaluationService();
-
-                $evaluationService->evaluate(
-                    (int)
-                    $applicationId
-                );
+                (new ResumeEvaluationService())->evaluate((int) $applicationId);
 
             } catch (\Throwable $e) {
 
-                error_log(
-                    'Resume AI evaluation failed: ' .
-                    $e->getMessage()
-                );
+                error_log('Resume AI evaluation failed: ' . $e->getMessage());
 
                 $_SESSION['ai_screening_error'] =
                     'Application submitted successfully, but AI screening could not run right now.';
@@ -725,88 +616,59 @@ class ApplicantController
 
             /*
             |--------------------------------------------------------------------------
-            | 18. Academic document evaluation
-            |--------------------------------------------------------------------------
-            |
-            | The service will later be updated to process
-            | each academic_document_evaluations record.
-            |
-            | For now, pass the application ID because
-            | that is the existing service interface.
-            |
-            */
-
-            if (
-                !empty(
-                    $academicDocumentsForDatabase
-                )
-            ) {
-
-                try {
-
-                    $academicService =
-                        new AcademicDocumentEvaluationService();
-
-                    $academicService->evaluate(
-                        (int)
-                        $applicationId
-                    );
-
-                } catch (\Throwable $e) {
-
-                    error_log(
-                        'Academic document evaluation failed: ' .
-                        $e->getMessage()
-                    );
-
-                    $_SESSION['academic_validation_error'] =
-                        'Application submitted successfully, but certificate verification could not run right now.';
-                }
-            }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | 19. Success
+            | 16. Success
             |--------------------------------------------------------------------------
             */
 
-            header(
-                "Location: ?page=application-success"
-            );
-
+            header("Location: ?page=application-success");
             exit;
-
 
         } catch (\Throwable $e) {
 
-            /*
-             * Remove uploaded files when
-             * submission fails.
-             */
-            foreach (
-                $savedFilePaths
-                as $savedPath
-            ) {
+            $database = \Core\Database::connection();
 
-                if (
-                    is_string($savedPath) &&
-                    file_exists($savedPath)
-                ) {
+            if ($database->inTransaction()) {
+                $database->rollBack();
+            }
+
+            if ($validationId !== null && isset($validations) && $validations instanceof ApplicationValidation) {
+                try {
+                    $validations->markProcessingAsReview(
+                        $validationId,
+                        'Submission processing did not complete. This attempt was not accepted.'
+                    );
+                } catch (\Throwable $updateError) {
+                    error_log('Unable to finalize application validation attempt: ' . $updateError->getMessage());
+                }
+            }
+
+            foreach ($savedFilePaths as $savedPath) {
+
+                if (is_string($savedPath) && file_exists($savedPath)) {
                     @unlink($savedPath);
                 }
             }
 
+            if ($stagingDirectory !== null) {
+                $this->removeDirectory($stagingDirectory);
+            }
 
-            $_SESSION['application_error'] =
-                $e->getMessage();
+            /*
+             * Never show raw database errors to applicants.
+             */
+            if ($e instanceof \PDOException) {
 
+                error_log('Application submission database error: ' . $e->getMessage());
 
-            header(
-                "Location: ?page=apply&token=" .
-                urlencode($token)
-            );
+                $_SESSION['application_error'] =
+                    'We could not process your application right now. Please try again later.';
 
+            } else {
+
+                $_SESSION['application_error'] = $e->getMessage();
+            }
+
+            header("Location: ?page=apply&token=" . urlencode($token));
             exit;
         }
     }
@@ -1581,6 +1443,73 @@ class ApplicantController
         }
 
         return null;
+    }
+
+
+    /**
+     * Move a staged file into permanent storage.
+     */
+    private function moveStagedFile(string $from, string $to, string $what): void
+    {
+        if (!@rename($from, $to)) {
+            throw new \Exception('Unable to save the uploaded ' . $what . '.');
+        }
+    }
+
+    /**
+     * Delete a directory and its files.
+     */
+    private function removeDirectory(string $directory): void
+    {
+        if (!is_dir($directory)) {
+            return;
+        }
+
+        foreach (scandir($directory) ?: [] as $item) {
+
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $directory . DIRECTORY_SEPARATOR . $item;
+
+            if (is_dir($path)) {
+                $this->removeDirectory($path);
+            } else {
+                @unlink($path);
+            }
+        }
+
+        @rmdir($directory);
+    }
+
+    /**
+     * Remove staging folders left behind by a crashed request.
+     */
+    private function purgeStalePending(string $pendingRoot): void
+    {
+        if (!is_dir($pendingRoot)) {
+            return;
+        }
+
+        foreach (glob($pendingRoot . '/VAL-*', GLOB_ONLYDIR) ?: [] as $directory) {
+
+            if (filemtime($directory) < time() - 86400) {
+                $this->removeDirectory($directory);
+            }
+        }
+    }
+
+    /**
+     * Client IP for rate limiting. REMOTE_ADDR cannot be spoofed by the
+     * client; if the site sits behind a proxy or CDN this will be the
+     * proxy's address and the per-IP limits will be shared.
+     */
+    private function clientIp(): ?string
+    {
+        $ip = trim((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+
+        return $ip !== '' ? substr($ip, 0, 45) : null;
     }
 
     /**

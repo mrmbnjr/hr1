@@ -862,14 +862,14 @@ $requirements = trim((string)($job['requirements'] ?? ''));
                             <input
                                 type="file"
                                 name="resume"
-                                accept=".pdf,.doc,.docx"
+                                accept=".pdf"
                                 required
                             >
 
                         </div>
 
                         <span class="file-note">
-                            PDF, DOC, or DOCX. Maximum 5 MB.
+                            PDF only. Maximum 5 MB.
                         </span>
                     </div>
 
@@ -1004,5 +1004,27 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form[action="?page=submit-application"]');
+    const button = form ? form.querySelector('.submit-button') : null;
 
+    if (!form || !button) {
+        return;
+    }
+
+    const originalLabel = button.textContent;
+
+    form.addEventListener('submit', function () {
+        button.disabled = true;
+        button.textContent = 'Checking your documents… this can take up to a minute';
+    });
+
+    // Restore the button if the browser returns here with the back button.
+    window.addEventListener('pageshow', function () {
+        button.disabled = false;
+        button.textContent = originalLabel;
+    });
+});
+</script>
 </html>
