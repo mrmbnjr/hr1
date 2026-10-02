@@ -183,12 +183,14 @@ switch ($page) {
 
             $formattedJobs[] = [
                 'id' => $job['posting_id'],
+                'application_token' => $job['application_token'],
                 'title' => $job['title'],
                 'department' => $job['department_name'],
                 'location' => 'Quezon City', // Database doesn't have location in getAllJobs, defaulting to QC
                 'employment_type' => $job['employment_type'],
                 'vacancies' => $job['vacancies'],
                 'applied_count' => $job['applicants'],
+                'applicant_limit' => $job['max_applicants'],
                 'closing_date' => $job['application_deadline'],
             ];
         }

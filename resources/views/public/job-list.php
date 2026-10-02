@@ -114,10 +114,10 @@ function timeLeft(string $date): array {
     <section class="job-grid" id="jobGrid">
         <?php foreach ($jobs as $j):
             [$left, $soon] = timeLeft($j['closing_date']);
-            $vac   = max(1, (int)$j['vacancies']);
-            $count = (int)$j['applied_count'];
-            $pct   = min(100, round($count / $vac * 100));
-            $full  = $count >= $vac;
+            $vacancies = max(1, (int)$j['vacancies']);
+            $applicantLimit = max(1, (int)$j['applicant_limit']);
+            $applicantsApplied = (int)$j['applied_count'];
+            $pct = min(100, round($applicantsApplied / $applicantLimit * 100));
             $init  = strtoupper(substr(preg_replace('/[^A-Za-z ]/', '', $j['title']), 0, 1) . (strpos($j['title'], ' ') !== false ? substr(strrchr($j['title'], ' '), 1, 1) : ''));
         ?>
         <article class="job" data-text="<?= $h(strtolower($j['title'] . ' ' . $j['department'])) ?>"
@@ -134,13 +134,13 @@ function timeLeft(string $date): array {
             <dl class="job__meta">
                 <div><dt>Branch</dt><dd><?= $h($j['location']) ?></dd></div>
                 <div><dt>Type</dt><dd><?= $h($j['employment_type']) ?></dd></div>
-                <div><dt>Vacancies</dt><dd><?= $vac ?> <?= $vac === 1 ? 'opening' : 'openings' ?></dd></div>
+                <div><dt>Vacancies</dt><dd><?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?></dd></div>
                 <div><dt>Application Deadline</dt><dd><?= $h(date('M j, Y', strtotime($j['closing_date']))) ?></dd></div>
             </dl>
 
             <div class="job__progress">
                 <div class="job__progress-text">
-                    <span><?= $count ?> applied of <?= $vac ?> <?= $vac === 1 ? 'opening' : 'openings' ?></span>
+                    <span><?= $applicantsApplied ?> applied of <?= $applicantLimit ?> applicant limit</span>
                     <span class="<?= $soon ? 'is-soon' : '' ?>"><i class="fa-regular fa-clock"></i> <?= $h($left) ?></span>
                 </div>
                 <div class="bar"><span style="width: <?= $pct ?>%"></span></div>
@@ -150,7 +150,7 @@ function timeLeft(string $date): array {
                 <button class="btn btn--ghost btn-view-details" data-id="<?= (int)$j['id'] ?>">
                     <i class="fa-regular fa-eye"></i> View details
                 </button>
-                <a class="btn btn--primary" href="index.php?page=apply&token=<?= (int)$j['id'] ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                <a class="btn btn--primary" href="index.php?page=apply&amp;token=<?= rawurlencode((string)$j['application_token']) ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
             </div>
         </article>
         <?php endforeach; ?>
