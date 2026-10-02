@@ -116,6 +116,21 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <div class="form-group">
+                <label>Branch</label>
+
+                <select id="branch" name="branch" required>
+                    <option value="" hidden selected>
+                        Select Branch
+                    </option>
+
+                    <!-- Sample branch data -->
+                    <option value="Quezon City">
+                        Quezon City
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label>Employment Type</label>
 
                 <select id="employmentType" name="employment_type" required>

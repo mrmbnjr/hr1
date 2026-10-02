@@ -120,6 +120,21 @@ $job = isset($job) && is_array($job) ? $job : [];
             </div>
 
             <div class="form-group">
+                <label>Branch</label>
+
+                <select id="branch" name="branch" required>
+                    <option value="" hidden selected>
+                        Select Branch
+                    </option>
+
+                    <!-- Sample branch data -->
+                    <option value="Quezon City">
+                        Quezon City
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
 
                 <label>Employment Type</label>
 
