@@ -18,8 +18,7 @@ $flash = $_SESSION['profile_flash'] ?? null;
 unset($_SESSION['profile_flash']);
 
 /* ---------------------------------------------------------------
-   View helpers. Closures (not named functions) so re-including this
-   view can never trigger "cannot redeclare".
+   View helpers (closures so re-including never redeclares)
 ---------------------------------------------------------------- */
 $e = static fn($value): string => htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 
@@ -94,17 +93,16 @@ $createdAt        = $profile['created_at'] ?? null;
 $verifiedAt       = $profile['email_verified_at'] ?? null;
 $roleName         = trim((string) ($profile['role_name'] ?? 'User'));
 
-/* Hero meta line: the compact, icon-led detail row under the name.
-   Built as a list so the hero never renders an empty <ul>. */
+/* Header meta line — built as a list so no empty <ul> is rendered. */
 $heroMeta = [];
-if ($employeeNumber !== '') {
-    $heroMeta[] = ['icon' => 'fa-id-badge', 'text' => $employeeNumber];
+if ($position !== '') {
+    $heroMeta[] = ['icon' => 'fa-user-tie', 'text' => $position];
 }
 if ($department !== '') {
     $heroMeta[] = ['icon' => 'fa-building', 'text' => $department];
 }
-if ($position !== '') {
-    $heroMeta[] = ['icon' => 'fa-user-tie', 'text' => $position];
+if ($employeeNumber !== '') {
+    $heroMeta[] = ['icon' => 'fa-id-badge', 'text' => $employeeNumber];
 }
 if (!$isLinked) {
     $heroMeta[] = ['icon' => 'fa-link-slash', 'text' => 'No employee record', 'muted' => true];
@@ -126,15 +124,14 @@ if (!isset($tabs[$activeTab])) {
 }
 
 /* ---------------------------------------------------------------
-   Role context — the page is shared by every role, so anything that
-   links elsewhere must stay inside what this role can actually open.
+   Role context — links must stay inside what this role can open.
 ---------------------------------------------------------------- */
 $roleCode  = strtoupper(trim((string) ($profile['role_code'] ?? 'EMP')));
 $canBrowseRecords = in_array($roleCode, ['ADMIN', 'HR', 'MGR'], true);
 
 $quickLinks = match ($roleCode) {
     'ADMIN' => [
-        ['page' => 'user-management', 'icon' => 'fa-users',         'label' => 'User Management'],
+        ['page' => 'user-management',  'icon' => 'fa-users',        'label' => 'User Management'],
         ['page' => 'employee-records', 'icon' => 'fa-address-book', 'label' => 'Employee Records'],
         ['page' => 'human-capital',    'icon' => 'fa-id-card',      'label' => 'Company Structure'],
     ],
@@ -154,7 +151,7 @@ $quickLinks = match ($roleCode) {
 };
 
 /* ---------------------------------------------------------------
-   Setup checklist (adapts to whether an employee record is linked)
+   Setup checklist
 ---------------------------------------------------------------- */
 $checklist = [
     ['label' => 'Account email', 'done' => $accountEmail !== '', 'hint' => 'The address used for sign-in codes.'],
@@ -162,9 +159,9 @@ $checklist = [
 ];
 
 if ($isLinked) {
-    $checklist[] = ['label' => 'Contact details',        'done' => $phone !== '' && $address !== '',           'hint' => 'Add a phone number and address.'];
-    $checklist[] = ['label' => 'Employee record',        'done' => $employeeNumber !== '',                     'hint' => 'Employee number assigned by HR.'];
-    $checklist[] = ['label' => 'Department & position',  'done' => $department !== '' && $position !== '',     'hint' => 'Your placement in the org chart.'];
+    $checklist[] = ['label' => 'Contact details',       'done' => $phone !== '' && $address !== '',       'hint' => 'Add a phone number and address.'];
+    $checklist[] = ['label' => 'Employee record',       'done' => $employeeNumber !== '',                 'hint' => 'Employee number assigned by HR.'];
+    $checklist[] = ['label' => 'Department & position', 'done' => $department !== '' && $position !== '', 'hint' => 'Your placement in the org chart.'];
 }
 
 $doneCount  = count(array_filter($checklist, static fn(array $item): bool => $item['done']));
@@ -211,76 +208,46 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
         <?php endif; ?>
 
         <!-- =====================================================
-             HERO
+             HEADER
         ====================================================== -->
-        <section class="profile-hero" aria-label="Profile summary">
-            <div class="hero-inner">
-                <div class="hero-avatar" aria-hidden="true">
-                    <span><?= $e($initials) ?></span>
-                    <?php if ($accountStatus === 'Active'): ?>
-                        <i class="hero-avatar-badge fa-solid fa-circle-check"></i>
-                    <?php endif; ?>
+        <header class="profile-hero">
+            <div class="hero-avatar" aria-hidden="true"><?= $e($initials) ?></div>
+
+            <div class="hero-id">
+                <div class="hero-name-row">
+                    <h1><?= $e($displayName) ?></h1>
+                    <span class="status-pill <?= $statusClass ?>"><i class="status-dot" aria-hidden="true"></i><?= $e($accountStatus) ?></span>
                 </div>
 
-                <div class="hero-id">
-                    <p class="hero-eyebrow"><?= $e($roleName) ?></p>
-
-                    <div class="hero-name-row">
-                        <h1><?= $e($displayName) ?></h1>
-                        <span class="status-pill <?= $statusClass ?>"><i class="status-dot" aria-hidden="true"></i><?= $e($accountStatus) ?></span>
-                    </div>
-
-                    <p class="hero-handle">
-                        <i class="fa-solid fa-at" aria-hidden="true"></i><?= $e($username) ?>
-                        <button type="button" class="copy-btn" data-copy="<?= $e($username) ?>" aria-label="Copy username" title="Copy username">
-                            <i class="fa-regular fa-copy" aria-hidden="true"></i>
-                        </button>
-                    </p>
-
-                    <?php if ($heroMeta): ?>
-                        <ul class="hero-meta">
-                            <?php foreach ($heroMeta as $item): ?>
-                                <li<?= !empty($item['muted']) ? ' class="is-muted"' : '' ?>>
-                                    <i class="fa-solid <?= $e($item['icon']) ?>" aria-hidden="true"></i>
-                                    <span><?= $e($item['text']) ?></span>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    <?php endif; ?>
-                </div>
-
-                <div class="hero-actions">
-                    <button type="button" class="btn-primary" data-jump="personal" data-start-edit>
-                        <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit profile
+                <p class="hero-handle">
+                    <span class="role-tag"><?= $e($roleName) ?></span>
+                    <span class="hero-username">@<?= $e($username) ?></span>
+                    <button type="button" class="copy-btn" data-copy="<?= $e($username) ?>" aria-label="Copy username" title="Copy username">
+                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
                     </button>
-                    <button type="button" class="btn-secondary" data-jump="account">
-                        <i class="fa-solid fa-key" aria-hidden="true"></i> Change password
-                    </button>
-                </div>
+                </p>
+
+                <?php if ($heroMeta): ?>
+                    <ul class="hero-meta">
+                        <?php foreach ($heroMeta as $item): ?>
+                            <li<?= !empty($item['muted']) ? ' class="is-muted"' : '' ?>>
+                                <i class="fa-solid <?= $e($item['icon']) ?>" aria-hidden="true"></i>
+                                <span><?= $e($item['text']) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
 
-            <ul class="hero-facts">
-                <li>
-                    <span>Member since</span>
-                    <strong><?= $e($fmt($createdAt)) ?></strong>
-                </li>
-                <li>
-                    <span>Last activity</span>
-                    <strong><?= $e($ago($activitySummary['last_at'])) ?></strong>
-                </li>
-                <li>
-                    <span>Actions logged</span>
-                    <strong><?= (int) $activitySummary['total'] ?></strong>
-                </li>
-                <li>
-                    <span>Email status</span>
-                    <strong class="<?= $verifiedAt ? 'is-ok' : 'is-warn' ?>">
-                        <i class="fa-solid <?= $verifiedAt ? 'fa-circle-check' : 'fa-circle-exclamation' ?>" aria-hidden="true"></i>
-                        <?= $verifiedAt ? 'Verified' : 'Not verified' ?>
-                    </strong>
-                </li>
-            </ul>
-        </section>
+            <div class="hero-actions">
+                <button type="button" class="btn-primary" data-jump="personal" data-start-edit>
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit profile
+                </button>
+                <button type="button" class="btn-secondary" data-jump="account">
+                    <i class="fa-solid fa-key" aria-hidden="true"></i> Change password
+                </button>
+            </div>
+        </header>
 
         <!-- =====================================================
              BODY
@@ -289,7 +256,6 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
 
             <div class="profile-main">
 
-                <!-- Tabs -->
                 <div class="profile-tabs" role="tablist" aria-label="Profile sections">
                     <?php foreach ($tabs as $key => $tab): ?>
                         <?php $isActive = $key === $activeTab; ?>
@@ -307,9 +273,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     <?php endforeach; ?>
                 </div>
 
-                <!-- =========================================
-                     PERSONAL
-                ========================================== -->
+                <!-- PERSONAL -->
                 <section class="profile-panel<?= $activeTab === 'personal' ? ' active' : '' ?>"
                          id="panel-personal" role="tabpanel" aria-labelledby="tab-personal"
                          <?= $activeTab === 'personal' ? '' : 'hidden' ?>>
@@ -369,8 +333,8 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
 
                             <p class="form-note">
                                 <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                                These details live on your employee record. Your sign-in email is managed in
-                                <button type="button" class="link-btn" data-jump="account">Account &amp; Security</button>.
+                                <span>These details live on your employee record. Your sign-in email is managed in
+                                <button type="button" class="link-btn" data-jump="account">Account &amp; Security</button>.</span>
                             </p>
                         </form>
                     <?php else: ?>
@@ -391,9 +355,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     <?php endif; ?>
                 </section>
 
-                <!-- =========================================
-                     EMPLOYMENT
-                ========================================== -->
+                <!-- EMPLOYMENT -->
                 <section class="profile-panel<?= $activeTab === 'employment' ? ' active' : '' ?>"
                          id="panel-employment" role="tabpanel" aria-labelledby="tab-employment"
                          <?= $activeTab === 'employment' ? '' : 'hidden' ?>>
@@ -407,7 +369,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     </div>
 
                     <?php if ($isLinked): ?>
-                        <dl class="info-grid">
+                        <dl class="info-list">
                             <div>
                                 <dt>Employee number</dt>
                                 <dd><?= $e($employeeNumber !== '' ? $employeeNumber : '—') ?></dd>
@@ -446,21 +408,18 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     <?php endif; ?>
                 </section>
 
-                <!-- =========================================
-                     ACCOUNT & SECURITY
-                ========================================== -->
+                <!-- ACCOUNT & SECURITY -->
                 <section class="profile-panel<?= $activeTab === 'account' ? ' active' : '' ?>"
                          id="panel-account" role="tabpanel" aria-labelledby="tab-account"
                          <?= $activeTab === 'account' ? '' : 'hidden' ?>>
 
                     <div class="panel-head">
                         <div>
-                            <h2>Account &amp; security</h2>
-                            <p>Your sign-in identity and the password that protects it.</p>
+                            <h2>Sign-in details</h2>
+                            <p>The identity you use to sign in to the system.</p>
                         </div>
                     </div>
 
-                    <!-- Sign-in identity -->
                     <form class="info-form" method="post" action="?page=profile-action" data-editable>
                         <input type="hidden" name="action" value="account">
 
@@ -490,7 +449,10 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                                 <label for="accountEmail">Sign-in email <span aria-hidden="true">*</span></label>
                                 <input type="email" id="accountEmail" name="account_email" value="<?= $e($accountEmail) ?>" maxlength="150"
                                        autocomplete="email" disabled required>
-                                <small class="field-help">Verification codes for sign-in are sent here.</small>
+                                <small class="field-help <?= $verifiedAt ? 'is-ok' : 'is-warn' ?>">
+                                    <i class="fa-solid <?= $verifiedAt ? 'fa-circle-check' : 'fa-circle-exclamation' ?>" aria-hidden="true"></i>
+                                    <?= $verifiedAt ? 'Verified. Sign-in codes are sent here.' : 'Not verified. Sign-in codes are sent here.' ?>
+                                </small>
                             </div>
                             <div class="form-group">
                                 <label for="roleDisplay">Role</label>
@@ -507,7 +469,6 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
 
                     <hr class="panel-divider">
 
-                    <!-- Password -->
                     <div class="panel-head is-compact">
                         <div>
                             <h2>Change password</h2>
@@ -563,9 +524,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     </form>
                 </section>
 
-                <!-- =========================================
-                     ACTIVITY
-                ========================================== -->
+                <!-- ACTIVITY -->
                 <section class="profile-panel<?= $activeTab === 'activity' ? ' active' : '' ?>"
                          id="panel-activity" role="tabpanel" aria-labelledby="tab-activity"
                          <?= $activeTab === 'activity' ? '' : 'hidden' ?>>
@@ -573,22 +532,11 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     <div class="panel-head">
                         <div>
                             <h2>Recent activity</h2>
-                            <p>The latest actions recorded against your account.</p>
-                        </div>
-                    </div>
-
-                    <div class="activity-stats">
-                        <div class="activity-stat">
-                            <span class="activity-stat-value"><?= (int) $activitySummary['total'] ?></span>
-                            <span class="activity-stat-label">Total actions</span>
-                        </div>
-                        <div class="activity-stat">
-                            <span class="activity-stat-value"><?= (int) $activitySummary['last_week'] ?></span>
-                            <span class="activity-stat-label">Last 7 days</span>
-                        </div>
-                        <div class="activity-stat">
-                            <span class="activity-stat-value"><?= (int) $activitySummary['pages'] ?></span>
-                            <span class="activity-stat-label">Pages visited</span>
+                            <p>
+                                <?= (int) $activitySummary['total'] ?> actions logged,
+                                <?= (int) $activitySummary['last_week'] ?> in the last 7 days.
+                                Last active <?= $e(strtolower($ago($activitySummary['last_at']))) ?>.
+                            </p>
                         </div>
                     </div>
 
@@ -631,29 +579,8 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
             ============================================== -->
             <aside class="profile-side" aria-label="Account summary">
 
-                <!-- Snapshot -->
                 <section class="side-card">
-                    <h2 class="side-card-title"><i class="fa-solid fa-id-card-clip" aria-hidden="true"></i> Account snapshot</h2>
-
-                    <dl class="side-list">
-                        <div><dt>Role</dt><dd><?= $e($roleName) ?></dd></div>
-                        <div><dt>Status</dt><dd><span class="status-pill <?= $statusClass ?>"><i class="status-dot" aria-hidden="true"></i><?= $e($accountStatus) ?></span></dd></div>
-                        <div><dt>Employee ID</dt><dd><?= $e($employeeNumber !== '' ? $employeeNumber : 'Not linked') ?></dd></div>
-                        <div><dt>Department</dt><dd><?= $e($department !== '' ? $department : '—') ?></dd></div>
-                        <div><dt>Member since</dt><dd><?= $e($fmt($createdAt)) ?></dd></div>
-                    </dl>
-
-                    <div class="side-copy-row">
-                        <span class="side-copy-value"><?= $e($accountEmail) ?></span>
-                        <button type="button" class="copy-btn" data-copy="<?= $e($accountEmail) ?>" aria-label="Copy sign-in email" title="Copy sign-in email">
-                            <i class="fa-regular fa-copy" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </section>
-
-                <!-- Setup checklist -->
-                <section class="side-card">
-                    <h2 class="side-card-title"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Profile setup</h2>
+                    <h2 class="side-card-title">Profile setup</h2>
 
                     <div class="progress">
                         <div class="progress-track"><span class="progress-fill" style="width: <?= (int) $percent ?>%"></span></div>
@@ -680,15 +607,20 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                     <?php endif; ?>
                 </section>
 
-                <!-- Quick links -->
                 <section class="side-card">
-                    <h2 class="side-card-title"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Quick links</h2>
+                    <h2 class="side-card-title">Quick links</h2>
 
                     <nav class="quick-links">
                         <?php foreach ($quickLinks as $link): ?>
-                            <a href="?page=<?= $e($link['page']) ?>"><i class="fa-solid <?= $e($link['icon']) ?>" aria-hidden="true"></i> <?= $e($link['label']) ?> <i class="fa-solid fa-chevron-right go" aria-hidden="true"></i></a>
+                            <a href="?page=<?= $e($link['page']) ?>">
+                                <i class="fa-solid <?= $e($link['icon']) ?>" aria-hidden="true"></i>
+                                <?= $e($link['label']) ?>
+                                <i class="fa-solid fa-chevron-right go" aria-hidden="true"></i>
+                            </a>
                         <?php endforeach; ?>
                     </nav>
+
+                    <p class="side-meta">Member since <?= $e($fmt($createdAt)) ?></p>
                 </section>
             </aside>
         </div>
