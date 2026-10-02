@@ -151,22 +151,7 @@ switch ($page) {
 
 
     case 'apply':
-        if (!isset($_GET['token'])) {
-            header("Location: ?page=careers");
-            exit;
-        }
-
-        $token = $_GET['token'];
-        $recruitment = new \App\Models\Recruitment();
-
-        $job = $recruitment->getJobById((int)$token);
-
-        if (!$job) {
-            header("Location: ?page=careers");
-            exit;
-        }
-
-        require BASE_PATH . '/resources/views/public/apply.php';
+        (new ApplicantController())->apply();
         break;
 
     case 'submit-application':

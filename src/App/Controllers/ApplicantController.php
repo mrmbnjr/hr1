@@ -62,7 +62,9 @@ class ApplicantController
         /*
          * The job must still be accepting applications.
          */
-        if ($this->jobClosedReason($job) !== null) {
+        $closedReason = $this->jobClosedReason($job);
+
+        if ($closedReason !== null) {
             require BASE_PATH . '/resources/views/public/apply-closed.php';
             exit;
         }
@@ -1569,6 +1571,13 @@ class ApplicantController
             (int) $job['hired_count'] >= (int) ($job['vacancies'] ?? 0)
         ) {
             return 'This position is no longer accepting applications because all vacancies have been filled.';
+        }
+
+        if (
+            isset($job['applicant_count'], $job['max_applicants']) &&
+            (int) $job['applicant_count'] >= (int) $job['max_applicants']
+        ) {
+            return 'This position has reached its maximum number of applicants.';
         }
 
         return null;

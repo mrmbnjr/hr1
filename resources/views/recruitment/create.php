@@ -150,6 +150,21 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <div class="form-group">
+                <label>
+                    Maximum Applicants
+                    <span class="required">*</span>
+                </label>
+
+                <input id="maxApplicants"
+                    type="number"
+                    name="max_applicants"
+                    min="1"
+                    value="<?= htmlspecialchars($_POST['max_applicants'] ?? '100') ?>"
+                    required>
+
+            </div>
+
+            <div class="form-group">
                 <label>Application Deadline</label>
 
                 <input id="deadline"

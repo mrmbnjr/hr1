@@ -114,8 +114,11 @@
     </h1>
 
     <p>
-        This position is no longer accepting
-        applications.
+        <?= htmlspecialchars(
+            $closedReason ?? 'This position is no longer accepting applications.',
+            ENT_QUOTES,
+            'UTF-8'
+        ) ?>
     </p>
 
     <p class="closed-note">

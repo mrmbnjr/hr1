@@ -77,7 +77,15 @@ class RecruitmentController
 
     public function update()
     {
-        $this->recruitment->update($_POST);
+        try {
+            $this->recruitment->update($_POST);
+        } catch (\InvalidArgumentException $e) {
+            $_SESSION['error'] = $e->getMessage();
+            $postingId = (int) ($_POST['posting_id'] ?? 0);
+
+            header("Location:?page=recruitment&action=edit&id=$postingId");
+            exit;
+        }
 
         header("Location:?page=recruitment");
         exit;

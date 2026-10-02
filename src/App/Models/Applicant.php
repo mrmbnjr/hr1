@@ -1246,6 +1246,7 @@ class Applicant
                 jp.academic_document_required,
                 jp.employment_type,
                 jp.vacancies,
+                jp.max_applicants,
                 jp.status,
                 jp.application_token,
                 jp.application_deadline,
@@ -1258,7 +1259,9 @@ class Applicant
                         WHEN ap.application_status = 'Hired'
                         THEN 1
                     END
-                ) AS hired_count
+                ) AS hired_count,
+
+                COUNT(ap.application_id) AS applicant_count
 
             FROM job_postings jp
 
@@ -1281,6 +1284,7 @@ class Applicant
                 jp.academic_document_required,
                 jp.employment_type,
                 jp.vacancies,
+                jp.max_applicants,
                 jp.status,
                 jp.application_token,
                 jp.application_deadline,
@@ -1466,6 +1470,43 @@ class Applicant
 
         try {
 
+            $postingStmt = $this->db->prepare("
+                SELECT max_applicants
+                FROM job_postings
+                WHERE posting_id = :posting_id
+                FOR UPDATE
+            ");
+
+            $postingStmt->execute([
+                ':posting_id' => $data['posting_id']
+            ]);
+
+            $posting = $postingStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$posting) {
+                throw new \Exception(
+                    'This position is no longer accepting applications.'
+                );
+            }
+
+            $countStmt = $this->db->prepare("
+                SELECT COUNT(*)
+                FROM applications
+                WHERE posting_id = :posting_id
+            ");
+
+            $countStmt->execute([
+                ':posting_id' => $data['posting_id']
+            ]);
+
+            $applicantCount = (int) $countStmt->fetchColumn();
+
+            if ($applicantCount >= (int) $posting['max_applicants']) {
+                throw new \Exception(
+                    'This position has reached its maximum number of applicants.'
+                );
+            }
+
             /*
              * 1. Create application
              */
@@ -1506,6 +1547,22 @@ class Applicant
 
             $applicationId =
                 (int) $this->db->lastInsertId();
+
+            if (
+                $applicantCount + 1 >=
+                (int) $posting['max_applicants']
+            ) {
+                $closeStmt = $this->db->prepare("
+                    UPDATE job_postings
+                    SET status = 'Closed'
+                    WHERE posting_id = :posting_id
+                    AND status = 'Open'
+                ");
+
+                $closeStmt->execute([
+                    ':posting_id' => $data['posting_id']
+                ]);
+            }
 
 
             /*

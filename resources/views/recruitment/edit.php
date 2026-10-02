@@ -174,6 +174,21 @@ $job = isset($job) && is_array($job) ? $job : [];
             </div>
 
             <div class="form-group">
+                <label>
+                    Maximum Applicants
+                    <span class="required">*</span>
+                </label>
+
+                <input id="maxApplicants"
+                    type="number"
+                    name="max_applicants"
+                    min="1"
+                    value="<?= htmlspecialchars((string) ($job['max_applicants'] ?? 100)) ?>"
+                    required>
+
+            </div>
+
+            <div class="form-group">
 
                 <label>Status</label>
 

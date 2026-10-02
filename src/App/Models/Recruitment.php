@@ -139,6 +139,14 @@ class Recruitment
 
     public function createJob(array $data)
     {
+        $maxApplicants = (int) ($data['max_applicants'] ?? 0);
+
+        if ($maxApplicants < 1) {
+            throw new \InvalidArgumentException(
+                'Maximum applicants must be at least 1.'
+            );
+        }
+
         // Check whether this position already has an open posting
         $check = $this->db->prepare("
             SELECT posting_id
@@ -184,6 +192,7 @@ class Recruitment
                 academic_document_required,
                 employment_type,
                 vacancies,
+                max_applicants,
                 status,
                 application_deadline,
                 created_by,
@@ -198,6 +207,7 @@ class Recruitment
                 :academic_document_required,
                 :employment_type,
                 :vacancies,
+                :max_applicants,
                 'Open',
                 :application_deadline,
                 :created_by,
@@ -217,6 +227,7 @@ class Recruitment
             ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
             ':employment_type' => $data['employment_type'],
             ':vacancies' => $data['vacancies'],
+            ':max_applicants' => $maxApplicants,
             ':application_deadline' => $data['application_deadline'],
             ':created_by' => $data['created_by'],
             ':application_token' => $applicationToken
@@ -273,6 +284,14 @@ class Recruitment
 
     public function update(array $data)
     {
+        $maxApplicants = (int) ($data['max_applicants'] ?? 0);
+
+        if ($maxApplicants < 1) {
+            throw new \InvalidArgumentException(
+                'Maximum applicants must be at least 1.'
+            );
+        }
+
         $sql = "
             UPDATE job_postings
             SET position_id = ?,
@@ -282,6 +301,7 @@ class Recruitment
                 academic_document_required = ?,
                 employment_type = ?,
                 vacancies = ?,
+                max_applicants = ?,
                 status = ?,
                 application_deadline = ?
             WHERE posting_id = ?
@@ -297,6 +317,7 @@ class Recruitment
             !empty($data['academic_document_required']) ? 1 : 0,
             $data['employment_type'],
             $data['vacancies'],
+            $maxApplicants,
             $data['status'],
             $data['application_deadline'],
             $data['posting_id']

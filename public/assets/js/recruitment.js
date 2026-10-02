@@ -5,6 +5,61 @@
 
 (function () {
 
+    const departmentSelect =
+        document.getElementById('department');
+
+    const positionSelect =
+        document.getElementById('position');
+
+    if (departmentSelect && positionSelect) {
+        const positionOptions = Array.from(positionSelect.options)
+            .filter(option => option.dataset.department);
+
+        const existingPlaceholder = Array.from(positionSelect.options)
+            .find(option => option.value === '' && !option.dataset.department && !option.disabled);
+
+        const positionPlaceholder = existingPlaceholder
+            ? existingPlaceholder.cloneNode(true)
+            : new Option('Select Position', '', true, true);
+
+        function filterPositions(preserveSelection) {
+            const selectedPosition = preserveSelection
+                ? positionSelect.value
+                : '';
+
+            const matchingPositions = positionOptions.filter(
+                option => option.dataset.department === departmentSelect.value
+            );
+
+            positionSelect.replaceChildren(positionPlaceholder.cloneNode(true));
+
+            matchingPositions.forEach(option => {
+                positionSelect.appendChild(option.cloneNode(true));
+            });
+
+            if (matchingPositions.length === 0 && departmentSelect.value) {
+                const emptyOption = new Option(
+                    'No positions available',
+                    '',
+                    false,
+                    false
+                );
+                emptyOption.disabled = true;
+                positionSelect.appendChild(emptyOption);
+            }
+
+            positionSelect.value = matchingPositions.some(
+                option => option.value === selectedPosition
+            ) ? selectedPosition : '';
+        }
+
+        departmentSelect.addEventListener('change', () => {
+            filterPositions(false);
+        });
+
+        filterPositions(true);
+    }
+
     // ======================================================
     // RECRUITMENT JOBS TABLE
     // ======================================================

@@ -85,6 +85,8 @@ CREATE TABLE job_postings (
 
     vacancies INT DEFAULT 1,
 
+    max_applicants INT UNSIGNED NOT NULL DEFAULT 100,
+
     status ENUM(
         'Open',
         'Closed'
