@@ -203,6 +203,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                         $roleId         = (int) ($user['role_id'] ?? 0);
                         $dormant        = $checkDormant($user, $status);
                         $email          = trim((string) ($user['email'] ?? ''));
+                        $employeeId     = (int) ($user['employee_id'] ?? 0);
                         $lastLogin      = !empty($user['last_login']) ? date('M j, Y g:ia', strtotime($user['last_login'])) : 'Never logged in';
                         $createdDisplay = !empty($user['created_at']) ? date('M j, Y', strtotime($user['created_at'])) : '—';
                         ?>
@@ -218,6 +219,7 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                             data-created-display="<?= $e($createdDisplay) ?>"
                             data-last-login="<?= $e($lastLogin) ?>"
                             data-user-id="<?= (int) $user['user_id'] ?>"
+                            data-employee-record-id="<?= $employeeId ?>"
                             data-fullname="<?= $e($fullname) ?>"
                             data-login="<?= $e($user['username'] ?? '') ?>"
                             data-email-address="<?= $e($email) ?>"
@@ -226,7 +228,11 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                             data-dormant="<?= $dormant ? '1' : '0' ?>"
                             data-unlinked="<?= $isUnlinked ? '1' : '0' ?>">
                             <td data-label="User">
-                                <button type="button" class="user-identity" data-action="details">
+                                <?php if ($employeeId > 0): ?>
+                                    <a class="user-identity" href="?page=view&amp;id=<?= $employeeId ?>" aria-label="View employee record for <?= $e($fullname) ?>">
+                                <?php else: ?>
+                                    <span class="user-identity is-unlinked">
+                                <?php endif; ?>
                                     <span class="avatar-circle"><?= $e($initial) ?></span>
                                     <span class="cell-text">
                                         <strong>
@@ -237,7 +243,11 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                                         </strong>
                                         <small class="sub-text"><?= $e($employeeNo !== '' ? $employeeNo : 'No employee ID') ?></small>
                                     </span>
-                                </button>
+                                <?php if ($employeeId > 0): ?>
+                                    </a>
+                                <?php else: ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <td data-label="Login">
                                 <span class="cell-text">
@@ -254,8 +264,12 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                             <td class="actions-cell">
                                 <button type="button" class="icon-action" data-action="menu" aria-label="Open actions for <?= $e($fullname) ?>" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
                                 <div class="row-menu" hidden>
-                                    <button type="button" data-action="details"><i class="fa-regular fa-eye" aria-hidden="true"></i> View details</button>
-                                    <button type="button" data-action="edit"><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit user</button>
+                                    <?php if ($employeeId > 0): ?>
+                                        <a href="?page=view&amp;id=<?= $employeeId ?>"><i class="fa-regular fa-eye" aria-hidden="true"></i> View employee record</a>
+                                    <?php endif; ?>
+                                    <?php if ($employeeId > 0 && !$isUnlinked): ?>
+                                        <a href="?page=edit-user-profile&amp;id=<?= (int) $user['user_id'] ?>"><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit user profile</a>
+                                    <?php endif; ?>
                                     <button type="button" data-action="toggle"<?= $status === 'Inactive' ? '' : ' class="is-danger"' ?>><i class="fa-solid fa-power-off" aria-hidden="true"></i> <?= $status === 'Inactive' ? 'Enable account' : 'Disable account' ?></button>
                                 </div>
                             </td>
@@ -283,85 +297,6 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
         </section>
     </main>
     <?php require BASE_PATH . '/resources/views/includes/footer.php'; ?>
-</div>
-
-<div class="modal-backdrop" id="userModal" hidden>
-    <section class="user-modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
-        <div class="modal-header">
-            <div>
-                <h2 id="userModalTitle">Edit user</h2>
-                <p>Update this account's username, role, or access status.</p>
-            </div>
-            <button type="button" class="modal-close" data-close-modal aria-label="Close dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-        </div>
-        <form method="post" action="?page=user-management-action" id="userForm">
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="user_id" id="formUserId">
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="username">Username <span aria-hidden="true">*</span></label>
-                    <input type="text" name="username" id="username" minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" aria-describedby="usernameHelp" required>
-                    <small class="field-help" id="usernameHelp">3–50 characters: letters, numbers, dots, dashes, or underscores.</small>
-                </div>
-                <div class="form-group">
-                    <label for="accountEmail">Email</label>
-                    <input type="email" id="accountEmail" readonly aria-describedby="emailHelp">
-                    <small class="field-help" id="emailHelp">Read from the employee record. Accounts don't store a separate email.</small>
-                </div>
-                <div class="form-group">
-                    <label for="roleId">Role <span aria-hidden="true">*</span></label>
-                    <select name="role_id" id="roleId" required>
-                        <option value="">Select a role</option>
-                        <?php foreach ($roles as $role): ?>
-                            <option value="<?= (int) $role['role_id'] ?>"><?= $e($role['role_name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="accountStatus">Account status</label>
-                    <select name="status" id="accountStatus" aria-describedby="statusHelp">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                    <small class="field-help" id="statusHelp">Inactive accounts can't sign in.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-outline" data-close-modal>Cancel</button>
-                <button type="submit" class="btn-primary">Save changes</button>
-            </div>
-        </form>
-    </section>
-</div>
-
-<div class="modal-backdrop" id="detailsModal" hidden>
-    <section class="user-modal details-modal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
-        <div class="modal-header">
-            <div>
-                <h2 id="detailsTitle">User details</h2>
-                <p>System access information for this account.</p>
-            </div>
-            <button type="button" class="modal-close" data-close-modal aria-label="Close dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-        </div>
-        <div class="details-content">
-            <div class="details-identity">
-                <span class="avatar-large" id="detailsAvatar">?</span>
-                <div>
-                    <h3 id="detailsName">-</h3>
-                    <p id="detailsEmployee">-</p>
-                    <span id="detailsStatus" class="status-pill">-</span>
-                </div>
-            </div>
-            <dl class="details-grid">
-                <div><dt>Username</dt><dd id="detailsUsername">-</dd></div>
-                <div><dt>Role</dt><dd id="detailsRole">-</dd></div>
-                <div><dt>Email</dt><dd id="detailsEmail">-</dd></div>
-                <div><dt>Department</dt><dd id="detailsDepartment">-</dd></div>
-                <div><dt>Created</dt><dd id="detailsCreated">-</dd></div>
-                <div><dt>Last login</dt><dd id="detailsLastLogin">Never logged in</dd></div>
-            </dl>
-        </div>
-    </section>
 </div>
 
 <?php require BASE_PATH . '/resources/views/includes/scripts.php'; ?>

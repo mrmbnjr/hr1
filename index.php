@@ -512,6 +512,24 @@ switch ($page) {
 
         break;
 
+    case 'edit-user-profile':
+
+        (new UserManagementController())->editProfile();
+
+        break;
+
+    case 'user-management-profile-update':
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            (new UserManagementController())->updateProfile();
+        } else {
+            http_response_code(405);
+            header('Allow: POST');
+            echo 'Method not allowed.';
+        }
+
+        break;
+
     case 'user-management-action':
 
         (new UserManagementController())->action();

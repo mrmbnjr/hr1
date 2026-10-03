@@ -155,9 +155,13 @@
     background: transparent;
     color: inherit;
     font: inherit;
+    text-decoration: none;
+}
+.user-identity[href] {
     cursor: pointer;
 }
 .user-identity:hover strong { color: var(--maroon); }
+.user-identity.is-unlinked { cursor: default; }
 
 /* One neutral chip for every role. Color is reserved for status, so it always means something. */
 .role-tag {
@@ -171,8 +175,7 @@
     font-weight: 700;
 }
 
-/* Status pill: same size and weight as the shared .status-badge. Class names (is-*) are kept
-   because the details dialog sets them from JS. */
+/* Status pill: same size and weight as the shared .status-badge. */
 .status-pill {
     --pill-bg: var(--gray-bg);
     --pill-fg: var(--gray);
@@ -219,8 +222,8 @@
     box-shadow: var(--shadow-lg);
     text-align: left;
 }
-.row-menu button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
-.row-menu button:hover { background: var(--um-tint); color: var(--maroon); }
+.row-menu button, .row-menu a { display: flex; align-items: center; gap: 9px; width: 100%; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: inherit; font-size: 13px; text-align: left; text-decoration: none; cursor: pointer; }
+.row-menu button:hover, .row-menu a:hover { background: var(--um-tint); color: var(--maroon); }
 .row-menu button.is-danger { color: var(--red); }
 .row-menu button.is-danger:hover { background: var(--red-bg); color: var(--red); }
 
@@ -281,50 +284,6 @@
     .user-toolbar select { flex: 1 1 100%; min-width: 100%; }
 }
 
-/* ---------- Dialogs ---------- */
-.modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(36, 19, 17, 0.55); }
-.modal-backdrop[hidden] { display: none; }
-
-/* Header and footer stay put; only the body scrolls. */
-.user-modal {
-    display: flex;
-    flex-direction: column;
-    width: min(520px, 100%);
-    max-height: calc(100vh - 40px);
-    max-height: calc(100dvh - 40px);
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card-bg);
-    box-shadow: var(--shadow-lg);
-}
-.user-modal > form { display: flex; flex-direction: column; min-height: 0; }
-
-.modal-header { flex: none; display: flex; justify-content: space-between; gap: 16px; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
-.modal-header h2 { margin: 0 0 2px; color: var(--maroon-dark); font-family: var(--font-heading); font-size: 22px; }
-.modal-header p { margin: 0; color: var(--ink-soft); font-size: 13px; }
-.modal-close { align-self: flex-start; flex: none; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--ink-soft); cursor: pointer; }
-.modal-close:hover { background: var(--um-tint); color: var(--maroon); }
-
-.modal-body, .details-content { display: grid; gap: 16px; padding: 20px 24px; overflow-y: auto; }
-.form-group { display: grid; gap: 6px; }
-.form-group label { color: var(--maroon-dark); font-size: 13px; font-weight: 800; }
-.form-group label span { color: var(--red); }
-.form-group input[readonly] { background: var(--gray-bg); color: var(--ink-soft); cursor: default; }
-.field-help { color: var(--ink-soft); font-size: 12px; }
-
-.modal-footer { flex: none; display: flex; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--border); }
-
-.details-identity { display: flex; align-items: center; gap: 14px; }
-.details-identity h3 { margin: 0 0 2px; color: var(--maroon-dark); font-family: var(--font-heading); font-size: 20px; }
-.details-identity p { margin: 0 0 8px; color: var(--ink-soft); font-size: 13px; }
-.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0; padding-top: 16px; border-top: 1px solid var(--border); }
-.details-grid div { display: grid; gap: 3px; }
-.details-grid dt { color: var(--ink-soft); font-size: 12px; font-weight: 700; }
-.details-grid dd { margin: 0; color: var(--ink); font-size: 13.5px; font-weight: 700; overflow-wrap: anywhere; }
-
 @media (max-width: 640px) {
     .user-management-page { padding: 20px 14px 40px; }
-    .details-grid { grid-template-columns: 1fr; }
-    .modal-header, .modal-body, .details-content, .modal-footer { padding-left: 18px; padding-right: 18px; }
 }

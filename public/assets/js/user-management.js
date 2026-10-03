@@ -20,19 +20,14 @@
     const statusTabs = $('statusTabs');
     const legendKeys = Array.from(statusTabs.querySelectorAll('.status-tab'));
     const attentionItems = Array.from(document.querySelectorAll('.attention-item'));
-    const userModal = $('userModal');
-    const detailsModal = $('detailsModal');
 
     const PAGE_SIZE = 8;
     const SEARCH_FIELDS = ['name', 'employeeId', 'username', 'email'];
     const STATUS_ORDER = { 'Active': 0, 'Pending Setup': 1, 'Inactive': 2 };
-    const STATUS_CLASS = { 'Active': 'is-active', 'Pending Setup': 'is-pending', 'Inactive': 'is-inactive' };
 
     let currentPage = 1;
     let statusFilter = 'All';   // the tabs above the table are the only status control
     let attentionFilter = '';   // '' | 'dormant' | 'unlinked' (matches the row's data-* flags)
-    let lastFocus = null;
-
     /* ---------- Filtering, sorting, paging ---------- */
 
     // Safari can't parse "YYYY-MM-DD HH:MM:SS", so normalise before Date.parse.
@@ -156,63 +151,7 @@
         if (!willOpen) return;
         menu.hidden = false;
         button.setAttribute('aria-expanded', 'true');
-        menu.querySelector('button').focus();
-    }
-
-    /* ---------- Dialogs ---------- */
-
-    function openModal(modal, origin, focusTarget) {
-        lastFocus = origin || document.activeElement;
-        modal.hidden = false;
-        document.body.classList.add('modal-open');
-        (focusTarget || modal.querySelector('[data-close-modal]')).focus();
-    }
-
-    function closeModals() {
-        const wasOpen = !userModal.hidden || !detailsModal.hidden;
-        userModal.hidden = true;
-        detailsModal.hidden = true;
-        document.body.classList.remove('modal-open');
-        if (wasOpen && lastFocus && document.contains(lastFocus)) lastFocus.focus();
-        lastFocus = null;
-    }
-
-    function setStatusPill(pill, status) {
-        const dot = document.createElement('i');
-        dot.className = 'status-dot';
-        dot.setAttribute('aria-hidden', 'true');
-        pill.className = `status-pill ${STATUS_CLASS[status] || 'is-inactive'}`;
-        pill.replaceChildren(dot, document.createTextNode(status));
-    }
-
-    function openDetails(row, origin) {
-        const data = row.dataset;
-        $('detailsAvatar').textContent = row.querySelector('.avatar-circle').textContent;
-        $('detailsName').textContent = data.fullname;
-        $('detailsEmployee').textContent = data.employeeNumber || 'No employee ID';
-        setStatusPill($('detailsStatus'), data.status);
-        $('detailsUsername').textContent = data.login;
-        $('detailsRole').textContent = data.role || '-';
-        $('detailsEmail').textContent = data.emailAddress || 'No email on record';
-        $('detailsDepartment').textContent = data.department || 'Unassigned';
-        $('detailsCreated').textContent = data.createdDisplay || data.created || '-';
-        $('detailsLastLogin').textContent = data.lastLogin || 'Never logged in';
-        openModal(detailsModal, origin);
-    }
-
-    function openEdit(row, origin) {
-        const data = row.dataset;
-        const roleSelect = $('roleId');
-        const options = Array.from(roleSelect.options);
-        const match = options.find(option => option.value && option.value === data.roleId)
-            || options.find(option => option.textContent.trim() === data.role);
-
-        $('formUserId').value = data.userId;
-        $('username').value = data.login;
-        $('accountEmail').value = data.emailAddress;   // the real email, never the display placeholder
-        roleSelect.value = match ? match.value : '';
-        $('accountStatus').value = data.status === 'Inactive' ? 'Inactive' : 'Active';
-        openModal(userModal, origin, $('username'));
+        menu.querySelector('a, button').focus();
     }
 
     /* ---------- Enable / disable ---------- */
@@ -252,18 +191,9 @@
 
         if (action === 'menu') { toggleMenu(button); return; }
 
-        // Return focus to the row's menu button if the action came from inside the menu.
-        const origin = button.closest('.row-menu') ? row.querySelector('[data-action="menu"]') : button;
         closeMenus();
-        if (action === 'details') openDetails(row, origin);
-        else if (action === 'edit') openEdit(row, origin);
-        else if (action === 'toggle') toggleAccount(row);
+        if (action === 'toggle') toggleAccount(row);
     });
-
-    document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeModals));
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', event => {
-        if (event.target === backdrop) closeModals();
-    }));
 
     // Close the row menu on outside click or when keyboard focus leaves it.
     document.addEventListener('click', event => { if (!event.target.closest('.actions-cell')) closeMenus(); });
@@ -273,20 +203,9 @@
         if (event.key === 'Escape') {
             const openMenu = tbody.querySelector('.row-menu:not([hidden])');
             closeMenus();
-            closeModals();
             if (openMenu) openMenu.previousElementSibling.focus();
             return;
         }
-
-        // Keep Tab inside an open dialog (it is aria-modal).
-        if (event.key !== 'Tab') return;
-        const modal = [userModal, detailsModal].find(item => !item.hidden);
-        if (!modal) return;
-        const focusable = Array.from(modal.querySelectorAll('button, input:not([type="hidden"]), select')).filter(el => !el.disabled);
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
 
     [search, role, department, sort].forEach(control => control.addEventListener('input', () => {

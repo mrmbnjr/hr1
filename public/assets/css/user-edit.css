@@ -1,0 +1,148 @@
+/* public/assets/css/user-edit.css
+   Admin → User Management → Edit Profile
+   Uses Royyan tokens with fallbacks so it renders standalone. */
+
+.ue-page {
+    --ue-maroon: var(--maroon, #7a1c2b);
+    --ue-maroon-dark: var(--maroon-dark, #5a1220);
+    --ue-gold: var(--gold, #c9a227);
+    --ue-ink: var(--ink, #1f2430);
+    --ue-ink-soft: var(--ink-soft, #6b7280);
+    --ue-card: var(--card-bg, #ffffff);
+    --ue-border: var(--border, #e5e7eb);
+    --ue-radius: var(--radius, 10px);
+    --ue-shadow: var(--shadow, 0 1px 2px rgba(16, 24, 40, .05));
+    --ue-head-bg: color-mix(in srgb, var(--ue-ink) 5%, var(--ue-card));
+    --ue-danger: #dc2626;
+
+    padding: 24px;
+    color: var(--ue-ink);
+    font-family: 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------- Page header ---------- */
+.ue-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.ue-crumbs { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--ue-ink-soft); }
+.ue-crumbs a { color: var(--ue-maroon); text-decoration: none; }
+.ue-crumbs a:hover { text-decoration: underline; }
+.ue-crumbs i { font-size: .6rem; }
+.ue-title { margin: 6px 0 2px; font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 1.6rem; line-height: 1.2; }
+.ue-sub { margin: 0; color: var(--ue-ink-soft); font-size: .9rem; }
+.ue-head-actions { display: flex; gap: 10px; }
+
+/* ---------- Layout ---------- */
+.ue-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+}
+.ue-main { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* ---------- Cards ---------- */
+.ue-card {
+    background: var(--ue-card);
+    border: 1px solid var(--ue-border);
+    border-radius: var(--ue-radius);
+    box-shadow: var(--ue-shadow);
+    overflow: hidden;
+}
+.ue-card-head { background: var(--ue-head-bg); padding: 14px 16px; border-bottom: 1px solid var(--ue-border); }
+.ue-card-head h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.ue-card-body { padding: 16px; }
+
+.ue-grid { display: grid; gap: 16px 20px; }
+.ue-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ue-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ue-span-all { grid-column: 1 / -1; }
+
+/* ---------- Fields ---------- */
+.ue-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ue-field label { font-size: .85rem; font-weight: 600; }
+.ue-field .req { color: var(--ue-danger); }
+
+.ue-field input,
+.ue-field select,
+.ue-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    font: inherit;
+    font-size: .92rem;
+    color: var(--ue-ink);
+    background: var(--ue-card);
+    border: 1px solid var(--ue-border);
+    border-radius: 8px;
+    transition: border-color .15s, box-shadow .15s;
+}
+.ue-field textarea { resize: vertical; min-height: 44px; }
+.ue-field ::placeholder { color: #9ca3af; }
+.ue-field input:focus,
+.ue-field select:focus,
+.ue-field textarea:focus {
+    outline: none;
+    border-color: var(--ue-maroon);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ue-maroon) 15%, transparent);
+}
+.ue-field input[readonly] {
+    background: var(--ue-head-bg);
+    color: var(--ue-ink-soft);
+    cursor: not-allowed;
+}
+.ue-field select:disabled { opacity: .6; cursor: not-allowed; }
+
+.ue-field.has-error input,
+.ue-field.has-error select,
+.ue-field.has-error textarea { border-color: var(--ue-danger); }
+.ue-error { display: none; color: var(--ue-danger); font-size: .75rem; }
+.ue-field.has-error .ue-error { display: block; }
+.ue-hint { color: var(--ue-ink-soft); font-size: .75rem; }
+
+/* ---------- Buttons ---------- */
+.ue-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 8px;
+    font: inherit; font-size: .9rem; font-weight: 700;
+    border: 1px solid transparent; cursor: pointer; text-decoration: none;
+    transition: background .15s, border-color .15s, opacity .15s;
+}
+.ue-btn-primary { background: var(--ue-maroon); color: #fff; }
+.ue-btn-primary:hover { background: var(--ue-maroon-dark); }
+.ue-btn-primary:disabled { opacity: .65; cursor: wait; }
+.ue-btn-ghost { background: var(--ue-card); color: var(--ue-ink); border-color: var(--ue-border); }
+.ue-btn-ghost:hover { border-color: var(--ue-maroon); color: var(--ue-maroon); }
+.ue-foot-actions { display: flex; justify-content: flex-end; gap: 10px; padding-bottom: 8px; }
+
+/* ---------- Toast ---------- */
+.ue-toast-wrap { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1200; }
+.ue-toast {
+    min-width: 260px; max-width: 360px;
+    padding: 12px 16px; border-radius: 8px;
+    background: var(--ue-card); color: var(--ue-ink);
+    border: 1px solid var(--ue-border); border-left: 4px solid #16a34a;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    font-size: .88rem;
+    opacity: 0; transform: translateX(12px);
+    transition: opacity .25s ease, transform .25s ease;
+}
+.ue-toast.show { opacity: 1; transform: translateX(0); }
+.ue-toast.error { border-left-color: var(--ue-danger); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .ue-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+    .ue-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+    .ue-page { padding: 16px; }
+    .ue-grid-3, .ue-grid-4 { grid-template-columns: 1fr; }
+    .ue-head-actions { display: none; } /* bottom bar handles actions on phones */
+}
