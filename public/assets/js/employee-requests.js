@@ -1,7 +1,10 @@
 // ==========================================================
-// RAM-YUM — Employee Requests
-// Filtering, sorting, pagination, request details modal,
-// status finalization, and HR remarks
+// RAM-YUM — Employee Requests (unified queue)
+// ----------------------------------------------------------
+// Employee requests and password reset requests are rendered
+// in a single table. This controller handles filtering,
+// sorting, pagination, the summary stat-card filters, and the
+// two detail modals (dispatched by the row's data-kind).
 // ==========================================================
 
 (function () {
@@ -25,10 +28,14 @@
             }
 
 
+            const tbody =
+                table.querySelector("tbody");
+
+
             const rows =
                 Array.from(
-                    table.querySelectorAll(
-                        "tbody tr.request-row"
+                    tbody.querySelectorAll(
+                        "tr.request-row"
                     )
                 );
 
@@ -37,28 +44,20 @@
             // FILTERS
             // ==================================================
 
-            const departmentFilter =
-                document.getElementById(
-                    "departmentFilter"
-                );
+            const searchInput =
+                document.getElementById("requestSearch");
 
 
-            const requestTypeFilter =
-                document.getElementById(
-                    "requestTypeFilter"
-                );
+            const categoryFilter =
+                document.getElementById("categoryFilter");
 
 
             const statusFilter =
-                document.getElementById(
-                    "statusFilter"
-                );
+                document.getElementById("statusFilter");
 
 
             const sortFilter =
-                document.getElementById(
-                    "sortFilter"
-                );
+                document.getElementById("sortFilter");
 
 
             // ==================================================
@@ -66,200 +65,287 @@
             // ==================================================
 
             const resultsCount =
-                document.getElementById(
-                    "resultsCount"
-                );
+                document.getElementById("resultsCount");
 
 
             const pageNumbers =
-                document.getElementById(
-                    "pageNumbers"
-                );
+                document.getElementById("pageNumbers");
 
 
             const prevPageBtn =
-                document.getElementById(
-                    "prevPage"
-                );
+                document.getElementById("prevPage");
 
 
             const nextPageBtn =
-                document.getElementById(
-                    "nextPage"
-                );
+                document.getElementById("nextPage");
+
+
+            const filterEmptyRow =
+                document.getElementById("filterEmpty");
 
 
             const PAGE_SIZE = 8;
 
-            rows.forEach(row => {
-                const openRow = event => {
-                    if (event.target.closest('a, button, input, select, textarea')) {
-                        return;
-                    }
 
-                    if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
-                        return;
-                    }
-
-                    if (event.type === 'keydown') {
-                        event.preventDefault();
-                    }
-
-                    openRequestModal(row);
-                };
-
-                row.addEventListener('click', openRow);
-                row.addEventListener('keydown', openRow);
-            });
+            let currentPage = 1;
 
 
             const STATUS_ORDER = [
                 "Pending",
                 "Approved",
                 "Rejected",
-                "Completed"
+                "Completed",
+                "Resolved"
             ];
 
 
-            let currentPage = 1;
+            // ==================================================
+            // SUMMARY CARDS
+            // ==================================================
+
+            const summaryCards =
+                Array.from(
+                    document.querySelectorAll(
+                        ".summary-card"
+                    )
+                );
+
+
+            function setActiveCard(card) {
+
+                summaryCards.forEach(
+                    function (item) {
+
+                        item.classList.toggle(
+                            "active",
+                            item === card
+                        );
+
+                    }
+                );
+
+            }
+
+
+            function refreshSummaryCounts() {
+
+                const counts = {
+                    total: rows.length,
+                    pending: 0,
+                    approved: 0,
+                    completed: 0,
+                    rejected: 0,
+                    resets: 0
+                };
+
+
+                rows.forEach(
+                    function (row) {
+
+                        const status =
+                            row.dataset.status ||
+                            "Pending";
+
+
+                        if (row.dataset.kind === "reset") {
+                            counts.resets++;
+                        }
+
+
+                        if (status === "Pending") {
+                            counts.pending++;
+                        } else if (status === "Approved") {
+                            counts.approved++;
+                        } else if (status === "Completed") {
+                            counts.completed++;
+                        } else if (status === "Rejected") {
+                            counts.rejected++;
+                        }
+
+                    }
+                );
+
+
+                summaryCards.forEach(
+                    function (card) {
+
+                        const kind =
+                            card.dataset.filterKind;
+
+
+                        const value =
+                            card.dataset.filterValue;
+
+
+                        let next = null;
+
+
+                        if (kind === "all") {
+                            next = counts.total;
+                        } else if (kind === "category") {
+                            next = counts.resets;
+                        } else if (kind === "status") {
+                            next =
+                                counts[
+                                    value.toLowerCase()
+                                ];
+                        }
+
+
+                        if (
+                            next === null ||
+                            next === undefined
+                        ) {
+                            return;
+                        }
+
+
+                        const valueEl =
+                            card.querySelector(
+                                ".stat-content strong"
+                            );
+
+
+                        if (valueEl) {
+                            valueEl.textContent =
+                                String(next);
+                        }
+
+                    }
+                );
+
+            }
+
+
+            summaryCards.forEach(
+                function (card) {
+
+                    card.addEventListener(
+                        "click",
+                        function () {
+
+                            const kind =
+                                card.dataset.filterKind;
+
+
+                            const value =
+                                card.dataset.filterValue;
+
+
+                            if (kind === "category") {
+
+                                if (categoryFilter) {
+                                    categoryFilter.value = value;
+                                }
+
+                                if (statusFilter) {
+                                    statusFilter.value = "All";
+                                }
+
+                            } else if (kind === "status") {
+
+                                if (statusFilter) {
+                                    statusFilter.value = value;
+                                }
+
+                                if (categoryFilter) {
+                                    categoryFilter.value = "All";
+                                }
+
+                            } else {
+
+                                if (categoryFilter) {
+                                    categoryFilter.value = "All";
+                                }
+
+                                if (statusFilter) {
+                                    statusFilter.value = "All";
+                                }
+
+                            }
+
+
+                            if (searchInput) {
+                                searchInput.value = "";
+                            }
+
+
+                            currentPage = 1;
+
+                            setActiveCard(card);
+
+                            applyFilters();
+
+                        }
+                    );
+
+                }
+            );
 
 
             // ==================================================
-            // MODAL
+            // DATE HELPERS
             // ==================================================
 
-            const modal =
-                document.getElementById(
-                    "requestModal"
+            function parseDate(dateString) {
+
+                if (!dateString) {
+                    return 0;
+                }
+
+
+                const parsed =
+                    new Date(dateString).getTime();
+
+
+                return Number.isNaN(parsed)
+                    ? 0
+                    : parsed;
+
+            }
+
+
+            function compareDates(dateA, dateB) {
+
+                return parseDate(dateA) - parseDate(dateB);
+
+            }
+
+
+            function compareStatus(statusA, statusB) {
+
+                const indexA =
+                    STATUS_ORDER.indexOf(statusA);
+
+
+                const indexB =
+                    STATUS_ORDER.indexOf(statusB);
+
+
+                return (
+                    (
+                        indexA === -1
+                            ? STATUS_ORDER.length
+                            : indexA
+                    )
+                    -
+                    (
+                        indexB === -1
+                            ? STATUS_ORDER.length
+                            : indexB
+                    )
                 );
 
-
-            const modalClose =
-                document.getElementById(
-                    "requestModalClose"
-                );
+            }
 
 
-            const modalCancel =
-                document.getElementById(
-                    "requestModalCancel"
-                );
+            // Both request kinds expose their timestamp via data-date.
 
+            function rowDate(row) {
 
-            const modalBackdrop =
-                modal?.querySelector(
-                    ".request-modal-backdrop"
-                );
+                return row.dataset.date || "";
 
-
-            const requestModalNext =
-                document.getElementById(
-                    "requestModalNext"
-                );
-
-            const requestModalBack =
-                document.getElementById(
-                    "requestModalBack"
-                );
-
-
-            const requestModalSave =
-                document.getElementById(
-                    "requestModalSave"
-                );
-
-
-            const requestStepOne =
-                document.getElementById(
-                    "requestStepOne"
-                );
-
-
-            const requestStepTwo =
-                document.getElementById(
-                    "requestStepTwo"
-                );
-
-
-            const requestReadonlyMessage =
-                document.getElementById(
-                    "requestReadonlyMessage"
-                );
-
-
-            // ==================================================
-            // MODAL FIELDS
-            // ==================================================
-
-            const employeeName =
-                document.getElementById(
-                    "modalEmployeeName"
-                );
-
-
-            const employeeNumber =
-                document.getElementById(
-                    "modalEmployeeNumber"
-                );
-
-
-            const department =
-                document.getElementById(
-                    "modalDepartment"
-                );
-
-
-            const requestType =
-                document.getElementById(
-                    "modalRequestType"
-                );
-
-
-            const requestDate =
-                document.getElementById(
-                    "modalRequestDate"
-                );
-
-
-            const requestStatus =
-                document.getElementById(
-                    "modalRequestStatus"
-                );
-
-
-            const requestSubject =
-                document.getElementById(
-                    "modalRequestSubject"
-                );
-
-
-            const requestDescription =
-                document.getElementById(
-                    "modalRequestDescription"
-                );
-
-
-            const requestRemarks =
-                document.getElementById(
-                    "modalRequestRemarks"
-                );
-
-
-            // ==================================================
-            // MODAL STATE
-            // ==================================================
-
-            let requestModalStep = 1;
-
-            let currentRequestRow = null;
-
-            let currentRequestId = null;
-
-            let originalStatus = "Pending";
-
-            let selectedStatus = "Pending";
-
-            let requestIsFinalized = false;
+            }
 
 
             // ==================================================
@@ -268,51 +354,48 @@
 
             function getVisibleRows() {
 
-                const selectedDepartment =
-                    departmentFilter?.value ??
-                    "All";
+                const search =
+                    (searchInput?.value || "")
+                        .toLowerCase()
+                        .trim();
 
 
-                const selectedRequestType =
-                    requestTypeFilter?.value ??
-                    "All";
+                const category =
+                    categoryFilter?.value || "All";
 
 
-                const selectedStatus =
-                    statusFilter?.value ??
-                    "All";
+                const status =
+                    statusFilter?.value || "All";
 
 
-                const selectedSort =
-                    sortFilter?.value ??
-                    "newest";
+                const sort =
+                    sortFilter?.value || "newest";
 
 
-                const visibleRows =
+                const visible =
                     rows.filter(
-                        row => {
+                        function (row) {
 
-                            const matchesDepartment =
-                                selectedDepartment === "All" ||
-                                row.dataset.department ===
-                                selectedDepartment;
+                            const matchesSearch =
+                                !search ||
+                                (row.dataset.name || "")
+                                    .toLowerCase()
+                                    .includes(search);
 
 
-                            const matchesRequestType =
-                                selectedRequestType === "All" ||
-                                row.dataset.requestType ===
-                                selectedRequestType;
+                            const matchesCategory =
+                                category === "All" ||
+                                row.dataset.kind === category;
 
 
                             const matchesStatus =
-                                selectedStatus === "All" ||
-                                row.dataset.status ===
-                                selectedStatus;
+                                status === "All" ||
+                                row.dataset.status === status;
 
 
                             return (
-                                matchesDepartment &&
-                                matchesRequestType &&
+                                matchesSearch &&
+                                matchesCategory &&
                                 matchesStatus
                             );
 
@@ -320,16 +403,16 @@
                     );
 
 
-                visibleRows.sort(
-                    (a, b) => {
+                visible.sort(
+                    function (a, b) {
 
-                        switch (selectedSort) {
+                        switch (sort) {
 
                             case "oldest":
 
                                 return compareDates(
-                                    a.dataset.date,
-                                    b.dataset.date
+                                    rowDate(a),
+                                    rowDate(b)
                                 );
 
 
@@ -364,8 +447,8 @@
                             default:
 
                                 return compareDates(
-                                    b.dataset.date,
-                                    a.dataset.date
+                                    rowDate(b),
+                                    rowDate(a)
                                 );
 
                         }
@@ -374,89 +457,7 @@
                 );
 
 
-                return visibleRows;
-
-            }
-
-
-            // ==================================================
-            // DATE COMPARISON
-            // ==================================================
-
-            function compareDates(
-                dateA,
-                dateB
-            ) {
-
-                const timeA =
-                    parseDate(dateA);
-
-
-                const timeB =
-                    parseDate(dateB);
-
-
-                return timeA - timeB;
-
-            }
-
-
-            function parseDate(
-                dateString
-            ) {
-
-                if (!dateString) {
-                    return 0;
-                }
-
-
-                const parsed =
-                    new Date(
-                        dateString
-                    ).getTime();
-
-
-                return Number.isNaN(parsed)
-                    ? 0
-                    : parsed;
-
-            }
-
-
-            // ==================================================
-            // STATUS COMPARISON
-            // ==================================================
-
-            function compareStatus(
-                statusA,
-                statusB
-            ) {
-
-                const indexA =
-                    STATUS_ORDER.indexOf(
-                        statusA
-                    );
-
-
-                const indexB =
-                    STATUS_ORDER.indexOf(
-                        statusB
-                    );
-
-
-                return (
-                    (
-                        indexA === -1
-                            ? STATUS_ORDER.length
-                            : indexA
-                    )
-                    -
-                    (
-                        indexB === -1
-                            ? STATUS_ORDER.length
-                            : indexB
-                    )
-                );
+                return visible;
 
             }
 
@@ -481,21 +482,13 @@
                     );
 
 
-                if (
-                    currentPage >
-                    totalPages
-                ) {
-
-                    currentPage =
-                        totalPages;
-
+                if (currentPage > totalPages) {
+                    currentPage = totalPages;
                 }
 
 
                 const start =
-                    (
-                        currentPage - 1
-                    ) * PAGE_SIZE;
+                    (currentPage - 1) * PAGE_SIZE;
 
 
                 const pageRows =
@@ -505,41 +498,36 @@
                     );
 
 
-                const tbody =
-                    table.querySelector(
-                        "tbody"
-                    );
-
-
                 visible.forEach(
-                    row => {
-
-                        tbody.appendChild(
-                            row
-                        );
-
+                    function (row) {
+                        tbody.appendChild(row);
                     }
                 );
 
 
                 rows.forEach(
-                    row => {
-
-                        row.style.display =
-                            "none";
-
+                    function (row) {
+                        row.style.display = "none";
                     }
                 );
 
 
                 pageRows.forEach(
-                    row => {
-
-                        row.style.display =
-                            "";
-
+                    function (row) {
+                        row.style.display = "";
                     }
                 );
+
+
+                if (filterEmptyRow) {
+
+                    filterEmptyRow.hidden =
+                        !(
+                            rows.length > 0 &&
+                            visible.length === 0
+                        );
+
+                }
 
 
                 updateResultsCount(
@@ -548,9 +536,7 @@
                 );
 
 
-                renderPagination(
-                    totalPages
-                );
+                renderPagination(totalPages);
 
             }
 
@@ -559,10 +545,7 @@
             // RESULTS COUNT
             // ==================================================
 
-            function updateResultsCount(
-                totalRows,
-                start
-            ) {
+            function updateResultsCount(totalRows, start) {
 
                 if (!resultsCount) {
                     return;
@@ -575,6 +558,7 @@
                         "No requests found";
 
                     return;
+
                 }
 
 
@@ -600,6 +584,7 @@
             // ==================================================
 
             function renderPagination(totalPages) {
+
                 window.renderTablePagination({
                     pageNumbers,
                     prevPageBtn,
@@ -611,24 +596,17 @@
                         applyFilters();
                     },
                 });
+
             }
 
 
-            // ==================================================
-            // PREVIOUS PAGE
-            // ==================================================
-
             prevPageBtn?.addEventListener(
                 "click",
-                () => {
+                function () {
 
-                    if (
-                        currentPage <= 1
-                    ) {
-
+                    if (currentPage <= 1) {
                         return;
                     }
-
 
                     currentPage--;
 
@@ -638,36 +616,23 @@
             );
 
 
-            // ==================================================
-            // NEXT PAGE
-            // ==================================================
-
             nextPageBtn?.addEventListener(
                 "click",
-                () => {
-
-                    const visibleRows =
-                        getVisibleRows();
-
+                function () {
 
                     const totalPages =
                         Math.max(
                             1,
                             Math.ceil(
-                                visibleRows.length /
+                                getVisibleRows().length /
                                 PAGE_SIZE
                             )
                         );
 
 
-                    if (
-                        currentPage >=
-                        totalPages
-                    ) {
-
+                    if (currentPage >= totalPages) {
                         return;
                     }
-
 
                     currentPage++;
 
@@ -682,25 +647,31 @@
             // ==================================================
 
             [
-                departmentFilter,
-                requestTypeFilter,
-                statusFilter,
-                sortFilter
+                { el: searchInput, event: "input" },
+                { el: categoryFilter, event: "change" },
+                { el: statusFilter, event: "change" },
+                { el: sortFilter, event: "change" }
 
             ].forEach(
-                filter => {
+                function (control) {
 
-                    if (!filter) {
+                    if (!control.el) {
                         return;
                     }
 
 
-                    filter.addEventListener(
-                        "change",
-                        () => {
+                    control.el.addEventListener(
+                        control.event,
+                        function () {
 
-                            currentPage =
-                                1;
+                            currentPage = 1;
+
+                            // Manual changes drop the card highlight
+                            // (sorting keeps the active status card).
+
+                            if (control.el !== sortFilter) {
+                                setActiveCard(null);
+                            }
 
                             applyFilters();
 
@@ -715,15 +686,15 @@
             // STATUS CLASS
             // ==================================================
 
-            function getStatusClass(
-                status
-            ) {
+            function getStatusClass(status) {
 
                 switch (status) {
 
                     case "Approved":
 
                     case "Completed":
+
+                    case "Resolved":
 
                         return "badge-green";
 
@@ -745,24 +716,108 @@
 
 
             // ==================================================
+            // EMPLOYEE REQUEST MODAL
+            // ==================================================
+
+            const requestModal =
+                document.getElementById("requestModal");
+
+
+            const requestModalClose =
+                document.getElementById("requestModalClose");
+
+
+            const requestModalBackdrop =
+                requestModal?.querySelector(
+                    ".request-modal-backdrop"
+                );
+
+
+            const requestModalNext =
+                document.getElementById("requestModalNext");
+
+
+            const requestModalBack =
+                document.getElementById("requestModalBack");
+
+
+            const requestModalSave =
+                document.getElementById("requestModalSave");
+
+
+            const requestStepOne =
+                document.getElementById("requestStepOne");
+
+
+            const requestStepTwo =
+                document.getElementById("requestStepTwo");
+
+
+            const requestReadonlyMessage =
+                document.getElementById("requestReadonlyMessage");
+
+
+            const employeeName =
+                document.getElementById("modalEmployeeName");
+
+
+            const employeeNumber =
+                document.getElementById("modalEmployeeNumber");
+
+
+            const department =
+                document.getElementById("modalDepartment");
+
+
+            const requestType =
+                document.getElementById("modalRequestType");
+
+
+            const requestDate =
+                document.getElementById("modalRequestDate");
+
+
+            const requestStatus =
+                document.getElementById("modalRequestStatus");
+
+
+            const requestSubject =
+                document.getElementById("modalRequestSubject");
+
+
+            const requestDescription =
+                document.getElementById("modalRequestDescription");
+
+
+            const requestRemarks =
+                document.getElementById("modalRequestRemarks");
+
+
+            let requestModalStep = 1;
+
+            let currentRequestRow = null;
+
+            let currentRequestId = null;
+
+            let requestIsFinalized = false;
+
+            let selectedStatus = "Pending";
+
+
+            // ==================================================
             // HIGHLIGHT STATUS
             // ==================================================
 
-            function highlightStatus(
-                status
-            ) {
+            function highlightStatus(status) {
 
                 document
-                    .querySelectorAll(
-                        ".request-status-item"
-                    )
+                    .querySelectorAll(".request-status-item")
                     .forEach(
-                        item => {
+                        function (item) {
 
                             item.classList.toggle(
                                 "active",
-                                item.dataset.status ===
-                                status
+                                item.dataset.status === status
                             );
 
                         }
@@ -792,18 +847,10 @@
                     isRequestEditable();
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Status buttons
-                |--------------------------------------------------------------------------
-                */
-
                 document
-                    .querySelectorAll(
-                        ".request-status-item"
-                    )
+                    .querySelectorAll(".request-status-item")
                     .forEach(
-                        item => {
+                        function (item) {
 
                             item.classList.toggle(
                                 "is-disabled",
@@ -813,48 +860,22 @@
 
                             item.setAttribute(
                                 "aria-disabled",
-                                editable
-                                    ? "false"
-                                    : "true"
+                                editable ? "false" : "true"
                             );
 
                         }
                     );
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Remarks
-                |--------------------------------------------------------------------------
-                */
-
                 if (requestRemarks) {
-
-                    requestRemarks.readOnly =
-                        !editable;
-
+                    requestRemarks.readOnly = !editable;
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Read-only message
-                |--------------------------------------------------------------------------
-                */
 
                 if (requestReadonlyMessage) {
-
-                    requestReadonlyMessage.hidden =
-                        editable;
-
+                    requestReadonlyMessage.hidden = editable;
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Save button
-                |--------------------------------------------------------------------------
-                */
 
                 if (requestModalSave) {
 
@@ -878,13 +899,9 @@
                 }
 
 
-                requestModalSave.hidden =
-                    true;
+                requestModalSave.hidden = true;
 
-
-                requestModalSave.disabled =
-                    false;
-
+                requestModalSave.disabled = false;
 
                 requestModalSave.innerHTML =
                     '<i class="fa-solid fa-check"></i> Save Changes';
@@ -898,49 +915,36 @@
 
             function resetModalStep() {
 
-                requestModalStep =
-                    1;
+                requestModalStep = 1;
 
 
                 if (requestStepOne) {
-
-                    requestStepOne.hidden =
-                        false;
-
+                    requestStepOne.hidden = false;
                 }
 
 
                 if (requestStepTwo) {
-
-                    requestStepTwo.hidden =
-                        true;
-
+                    requestStepTwo.hidden = true;
                 }
 
 
                 if (requestModalNext) {
 
-                    requestModalNext.hidden =
-                        false;
+                    requestModalNext.hidden = false;
 
                     requestModalNext.innerHTML =
                         'Next <i class="fa-solid fa-arrow-right"></i>';
 
                 }
 
+
                 if (requestModalBack) {
-
-                    requestModalBack.hidden =
-                        true;
-
+                    requestModalBack.hidden = true;
                 }
 
 
                 if (requestModalSave) {
-
-                    requestModalSave.hidden =
-                        true;
-
+                    requestModalSave.hidden = true;
                 }
 
             }
@@ -950,131 +954,71 @@
             // OPEN REQUEST MODAL
             // ==================================================
 
-            function openRequestModal(
-                row
-            ) {
+            function openRequestModal(row) {
 
-                const data =
-                    row.dataset;
+                const data = row.dataset;
 
 
-                currentRequestRow =
-                    row;
+                currentRequestRow = row;
+
+                currentRequestId = data.id || null;
 
 
-                currentRequestId =
-                    data.id || null;
+                const originalStatus =
+                    data.status || "Pending";
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Determine current database state
-                |--------------------------------------------------------------------------
-                */
-
-                originalStatus =
-                    data.status ||
-                    "Pending";
-
-
-                selectedStatus =
-                    originalStatus;
-
+                selectedStatus = originalStatus;
 
                 requestIsFinalized =
-                    originalStatus !==
-                    "Pending";
+                    originalStatus !== "Pending";
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Reset modal
-                |--------------------------------------------------------------------------
-                */
 
                 resetModalStep();
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Employee
-                |--------------------------------------------------------------------------
-                */
-
                 if (employeeName) {
-
                     employeeName.textContent =
-                        data.name ||
-                        "Unknown Employee";
-
+                        data.name || "Unknown Employee";
                 }
 
 
                 if (employeeNumber) {
-
                     employeeNumber.textContent =
-                        data.employeeNumber ||
-                        "—";
-
+                        data.employeeNumber || "—";
                 }
 
 
                 if (department) {
-
                     department.textContent =
-                        data.department ||
-                        "—";
-
+                        data.department || "—";
                 }
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Request information
-                |--------------------------------------------------------------------------
-                */
-
                 if (requestType) {
-
                     requestType.textContent =
-                        data.requestType ||
-                        "—";
-
+                        data.requestType || "—";
                 }
 
 
                 if (requestDate) {
-
                     requestDate.textContent =
-                        data.date ||
-                        "—";
-
+                        data.date || "—";
                 }
 
 
                 if (requestSubject) {
-
                     requestSubject.textContent =
-                        data.subject ||
-                        "No subject provided.";
-
+                        data.subject || "No subject provided.";
                 }
 
 
                 if (requestDescription) {
-
                     requestDescription.textContent =
                         data.description ||
                         "No additional details provided.";
-
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Status
-                |--------------------------------------------------------------------------
-                */
 
                 if (requestStatus) {
 
@@ -1084,62 +1028,31 @@
 
                     requestStatus.className =
                         "badge " +
-                        getStatusClass(
-                            selectedStatus
-                        );
+                        getStatusClass(selectedStatus);
 
                 }
 
 
-                highlightStatus(
-                    selectedStatus
-                );
+                highlightStatus(selectedStatus);
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Remarks
-                |--------------------------------------------------------------------------
-                */
 
                 if (requestRemarks) {
-
                     requestRemarks.value =
-                        data.hrRemarks ||
-                        "";
-
+                        data.hrRemarks || "";
                 }
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Apply editability
-                |--------------------------------------------------------------------------
-                */
 
                 updateModalEditability();
 
 
-                /*
-                |--------------------------------------------------------------------------
-                | Open
-                |--------------------------------------------------------------------------
-                */
+                requestModal.classList.add("is-open");
 
-                modal.classList.add(
-                    "is-open"
-                );
-
-
-                modal.setAttribute(
+                requestModal.setAttribute(
                     "aria-hidden",
                     "false"
                 );
 
-
-                document.body.classList.add(
-                    "modal-open"
-                );
+                document.body.classList.add("modal-open");
 
             }
 
@@ -1150,55 +1063,33 @@
 
             function closeRequestModal() {
 
-                if (!modal) {
+                if (!requestModal) {
                     return;
                 }
 
 
-                modal.classList.remove(
-                    "is-open"
-                );
+                requestModal.classList.remove("is-open");
 
-
-                modal.setAttribute(
+                requestModal.setAttribute(
                     "aria-hidden",
                     "true"
                 );
 
-
-                document.body.classList.remove(
-                    "modal-open"
-                );
+                document.body.classList.remove("modal-open");
 
 
-                currentRequestRow =
-                    null;
+                currentRequestRow = null;
 
+                currentRequestId = null;
 
-                currentRequestId =
-                    null;
+                requestIsFinalized = false;
 
-
-                originalStatus =
-                    "Pending";
-
-
-                selectedStatus =
-                    "Pending";
-
-
-                requestIsFinalized =
-                    false;
+                selectedStatus = "Pending";
 
 
                 if (requestRemarks) {
-
-                    requestRemarks.value =
-                        "";
-
-                    requestRemarks.readOnly =
-                        false;
-
+                    requestRemarks.value = "";
+                    requestRemarks.readOnly = false;
                 }
 
 
@@ -1229,9 +1120,7 @@
 
 
                     const row =
-                        button.closest(
-                            ".request-row"
-                        );
+                        button.closest(".request-row");
 
 
                     if (!row) {
@@ -1239,9 +1128,7 @@
                     }
 
 
-                    openRequestModal(
-                        row
-                    );
+                    openRequestModal(row);
 
                 }
             );
@@ -1267,26 +1154,15 @@
 
 
                     if (
-                        !modal.classList.contains(
-                            "is-open"
-                        )
+                        !requestModal ||
+                        !requestModal.classList.contains("is-open")
                     ) {
-
                         return;
-
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Finalized requests are read-only
-                    |--------------------------------------------------------------------------
-                    */
-
                     if (!isRequestEditable()) {
-
                         return;
-
                     }
 
 
@@ -1295,9 +1171,7 @@
                         "Pending";
 
 
-                    highlightStatus(
-                        selectedStatus
-                    );
+                    highlightStatus(selectedStatus);
 
 
                     if (requestStatus) {
@@ -1308,9 +1182,7 @@
 
                         requestStatus.className =
                             "badge " +
-                            getStatusClass(
-                                selectedStatus
-                            );
+                            getStatusClass(selectedStatus);
 
                     }
 
@@ -1318,23 +1190,13 @@
             );
 
 
-            // ==================================================
-            // MODAL CLOSE EVENTS
-            // ==================================================
-
-            modalClose?.addEventListener(
+            requestModalClose?.addEventListener(
                 "click",
                 closeRequestModal
             );
 
 
-            modalCancel?.addEventListener(
-                "click",
-                closeRequestModal
-            );
-
-
-            modalBackdrop?.addEventListener(
+            requestModalBackdrop?.addEventListener(
                 "click",
                 closeRequestModal
             );
@@ -1348,100 +1210,104 @@
                 "click",
                 function () {
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Step 1 -> Step 2
-                    |--------------------------------------------------------------------------
-                    */
+                    if (requestModalStep === 1) {
 
-                    if (
-                        requestModalStep === 1
-                    ) {
+                        requestStepOne.hidden = true;
 
-                        requestStepOne.hidden =
-                            true;
+                        requestStepTwo.hidden = false;
 
+                        requestModalStep = 2;
 
-                        requestStepTwo.hidden =
-                            false;
-
-
-                        requestModalStep =
-                            2;
-
-
-                        requestModalNext.hidden =
-                            true;
+                        requestModalNext.hidden = true;
 
 
                         if (requestModalBack) {
-
-                            requestModalBack.hidden =
-                                false;
-
+                            requestModalBack.hidden = false;
                         }
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Only show Save for Pending requests
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            requestModalSave
-                        ) {
-
+                        if (requestModalSave) {
                             requestModalSave.hidden =
                                 requestIsFinalized;
-
                         }
 
 
                         return;
-                    }
 
+                    }
 
                 }
             );
+
 
             requestModalBack?.addEventListener(
                 "click",
                 function () {
 
-                    requestStepTwo.hidden =
-                        true;
+                    requestStepTwo.hidden = true;
 
+                    requestStepOne.hidden = false;
 
-                    requestStepOne.hidden =
-                        false;
+                    requestModalStep = 1;
 
-
-                    requestModalStep =
-                        1;
-
-
-                    requestModalBack.hidden =
-                        true;
+                    requestModalBack.hidden = true;
 
 
                     if (requestModalNext) {
-
-                        requestModalNext.hidden =
-                            false;
-
+                        requestModalNext.hidden = false;
                     }
 
 
                     if (requestModalSave) {
-
-                        requestModalSave.hidden =
-                            true;
-
+                        requestModalSave.hidden = true;
                     }
 
                 }
             );
+
+
+            // ==================================================
+            // UPDATE TABLE ROW
+            // ==================================================
+
+            function updateRequestRow(row, request) {
+
+                if (!row || !request) {
+                    return;
+                }
+
+
+                const status =
+                    request.status || "Pending";
+
+
+                const remarks =
+                    request.hr_remarks || "";
+
+
+                row.dataset.status = status;
+
+                row.dataset.hrRemarks = remarks;
+
+                row.dataset.id =
+                    request.request_id || row.dataset.id;
+
+
+                const badge =
+                    row.querySelector(".badge");
+
+
+                if (badge) {
+
+                    badge.textContent = status;
+
+                    badge.className =
+                        "badge " +
+                        getStatusClass(status);
+
+                }
+
+            }
 
 
             // ==================================================
@@ -1452,12 +1318,6 @@
                 "click",
                 async function () {
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Must have request
-                    |--------------------------------------------------------------------------
-                    */
-
                     if (!currentRequestId) {
 
                         alert(
@@ -1465,56 +1325,29 @@
                         );
 
                         return;
+
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Already finalized
-                    |--------------------------------------------------------------------------
-                    */
-
                     if (!isRequestEditable()) {
-
                         return;
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Pending cannot be saved
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        selectedStatus ===
-                        "Pending"
-                    ) {
+                    if (selectedStatus === "Pending") {
 
                         alert(
                             "Please select Approved, Rejected, or Completed before saving."
                         );
 
                         return;
+
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Remarks
-                    |--------------------------------------------------------------------------
-                    */
-
                     const hrRemarks =
-                        requestRemarks?.value.trim() ||
-                        "";
+                        requestRemarks?.value.trim() || "";
 
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Confirm finalization
-                    |--------------------------------------------------------------------------
-                    */
 
                     const confirmed =
                         window.confirm(
@@ -1523,21 +1356,11 @@
 
 
                     if (!confirmed) {
-
                         return;
-
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Disable button
-                    |--------------------------------------------------------------------------
-                    */
-
-                    requestModalSave.disabled =
-                        true;
-
+                    requestModalSave.disabled = true;
 
                     requestModalSave.innerHTML =
                         '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
@@ -1545,27 +1368,17 @@
 
                     try {
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Prepare form
-                        |--------------------------------------------------------------------------
-                        */
-
-                        const formData =
-                            new FormData();
-
+                        const formData = new FormData();
 
                         formData.append(
                             "request_id",
                             currentRequestId
                         );
 
-
                         formData.append(
                             "status",
                             selectedStatus
                         );
-
 
                         formData.append(
                             "hr_remarks",
@@ -1573,36 +1386,22 @@
                         );
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Send request
-                        |--------------------------------------------------------------------------
-                        */
+                        const response =
+                            await fetch(
+                                "?page=employee-requests-update",
+                                {
+                                    method: "POST",
+                                    body: formData,
+                                    credentials: "same-origin"
+                                }
+                            );
 
-                    const response =
-                        await fetch(
-                            "?page=employee-requests-update",
-                            {
-                                method: "POST",
-                                body: formData,
-                                credentials: "same-origin"
-                            }
-                        );
 
                         const result =
                             await response.json();
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Server error
-                        |--------------------------------------------------------------------------
-                        */
-
-                        if (
-                            !response.ok ||
-                            !result.success
-                        ) {
+                        if (!response.ok || !result.success) {
 
                             throw new Error(
                                 result.message ||
@@ -1612,41 +1411,16 @@
                         }
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Update table row
-                        |--------------------------------------------------------------------------
-                        */
-
                         updateRequestRow(
                             currentRequestRow,
                             result.request
                         );
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Finalize modal state
-                        |--------------------------------------------------------------------------
-                        */
+                        requestIsFinalized = true;
 
-                        requestIsFinalized =
-                            true;
+                        selectedStatus = result.request.status;
 
-
-                        originalStatus =
-                            result.request.status;
-
-
-                        selectedStatus =
-                            result.request.status;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Update status display
-                        |--------------------------------------------------------------------------
-                        */
 
                         if (requestStatus) {
 
@@ -1663,59 +1437,24 @@
                         }
 
 
-                        highlightStatus(
-                            result.request.status
-                        );
+                        highlightStatus(result.request.status);
 
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Update remarks
-                        |--------------------------------------------------------------------------
-                        */
 
                         if (requestRemarks) {
-
                             requestRemarks.value =
-                                result.request.hr_remarks ||
-                                "";
-
+                                result.request.hr_remarks || "";
                         }
 
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Lock request
-                        |--------------------------------------------------------------------------
-                        */
-
                         updateModalEditability();
 
+                        requestModalSave.hidden = true;
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Save button becomes hidden
-                        |--------------------------------------------------------------------------
-                        */
-
-                        requestModalSave.hidden =
-                            true;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Refresh table
-                        |--------------------------------------------------------------------------
-                        */
 
                         applyFilters();
 
+                        refreshSummaryCounts();
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Notify HR
-                        |--------------------------------------------------------------------------
-                        */
 
                         alert(
                             "Employee request finalized successfully."
@@ -1735,9 +1474,7 @@
                         );
 
 
-                        requestModalSave.disabled =
-                            false;
-
+                        requestModalSave.disabled = false;
 
                         requestModalSave.innerHTML =
                             '<i class="fa-solid fa-check"></i> Save Changes';
@@ -1749,144 +1486,14 @@
 
 
             // ==================================================
-            // UPDATE TABLE ROW
+            // PASSWORD RESET REQUEST MODAL
             // ==================================================
-
-            function updateRequestRow(
-                row,
-                request
-            ) {
-
-                if (!row || !request) {
-                    return;
-                }
-
-
-                const status =
-                    request.status ||
-                    "Pending";
-
-
-                const remarks =
-                    request.hr_remarks ||
-                    "";
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Update data attributes
-                |--------------------------------------------------------------------------
-                */
-
-                row.dataset.status =
-                    status;
-
-
-                row.dataset.hrRemarks =
-                    remarks;
-
-
-                row.dataset.id =
-                    request.request_id ||
-                    row.dataset.id;
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Update visible badge
-                |--------------------------------------------------------------------------
-                */
-
-                const badge =
-                    row.querySelector(
-                        ".badge"
-                    );
-
-
-                if (badge) {
-
-                    badge.textContent =
-                        status;
-
-
-                    badge.className =
-                        "badge " +
-                        getStatusClass(
-                            status
-                        );
-
-                }
-
-            }
-
-
-            // ==================================================
-            // ESCAPE KEY
-            // ==================================================
-
-            document.addEventListener(
-                "keydown",
-                function (event) {
-
-                    if (
-                        event.key ===
-                        "Escape" &&
-                        modal.classList.contains(
-                            "is-open"
-                        )
-                    ) {
-
-                        closeRequestModal();
-
-                    }
-
-                }
-            );
-
-
-            // ==================================================
-            // INITIALIZE
-            // ==================================================
-
-            applyFilters();
-
-        }
-    );
-
-})();
-
-
-// ==========================================================
-// RAM-YUM — Password Reset Requests (HR / Admin tab)
-// Tab switching, detail modal, and resolve / reopen actions
-// ==========================================================
-
-(function () {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            // ==================================================
-            // TABLE — only present for ADMIN / HR
-            // ==================================================
-
-            const resetTable =
-                document.getElementById(
-                    "passwordResetTable"
-                );
-
-
-            if (!resetTable) {
-                return;
-            }
-
 
             const UPDATE_URL =
                 "?page=password-reset-request-update";
 
 
-            const STATUS_META = {
+            const RESET_STATUS_META = {
 
                 Pending: {
                     label: "Pending",
@@ -1905,226 +1512,57 @@
             };
 
 
-            // ==================================================
-            // TABS
-            // ==================================================
+            const resetModal =
+                document.getElementById("resetRequestModal");
 
-            const tabButtons =
-                Array.from(
-                    document.querySelectorAll(
-                        ".request-tab[data-tab]"
-                    )
-                );
 
+            const resetModalName =
+                document.getElementById("resetModalName");
 
-            const tabPanels =
-                Array.from(
-                    document.querySelectorAll(
-                        ".request-tab-panel[data-panel]"
-                    )
-                );
 
+            const resetModalIdentifier =
+                document.getElementById("resetModalIdentifier");
 
-            function activateTab(name) {
 
-                tabButtons.forEach(function (button) {
+            const resetModalContact =
+                document.getElementById("resetModalContact");
 
-                    const isActive =
-                        button.dataset.tab === name;
 
-                    button.classList.toggle(
-                        "is-active",
-                        isActive
-                    );
+            const resetModalCreated =
+                document.getElementById("resetModalCreated");
 
-                    button.setAttribute(
-                        "aria-selected",
-                        isActive ? "true" : "false"
-                    );
 
-                });
+            const resetModalStatus =
+                document.getElementById("resetModalStatus");
 
 
-                tabPanels.forEach(function (panel) {
+            const resetModalResolvedBy =
+                document.getElementById("resetModalResolvedBy");
 
-                    const isActive =
-                        panel.dataset.panel === name;
 
-                    panel.classList.toggle(
-                        "is-active",
-                        isActive
-                    );
+            const resetModalMessage =
+                document.getElementById("resetModalMessage");
 
-                    panel.hidden = !isActive;
 
-                });
+            const resetModalAction =
+                document.getElementById("resetRequestModalAction");
 
-            }
 
-
-            tabButtons.forEach(function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-                        activateTab(
-                            button.dataset.tab
-                        );
-                    }
-                );
-
-            });
-
-
-            // ==================================================
-            // PENDING COUNT PILL
-            // ==================================================
-
-            let pendingCount =
-                (function () {
-
-                    const badge =
-                        document.querySelector(
-                            ".request-tab-badge"
-                        );
-
-                    return badge
-                        ? parseInt(
-                            badge.textContent,
-                            10
-                        ) || 0
-                        : 0;
-
-                })();
-
-
-            function renderPendingCount() {
-
-                const tab =
-                    document.querySelector(
-                        '.request-tab[data-tab="resets"]'
-                    );
-
-
-                if (!tab) {
-                    return;
-                }
-
-
-                let badge =
-                    tab.querySelector(
-                        ".request-tab-badge"
-                    );
-
-
-                if (pendingCount <= 0) {
-
-                    if (badge) {
-                        badge.remove();
-                    }
-
-                    return;
-                }
-
-
-                if (!badge) {
-
-                    badge =
-                        document.createElement(
-                            "span"
-                        );
-
-                    badge.className =
-                        "request-tab-badge";
-
-                    tab.appendChild(badge);
-
-                }
-
-
-                badge.textContent =
-                    String(pendingCount);
-
-            }
-
-
-            // ==================================================
-            // MODAL
-            // ==================================================
-
-            const modal =
-                document.getElementById(
-                    "resetRequestModal"
-                );
-
-
-            if (!modal) {
-                return;
-            }
-
-
-            const modalName =
-                document.getElementById(
-                    "resetModalName"
-                );
-
-
-            const modalIdentifier =
-                document.getElementById(
-                    "resetModalIdentifier"
-                );
-
-
-            const modalContact =
-                document.getElementById(
-                    "resetModalContact"
-                );
-
-
-            const modalCreated =
-                document.getElementById(
-                    "resetModalCreated"
-                );
-
-
-            const modalStatus =
-                document.getElementById(
-                    "resetModalStatus"
-                );
-
-
-            const modalResolvedBy =
-                document.getElementById(
-                    "resetModalResolvedBy"
-                );
-
-
-            const modalMessage =
-                document.getElementById(
-                    "resetModalMessage"
-                );
-
-
-            const modalAction =
-                document.getElementById(
-                    "resetRequestModalAction"
-                );
-
-
-            const modalBackdrop =
-                modal.querySelector(
+            const resetModalBackdrop =
+                resetModal?.querySelector(
                     ".request-modal-backdrop"
                 );
 
 
-            let currentRow = null;
+            let currentResetRow = null;
 
 
-            function statusBadge(status) {
+            function resetStatusBadge(status) {
 
                 const meta =
-                    STATUS_META[status] ||
-                    STATUS_META.Pending;
+                    RESET_STATUS_META[status] ||
+                    RESET_STATUS_META.Pending;
+
 
                 return (
                     '<span class="badge ' +
@@ -2137,197 +1575,144 @@
             }
 
 
-            function openModal(row) {
+            function openResetModal(row) {
 
-                currentRow = row;
+                if (!resetModal) {
+                    return;
+                }
+
+
+                currentResetRow = row;
 
 
                 const status =
-                    row.dataset.status ||
-                    "Pending";
+                    row.dataset.status || "Pending";
 
 
                 const meta =
-                    STATUS_META[status] ||
-                    STATUS_META.Pending;
+                    RESET_STATUS_META[status] ||
+                    RESET_STATUS_META.Pending;
 
 
-                modalName.textContent =
-                    row.dataset.name || "—";
+                if (resetModalName) {
+                    resetModalName.textContent =
+                        row.dataset.name || "—";
+                }
 
 
-                modalIdentifier.textContent =
-                    row.dataset.identifier || "—";
+                if (resetModalIdentifier) {
+                    resetModalIdentifier.textContent =
+                        row.dataset.identifier || "—";
+                }
 
 
-                modalContact.textContent =
-                    row.dataset.contact || "—";
+                if (resetModalContact) {
+                    resetModalContact.textContent =
+                        row.dataset.contact || "—";
+                }
 
 
-                modalCreated.textContent =
-                    row.dataset.created || "—";
+                if (resetModalCreated) {
+                    resetModalCreated.textContent =
+                        row.dataset.created || "—";
+                }
 
 
-                modalStatus.innerHTML =
-                    statusBadge(status);
+                if (resetModalStatus) {
+                    resetModalStatus.innerHTML =
+                        resetStatusBadge(status);
+                }
 
 
-                modalResolvedBy.textContent =
-                    row.dataset.resolvedBy || "—";
+                if (resetModalResolvedBy) {
+                    resetModalResolvedBy.textContent =
+                        row.dataset.resolvedBy || "—";
+                }
 
 
-                modalMessage.textContent =
-                    row.dataset.message ||
-                    "(no message)";
+                if (resetModalMessage) {
+                    resetModalMessage.textContent =
+                        row.dataset.message || "(no message)";
+                }
 
 
-                modalAction.dataset.status =
-                    status;
+                if (resetModalAction) {
+
+                    resetModalAction.dataset.status = status;
+
+                    resetModalAction.innerHTML =
+                        status === "Resolved"
+                            ? '<i class="fa-solid fa-rotate-left"></i> ' +
+                                meta.action
+                            : '<i class="fa-solid fa-check"></i> ' +
+                                meta.action;
+
+                }
 
 
-                modalAction.innerHTML =
-                    status === "Resolved"
-                        ? '<i class="fa-solid fa-rotate-left"></i> ' +
-                            meta.action
-                        : '<i class="fa-solid fa-check"></i> ' +
-                            meta.action;
+                resetModal.classList.add("is-open");
 
-
-                modal.classList.add("is-open");
-
-                modal.setAttribute(
+                resetModal.setAttribute(
                     "aria-hidden",
                     "false"
                 );
 
-                document.body.classList.add(
-                    "modal-open"
-                );
+                document.body.classList.add("modal-open");
 
             }
 
 
-            function closeModal() {
+            function closeResetModal() {
 
-                modal.classList.remove("is-open");
+                if (!resetModal) {
+                    return;
+                }
 
-                modal.setAttribute(
+
+                resetModal.classList.remove("is-open");
+
+                resetModal.setAttribute(
                     "aria-hidden",
                     "true"
                 );
 
-                document.body.classList.remove(
-                    "modal-open"
-                );
+                document.body.classList.remove("modal-open");
 
-                currentRow = null;
+
+                currentResetRow = null;
 
             }
 
 
             document
                 .getElementById("resetRequestModalClose")
-                ?.addEventListener(
-                    "click",
-                    closeModal
-                );
+                ?.addEventListener("click", closeResetModal);
 
 
             document
                 .getElementById("resetRequestModalCloseFooter")
-                ?.addEventListener(
-                    "click",
-                    closeModal
-                );
+                ?.addEventListener("click", closeResetModal);
 
 
-            modalBackdrop?.addEventListener(
+            resetModalBackdrop?.addEventListener(
                 "click",
-                closeModal
-            );
-
-
-            document.addEventListener(
-                "keydown",
-                function (event) {
-
-                    if (
-                        event.key === "Escape" &&
-                        modal.classList.contains(
-                            "is-open"
-                        )
-                    ) {
-                        closeModal();
-                    }
-
-                }
+                closeResetModal
             );
 
 
             // ==================================================
-            // ROW CLICK → OPEN DETAILS
+            // APPLY A NEW STATUS TO THE RESET ROW
             // ==================================================
 
-            function bindRow(row) {
-
-                const open = function (event) {
-
-                    if (
-                        event.target.closest(
-                            "button, a, input, select, textarea"
-                        )
-                    ) {
-                        return;
-                    }
-
-
-                    if (
-                        event.type === "keydown" &&
-                        event.key !== "Enter" &&
-                        event.key !== " "
-                    ) {
-                        return;
-                    }
-
-
-                    if (event.type === "keydown") {
-                        event.preventDefault();
-                    }
-
-
-                    openModal(row);
-
-                };
-
-
-                row.addEventListener("click", open);
-
-                row.addEventListener("keydown", open);
-
-            }
-
-
-            resetTable
-                .querySelectorAll(
-                    "tbody tr.reset-row"
-                )
-                .forEach(bindRow);
-
-
-            // ==================================================
-            // APPLY A NEW STATUS TO THE ROW
-            // ==================================================
-
-            function applyStatus(row, request) {
+            function applyResetStatus(row, request) {
 
                 const status =
-                    request.status ||
-                    "Pending";
+                    request.status || "Pending";
 
 
                 const meta =
-                    STATUS_META[status] ||
-                    STATUS_META.Pending;
+                    RESET_STATUS_META[status] ||
+                    RESET_STATUS_META.Pending;
 
 
                 row.dataset.status = status;
@@ -2348,25 +1733,7 @@
                     badge.className =
                         "badge " + meta.className;
 
-                    badge.textContent =
-                        meta.label;
-
-                }
-
-
-                const button =
-                    row.querySelector(
-                        ".reset-action-btn"
-                    );
-
-
-                if (button) {
-
-                    button.dataset.status =
-                        status;
-
-                    button.textContent =
-                        meta.action;
+                    badge.textContent = meta.label;
 
                 }
 
@@ -2374,22 +1741,13 @@
 
 
             // ==================================================
-            // SAVE STATUS
+            // SAVE RESET STATUS
             // ==================================================
 
-            async function saveStatus(
-                row,
-                nextStatus,
-                button
-            ) {
+            async function saveResetStatus(row, nextStatus, button) {
 
                 const requestId =
                     row.dataset.id;
-
-
-                const previousStatus =
-                    row.dataset.status ||
-                    "Pending";
 
 
                 if (button) {
@@ -2397,20 +1755,11 @@
                 }
 
 
-                const formData =
-                    new FormData();
+                const formData = new FormData();
 
+                formData.append("request_id", requestId);
 
-                formData.append(
-                    "request_id",
-                    requestId
-                );
-
-
-                formData.append(
-                    "status",
-                    nextStatus
-                );
+                formData.append("status", nextStatus);
 
 
                 try {
@@ -2421,8 +1770,7 @@
                             {
                                 method: "POST",
                                 body: formData,
-                                credentials:
-                                    "same-origin"
+                                credentials: "same-origin"
                             }
                         );
 
@@ -2431,10 +1779,7 @@
                         await response.json();
 
 
-                    if (
-                        !response.ok ||
-                        !result.success
-                    ) {
+                    if (!response.ok || !result.success) {
 
                         throw new Error(
                             result.message ||
@@ -2444,37 +1789,11 @@
                     }
 
 
-                    applyStatus(
-                        row,
-                        result.request
-                    );
+                    applyResetStatus(row, result.request);
 
+                    refreshSummaryCounts();
 
-                    // Keep the pending-count pill in step.
-
-                    if (
-                        previousStatus === "Pending" &&
-                        result.request.status === "Resolved"
-                    ) {
-
-                        pendingCount =
-                            Math.max(
-                                0,
-                                pendingCount - 1
-                            );
-
-                        renderPendingCount();
-
-                    } else if (
-                        previousStatus === "Resolved" &&
-                        result.request.status === "Pending"
-                    ) {
-
-                        pendingCount += 1;
-
-                        renderPendingCount();
-
-                    }
+                    applyFilters();
 
 
                     return true;
@@ -2500,90 +1819,26 @@
 
 
             // ==================================================
-            // ROW QUICK-ACTION BUTTONS
-            // ==================================================
-
-            resetTable.addEventListener(
-                "click",
-                function (event) {
-
-                    const button =
-                        event.target.closest(
-                            ".reset-action-btn"
-                        );
-
-
-                    if (!button) {
-                        return;
-                    }
-
-
-                    event.stopPropagation();
-
-
-                    const row =
-                        button.closest(
-                            "tr.reset-row"
-                        );
-
-
-                    if (!row) {
-                        return;
-                    }
-
-
-                    const status =
-                        row.dataset.status ||
-                        "Pending";
-
-
-                    const meta =
-                        STATUS_META[status] ||
-                        STATUS_META.Pending;
-
-
-                    const confirmText =
-                        status === "Resolved"
-                            ? "Reopen this password reset request?"
-                            : "Mark this password reset request as resolved? Make sure you have already reset the account.";
-
-
-                    if (!window.confirm(confirmText)) {
-                        return;
-                    }
-
-
-                    saveStatus(
-                        row,
-                        meta.next,
-                        button
-                    );
-
-                }
-            );
-
-
-            // ==================================================
             // MODAL ACTION BUTTON
             // ==================================================
 
-            modalAction?.addEventListener(
+            resetModalAction?.addEventListener(
                 "click",
                 async function () {
 
-                    if (!currentRow) {
+                    if (!currentResetRow) {
                         return;
                     }
 
 
                     const status =
-                        currentRow.dataset.status ||
+                        currentResetRow.dataset.status ||
                         "Pending";
 
 
                     const meta =
-                        STATUS_META[status] ||
-                        STATUS_META.Pending;
+                        RESET_STATUS_META[status] ||
+                        RESET_STATUS_META.Pending;
 
 
                     const confirmText =
@@ -2597,26 +1852,124 @@
                     }
 
 
-                    modalAction.disabled = true;
+                    resetModalAction.disabled = true;
 
 
                     const saved =
-                        await saveStatus(
-                            currentRow,
+                        await saveResetStatus(
+                            currentResetRow,
                             meta.next,
                             null
                         );
 
 
-                    modalAction.disabled = false;
+                    resetModalAction.disabled = false;
 
 
                     if (saved) {
-                        closeModal();
+                        closeResetModal();
                     }
 
                 }
             );
+
+
+            // ==================================================
+            // ROW CLICK → OPEN THE RIGHT MODAL
+            // ==================================================
+
+            function openRowModal(row) {
+
+                if ((row.dataset.kind || "employee") === "reset") {
+                    openResetModal(row);
+                } else {
+                    openRequestModal(row);
+                }
+
+            }
+
+
+            rows.forEach(
+                function (row) {
+
+                    const openRow =
+                        function (event) {
+
+                            if (
+                                event.target.closest(
+                                    "a, button, input, select, textarea"
+                                )
+                            ) {
+                                return;
+                            }
+
+
+                            if (
+                                event.type === "keydown" &&
+                                event.key !== "Enter" &&
+                                event.key !== " "
+                            ) {
+                                return;
+                            }
+
+
+                            if (event.type === "keydown") {
+                                event.preventDefault();
+                            }
+
+
+                            openRowModal(row);
+
+                        };
+
+
+                    row.addEventListener("click", openRow);
+
+                    row.addEventListener("keydown", openRow);
+
+                }
+            );
+
+
+            // ==================================================
+            // ESCAPE KEY
+            // ==================================================
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (event.key !== "Escape") {
+                        return;
+                    }
+
+
+                    if (
+                        requestModal &&
+                        requestModal.classList.contains("is-open")
+                    ) {
+                        closeRequestModal();
+                    }
+
+
+                    if (
+                        resetModal &&
+                        resetModal.classList.contains("is-open")
+                    ) {
+                        closeResetModal();
+                    }
+
+                }
+            );
+
+
+            // ==================================================
+            // INITIALIZE
+            // ==================================================
+
+            refreshSummaryCounts();
+
+            applyFilters();
 
         }
     );

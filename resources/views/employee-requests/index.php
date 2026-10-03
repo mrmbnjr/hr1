@@ -10,7 +10,7 @@ $pageJS =
     "employee-requests.js";
 
 $pageDescription =
-    "Review and manage employee requests.";
+    "Review and manage employee requests and password reset requests.";
 
 
 if (!isset($_SESSION['user_id'])) {
@@ -26,9 +26,12 @@ if (!isset($_SESSION['user_id'])) {
 $requests =
     $requests ?? [];
 
-$departments =
-    $departments ?? [];
 
+/*
+|--------------------------------------------------------------------------
+| Employee request statuses
+|--------------------------------------------------------------------------
+*/
 
 $statusMeta = [
 
@@ -55,25 +58,13 @@ $statusMeta = [
 ];
 
 
-$requestTypes = [
-
-    "Certificate of Employment",
-    "Document Request",
-    "Profile Update",
-    "Payroll Concern",
-    "Employment Concern",
-    "Other"
-
-];
-
-
 /*
 |--------------------------------------------------------------------------
 | Password reset requests ("Contact HR")
 |--------------------------------------------------------------------------
 |
 | Supplied by EmployeeRequestsController for ADMIN and HR only. Managers
-| see the Employee Requests tab without the reset queue.
+| see the combined queue without the password reset rows.
 |
 */
 
@@ -85,6 +76,22 @@ $passwordResetRequests =
 
 $passwordResetPendingCount =
     $passwordResetPendingCount ?? 0;
+
+
+$resetStatusMeta = [
+
+    "Pending" => [
+        "label" => "Pending",
+        "class" => "badge-gray"
+    ],
+
+    "Resolved" => [
+        "label" => "Resolved",
+        "class" => "badge-green"
+    ]
+
+];
+
 
 $formatRelativeTime = static function (?string $createdAt): string {
     if (empty($createdAt)) {
@@ -120,19 +127,115 @@ $formatRelativeTime = static function (?string $createdAt): string {
 };
 
 
-$resetStatusMeta = [
+/*
+|--------------------------------------------------------------------------
+| Summary counts (stat cards)
+|--------------------------------------------------------------------------
+|
+| Employee requests and password reset requests share the "Pending" bucket
+| so the queue reads as a single workload.
+|
+*/
 
-    "Pending" => [
-        "label" => "Pending",
-        "class" => "badge-gray"
+$summary = [
+    "total"     => count($requests) + count($passwordResetRequests),
+    "pending"   => 0,
+    "approved"  => 0,
+    "completed" => 0,
+    "rejected"  => 0,
+    "resets"    => count($passwordResetRequests),
+];
+
+$employeeStatusKeys = [
+    "Pending"   => "pending",
+    "Approved"  => "approved",
+    "Completed" => "completed",
+    "Rejected"  => "rejected",
+];
+
+foreach ($requests as $request) {
+
+    $status =
+        $request["status"] ?? "Pending";
+
+    if (isset($employeeStatusKeys[$status])) {
+        $summary[$employeeStatusKeys[$status]]++;
+    }
+}
+
+foreach ($passwordResetRequests as $reset) {
+
+    if (($reset["status"] ?? "Pending") === "Pending") {
+        $summary["pending"]++;
+    }
+}
+
+
+$summaryCards = [
+
+    [
+        "filterKind"  => "all",
+        "filterValue" => "All",
+        "icon"        => "fa-inbox",
+        "label"       => "Total Requests",
+        "value"       => $summary["total"],
+        "note"        => "All employee & reset requests",
     ],
 
-    "Resolved" => [
-        "label" => "Resolved",
-        "class" => "badge-green"
-    ]
+    [
+        "filterKind"  => "status",
+        "filterValue" => "Pending",
+        "icon"        => "fa-clock",
+        "label"       => "Pending",
+        "value"       => $summary["pending"],
+        "note"        => "Awaiting HR review",
+    ],
+
+    [
+        "filterKind"  => "status",
+        "filterValue" => "Approved",
+        "icon"        => "fa-circle-check",
+        "label"       => "Approved",
+        "value"       => $summary["approved"],
+        "note"        => "Approved by HR",
+    ],
+
+    [
+        "filterKind"  => "status",
+        "filterValue" => "Completed",
+        "icon"        => "fa-flag-checkered",
+        "label"       => "Completed",
+        "value"       => $summary["completed"],
+        "note"        => "Marked as completed",
+    ],
+
+    [
+        "filterKind"  => "status",
+        "filterValue" => "Rejected",
+        "icon"        => "fa-circle-xmark",
+        "label"       => "Rejected",
+        "value"       => $summary["rejected"],
+        "note"        => "Declined by HR",
+    ],
 
 ];
+
+if ($canViewPasswordResets) {
+
+    $summaryCards[] = [
+        "filterKind"  => "category",
+        "filterValue" => "reset",
+        "icon"        => "fa-key",
+        "label"       => "Password Resets",
+        "value"       => $summary["resets"],
+        "note"        => "Account recovery requests",
+    ];
+}
+
+
+$hasAnyRows =
+    !empty($requests) ||
+    !empty($passwordResetRequests);
 
 ?>
 
@@ -148,63 +251,53 @@ $resetStatusMeta = [
 
     <div class="employee-request-page">
 
-        <?php if ($canViewPasswordResets): ?>
-
         <!-- ======================================================
-            TABS
+            SUMMARY CARDS
         ======================================================= -->
 
-        <div class="request-tabs" role="tablist">
+        <section class="summary-grid" aria-label="Request summary">
 
-            <button
-                type="button"
-                class="request-tab is-active"
-                role="tab"
-                aria-selected="true"
-                data-tab="employee"
-            >
+            <?php foreach ($summaryCards as $card): ?>
 
-                <i class="fa-solid fa-inbox"></i>
+                <button
+                    type="button"
+                    class="stat-card summary-card"
+                    data-filter-kind="<?= htmlspecialchars(
+                        $card['filterKind']
+                    ) ?>"
+                    data-filter-value="<?= htmlspecialchars(
+                        $card['filterValue']
+                    ) ?>"
+                >
 
-                Employee Requests
+                    <div class="stat-icon">
 
-            </button>
+                        <i class="fa-solid <?= htmlspecialchars(
+                            $card['icon']
+                        ) ?>"></i>
 
-
-            <button
-                type="button"
-                class="request-tab"
-                role="tab"
-                aria-selected="false"
-                data-tab="resets"
-            >
-
-                <i class="fa-solid fa-key"></i>
-
-                Password Reset Requests
-
-                <?php if ($passwordResetPendingCount > 0): ?>
-
-                    <span class="request-tab-badge">
-
-                        <?= (int) $passwordResetPendingCount ?>
-
-                    </span>
-
-                <?php endif; ?>
-
-            </button>
-
-        </div>
-
-        <?php endif; ?>
+                    </div>
 
 
-        <div
-            class="request-tab-panel is-active"
-            id="tabPanelEmployee"
-            data-panel="employee"
-        >
+                    <div class="stat-content">
+
+                        <span><?= htmlspecialchars(
+                            $card['label']
+                        ) ?></span>
+
+                        <strong><?= (int) $card['value'] ?></strong>
+
+                        <small><?= htmlspecialchars(
+                            $card['note']
+                        ) ?></small>
+
+                    </div>
+
+                </button>
+
+            <?php endforeach; ?>
+
+        </section>
 
 
         <!-- ======================================================
@@ -213,54 +306,39 @@ $resetStatusMeta = [
 
         <section class="filter-bar">
 
-            <select id="departmentFilter">
+            <div class="filter-search">
 
-                <option value="All">
-                    All Departments
-                </option>
+                <i class="fa-solid fa-magnifying-glass"></i>
 
-                <?php foreach ($departments as $department): ?>
+                <input
+                    type="text"
+                    id="requestSearch"
+                    placeholder="Search by name..."
+                    autocomplete="off"
+                >
 
-                    <option
-                        value="<?= htmlspecialchars(
-                            $department['department_name']
-                        ) ?>"
-                    >
+            </div>
 
-                        <?= htmlspecialchars(
-                            $department['department_name']
-                        ) ?>
 
+            <?php if ($canViewPasswordResets): ?>
+
+                <select id="categoryFilter">
+
+                    <option value="All">
+                        All Requests
                     </option>
 
-                <?php endforeach; ?>
-
-            </select>
-
-
-            <select id="requestTypeFilter">
-
-                <option value="All">
-                    All Request Types
-                </option>
-
-                <?php foreach ($requestTypes as $requestType): ?>
-
-                    <option
-                        value="<?= htmlspecialchars(
-                            $requestType
-                        ) ?>"
-                    >
-
-                        <?= htmlspecialchars(
-                            $requestType
-                        ) ?>
-
+                    <option value="employee">
+                        Employee Requests
                     </option>
 
-                <?php endforeach; ?>
+                    <option value="reset">
+                        Password Resets
+                    </option>
 
-            </select>
+                </select>
+
+            <?php endif; ?>
 
 
             <select id="statusFilter">
@@ -285,6 +363,14 @@ $resetStatusMeta = [
                     Completed
                 </option>
 
+                <?php if ($canViewPasswordResets): ?>
+
+                    <option value="Resolved">
+                        Resolved
+                    </option>
+
+                <?php endif; ?>
+
             </select>
 
 
@@ -299,11 +385,11 @@ $resetStatusMeta = [
                 </option>
 
                 <option value="name-az">
-                    Employee Name (A-Z)
+                    Name (A-Z)
                 </option>
 
                 <option value="name-za">
-                    Employee Name (Z-A)
+                    Name (Z-A)
                 </option>
 
                 <option value="status">
@@ -316,7 +402,7 @@ $resetStatusMeta = [
 
 
         <!-- ======================================================
-            REQUEST TABLE
+            UNIFIED REQUEST TABLE
         ======================================================= -->
 
         <section class="table-card">
@@ -333,15 +419,15 @@ $resetStatusMeta = [
                         <tr>
 
                             <th>
-                                Employee
+                                Requester
                             </th>
 
                             <th>
-                                Department
+                                Type
                             </th>
 
                             <th>
-                                Request Type
+                                Details
                             </th>
 
                             <th>
@@ -357,7 +443,7 @@ $resetStatusMeta = [
 
                     <tbody>
 
-                        <?php if (empty($requests)): ?>
+                        <?php if (!$hasAnyRows): ?>
 
                             <tr>
 
@@ -420,6 +506,7 @@ $resetStatusMeta = [
 
                                 <tr
                                     class="request-row"
+                                    data-kind="employee"
                                     tabindex="0"
                                     role="button"
 
@@ -473,7 +560,7 @@ $resetStatusMeta = [
                                 >
 
 
-                                    <!-- Employee -->
+                                    <!-- Requester -->
 
                                     <td>
 
@@ -516,20 +603,22 @@ $resetStatusMeta = [
                                     </td>
 
 
-                                    <!-- Department -->
+                                    <!-- Type -->
 
                                     <td>
 
-                                        <?= htmlspecialchars(
-                                            $request[
-                                                'department_name'
-                                            ] ?? '—'
-                                        ) ?>
+                                        <span class="request-kind">
+
+                                            <i class="fa-solid fa-file-lines"></i>
+
+                                            Employee Request
+
+                                        </span>
 
                                     </td>
 
 
-                                    <!-- Request Type -->
+                                    <!-- Details -->
 
                                     <td>
 
@@ -552,23 +641,15 @@ $resetStatusMeta = [
                                         </button>
 
 
-                                        <?php if (
-                                            !empty(
-                                                $request['subject']
-                                            )
-                                        ): ?>
+                                        <span class="sub-text">
 
-                                            <span class="sub-text">
+                                            <?= htmlspecialchars(
+                                                $request[
+                                                    'department_name'
+                                                ] ?? '—'
+                                            ) ?>
 
-                                                <?= htmlspecialchars(
-                                                    $request[
-                                                        'subject'
-                                                    ]
-                                                ) ?>
-
-                                            </span>
-
-                                        <?php endif; ?>
+                                        </span>
 
                                     </td>
 
@@ -605,7 +686,244 @@ $resetStatusMeta = [
 
                             <?php endforeach; ?>
 
+
+                            <?php foreach ($passwordResetRequests as $reset): ?>
+
+                                <?php
+
+                                $resetStatus =
+                                    $reset['status']
+                                    ?? 'Pending';
+
+
+                                $resetMeta =
+                                    $resetStatusMeta[$resetStatus]
+                                    ?? $resetStatusMeta['Pending'];
+
+
+                                $resetName =
+                                    trim(
+                                        (string) (
+                                            $reset['full_name']
+                                            ?? ''
+                                        )
+                                    );
+
+
+                                if ($resetName === '') {
+
+                                    $resetName =
+                                        'Unknown Requester';
+                                }
+
+
+                                $resetInitial =
+                                    strtoupper(
+                                        substr(
+                                            $resetName,
+                                            0,
+                                            1
+                                        )
+                                    );
+
+
+                                $resetMessage =
+                                    trim(
+                                        (string) (
+                                            $reset['message']
+                                            ?? ''
+                                        )
+                                    );
+
+                                ?>
+
+                                <tr
+                                    class="request-row reset-row"
+                                    data-kind="reset"
+                                    tabindex="0"
+                                    role="button"
+
+                                    data-id="<?= htmlspecialchars(
+                                        $reset['request_id'] ?? ''
+                                    ) ?>"
+
+                                    data-name="<?= htmlspecialchars(
+                                        $resetName
+                                    ) ?>"
+
+                                    data-identifier="<?= htmlspecialchars(
+                                        $reset['identifier'] ?? ''
+                                    ) ?>"
+
+                                    data-contact="<?= htmlspecialchars(
+                                        $reset['contact'] ?? ''
+                                    ) ?>"
+
+                                    data-message="<?= htmlspecialchars(
+                                        $reset['message'] ?? ''
+                                    ) ?>"
+
+                                    data-status="<?= htmlspecialchars(
+                                        $resetStatus
+                                    ) ?>"
+
+                                    data-created="<?= htmlspecialchars(
+                                        $reset['created_at'] ?? ''
+                                    ) ?>"
+
+                                    data-date="<?= htmlspecialchars(
+                                        $reset['created_at'] ?? ''
+                                    ) ?>"
+
+                                    data-resolved-at="<?= htmlspecialchars(
+                                        $reset['resolved_at'] ?? ''
+                                    ) ?>"
+
+                                    data-resolved-by="<?= htmlspecialchars(
+                                        $reset['resolved_by_username']
+                                        ?? ''
+                                    ) ?>"
+                                >
+
+
+                                    <!-- Requester -->
+
+                                    <td>
+
+                                        <div class="request-cell">
+
+                                            <div class="avatar-circle">
+
+                                                <?= htmlspecialchars(
+                                                    $resetInitial
+                                                ) ?>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <strong>
+
+                                                    <?= htmlspecialchars(
+                                                        $resetName
+                                                    ) ?>
+
+                                                </strong>
+
+
+                                                <span class="sub-text">
+
+                                                    <?= htmlspecialchars(
+                                                        $reset['identifier']
+                                                        ?? ''
+                                                    ) ?>
+
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Type -->
+
+                                    <td>
+
+                                        <span class="request-kind request-kind--reset">
+
+                                            <i class="fa-solid fa-key"></i>
+
+                                            Password Reset
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Details -->
+
+                                    <td>
+
+                                        <strong class="request-detail-value">
+
+                                            <?= htmlspecialchars(
+                                                $reset['contact']
+                                                ?? '—'
+                                            ) ?>
+
+                                        </strong>
+
+
+                                        <span class="sub-text">
+
+                                            <?= htmlspecialchars(
+                                                $resetMessage !== ''
+                                                    ? $resetMessage
+                                                    : 'Account recovery request'
+                                            ) ?>
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <span
+                                            class="badge <?= htmlspecialchars(
+                                                $resetMeta['class']
+                                            ) ?>"
+                                        >
+
+                                            <?= htmlspecialchars(
+                                                $resetMeta['label']
+                                            ) ?>
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="sub-text application-time">
+                                            <?= htmlspecialchars(
+                                                $formatRelativeTime($reset['created_at'] ?? null)
+                                            ) ?>
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
                         <?php endif; ?>
+
+
+                        <!-- Toggled by JS when the active filters hide every row -->
+
+                        <tr class="filter-empty" id="filterEmpty" hidden>
+
+                            <td colspan="5">
+
+                                <div class="empty-state">
+
+                                    <i class="fa-solid fa-filter-circle-xmark"></i>
+
+                                    <p>
+                                        No requests match the current filters.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
 
                     </tbody>
 
@@ -635,6 +953,7 @@ $resetStatusMeta = [
                         class="page-btn"
                         id="prevPage"
                         type="button"
+                        aria-label="Previous page"
                     >
 
                         <i class="fa-solid fa-chevron-left"></i>
@@ -652,6 +971,7 @@ $resetStatusMeta = [
                         class="page-btn"
                         id="nextPage"
                         type="button"
+                        aria-label="Next page"
                     >
 
                         <i class="fa-solid fa-chevron-right"></i>
@@ -664,258 +984,6 @@ $resetStatusMeta = [
 
         </section>
 
-        </div><!-- /#tabPanelEmployee -->
-
-
-        <?php if ($canViewPasswordResets): ?>
-
-        <!-- ======================================================
-            PASSWORD RESET REQUESTS ("Contact HR")
-        ======================================================= -->
-
-        <div
-            class="request-tab-panel"
-            id="tabPanelResets"
-            data-panel="resets"
-            hidden
-        >
-
-            <section class="table-card">
-
-                <div class="table-scroll">
-
-                    <table
-                        class="employee-request-table"
-                        id="passwordResetTable"
-                    >
-
-                        <thead>
-
-                            <tr>
-
-                                <th>Requester</th>
-
-                                <th>Username / ID</th>
-
-                                <th>Contact</th>
-
-                                <th>Status</th>
-
-                                <th></th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-                            <?php if (empty($passwordResetRequests)): ?>
-
-                                <tr class="empty-row">
-
-                                    <td colspan="5">
-
-                                        <div class="empty-state">
-
-                                            <i class="fa-solid fa-key"></i>
-
-                                            <p>
-                                                No password reset requests.
-                                            </p>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-
-                            <?php else: ?>
-
-                                <?php foreach ($passwordResetRequests as $reset): ?>
-
-                                    <?php
-
-                                    $resetStatus =
-                                        $reset['status']
-                                        ?? 'Pending';
-
-
-                                    $resetMeta =
-                                        $resetStatusMeta[$resetStatus]
-                                        ?? $resetStatusMeta['Pending'];
-
-
-                                    $resetName =
-                                        trim(
-                                            (string) (
-                                                $reset['full_name']
-                                                ?? ''
-                                            )
-                                        );
-
-
-                                    if ($resetName === '') {
-
-                                        $resetName =
-                                            'Unknown Requester';
-                                    }
-
-
-                                    $resetInitial =
-                                        strtoupper(
-                                            substr(
-                                                $resetName,
-                                                0,
-                                                1
-                                            )
-                                        );
-
-                                    ?>
-
-                                    <tr
-                                        class="reset-row"
-                                        tabindex="0"
-                                        role="button"
-
-                                        data-id="<?= htmlspecialchars(
-                                            $reset['request_id'] ?? ''
-                                        ) ?>"
-
-                                        data-name="<?= htmlspecialchars(
-                                            $resetName
-                                        ) ?>"
-
-                                        data-identifier="<?= htmlspecialchars(
-                                            $reset['identifier'] ?? ''
-                                        ) ?>"
-
-                                        data-contact="<?= htmlspecialchars(
-                                            $reset['contact'] ?? ''
-                                        ) ?>"
-
-                                        data-message="<?= htmlspecialchars(
-                                            $reset['message'] ?? ''
-                                        ) ?>"
-
-                                        data-status="<?= htmlspecialchars(
-                                            $resetStatus
-                                        ) ?>"
-
-                                        data-created="<?= htmlspecialchars(
-                                            $reset['created_at'] ?? ''
-                                        ) ?>"
-
-                                        data-resolved-at="<?= htmlspecialchars(
-                                            $reset['resolved_at'] ?? ''
-                                        ) ?>"
-
-                                        data-resolved-by="<?= htmlspecialchars(
-                                            $reset['resolved_by_username']
-                                            ?? ''
-                                        ) ?>"
-                                    >
-
-                                        <td>
-
-                                            <div class="request-cell">
-
-                                                <div class="avatar-circle">
-
-                                                    <?= htmlspecialchars(
-                                                        $resetInitial
-                                                    ) ?>
-
-                                                </div>
-
-
-                                                <div>
-
-                                                    <strong>
-
-                                                        <?= htmlspecialchars(
-                                                            $resetName
-                                                        ) ?>
-
-                                                    </strong>
-
-
-                                                    <span class="sub-text">
-                                                        Password reset
-                                                    </span>
-
-                                                </div>
-
-                                            </div>
-
-                                        </td>
-
-
-                                        <td>
-
-                                            <?= htmlspecialchars(
-                                                $reset['identifier']
-                                                ?? '—'
-                                            ) ?>
-
-                                        </td>
-
-
-                                        <td>
-
-                                            <?= htmlspecialchars(
-                                                $reset['contact']
-                                                ?? '—'
-                                            ) ?>
-
-                                        </td>
-
-
-                                        <td>
-
-                                            <span
-                                                class="badge <?= htmlspecialchars(
-                                                    $resetMeta['class']
-                                                ) ?>"
-                                            >
-
-                                                <?= htmlspecialchars(
-                                                    $resetMeta['label']
-                                                ) ?>
-
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-
-                                            <span class="sub-text application-time">
-                                                <?= htmlspecialchars(
-                                                    $formatRelativeTime($reset['created_at'] ?? null)
-                                                ) ?>
-                                            </span>
-
-                                        </td>
-
-
-                                    </tr>
-
-                                <?php endforeach; ?>
-
-                            <?php endif; ?>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-        </div>
-
-        <?php endif; ?>
-
     </div>
 
 
@@ -923,7 +991,7 @@ $resetStatusMeta = [
 
 
     <!-- ==========================================================
-        REQUEST MODAL
+        EMPLOYEE REQUEST MODAL
     =========================================================== -->
 
     <div

@@ -21,17 +21,123 @@
 
 
 /* ==========================================================
+   SUMMARY CARDS
+========================================================== */
+
+.employee-request-page .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+/* Stat-card contract — mirrors recruitment.css / applicants.css so this
+   page matches the rest of the system. Uses --card-bg (not --white) so
+   light and dark themes both stay legible without a theme override. */
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    min-height: 84px;
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: 12px;
+
+    background: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(74, 15, 15, 0.05);
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+
+    background: linear-gradient(145deg, var(--maroon), var(--maroon-dark));
+    color: var(--gold);
+    font-size: 15px;
+}
+
+.stat-content { min-width: 0; }
+
+.stat-content span {
+    display: block;
+    margin-bottom: 2px;
+
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.stat-content strong {
+    display: block;
+
+    color: var(--ink);
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.stat-content small {
+    display: block;
+    margin-top: 3px;
+
+    color: var(--gray);
+    font-size: 11px;
+}
+
+/* The cards double as filters — clicking one applies its preset. */
+
+.summary-card {
+    appearance: none;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition);
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-top-color: var(--maroon);
+}
+
+.summary-card.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--tint-gold-12);
+}
+
+.summary-card:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: 2px;
+}
+
+
+/* ==========================================================
    FILTER BAR
 ========================================================== */
 
 .employee-request-page .filter-bar {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
-/* Filter bar select styles are defined in components.css */
+/* Filter bar select / search styles are defined in components.css */
 
 
 /* ==========================================================
@@ -57,7 +163,7 @@
 
 .employee-request-table .application-time {
     display: block;
-    margin-top: 25px;
+    margin-top: 0;
     color: var(--ink-soft);
     font-size: 11.5px;
     line-height: 1.4;
@@ -818,8 +924,8 @@ body.modal-open {
         padding: 24px 24px 40px;
     }
 
-    .employee-request-page .filter-bar {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .employee-request-page .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
@@ -834,9 +940,20 @@ body.modal-open {
         padding: 20px 16px 32px;
     }
 
+    .employee-request-page .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .employee-request-page .filter-bar {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        align-items: stretch;
         gap: 10px;
+    }
+
+    .employee-request-page .filter-bar select,
+    .employee-request-page .filter-search {
+        width: 100%;
+        min-width: 0;
     }
 
     .employee-request-page .table-footer {
@@ -852,78 +969,63 @@ body.modal-open {
 }
 
 
+@media (max-width: 480px) {
+
+    .employee-request-page .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 /* ==========================================================
-   TABS — Employee Requests / Password Reset Requests
+   TYPE LABEL — "Employee Request" / "Password Reset"
 ========================================================== */
 
-.employee-request-page .request-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-}
-
-.employee-request-page .request-tab {
-    appearance: none;
+.request-kind {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 16px;
-    margin-bottom: -1px;
-    border: 0;
-    border-bottom: 3px solid transparent;
-    background: transparent;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-muted);
     color: var(--ink-soft);
-    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 800;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.request-kind i {
+    font-size: 11px;
+    color: var(--gold-dark);
+}
+
+.request-kind--reset {
+    background: var(--tint-gold-12);
+    color: var(--accent);
+}
+
+.request-kind--reset i {
+    color: var(--accent);
+}
+
+
+/* Secondary value shown in the Details column */
+
+.request-detail-value {
+    display: block;
+    color: var(--accent);
     font-size: 13.5px;
     font-weight: 800;
-    line-height: 1;
-    cursor: pointer;
-    transition: color var(--transition), border-color var(--transition);
-}
-
-.employee-request-page .request-tab i {
-    font-size: 13px;
-}
-
-.employee-request-page .request-tab:hover {
-    color: var(--accent);
-}
-
-.employee-request-page .request-tab.is-active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-}
-
-.employee-request-page .request-tab:focus-visible {
-    outline: 2px solid var(--gold-dark);
-    outline-offset: 2px;
+    line-height: 1.4;
 }
 
 
-/* Pending-count pill on the Password Reset Requests tab */
+/* Filter-empty row should not draw a bottom border */
 
-.request-tab-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: var(--maroon);
-    color: var(--white);
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1;
-}
-
-
-/* Panels */
-
-.request-tab-panel[hidden] {
-    display: none;
+.filter-empty td {
+    border-bottom: 0 !important;
 }
 
 
