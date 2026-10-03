@@ -86,6 +86,39 @@ $passwordResetRequests =
 $passwordResetPendingCount =
     $passwordResetPendingCount ?? 0;
 
+$formatRelativeTime = static function (?string $createdAt): string {
+    if (empty($createdAt)) {
+        return 'Time unavailable';
+    }
+
+    try {
+        $submittedAt = new DateTimeImmutable($createdAt);
+    } catch (Exception $exception) {
+        return 'Time unavailable';
+    }
+
+    $elapsedSeconds = max(0, time() - $submittedAt->getTimestamp());
+
+    if ($elapsedSeconds < 60) {
+        return 'Just now';
+    }
+
+    $units = [
+        86400 => 'day',
+        3600  => 'hour',
+        60    => 'minute',
+    ];
+
+    foreach ($units as $secondsPerUnit => $unit) {
+        if ($elapsedSeconds >= $secondsPerUnit) {
+            $count = intdiv($elapsedSeconds, $secondsPerUnit);
+            return $count . ' ' . $unit . ($count === 1 ? '' : 's') . ' ago';
+        }
+    }
+
+    return 'Just now';
+};
+
 
 $resetStatusMeta = [
 
@@ -312,12 +345,10 @@ $resetStatusMeta = [
                             </th>
 
                             <th>
-                                Date Submitted
-                            </th>
-
-                            <th>
                                 Status
                             </th>
+
+                            <th></th>
 
                         </tr>
 
@@ -542,33 +573,6 @@ $resetStatusMeta = [
                                     </td>
 
 
-                                    <!-- Date -->
-
-                                    <td>
-
-                                        <?php if (
-                                            !empty(
-                                                $request[
-                                                    'requested_at'
-                                                ]
-                                            )
-                                        ): ?>
-
-                                            <?= htmlspecialchars(
-                                                $request[
-                                                    'requested_at'
-                                                ]
-                                            ) ?>
-
-                                        <?php else: ?>
-
-                                            —
-
-                                        <?php endif; ?>
-
-                                    </td>
-
-
                                     <!-- Status -->
 
                                     <td>
@@ -583,6 +587,16 @@ $resetStatusMeta = [
                                                 $meta['label']
                                             ) ?>
 
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="sub-text application-time">
+                                            <?= htmlspecialchars(
+                                                $formatRelativeTime($request['requested_at'] ?? null)
+                                            ) ?>
                                         </span>
 
                                     </td>
@@ -685,9 +699,9 @@ $resetStatusMeta = [
 
                                 <th>Contact</th>
 
-                                <th>Date Requested</th>
-
                                 <th>Status</th>
+
+                                <th></th>
 
                             </tr>
 
@@ -859,16 +873,6 @@ $resetStatusMeta = [
 
                                         <td>
 
-                                            <?= htmlspecialchars(
-                                                $reset['created_at']
-                                                ?? '—'
-                                            ) ?>
-
-                                        </td>
-
-
-                                        <td>
-
                                             <span
                                                 class="badge <?= htmlspecialchars(
                                                     $resetMeta['class']
@@ -879,6 +883,16 @@ $resetStatusMeta = [
                                                     $resetMeta['label']
                                                 ) ?>
 
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            <span class="sub-text application-time">
+                                                <?= htmlspecialchars(
+                                                    $formatRelativeTime($reset['created_at'] ?? null)
+                                                ) ?>
                                             </span>
 
                                         </td>
