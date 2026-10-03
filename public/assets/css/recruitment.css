@@ -26,6 +26,127 @@
 }
 
 
+/* ==========================================
+   RECRUITMENT KPI CARDS
+   Summary cards above the table. Colours come
+   from the shared tokens only, so light and
+   dark themes stay in sync.
+========================================== */
+
+.recruitment-overview {
+    margin: 1rem .5rem 0;
+}
+
+/* ---------- KPI cards ---------- */
+
+.recruit-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+}
+
+.recruit-stat {
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 16px 18px;
+
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition);
+}
+
+.recruit-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-left-color: var(--maroon);
+}
+
+.recruit-stat.is-alert {
+    border-left-color: var(--status-pending);
+    background: var(--status-pending-bg);
+}
+
+.recruit-stat__icon {
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 13px;
+
+    background: linear-gradient(145deg, var(--maroon), var(--maroon-dark));
+    color: var(--gold);
+
+    font-size: 17px;
+
+    box-shadow: 0 4px 12px var(--card-shadow);
+}
+
+.recruit-stat.is-alert .recruit-stat__icon {
+    background: linear-gradient(145deg, var(--gold-dark), var(--gold));
+    color: var(--maroon-dark);
+}
+
+.recruit-stat__body { min-width: 0; }
+
+.recruit-stat__label {
+    display: block;
+    margin-bottom: 3px;
+
+    color: var(--ink-soft);
+
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+.recruit-stat__value {
+    margin: 0;
+
+    color: var(--accent);
+    font-family: var(--font-heading);
+    font-size: 27px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.recruit-stat__note {
+    display: block;
+    margin-top: 5px;
+
+    color: var(--ink-soft);
+
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+
+/* ---------- KPI cards responsive ---------- */
+
+@media (max-width: 600px) {
+
+    .recruitment-overview {
+        margin-inline: 0;
+    }
+
+}
+
 
 /* ==========================================
    RECRUITMENT TABLE
@@ -60,25 +181,16 @@
 /* Table header, body, and row styles are defined in components.css */
 
 
-/* Employment types use distinct badge tones. */
-.badge.employment.full-time {
-    background: var(--badge-green-bg);
-    color: var(--badge-green-fg);
-}
-
-.badge.employment.part-time {
-    background: var(--badge-blue-bg);
-    color: var(--badge-blue-fg);
-}
-
-.badge.employment.contract {
-    background: var(--badge-orange-bg);
-    color: var(--badge-orange-fg);
-}
-
+/* Employment types keep a neutral badge style. */
+.badge.employment.full-time,
+.badge.employment.part-time,
+.badge.employment.contract,
 .badge.employment.internship {
-    background: var(--badge-gold-bg);
-    color: var(--badge-gold-fg);
+    background: transparent;
+    color: #000;
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 
@@ -95,6 +207,20 @@
 .deadline-cell i {
     color: var(--gold-dark);
     font-size: 11px;
+}
+
+/* A posting that closes within the next 7 days is called out in the row. */
+.deadline-cell.is-soon {
+    color: var(--soon-ink);
+    font-weight: 700;
+}
+
+.deadline-cell.is-soon i { color: var(--soon-ink); }
+
+.badge-soon {
+    margin-left: 6px;
+    background: var(--soon-bg);
+    color: var(--soon-ink);
 }
 
 
@@ -318,6 +444,16 @@
 
     font-size: 13px;
 }
+
+/* "No postings match these filters" row, toggled by recruitment.js. */
+.data-table tbody tr.filter-empty[hidden] { display: none; }
+
+.data-table tbody tr.filter-empty > td {
+    padding: 0;
+    border-bottom: 0;
+}
+
+.data-table tbody tr.filter-empty:hover { background: transparent; }
 
 
 /* ==========================================

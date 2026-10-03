@@ -10,6 +10,68 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+/*
+|--------------------------------------------------------------------------
+| Overview Metrics
+|--------------------------------------------------------------------------
+| Supplied by RecruitmentController::recruitment(). The defaults keep the
+| page renderable if the view is ever included without them.
+*/
+$overview = array_merge([
+    'total'              => 0,
+    'open'               => 0,
+    'closed'             => 0,
+    'vacancies'          => 0,
+    'applications'       => 0,
+    'departments_hiring' => 0,
+    'closing_soon'       => 0,
+    'hired'              => 0,
+], $overview ?? []);
+
+/*
+|--------------------------------------------------------------------------
+| KPI Cards
+|--------------------------------------------------------------------------
+*/
+$overviewCards = [
+    [
+        'icon'  => 'fa-briefcase',
+        'label' => 'Open Postings',
+        'value' => (int) $overview['open'],
+        'note'  => $overview['total'] . ' total &middot; ' . $overview['closed'] . ' closed',
+        'alert' => false,
+    ],
+    [
+        'icon'  => 'fa-user-plus',
+        'label' => 'Openings',
+        'value' => (int) $overview['vacancies'],
+        'note'  => $overview['departments_hiring'] . ' ' . ($overview['departments_hiring'] === 1 ? 'department hiring' : 'departments hiring'),
+        'alert' => false,
+    ],
+    [
+        'icon'  => 'fa-file-lines',
+        'label' => 'Applications',
+        'value' => (int) $overview['applications'],
+        'note'  => $overview['hired'] . ' hired so far',
+        'alert' => false,
+    ],
+    [
+        'icon'  => 'fa-hourglass-half',
+        'label' => 'Closing Soon',
+        'value' => (int) $overview['closing_soon'],
+        'note'  => 'Within the next 7 days',
+        'alert' => $overview['closing_soon'] > 0,
+    ],
+];
+
+/*
+|--------------------------------------------------------------------------
+| Deadline Helper
+|--------------------------------------------------------------------------
+| Used to flag postings that close within the next 7 days.
+*/
+$today = strtotime('today');
+
 ?>
 
 <?php require BASE_PATH . '/resources/views/includes/header.php'; ?>
@@ -20,6 +82,30 @@ if (!isset($_SESSION['user_id'])) {
     <?php require BASE_PATH . '/resources/views/includes/navbar.php'; ?>
 
     <div class="recruitment-page">
+
+        <!-- ==========================================
+            KPI CARDS
+        =========================================== -->
+
+        <section class="recruitment-overview" aria-label="Recruitment summary">
+
+            <div class="recruit-stats">
+                <?php foreach ($overviewCards as $card): ?>
+                    <article class="recruit-stat<?= $card['alert'] ? ' is-alert' : '' ?>">
+                        <div class="recruit-stat__icon">
+                            <i class="fa-solid <?= htmlspecialchars($card['icon']) ?>"></i>
+                        </div>
+                        <div class="recruit-stat__body">
+                            <span class="recruit-stat__label"><?= htmlspecialchars($card['label']) ?></span>
+                            <p class="recruit-stat__value"><?= $card['value'] ?></p>
+                            <span class="recruit-stat__note"><?= $card['note'] ?></span>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+
+        </section>
+
         <!-- ==========================================
             FILTERS
         =========================================== -->
@@ -110,6 +196,14 @@ if (!isset($_SESSION['user_id'])) {
 
                             <?php foreach ($jobs as $job): ?>
 
+                                <?php
+                                $deadlineTs    = strtotime((string) $job['application_deadline']);
+                                $isClosingSoon = $job['status'] === 'Open'
+                                    && $deadlineTs !== false
+                                    && $deadlineTs >= $today
+                                    && $deadlineTs <= strtotime('+7 days', $today);
+                                ?>
+
                                 <tr
                                     class="job-row"
                                     data-job="<?= htmlspecialchars(strtolower($job['title'])) ?>"
@@ -117,6 +211,7 @@ if (!isset($_SESSION['user_id'])) {
                                     data-employment-type="<?= htmlspecialchars($job['employment_type']) ?>"
                                     data-status="<?= htmlspecialchars($job['status']) ?>"
                                     data-deadline="<?= htmlspecialchars($job['application_deadline']) ?>"
+                                    data-closing-soon="<?= $isClosingSoon ? '1' : '0' ?>"
                                 >
 
                                     <!-- Job Title -->
@@ -145,9 +240,18 @@ if (!isset($_SESSION['user_id'])) {
 
                                     <!-- Deadline -->
                                     <td>
-                                        <span class="deadline-cell">
-                                            <?= htmlspecialchars($job['application_deadline']) ?>
+                                        <span class="deadline-cell<?= $isClosingSoon ? ' is-soon' : '' ?>">
+                                            <i class="fa-regular fa-clock"></i>
+                                            <?= htmlspecialchars(
+                                                $deadlineTs !== false
+                                                    ? date('M j, Y', $deadlineTs)
+                                                    : (string) $job['application_deadline']
+                                            ) ?>
                                         </span>
+
+                                        <?php if ($isClosingSoon): ?>
+                                            <span class="badge badge-soon">Closing soon</span>
+                                        <?php endif; ?>
                                     </td>
 
                                     <!-- Status -->
@@ -312,6 +416,19 @@ if (!isset($_SESSION['user_id'])) {
                             </tr>
 
                         <?php endif; ?>
+
+                        <!-- Toggled by JS when the active filters hide every row -->
+                        <tr class="filter-empty" id="filterEmpty" hidden>
+                            <td colspan="8" class="empty-state">
+                                <i class="fa-solid fa-filter-circle-xmark"></i>
+                                <h3>No postings match these filters</h3>
+                                <p>Try clearing a filter or switching back to all postings.</p>
+                                <button type="button" class="btn-primary" id="filterEmptyReset">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    Clear filters
+                                </button>
+                            </td>
+                        </tr>
 
                     </tbody>
 

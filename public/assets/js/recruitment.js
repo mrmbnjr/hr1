@@ -84,6 +84,12 @@
         const statusFilter =
             document.getElementById('statusFilter');
 
+        const filterEmpty =
+            document.getElementById('filterEmpty');
+
+        const filterEmptyReset =
+            document.getElementById('filterEmptyReset');
+
         const resultsCount =
             document.getElementById('resultsCount');
 
@@ -187,6 +193,15 @@
             pageRows.forEach(row => {
                 row.style.display = '';
             });
+
+            /*
+             * The "no matches" row is not part of `rows`, so it is moved to
+             * the end of the body and shown only when filters hide everything.
+             */
+            if (filterEmpty) {
+                tbody.appendChild(filterEmpty);
+                filterEmpty.hidden = !(rows.length > 0 && visible.length === 0);
+            }
 
             updateResultsCount(
                 visible.length,
@@ -305,6 +320,24 @@
 
             });
         });
+
+
+        // ==================================================
+        // RESET (from the "no matches" row)
+        // ==================================================
+
+        function resetFilters() {
+
+            if (jobFilter) jobFilter.value = '';
+            if (departmentFilter) departmentFilter.value = '';
+            if (employmentFilter) employmentFilter.value = '';
+            if (statusFilter) statusFilter.value = '';
+
+            currentPage = 1;
+            applyFilters();
+        }
+
+        filterEmptyReset?.addEventListener('click', resetFilters);
 
 
         // ==================================================

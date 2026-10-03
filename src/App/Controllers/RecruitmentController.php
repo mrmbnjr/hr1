@@ -20,7 +20,71 @@ class RecruitmentController
 
         $applicationBaseUrl = url('?page=apply&token=');
 
+        /*
+        |----------------------------------------------------------------------
+        | Overview metrics
+        |----------------------------------------------------------------------
+        | Feeds the KPI cards at the top of the page.
+        */
+        $overview = $this->buildOverview($jobs);
+
         require BASE_PATH . '/resources/views/recruitment/index.php';
+    }
+
+    /**
+     * Aggregate the job posting rows into the KPI figures shown above the
+     * recruitment table.
+     *
+     * @param array<int, array<string, mixed>> $jobs
+     * @return array<string, int>
+     */
+    private function buildOverview(array $jobs): array
+    {
+        $today      = strtotime('today');
+        $soonCutoff = strtotime('+7 days', $today);
+
+        $overview = [
+            'total'              => 0,
+            'open'               => 0,
+            'closed'             => 0,
+            'vacancies'          => 0,
+            'applications'       => 0,
+            'departments_hiring' => 0,
+            'closing_soon'       => 0,
+            'hired'              => 0,
+        ];
+
+        $hiringDepartments = [];
+
+        foreach ($jobs as $job) {
+            $status   = (string) ($job['status'] ?? '');
+            $deadline = strtotime((string) ($job['application_deadline'] ?? ''));
+
+            $overview['total']++;
+            $overview['applications'] += (int) ($job['applicants'] ?? 0);
+            $overview['hired']        += (int) ($job['hired'] ?? 0);
+
+            if ($status === 'Open') {
+                $overview['open']++;
+                $overview['vacancies'] += (int) ($job['vacancies'] ?? 0);
+
+                $department = (string) ($job['department_name'] ?? '');
+
+                if ($department !== '') {
+                    $hiringDepartments[$department] = true;
+                }
+
+                if ($deadline !== false && $deadline >= $today && $deadline <= $soonCutoff) {
+                    $overview['closing_soon']++;
+                }
+            } elseif ($status === 'Closed') {
+                $overview['closed']++;
+            }
+        }
+
+        $overview['departments_hiring'] = count($hiringDepartments);
+
+        return $overview;
     }
 
     public function create()
