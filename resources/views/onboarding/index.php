@@ -43,6 +43,68 @@ $statusMeta = [
     ],
 ];
 
+/*
+|--------------------------------------------------------------------------
+| SUMMARY METRICS
+|--------------------------------------------------------------------------
+| The controller already counts each status. The array-derived counts below
+| only act as a fallback, so the summary stays correct if the view is ever
+| rendered without those variables.
+*/
+
+$totalOnboarding = (int) ($totalNewHires ?? count($employees));
+
+$statusCounts = [
+    'Pending'     => 0,
+    'In Progress' => 0,
+    'Completed'   => 0,
+    'Overdue'     => 0,
+];
+
+foreach ($employees as $onboardingRow) {
+    $rowStatus = (string) ($onboardingRow['onboarding_status'] ?? 'Pending');
+
+    $statusCounts[$rowStatus] = ($statusCounts[$rowStatus] ?? 0) + 1;
+}
+
+$pendingCount   = (int) ($pending   ?? $statusCounts['Pending']);
+$ongoingCount   = (int) ($ongoing   ?? $statusCounts['In Progress']);
+$completedCount = (int) ($completed ?? $statusCounts['Completed']);
+$overdueCount   = $statusCounts['Overdue'];
+
+$statTiles = [
+    [
+        'icon'  => 'fa-users',
+        'value' => $totalOnboarding,
+        'label' => 'In Onboarding',
+        'note'  => 'Active onboarding records',
+    ],
+    [
+        'icon'  => 'fa-hourglass-half',
+        'value' => $pendingCount,
+        'label' => 'Pending',
+        'note'  => 'Not yet started',
+    ],
+    [
+        'icon'  => 'fa-arrows-rotate',
+        'value' => $ongoingCount,
+        'label' => 'In Progress',
+        'note'  => 'Currently onboarding',
+    ],
+    [
+        'icon'  => 'fa-circle-check',
+        'value' => $completedCount,
+        'label' => 'Completed',
+        'note'  => 'Finished onboarding',
+    ],
+    [
+        'icon'  => 'fa-triangle-exclamation',
+        'value' => $overdueCount,
+        'label' => 'Overdue',
+        'note'  => 'Needs follow-up',
+    ],
+];
+
 ?>
 
 <?php require BASE_PATH . '/resources/views/includes/header.php'; ?>
@@ -53,6 +115,28 @@ $statusMeta = [
     <?php require BASE_PATH . '/resources/views/includes/navbar.php'; ?>
 
     <div class="onboarding-page">
+        <!-- ==========================================================
+            SUMMARY
+        ========================================================== -->
+
+        <section class="onboarding-summary-grid" aria-label="Onboarding summary">
+            <?php foreach ($statTiles as $tile): ?>
+
+                <div class="onboarding-stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid <?= htmlspecialchars($tile['icon']) ?>"></i>
+                    </div>
+
+                    <div class="stat-content">
+                        <span><?= htmlspecialchars($tile['label']) ?></span>
+                        <strong><?= (int) $tile['value'] ?></strong>
+                        <small><?= htmlspecialchars($tile['note']) ?></small>
+                    </div>
+                </div>
+
+            <?php endforeach; ?>
+        </section>
+
         <!-- ==========================================================
             FILTER BAR
         ========================================================== -->

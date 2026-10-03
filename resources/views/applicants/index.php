@@ -97,55 +97,37 @@ foreach ($applicants as $a) {
             SUMMARY CARDS
         ========================================================== -->
 
-        <section class="summary-grid">
+        <?php
+        /* Summary tiles. Each tile doubles as a status filter:
+           data-filter is read by applicants.js, and the extra
+           .summary-card class is the JS hook it binds to. The visual
+           contract (.stat-card / .stat-icon / .stat-content) is the
+           same one used on the recruitment, statistics and onboarding
+           screens. */
+        $summaryTiles = [
+            ['filter' => 'All',          'icon' => 'fa-users',            'label' => 'Total Applicants',    'value' => (int) $summary['Total'],        'note' => 'Across all postings'],
+            ['filter' => 'Submitted',    'icon' => 'fa-inbox',            'label' => 'Submitted',           'value' => (int) $summary['Submitted'],    'note' => 'Awaiting screening'],
+            ['filter' => 'Under Review', 'icon' => 'fa-magnifying-glass', 'label' => 'Under Review',        'value' => (int) $summary['Under Review'], 'note' => 'In AI screening'],
+            ['filter' => 'Interview',    'icon' => 'fa-calendar-check',   'label' => 'Interview Scheduled', 'value' => (int) $summary['Interview'],    'note' => 'Interviews arranged'],
+            ['filter' => 'Hired',        'icon' => 'fa-user-check',       'label' => 'Hired',               'value' => (int) $summary['Hired'],        'note' => 'Successfully hired'],
+            ['filter' => 'Rejected',     'icon' => 'fa-user-xmark',       'label' => 'Rejected',            'value' => (int) $summary['Rejected'],     'note' => 'Not moving forward'],
+        ];
+        ?>
 
-            <div class="summary-card" data-filter="All">
-                <div class="summary-icon icon-total"><i class="fa-solid fa-users"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Total'] ?></span>
-                    <span class="summary-label">Total Applicants</span>
-                </div>
-            </div>
+        <section class="summary-grid" aria-label="Applicant summary">
 
-            <div class="summary-card" data-filter="Submitted">
-                <div class="summary-icon icon-submitted"><i class="fa-solid fa-inbox"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Submitted'] ?></span>
-                    <span class="summary-label">Submitted</span>
+            <?php foreach ($summaryTiles as $tile): ?>
+                <div class="stat-card summary-card" data-filter="<?= htmlspecialchars($tile['filter']) ?>">
+                    <div class="stat-icon">
+                        <i class="fa-solid <?= htmlspecialchars($tile['icon']) ?>"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span><?= htmlspecialchars($tile['label']) ?></span>
+                        <strong><?= (int) $tile['value'] ?></strong>
+                        <small><?= htmlspecialchars($tile['note']) ?></small>
+                    </div>
                 </div>
-            </div>
-
-            <div class="summary-card" data-filter="Under Review">
-                <div class="summary-icon icon-review"><i class="fa-solid fa-magnifying-glass"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Under Review'] ?></span>
-                    <span class="summary-label">Under Review</span>
-                </div>
-            </div>
-
-            <div class="summary-card" data-filter="Interview">
-                <div class="summary-icon icon-interview"><i class="fa-solid fa-calendar-check"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Interview'] ?></span>
-                    <span class="summary-label">Interview Scheduled</span>
-                </div>
-            </div>
-
-            <div class="summary-card" data-filter="Hired">
-                <div class="summary-icon icon-hired"><i class="fa-solid fa-user-check"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Hired'] ?></span>
-                    <span class="summary-label">Hired</span>
-                </div>
-            </div>
-
-            <div class="summary-card" data-filter="Rejected">
-                <div class="summary-icon icon-rejected"><i class="fa-solid fa-user-xmark"></i></div>
-                <div class="summary-body">
-                    <span class="summary-count"><?= (int)$summary['Rejected'] ?></span>
-                    <span class="summary-label">Rejected</span>
-                </div>
-            </div>
+            <?php endforeach; ?>
 
         </section>
 

@@ -38,29 +38,25 @@ $overviewCards = [
         'icon'  => 'fa-briefcase',
         'label' => 'Open Postings',
         'value' => (int) $overview['open'],
-        'note'  => $overview['total'] . ' total &middot; ' . $overview['closed'] . ' closed',
-        'alert' => false,
+        'note'  => $overview['total'] . ' total, ' . $overview['closed'] . ' closed',
     ],
     [
         'icon'  => 'fa-user-plus',
         'label' => 'Openings',
         'value' => (int) $overview['vacancies'],
         'note'  => $overview['departments_hiring'] . ' ' . ($overview['departments_hiring'] === 1 ? 'department hiring' : 'departments hiring'),
-        'alert' => false,
     ],
     [
         'icon'  => 'fa-file-lines',
         'label' => 'Applications',
         'value' => (int) $overview['applications'],
         'note'  => $overview['hired'] . ' hired so far',
-        'alert' => false,
     ],
     [
         'icon'  => 'fa-hourglass-half',
         'label' => 'Closing Soon',
         'value' => (int) $overview['closing_soon'],
         'note'  => 'Within the next 7 days',
-        'alert' => $overview['closing_soon'] > 0,
     ],
 ];
 
@@ -84,26 +80,25 @@ $today = strtotime('today');
     <div class="recruitment-page">
 
         <!-- ==========================================
-            KPI CARDS
+            SUMMARY CARDS
         =========================================== -->
 
-        <section class="recruitment-overview" aria-label="Recruitment summary">
+        <section class="recruitment-stats" aria-label="Recruitment summary">
+            <?php foreach ($overviewCards as $card): ?>
 
-            <div class="recruit-stats">
-                <?php foreach ($overviewCards as $card): ?>
-                    <article class="recruit-stat<?= $card['alert'] ? ' is-alert' : '' ?>">
-                        <div class="recruit-stat__icon">
-                            <i class="fa-solid <?= htmlspecialchars($card['icon']) ?>"></i>
-                        </div>
-                        <div class="recruit-stat__body">
-                            <span class="recruit-stat__label"><?= htmlspecialchars($card['label']) ?></span>
-                            <p class="recruit-stat__value"><?= $card['value'] ?></p>
-                            <span class="recruit-stat__note"><?= $card['note'] ?></span>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fa-solid <?= htmlspecialchars($card['icon']) ?>"></i>
+                    </div>
 
+                    <div class="stat-content">
+                        <span><?= htmlspecialchars($card['label']) ?></span>
+                        <strong><?= (int) $card['value'] ?></strong>
+                        <small><?= htmlspecialchars($card['note']) ?></small>
+                    </div>
+                </div>
+
+            <?php endforeach; ?>
         </section>
 
         <!-- ==========================================
