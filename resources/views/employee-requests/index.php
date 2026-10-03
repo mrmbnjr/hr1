@@ -970,29 +970,45 @@ $requestTypes = [
             <div class="request-modal-footer">
                 <button
                     type="button"
-                    class="modal-btn modal-btn-primary"
-                    id="requestModalNext"
-                >
-
-                    Next
-
-                    <i class="fa-solid fa-arrow-right"></i>
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="modal-btn modal-btn-primary"
-                    id="requestModalSave"
+                    class="modal-btn modal-btn-secondary"
+                    id="requestModalBack"
                     hidden
                 >
 
-                    <i class="fa-solid fa-check"></i>
+                    <i class="fa-solid fa-arrow-left"></i>
 
-                    Save Changes
+                    Back
 
                 </button>
+
+
+                <div class="request-modal-actions">
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-primary"
+                        id="requestModalNext"
+                    >
+
+                        Next
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-primary"
+                        id="requestModalSave"
+                        hidden
+                    >
+
+                        <i class="fa-solid fa-check"></i>
+
+                        Save Changes
+
+                    </button>
+                </div>
 
             </div>
 

@@ -553,11 +553,23 @@
 
     display: flex;
 
-    justify-content: flex-end;
+    align-items: center;
+
+    justify-content: space-between;
 
     padding: 18px 28px;
 
     border-top: 1px solid var(--border);
+
+}
+
+.request-modal-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-left: auto;
 
 }
 

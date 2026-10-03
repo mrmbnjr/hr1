@@ -157,6 +157,11 @@
                     "requestModalNext"
                 );
 
+            const requestModalBack =
+                document.getElementById(
+                    "requestModalBack"
+                );
+
 
             const requestModalSave =
                 document.getElementById(
@@ -854,7 +859,8 @@
                 if (requestModalSave) {
 
                     requestModalSave.hidden =
-                        !editable;
+                        !editable ||
+                        requestModalStep !== 2;
 
                 }
 
@@ -917,9 +923,15 @@
                     requestModalNext.hidden =
                         false;
 
-
                     requestModalNext.innerHTML =
                         'Next <i class="fa-solid fa-arrow-right"></i>';
+
+                }
+
+                if (requestModalBack) {
+
+                    requestModalBack.hidden =
+                        true;
 
                 }
 
@@ -1358,8 +1370,16 @@
                             2;
 
 
-                        requestModalNext.innerHTML =
-                            '<i class="fa-solid fa-arrow-left"></i> Back';
+                        requestModalNext.hidden =
+                            true;
+
+
+                        if (requestModalBack) {
+
+                            requestModalBack.hidden =
+                                false;
+
+                        }
 
 
                         /*
@@ -1382,11 +1402,12 @@
                     }
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Step 2 -> Step 1
-                    |--------------------------------------------------------------------------
-                    */
+                }
+            );
+
+            requestModalBack?.addEventListener(
+                "click",
+                function () {
 
                     requestStepTwo.hidden =
                         true;
@@ -1400,8 +1421,16 @@
                         1;
 
 
-                    requestModalNext.innerHTML =
-                        'Next <i class="fa-solid fa-arrow-right"></i>';
+                    requestModalBack.hidden =
+                        true;
+
+
+                    if (requestModalNext) {
+
+                        requestModalNext.hidden =
+                            false;
+
+                    }
 
 
                     if (requestModalSave) {
