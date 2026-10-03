@@ -265,10 +265,10 @@ $flashType = ($flash['type'] ?? '') === 'success' ? 'success' : 'error';
                                 <button type="button" class="icon-action" data-action="menu" aria-label="Open actions for <?= $e($fullname) ?>" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
                                 <div class="row-menu" hidden>
                                     <?php if ($employeeId > 0): ?>
-                                        <a href="?page=view&amp;id=<?= $employeeId ?>"><i class="fa-regular fa-eye" aria-hidden="true"></i> View employee record</a>
+                                        <a href="?page=view&amp;id=<?= $employeeId ?>"><i class="fa-regular fa-eye" aria-hidden="true"></i> View Details</a>
                                     <?php endif; ?>
                                     <?php if ($employeeId > 0 && !$isUnlinked): ?>
-                                        <a href="?page=edit-user-profile&amp;id=<?= (int) $user['user_id'] ?>"><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit user profile</a>
+                                        <a href="?page=edit-user-profile&amp;id=<?= (int) $user['user_id'] ?>"><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit User</a>
                                     <?php endif; ?>
                                     <button type="button" data-action="toggle"<?= $status === 'Inactive' ? '' : ' class="is-danger"' ?>><i class="fa-solid fa-power-off" aria-hidden="true"></i> <?= $status === 'Inactive' ? 'Enable account' : 'Disable account' ?></button>
                                 </div>

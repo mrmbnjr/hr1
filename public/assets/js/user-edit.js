@@ -37,7 +37,18 @@
         phone: function (v) {
             if (!v.trim()) return 'Phone is required.';
             return /^[0-9+()\-\s]{7,30}$/.test(v) ? '' : 'Enter a valid phone number.';
-        }
+        },
+        username: function (v) {
+            if (!v.trim()) return 'Username is required.';
+            return /^[A-Za-z0-9._-]{3,50}$/.test(v.trim()) ? '' : 'Use 3–50 letters, numbers, . _ or -.';
+        },
+        account_email: function (v) {
+            if (!v.trim()) return 'Sign-in email is required.';
+            if (v.length > 150) return 'Email is too long.';
+            return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) ? '' : 'Enter a valid email address.';
+        },
+        role_id: function (v) { return v ? '' : 'Select a role.'; },
+        status: function (v) { return (v === 'Active' || v === 'Inactive') ? '' : 'Select a status.'; }
     };
 
     function validateField(name) {
@@ -69,12 +80,35 @@
         return !firstBad;
     }
 
+    /* ---------- Character counter (address) ---------- */
+    (function () {
+        var area = form.elements['address'];
+        var counter = document.getElementById('addressCount');
+        if (!area || !counter) return;
+
+        var max = parseInt(area.getAttribute('maxlength'), 10) || 500;
+        function update() { counter.textContent = area.value.length + ' / ' + max; }
+
+        area.addEventListener('input', update);
+        update();
+    })();
+
     /* ---------- Toast ---------- */
     function toast(message, type) {
         var wrap = document.getElementById('toastWrap');
+        if (!wrap) return;
         var t = document.createElement('div');
         t.className = 'ue-toast' + (type === 'error' ? ' error' : '');
-        t.textContent = message;
+
+        var icon = document.createElement('i');
+        icon.className = 'fa-solid ' + (type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check');
+        icon.setAttribute('aria-hidden', 'true');
+
+        var text = document.createElement('span');
+        text.textContent = message;
+
+        t.appendChild(icon);
+        t.appendChild(text);
         wrap.appendChild(t);
         requestAnimationFrame(function () { t.classList.add('show'); });
 

@@ -109,6 +109,44 @@ class User
         ]);
     }
 
+    /**
+     * Update the full sign-in identity and access of an account in one
+     * statement: username, sign-in email, role and status.
+     *
+     * When the sign-in email actually changes we clear `email_verified_at`,
+     * because a brand new address has not been verified yet.
+     */
+    public function updateAccountFull(
+        int $userId,
+        string $username,
+        string $email,
+        int $roleId,
+        string $status,
+        bool $resetVerification = false
+    ): bool {
+        $sql = 'UPDATE users
+                SET username = :username,
+                    email = :email,
+                    role_id = :role_id,
+                    status = :status';
+
+        if ($resetVerification) {
+            $sql .= ', email_verified_at = NULL';
+        }
+
+        $sql .= ' WHERE user_id = :user_id';
+
+        $stmt = $this->db->prepare($sql);
+
+        return $stmt->execute([
+            ':username' => $username,
+            ':email'    => $email,
+            ':role_id'  => $roleId,
+            ':status'   => $status,
+            ':user_id'  => $userId,
+        ]);
+    }
+
     public function setStatus(int $userId, string $status): bool
     {
         $stmt = $this->db->prepare(
