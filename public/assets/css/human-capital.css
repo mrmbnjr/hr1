@@ -34,7 +34,7 @@
 
 .card-header h2{
     margin:0;
-    color:var(--maroon-dark);
+    color:var(--accent);
     font-family:var(--font-heading);
     font-size:19px;
     font-weight:700;
@@ -54,7 +54,7 @@
     display:flex;
     gap:4px;
     padding:4px;
-    background:rgba(242, 193, 78, 0.10);
+    background:var(--tint-gold-10);
     border:1px solid var(--border);
     border-radius:var(--radius-field);
     width:fit-content;
@@ -84,12 +84,12 @@
 }
 
 .cs-view-tab:hover{
-    color:var(--maroon-dark);
+    color:var(--accent);
 }
 
 .cs-view-tab.active{
     background:var(--card-bg);
-    color:var(--maroon-dark);
+    color:var(--accent);
     box-shadow:0 1px 2px rgba(20,10,5,.08);
 }
 
@@ -221,7 +221,7 @@
 
 /* Owner's name */
 .owner-node:last-child i{
-    color:var(--maroon);
+    color:var(--accent);
 }
 
 /* =====================================================
@@ -275,16 +275,16 @@
     gap:8px;
     width:100%;
     padding:11px 16px;
-    background:rgba(242, 193, 78, 0.08);
+    background:var(--surface-2);
     border:1px solid var(--border);
     border-radius:var(--radius-btn);
     font-size:12.5px;
     font-weight:600;
-    color:var(--maroon-dark);
+    color:var(--accent);
 }
 
 .department-node i{
-    color:var(--maroon);
+    color:var(--accent);
     font-size:12px;
 }
 
@@ -336,7 +336,7 @@
     align-items:center;
     gap:7px;
     padding:6px 10px;
-    background:rgba(242, 193, 78, 0.05);
+    background:var(--surface-2);
     border-radius:6px;
     font-size:11.5px;
     color:var(--ink-soft);
@@ -351,7 +351,7 @@
     margin-top:10px;
     padding:12px;
     border-radius:8px;
-    background:rgba(242, 193, 78, 0.04);
+    background:var(--surface-2);
     border:1px dashed var(--border);
     color:var(--ink-soft);
     text-align:center;
@@ -373,6 +373,10 @@
     border-collapse:collapse;
     table-layout:auto;
     font-size:13.5px;
+}
+
+.cs-table tbody td strong{
+    color:var(--accent);
 }
 
 /* Table styles are defined in components.css */
@@ -403,8 +407,8 @@
 }
 
 .dropdown-btn:hover{
-    background:rgba(242, 193, 78, 0.12);
-    color:var(--maroon-dark);
+    background:var(--tint-gold-12);
+    color:var(--accent);
     border-color:var(--border);
 }
 
@@ -454,18 +458,18 @@
 
 .dropdown-menu a:hover,
 .dropdown-menu button:hover{
-    background:rgba(242, 193, 78, 0.12);
+    background:var(--tint-gold-12);
 }
 
 .dropdown-menu .deleteDepartment:hover,
 .deletePosition:hover{
-    background:var(--red-bg);
-    color:var(--red);
+    background:var(--badge-red-bg);
+    color:var(--badge-red-fg);
 }
 
 .dropdown-menu .deleteDepartment:hover,
 .deletePosition:hover i{
-    color:var(--red);
+    color:var(--badge-red-fg);
 }
 
 /* =====================================================
@@ -490,7 +494,7 @@
 
 .cs-empty-state h3{
     margin:16px 0 6px;
-    color:var(--maroon-dark);
+    color:var(--accent);
     font-family:var(--font-heading);
     font-size:15px;
     font-weight:700;
@@ -551,7 +555,7 @@
 
 .modal-header h3{
     margin:0;
-    color:var(--maroon-dark);
+    color:var(--accent);
     font-family:var(--font-heading);
     font-size:16px;
     font-weight:700;
@@ -565,7 +569,7 @@
     justify-content:center;
     border:none;
     border-radius:8px;
-    background:rgba(242, 193, 78, 0.12);
+    background:var(--tint-gold-12);
     color:var(--ink-soft);
     cursor:pointer;
     transition:background var(--transition), color var(--transition);
@@ -573,7 +577,7 @@
 
 .modal-close:hover{
     background:rgba(242, 193, 78, 0.2);
-    color:var(--maroon-dark);
+    color:var(--accent);
 }
 
 .modal-body{
@@ -627,15 +631,15 @@
 }
 
 .toast-success i {
-    color: var(--green);
+    color: var(--badge-green-fg);
 }
 
 .toast-error {
-    border-color: var(--red);
+    border-color: var(--badge-red-fg);
 }
 
 .toast-error i {
-    color: var(--red);
+    color: var(--badge-red-fg);
 }
 
 /* =====================================================
@@ -687,7 +691,7 @@
 .form-group textarea:focus{
     outline:none;
     border-color:var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.18);
+    box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .form-group textarea{
@@ -699,48 +703,6 @@
     from{ opacity:0; transform:translateX(30px); }
     to{ opacity:1; transform:none; }
 }
-
-/* =====================================================
-   DARK MODE
-===================================================== */
-[data-theme="dark"] .dashboard-card{
-    box-shadow:none;
-}
-
-[data-theme="dark"] .card-header h2,
-[data-theme="dark"] .cs-table tbody td strong,
-[data-theme="dark"] .modal-header h3,
-[data-theme="dark"] .cs-empty-state h3{
-    color:var(--gold);
-}
-
-[data-theme="dark"] .cs-view-navigation{
-    background:rgba(242, 193, 78, 0.06);
-}
-
-[data-theme="dark"] .cs-view-tab.active{
-    color:var(--gold);
-}
-
-[data-theme="dark"] .cs-table thead th{
-    background:rgba(242, 193, 78, 0.08);
-}
-
-[data-theme="dark"] .cs-table tbody tr:hover{
-    background:rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .department-node,
-[data-theme="dark"] .employee-node,
-[data-theme="dark"] .organization-empty{
-    background:rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .department-node{
-    color:var(--gold);
-}
-
-
 
 /* =====================================================
    RESPONSIVE

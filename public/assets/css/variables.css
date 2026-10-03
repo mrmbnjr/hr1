@@ -130,12 +130,15 @@
 
 --button-border: 2px solid #b67f1f;
 
+/* Fixed bevel colour under the gold button (theme-independent) */
+--button-shadow-color: #9a6915;
+
 --button-shadow:
-  0 5px 0 #9a6915,
+  0 5px 0 var(--button-shadow-color),
   0 10px 20px rgba(74,15,15,.18);
 
 --button-shadow-hover:
-  0 6px 0 #9a6915,
+  0 6px 0 var(--button-shadow-color),
   0 14px 24px rgba(74,15,15,.25);
 
 --button-radius: 14px;

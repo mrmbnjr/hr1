@@ -77,14 +77,14 @@
 
 .request-cell strong {
     display: block;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 13.5px;
     font-weight: 800;
     line-height: 1.4;
 }
 
 .employee-request-table tbody tr.request-row:hover .request-cell strong {
-    color: var(--maroon);
+    color: var(--accent);
 }
 
 
@@ -94,7 +94,7 @@
 
 .request-type {
     display: block;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 13.5px;
     font-weight: 800;
     line-height: 1.4;
@@ -107,13 +107,13 @@
 
 .btn-review:hover {
     background: var(--button-bg-hover);
-    box-shadow: 0 4px 0 #9a6915;
+    box-shadow: 0 4px 0 var(--button-shadow-color);
     transform: translateY(-1px);
 }
 
 .btn-review:active {
     background: var(--button-bg-active);
-    box-shadow: 0 1px 0 #9a6915;
+    box-shadow: 0 1px 0 var(--button-shadow-color);
     transform: translateY(1px);
 }
 
@@ -187,30 +187,7 @@
 }
 
 
-/* ==========================================================
-   DARK MODE
-========================================================== */
-
-[data-theme="dark"] .employee-request-page .table-card {
-    box-shadow: none;
-}
-
-[data-theme="dark"] .request-cell strong,
-[data-theme="dark"] .request-type {
-    color: var(--gold);
-}
-
-[data-theme="dark"] .employee-request-table thead th {
-    background: rgba(242, 193, 78, 0.08);
-}
-
-[data-theme="dark"] .employee-request-table tbody tr.request-row:hover {
-    background: rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .avatar-circle {
-    color: var(--maroon-dark-white);
-}
+/* Dark mode is handled entirely by design tokens in variables.css */
 
 
 
@@ -230,7 +207,7 @@
     font: inherit;
     font-weight: 800;
 
-    color: var(--maroon-dark);
+    color: var(--accent);
 
     text-align: left;
 
@@ -244,15 +221,14 @@
 
 .request-view-btn:hover {
 
-    color: var(--maroon);
+    color: var(--accent);
     text-decoration: none;
 
 }
 
 .request-view-btn:focus-visible {
 
-    outline: 2px solid
-        var(--primary-color, #7b1e2b);
+    outline: 2px solid var(--gold-dark);
 
     outline-offset: 3px;
 
@@ -331,7 +307,9 @@
 
     flex-direction: column;
 
-    background: #ffffff;
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
 
     border-radius: 16px;
 
@@ -370,7 +348,7 @@
 
     padding: 24px 28px;
 
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid var(--border);
 
 }
 
@@ -388,13 +366,15 @@
 
     letter-spacing: 0.08em;
 
-    color: #8b8b8b;
+    color: var(--ink-soft);
 
 }
 
 .request-modal-header h2 {
 
     margin: 0;
+
+    color: var(--accent);
 
     font-size: 22px;
 
@@ -416,9 +396,9 @@
 
     border-radius: 8px;
 
-    background: #f5f5f5;
+    background: var(--surface-muted);
 
-    color: #555;
+    color: var(--ink-soft);
 
     cursor: pointer;
 
@@ -430,9 +410,9 @@
 
 .request-modal-close:hover {
 
-    background: #eeeeee;
+    background: var(--tint-gold-12);
 
-    color: #222;
+    color: var(--accent);
 
 }
 
@@ -471,6 +451,8 @@
 
     margin: 0 0 14px;
 
+    color: var(--accent);
+
     font-size: 14px;
 
     font-weight: 700;
@@ -481,7 +463,7 @@
 
     font-size: 13px;
 
-    color: #7b1e2b;
+    color: var(--accent);
 
 }
 
@@ -505,9 +487,9 @@
 
     padding: 15px;
 
-    background: #f8f8f8;
+    background: var(--surface-muted);
 
-    border: 1px solid #eeeeee;
+    border: 1px solid var(--border);
 
     border-radius: 10px;
 
@@ -521,7 +503,7 @@
 
     font-size: 12px;
 
-    color: #888;
+    color: var(--ink-soft);
 
 }
 
@@ -546,9 +528,9 @@
 
     min-height: 50px;
 
-    background: #fafafa;
+    background: var(--surface-muted);
 
-    border: 1px solid #eeeeee;
+    border: 1px solid var(--border);
 
     border-radius: 10px;
 
@@ -556,7 +538,7 @@
 
     line-height: 1.6;
 
-    color: #444;
+    color: var(--ink);
 
     white-space: pre-wrap;
 
@@ -575,7 +557,7 @@
 
     padding: 18px 28px;
 
-    border-top: 1px solid #eeeeee;
+    border-top: 1px solid var(--border);
 
 }
 
@@ -597,9 +579,29 @@
 
 .modal-btn-secondary {
 
-    background: #eeeeee;
+    background: var(--surface-muted);
 
-    color: #333;
+    color: var(--ink);
+
+}
+
+.modal-btn-primary {
+
+    background: var(--maroon);
+
+    color: var(--white);
+
+}
+
+.modal-btn-primary:hover {
+
+    background: var(--maroon-dark);
+
+}
+
+.modal-btn-primary:active {
+
+    background: var(--maroon-dark);
 
 }
 
@@ -658,7 +660,7 @@ body.modal-open {
 
     border-radius: 50%;
 
-    background: #cfcfcf;
+    background: var(--border);
 
     flex-shrink: 0;
 }
@@ -678,24 +680,24 @@ body.modal-open {
 
     font-size: 12px;
 
-    color: #888;
+    color: var(--ink-soft);
 }
 
 
 .request-status-item.active {
-    border-color: #7a1f2b;
+    border-color: var(--accent);
 
-    background: rgba(122, 31, 43, 0.05);
+    background: var(--tint-gold-12);
 }
 
 
 .request-status-item.active .status-dot {
-    background: #7a1f2b;
+    background: var(--accent);
 }
 
 
 .request-status-item.active strong {
-    color: #7a1f2b;
+    color: var(--accent);
 }
 
 .request-status-item.is-disabled {
@@ -717,16 +719,18 @@ body.modal-open {
     min-height: 120px;
     resize: vertical;
     padding: 14px 16px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 10px;
     font: inherit;
     line-height: 1.5;
+    color: var(--ink);
+    background: var(--card-bg);
     box-sizing: border-box;
 }
 
 
 .request-remarks-input:read-only {
-    background: #f5f5f5;
+    background: var(--field-readonly-bg);
     cursor: default;
     opacity: 0.8;
 }

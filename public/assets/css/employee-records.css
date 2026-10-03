@@ -35,7 +35,7 @@
 
 .records-page-header h1 {
     margin: 2px 0 4px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 28px;
     line-height: 1.2;
@@ -101,7 +101,7 @@
 
 .table-header h2 {
     margin: 0;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 18px;
     font-weight: 800;
@@ -150,18 +150,18 @@
 
 .employee-details strong {
     display: block;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 13.5px;
     font-weight: 800;
     line-height: 1.4;
 }
 
 .employee-link:hover .employee-details strong {
-    color: var(--maroon);
+    color: var(--accent);
 }
 
 .employee-id {
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 12.5px;
     font-weight: 800;
     white-space: nowrap;
@@ -229,12 +229,12 @@
 }
 
 .employee-view-tab:hover {
-    color: var(--maroon);
-    background: rgba(242, 193, 78, 0.07);
+    color: var(--accent);
+    background: var(--surface-2);
 }
 
 .employee-view-tab.active {
-    color: var(--maroon);
+    color: var(--accent);
 }
 
 .employee-view-tab::after {
@@ -318,7 +318,7 @@
 
 .employee-profile-info h1 {
     margin: 0;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 25px;
     line-height: 1.25;
@@ -365,10 +365,10 @@
     min-height: 92px;
     padding: 16px;
     background: var(--card-bg);
-    border: 1px solid rgba(111, 20, 20, 0.1);
+    border: 1px solid var(--border);
     border-top: 3px solid var(--gold);
     border-radius: 20px;
-    box-shadow: 0 2px 12px rgba(74, 15, 15, 0.07);
+    box-shadow: var(--shadow);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
@@ -380,14 +380,14 @@
     height: 38px;
     flex: 0 0 38px;
     border-radius: 12px;
-    background: rgba(242, 193, 78, 0.18);
-    color: var(--maroon);
+    background: var(--badge-gold-bg);
+    color: var(--badge-gold-fg);
     font-size: 16px;
 }
 
 .overview-stat-card-status .overview-stat-icon {
-    background: var(--green-bg);
-    color: var(--green);
+    background: var(--badge-green-bg);
+    color: var(--badge-green-fg);
 }
 
 .overview-stat-card > div:last-child {
@@ -407,7 +407,7 @@
 .overview-stat-card strong {
     display: block;
     overflow: hidden;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 17px;
     line-height: 1.2;
@@ -438,8 +438,8 @@
     height: 48px;
     flex: 0 0 48px;
     border-radius: 50%;
-    background: conic-gradient(var(--maroon) var(--completion), var(--border) 0);
-    color: var(--maroon-dark);
+    background: conic-gradient(var(--accent) var(--completion), var(--border) 0);
+    color: var(--accent);
     font-size: 11px;
     font-weight: 800;
 }
@@ -462,7 +462,7 @@
 }
 
 .overview-completeness-value {
-    color: var(--maroon);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 20px;
     white-space: nowrap;
@@ -473,14 +473,14 @@
     height: 9px;
     overflow: hidden;
     border-radius: 999px;
-    background: rgba(230, 213, 189, 0.7);
+    background: var(--track-bg);
 }
 
 .overview-progress-track span {
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--maroon), var(--gold-dark));
+    background: linear-gradient(90deg, var(--accent), var(--gold-dark));
 }
 
 .overview-progress-meta {
@@ -516,10 +516,10 @@
 
 .employee-profile-card,
 .record-card {
-    border: 1px solid rgba(111, 20, 20, 0.1);
+    border: 1px solid var(--border);
     border-top: 3px solid var(--gold);
     border-radius: 20px;
-    box-shadow: 0 2px 12px rgba(74, 15, 15, 0.07);
+    box-shadow: var(--shadow);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
@@ -545,7 +545,7 @@
 
 .record-card-header h2 {
     margin: 0;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 17px;
     line-height: 1.35;
@@ -614,7 +614,7 @@
     padding: 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-field);
-    background: var(--surface-muted, rgba(242, 193, 78, 0.05));
+    background: var(--surface-muted);
 }
 
 .employee-document-icon {
@@ -626,7 +626,7 @@
     flex: 0 0 42px;
     border-radius: 50%;
     background: var(--gold-light);
-    color: var(--maroon-dark);
+    color: var(--accent);
 }
 
 .employee-document-info {
@@ -702,7 +702,7 @@
     border: 1px solid var(--gold-dark);
     border-radius: 50%;
     background: var(--gold-light);
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 12px;
 }
 
@@ -753,8 +753,8 @@
 .employee-activity-meta .activity-method {
     padding: 3px 7px;
     border-radius: 6px;
-    background: var(--gray-bg);
-    color: var(--gray);
+    background: var(--badge-gray-bg);
+    color: var(--badge-gray-fg);
     font-size: 10px;
     font-weight: 800;
 }
@@ -788,7 +788,7 @@
 
 .empty-state h3 {
     margin: 0;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 15px;
     font-weight: 800;
@@ -826,66 +826,7 @@
 }
 
 
-/* ==========================================================
-   DARK MODE
-========================================================== */
-
-[data-theme="dark"] .table-card,
-[data-theme="dark"] .employee-profile-card,
-[data-theme="dark"] .record-card {
-    box-shadow: none;
-}
-
-[data-theme="dark"] .records-page-header h1,
-[data-theme="dark"] .table-header h2,
-[data-theme="dark"] .employee-profile-info h1,
-[data-theme="dark"] .record-card-header h2,
-[data-theme="dark"] .empty-state h3 {
-    color: var(--ink);
-}
-
-[data-theme="dark"] .employee-details strong,
-[data-theme="dark"] .employee-id {
-    color: var(--gold);
-}
-
-[data-theme="dark"] .employee-records-table thead th {
-    background: rgba(242, 193, 78, 0.08);
-}
-
-[data-theme="dark"] .employee-records-table tbody tr.employee-row:hover {
-    background: rgba(242, 193, 78, 0.05);
-}
-
-[data-theme="dark"] .employee-view-tab.active,
-[data-theme="dark"] .employee-view-tab:hover {
-    color: var(--gold);
-}
-
-[data-theme="dark"] .avatar-circle,
-[data-theme="dark"] .avatar-large {
-    color: var(--maroon-dark-white);
-}
-
-[data-theme="dark"] .badge-green {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-}
-
-[data-theme="dark"] .badge-orange {
-    background: rgba(249, 115, 22, 0.12);
-    color: #fb923c;
-}
-
-[data-theme="dark"] .badge-blue {
-    background: rgba(59, 130, 246, 0.12);
-    color: #60a5fa;
-}
-
-[data-theme="dark"] .badge-gray {
-    background: rgba(148, 163, 184, 0.12);
-    color: #94a3b8;
-}
+/* Dark mode is handled entirely by design tokens in variables.css */
 
 
 /* ==========================================================
