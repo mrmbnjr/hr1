@@ -66,6 +66,41 @@ $requestTypes = [
 
 ];
 
+
+/*
+|--------------------------------------------------------------------------
+| Password reset requests ("Contact HR")
+|--------------------------------------------------------------------------
+|
+| Supplied by EmployeeRequestsController for ADMIN and HR only. Managers
+| see the Employee Requests tab without the reset queue.
+|
+*/
+
+$canViewPasswordResets =
+    $canViewPasswordResets ?? false;
+
+$passwordResetRequests =
+    $passwordResetRequests ?? [];
+
+$passwordResetPendingCount =
+    $passwordResetPendingCount ?? 0;
+
+
+$resetStatusMeta = [
+
+    "Pending" => [
+        "label" => "Pending",
+        "class" => "badge-gray"
+    ],
+
+    "Resolved" => [
+        "label" => "Resolved",
+        "class" => "badge-green"
+    ]
+
+];
+
 ?>
 
 <?php require BASE_PATH . '/resources/views/includes/header.php'; ?>
@@ -79,6 +114,64 @@ $requestTypes = [
 
 
     <div class="employee-request-page">
+
+        <?php if ($canViewPasswordResets): ?>
+
+        <!-- ======================================================
+            TABS
+        ======================================================= -->
+
+        <div class="request-tabs" role="tablist">
+
+            <button
+                type="button"
+                class="request-tab is-active"
+                role="tab"
+                aria-selected="true"
+                data-tab="employee"
+            >
+
+                <i class="fa-solid fa-inbox"></i>
+
+                Employee Requests
+
+            </button>
+
+
+            <button
+                type="button"
+                class="request-tab"
+                role="tab"
+                aria-selected="false"
+                data-tab="resets"
+            >
+
+                <i class="fa-solid fa-key"></i>
+
+                Password Reset Requests
+
+                <?php if ($passwordResetPendingCount > 0): ?>
+
+                    <span class="request-tab-badge">
+
+                        <?= (int) $passwordResetPendingCount ?>
+
+                    </span>
+
+                <?php endif; ?>
+
+            </button>
+
+        </div>
+
+        <?php endif; ?>
+
+
+        <div
+            class="request-tab-panel is-active"
+            id="tabPanelEmployee"
+            data-panel="employee"
+        >
 
 
         <!-- ======================================================
@@ -557,6 +650,258 @@ $requestTypes = [
 
         </section>
 
+        </div><!-- /#tabPanelEmployee -->
+
+
+        <?php if ($canViewPasswordResets): ?>
+
+        <!-- ======================================================
+            PASSWORD RESET REQUESTS ("Contact HR")
+        ======================================================= -->
+
+        <div
+            class="request-tab-panel"
+            id="tabPanelResets"
+            data-panel="resets"
+            hidden
+        >
+
+            <section class="table-card">
+
+                <div class="table-scroll">
+
+                    <table
+                        class="employee-request-table"
+                        id="passwordResetTable"
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Requester</th>
+
+                                <th>Username / ID</th>
+
+                                <th>Contact</th>
+
+                                <th>Date Requested</th>
+
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <?php if (empty($passwordResetRequests)): ?>
+
+                                <tr class="empty-row">
+
+                                    <td colspan="5">
+
+                                        <div class="empty-state">
+
+                                            <i class="fa-solid fa-key"></i>
+
+                                            <p>
+                                                No password reset requests.
+                                            </p>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            <?php else: ?>
+
+                                <?php foreach ($passwordResetRequests as $reset): ?>
+
+                                    <?php
+
+                                    $resetStatus =
+                                        $reset['status']
+                                        ?? 'Pending';
+
+
+                                    $resetMeta =
+                                        $resetStatusMeta[$resetStatus]
+                                        ?? $resetStatusMeta['Pending'];
+
+
+                                    $resetName =
+                                        trim(
+                                            (string) (
+                                                $reset['full_name']
+                                                ?? ''
+                                            )
+                                        );
+
+
+                                    if ($resetName === '') {
+
+                                        $resetName =
+                                            'Unknown Requester';
+                                    }
+
+
+                                    $resetInitial =
+                                        strtoupper(
+                                            substr(
+                                                $resetName,
+                                                0,
+                                                1
+                                            )
+                                        );
+
+                                    ?>
+
+                                    <tr
+                                        class="reset-row"
+                                        tabindex="0"
+                                        role="button"
+
+                                        data-id="<?= htmlspecialchars(
+                                            $reset['request_id'] ?? ''
+                                        ) ?>"
+
+                                        data-name="<?= htmlspecialchars(
+                                            $resetName
+                                        ) ?>"
+
+                                        data-identifier="<?= htmlspecialchars(
+                                            $reset['identifier'] ?? ''
+                                        ) ?>"
+
+                                        data-contact="<?= htmlspecialchars(
+                                            $reset['contact'] ?? ''
+                                        ) ?>"
+
+                                        data-message="<?= htmlspecialchars(
+                                            $reset['message'] ?? ''
+                                        ) ?>"
+
+                                        data-status="<?= htmlspecialchars(
+                                            $resetStatus
+                                        ) ?>"
+
+                                        data-created="<?= htmlspecialchars(
+                                            $reset['created_at'] ?? ''
+                                        ) ?>"
+
+                                        data-resolved-at="<?= htmlspecialchars(
+                                            $reset['resolved_at'] ?? ''
+                                        ) ?>"
+
+                                        data-resolved-by="<?= htmlspecialchars(
+                                            $reset['resolved_by_username']
+                                            ?? ''
+                                        ) ?>"
+                                    >
+
+                                        <td>
+
+                                            <div class="request-cell">
+
+                                                <div class="avatar-circle">
+
+                                                    <?= htmlspecialchars(
+                                                        $resetInitial
+                                                    ) ?>
+
+                                                </div>
+
+
+                                                <div>
+
+                                                    <strong>
+
+                                                        <?= htmlspecialchars(
+                                                            $resetName
+                                                        ) ?>
+
+                                                    </strong>
+
+
+                                                    <span class="sub-text">
+                                                        Password reset
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $reset['identifier']
+                                                ?? '—'
+                                            ) ?>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $reset['contact']
+                                                ?? '—'
+                                            ) ?>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <?= htmlspecialchars(
+                                                $reset['created_at']
+                                                ?? '—'
+                                            ) ?>
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <span
+                                                class="badge <?= htmlspecialchars(
+                                                    $resetMeta['class']
+                                                ) ?>"
+                                            >
+
+                                                <?= htmlspecialchars(
+                                                    $resetMeta['label']
+                                                ) ?>
+
+                                            </span>
+
+                                        </td>
+
+
+                                    </tr>
+
+                                <?php endforeach; ?>
+
+                            <?php endif; ?>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </div>
+
+        <?php endif; ?>
+
     </div>
 
 
@@ -1008,6 +1353,237 @@ $requestTypes = [
                         Save Changes
 
                     </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+        PASSWORD RESET REQUEST MODAL
+    =========================================================== -->
+
+    <div
+        class="request-modal"
+        id="resetRequestModal"
+        aria-hidden="true"
+    >
+
+        <div class="request-modal-backdrop"></div>
+
+
+        <div
+            class="request-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resetRequestModalTitle"
+        >
+
+
+            <div class="request-modal-header">
+
+                <div>
+
+                    <span class="modal-eyebrow">
+                        Password Reset Request
+                    </span>
+
+
+                    <h2 id="resetRequestModalTitle">
+                        Request Details
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="request-modal-close"
+                    id="resetRequestModalClose"
+                    aria-label="Close request details"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <div class="request-modal-body">
+
+
+                <!-- Requester -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+
+                        <i class="fa-solid fa-user"></i>
+
+                        Requester Information
+
+                    </h3>
+
+
+                    <div class="request-detail-grid">
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Full Name
+                            </span>
+
+                            <strong id="resetModalName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Username / Employee ID
+                            </span>
+
+                            <strong id="resetModalIdentifier">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Contact
+                            </span>
+
+                            <strong id="resetModalContact">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Request -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+
+                        <i class="fa-solid fa-file-lines"></i>
+
+                        Request Information
+
+                    </h3>
+
+
+                    <div class="request-detail-grid">
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Date Requested
+                            </span>
+
+                            <strong id="resetModalCreated">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Status
+                            </span>
+
+                            <span id="resetModalStatus">
+                                —
+                            </span>
+
+                        </div>
+
+
+                        <div class="request-detail-item">
+
+                            <span class="detail-label">
+                                Handled By
+                            </span>
+
+                            <strong id="resetModalResolvedBy">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Message -->
+
+                <div class="request-detail-section">
+
+                    <h3>
+
+                        <i class="fa-solid fa-align-left"></i>
+
+                        Message to HR
+
+                    </h3>
+
+
+                    <div
+                        class="request-detail-message"
+                        id="resetModalMessage"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="request-modal-footer">
+
+                <div class="request-modal-actions">
+
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-secondary"
+                        id="resetRequestModalCloseFooter"
+                    >
+
+                        Close
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="modal-btn modal-btn-primary"
+                        id="resetRequestModalAction"
+                    >
+
+                        <i class="fa-solid fa-check"></i>
+
+                        Mark as resolved
+
+                    </button>
+
                 </div>
 
             </div>

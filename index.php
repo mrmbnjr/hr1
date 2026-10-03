@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\PasswordResetController;
 use App\Controllers\DashboardController;
 use App\Controllers\RecruitmentController;
 use App\Controllers\ApplicantController;
@@ -66,7 +67,42 @@ switch ($page) {
 
     case 'reset-password':
 
-        require BASE_PATH . '/resources/reset-password/index.php';
+        (new PasswordResetController())->show();
+
+        break;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PASSWORD RESET — self-service
+    |--------------------------------------------------------------------------
+    |
+    | Backs resources/views/reset-password/index.php. Each endpoint answers
+    | with JSON (see PasswordResetController).
+    |
+    */
+
+    case 'reset-send-code':
+
+        (new PasswordResetController())->sendCode();
+
+        break;
+
+    case 'reset-verify-code':
+
+        (new PasswordResetController())->verifyCode();
+
+        break;
+
+    case 'reset-by-username':
+
+        (new PasswordResetController())->resetByUsername();
+
+        break;
+
+    case 'reset-hr-request':
+
+        (new PasswordResetController())->requestHr();
 
         break;
 
@@ -497,6 +533,28 @@ switch ($page) {
     case 'employee-requests':
 
         (new EmployeeRequestsController())->employeeRequests();
+
+        break;
+
+    /*
+     * Finalize an employee request (status + HR remarks).
+     * The page's JavaScript posts here; without it the Save button 404s.
+     */
+
+    case 'employee-requests-update':
+
+        (new EmployeeRequestsController())->update();
+
+        break;
+
+    /*
+     * Password reset requests ("Contact HR") — HR / Admin only.
+     * Marks a request Resolved or reopens it.
+     */
+
+    case 'password-reset-request-update':
+
+        (new EmployeeRequestsController())->updatePasswordResetRequest();
 
         break;
 

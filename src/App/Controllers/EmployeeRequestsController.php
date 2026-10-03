@@ -3,17 +3,23 @@
 namespace App\Controllers;
 
 use App\Models\EmployeeRequests;
+use App\Models\PasswordResetRequest;
 use App\Services\Auth;
 
 class EmployeeRequestsController
 {
     private EmployeeRequests $employeeRequests;
 
+    private PasswordResetRequest $passwordResetRequest;
+
 
     public function __construct()
     {
         $this->employeeRequests =
             new EmployeeRequests();
+
+        $this->passwordResetRequest =
+            new PasswordResetRequest();
     }
 
 
@@ -36,6 +42,36 @@ class EmployeeRequestsController
 
         $departments =
             $this->employeeRequests->getDepartments();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Password reset requests ("Contact HR")
+        |--------------------------------------------------------------------------
+        |
+        | Shown as a second tab, but only to HR and Admin — managers can see
+        | employee requests without gaining access to account recovery data.
+        |
+        */
+
+        $canViewPasswordResets =
+            Auth::hasAnyRole([
+                'ADMIN',
+                'HR'
+            ]);
+
+        $passwordResetRequests = [];
+        $passwordResetPendingCount = 0;
+
+        if ($canViewPasswordResets) {
+
+            $passwordResetRequests =
+                $this->passwordResetRequest->getAll();
+
+            $passwordResetPendingCount =
+                $this->passwordResetRequest->getPendingCount();
+        }
+
 
         require BASE_PATH . '/resources/views/employee-requests/index.php';
     }
@@ -623,4 +659,214 @@ class EmployeeRequestsController
             ]);
         }
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE PASSWORD RESET REQUEST (HR / Admin)
+    |--------------------------------------------------------------------------
+    |
+    | Marks a "Contact HR" password reset request as Resolved, or reopens it.
+    | This only tracks the request itself — resetting the person's actual
+    | password is done from User Management.
+    |
+    */
+
+    public function updatePasswordResetRequest(): void
+    {
+        header(
+            'Content-Type: application/json; charset=utf-8'
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Authentication — HR and Admin only
+        |--------------------------------------------------------------------------
+        */
+
+        Auth::requireRole([
+            'ADMIN',
+            'HR'
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Request method
+        |--------------------------------------------------------------------------
+        */
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
+            http_response_code(405);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'Invalid request method.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Request ID
+        |--------------------------------------------------------------------------
+        */
+
+        $requestId =
+            filter_input(
+                INPUT_POST,
+                'request_id',
+                FILTER_VALIDATE_INT
+            );
+
+
+        if (!$requestId) {
+
+            http_response_code(422);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'Invalid request ID.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status — only Pending / Resolved exist for this queue
+        |--------------------------------------------------------------------------
+        */
+
+        $status =
+            trim(
+                $_POST['status'] ?? ''
+            );
+
+
+        if (!in_array(
+            $status,
+            [
+                'Pending',
+                'Resolved'
+            ],
+            true
+        )) {
+
+            http_response_code(422);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'Please choose Resolved or Pending before saving.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Confirm the request exists
+        |--------------------------------------------------------------------------
+        */
+
+        $existing =
+            $this->passwordResetRequest
+                ->getById(
+                    $requestId
+                );
+
+
+        if (!$existing) {
+
+            http_response_code(404);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'Password reset request not found.'
+            ]);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Apply the change
+        |--------------------------------------------------------------------------
+        */
+
+        $handledBy =
+            $status === 'Resolved'
+                ? (int) Auth::userId()
+                : null;
+
+        try {
+
+            $updated =
+                $this->passwordResetRequest
+                    ->setStatus(
+                        $requestId,
+                        $status,
+                        $handledBy
+                    );
+
+
+            if (!$updated) {
+
+                http_response_code(500);
+
+                echo json_encode([
+                    'success' => false,
+                    'message' =>
+                        'Failed to update the password reset request.'
+                ]);
+
+                return;
+            }
+
+
+            $request =
+                $this->passwordResetRequest
+                    ->getById(
+                        $requestId
+                    );
+
+
+            echo json_encode([
+                'success' => true,
+                'message' =>
+                    $status === 'Resolved'
+                        ? 'Password reset request marked as resolved.'
+                        : 'Password reset request reopened.',
+                'request' =>
+                    $request
+            ]);
+
+        } catch (\Throwable $e) {
+
+            error_log(
+                'Password reset request update failed: '
+                . $e->getMessage()
+            );
+
+            http_response_code(500);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'An error occurred while updating the password reset request.'
+            ]);
+        }
+    }
+
 }

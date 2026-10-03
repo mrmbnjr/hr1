@@ -840,3 +840,85 @@ body.modal-open {
         justify-content: center;
     }
 }
+
+
+/* ==========================================================
+   TABS — Employee Requests / Password Reset Requests
+========================================================== */
+
+.employee-request-page .request-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.employee-request-page .request-tab {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 16px;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    transition: color var(--transition), border-color var(--transition);
+}
+
+.employee-request-page .request-tab i {
+    font-size: 13px;
+}
+
+.employee-request-page .request-tab:hover {
+    color: var(--accent);
+}
+
+.employee-request-page .request-tab.is-active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.employee-request-page .request-tab:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: 2px;
+}
+
+
+/* Pending-count pill on the Password Reset Requests tab */
+
+.request-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--maroon);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+
+/* Panels */
+
+.request-tab-panel[hidden] {
+    display: none;
+}
+
+
+/* Password reset rows behave like the employee request rows */
+
+.reset-row {
+    cursor: pointer;
+}

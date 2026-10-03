@@ -24,6 +24,8 @@ hPanel → **phpMyAdmin** → open your new database → **Import**:
 The `migrations/` files are not needed on a fresh database; `schema.sql` already includes them.
 For an existing installation that already created `application_validations`, run
 `database/migrations/20261002_extend_ai_validation_for_processing.sql` once.
+For an existing installation, also run `database/migrations/20261003_add_password_reset.sql`
+once to enable the self-service password reset page (`?page=reset-password`).
 
 ## 5. Upload the files
 Upload the **contents** of the `hr1` folder (not the folder itself) into the subdomain folder.
@@ -40,6 +42,8 @@ Set `APP_URL`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Keep `APP_ENV=production`, `
 Rejected applicants are hidden from the applicant list after 30 days by default; set
 `REJECTED_APPLICANT_RETENTION_DAYS` to change that period.
 Leave `APP_BASE_PATH` empty. For Gmail OTP emails, `MAIL_PASSWORD` must be a Google **App Password**.
+The password reset page also emails HR when someone picks "Contact HR"; set `HR_NOTIFICATION_EMAIL`
+to the inbox that should receive those requests (it falls back to `MAIL_FROM_ADDRESS` if unset).
 
 ## 7. Permissions
 Folders `755`, files `644`. `storage/uploads/` and `storage/logs/` must be writable by PHP

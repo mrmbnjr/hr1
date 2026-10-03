@@ -1854,3 +1854,771 @@
     );
 
 })();
+
+
+// ==========================================================
+// RAM-YUM — Password Reset Requests (HR / Admin tab)
+// Tab switching, detail modal, and resolve / reopen actions
+// ==========================================================
+
+(function () {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            // ==================================================
+            // TABLE — only present for ADMIN / HR
+            // ==================================================
+
+            const resetTable =
+                document.getElementById(
+                    "passwordResetTable"
+                );
+
+
+            if (!resetTable) {
+                return;
+            }
+
+
+            const UPDATE_URL =
+                "?page=password-reset-request-update";
+
+
+            const STATUS_META = {
+
+                Pending: {
+                    label: "Pending",
+                    className: "badge-gray",
+                    action: "Mark resolved",
+                    next: "Resolved"
+                },
+
+                Resolved: {
+                    label: "Resolved",
+                    className: "badge-green",
+                    action: "Reopen",
+                    next: "Pending"
+                }
+
+            };
+
+
+            // ==================================================
+            // TABS
+            // ==================================================
+
+            const tabButtons =
+                Array.from(
+                    document.querySelectorAll(
+                        ".request-tab[data-tab]"
+                    )
+                );
+
+
+            const tabPanels =
+                Array.from(
+                    document.querySelectorAll(
+                        ".request-tab-panel[data-panel]"
+                    )
+                );
+
+
+            function activateTab(name) {
+
+                tabButtons.forEach(function (button) {
+
+                    const isActive =
+                        button.dataset.tab === name;
+
+                    button.classList.toggle(
+                        "is-active",
+                        isActive
+                    );
+
+                    button.setAttribute(
+                        "aria-selected",
+                        isActive ? "true" : "false"
+                    );
+
+                });
+
+
+                tabPanels.forEach(function (panel) {
+
+                    const isActive =
+                        panel.dataset.panel === name;
+
+                    panel.classList.toggle(
+                        "is-active",
+                        isActive
+                    );
+
+                    panel.hidden = !isActive;
+
+                });
+
+            }
+
+
+            tabButtons.forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+                        activateTab(
+                            button.dataset.tab
+                        );
+                    }
+                );
+
+            });
+
+
+            // ==================================================
+            // PENDING COUNT PILL
+            // ==================================================
+
+            let pendingCount =
+                (function () {
+
+                    const badge =
+                        document.querySelector(
+                            ".request-tab-badge"
+                        );
+
+                    return badge
+                        ? parseInt(
+                            badge.textContent,
+                            10
+                        ) || 0
+                        : 0;
+
+                })();
+
+
+            function renderPendingCount() {
+
+                const tab =
+                    document.querySelector(
+                        '.request-tab[data-tab="resets"]'
+                    );
+
+
+                if (!tab) {
+                    return;
+                }
+
+
+                let badge =
+                    tab.querySelector(
+                        ".request-tab-badge"
+                    );
+
+
+                if (pendingCount <= 0) {
+
+                    if (badge) {
+                        badge.remove();
+                    }
+
+                    return;
+                }
+
+
+                if (!badge) {
+
+                    badge =
+                        document.createElement(
+                            "span"
+                        );
+
+                    badge.className =
+                        "request-tab-badge";
+
+                    tab.appendChild(badge);
+
+                }
+
+
+                badge.textContent =
+                    String(pendingCount);
+
+            }
+
+
+            // ==================================================
+            // MODAL
+            // ==================================================
+
+            const modal =
+                document.getElementById(
+                    "resetRequestModal"
+                );
+
+
+            if (!modal) {
+                return;
+            }
+
+
+            const modalName =
+                document.getElementById(
+                    "resetModalName"
+                );
+
+
+            const modalIdentifier =
+                document.getElementById(
+                    "resetModalIdentifier"
+                );
+
+
+            const modalContact =
+                document.getElementById(
+                    "resetModalContact"
+                );
+
+
+            const modalCreated =
+                document.getElementById(
+                    "resetModalCreated"
+                );
+
+
+            const modalStatus =
+                document.getElementById(
+                    "resetModalStatus"
+                );
+
+
+            const modalResolvedBy =
+                document.getElementById(
+                    "resetModalResolvedBy"
+                );
+
+
+            const modalMessage =
+                document.getElementById(
+                    "resetModalMessage"
+                );
+
+
+            const modalAction =
+                document.getElementById(
+                    "resetRequestModalAction"
+                );
+
+
+            const modalBackdrop =
+                modal.querySelector(
+                    ".request-modal-backdrop"
+                );
+
+
+            let currentRow = null;
+
+
+            function statusBadge(status) {
+
+                const meta =
+                    STATUS_META[status] ||
+                    STATUS_META.Pending;
+
+                return (
+                    '<span class="badge ' +
+                    meta.className +
+                    '">' +
+                    meta.label +
+                    "</span>"
+                );
+
+            }
+
+
+            function openModal(row) {
+
+                currentRow = row;
+
+
+                const status =
+                    row.dataset.status ||
+                    "Pending";
+
+
+                const meta =
+                    STATUS_META[status] ||
+                    STATUS_META.Pending;
+
+
+                modalName.textContent =
+                    row.dataset.name || "—";
+
+
+                modalIdentifier.textContent =
+                    row.dataset.identifier || "—";
+
+
+                modalContact.textContent =
+                    row.dataset.contact || "—";
+
+
+                modalCreated.textContent =
+                    row.dataset.created || "—";
+
+
+                modalStatus.innerHTML =
+                    statusBadge(status);
+
+
+                modalResolvedBy.textContent =
+                    row.dataset.resolvedBy || "—";
+
+
+                modalMessage.textContent =
+                    row.dataset.message ||
+                    "(no message)";
+
+
+                modalAction.dataset.status =
+                    status;
+
+
+                modalAction.innerHTML =
+                    status === "Resolved"
+                        ? '<i class="fa-solid fa-rotate-left"></i> ' +
+                            meta.action
+                        : '<i class="fa-solid fa-check"></i> ' +
+                            meta.action;
+
+
+                modal.classList.add("is-open");
+
+                modal.setAttribute(
+                    "aria-hidden",
+                    "false"
+                );
+
+                document.body.classList.add(
+                    "modal-open"
+                );
+
+            }
+
+
+            function closeModal() {
+
+                modal.classList.remove("is-open");
+
+                modal.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+                document.body.classList.remove(
+                    "modal-open"
+                );
+
+                currentRow = null;
+
+            }
+
+
+            document
+                .getElementById("resetRequestModalClose")
+                ?.addEventListener(
+                    "click",
+                    closeModal
+                );
+
+
+            document
+                .getElementById("resetRequestModalCloseFooter")
+                ?.addEventListener(
+                    "click",
+                    closeModal
+                );
+
+
+            modalBackdrop?.addEventListener(
+                "click",
+                closeModal
+            );
+
+
+            document.addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key === "Escape" &&
+                        modal.classList.contains(
+                            "is-open"
+                        )
+                    ) {
+                        closeModal();
+                    }
+
+                }
+            );
+
+
+            // ==================================================
+            // ROW CLICK → OPEN DETAILS
+            // ==================================================
+
+            function bindRow(row) {
+
+                const open = function (event) {
+
+                    if (
+                        event.target.closest(
+                            "button, a, input, select, textarea"
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        event.type === "keydown" &&
+                        event.key !== "Enter" &&
+                        event.key !== " "
+                    ) {
+                        return;
+                    }
+
+
+                    if (event.type === "keydown") {
+                        event.preventDefault();
+                    }
+
+
+                    openModal(row);
+
+                };
+
+
+                row.addEventListener("click", open);
+
+                row.addEventListener("keydown", open);
+
+            }
+
+
+            resetTable
+                .querySelectorAll(
+                    "tbody tr.reset-row"
+                )
+                .forEach(bindRow);
+
+
+            // ==================================================
+            // APPLY A NEW STATUS TO THE ROW
+            // ==================================================
+
+            function applyStatus(row, request) {
+
+                const status =
+                    request.status ||
+                    "Pending";
+
+
+                const meta =
+                    STATUS_META[status] ||
+                    STATUS_META.Pending;
+
+
+                row.dataset.status = status;
+
+                row.dataset.resolvedAt =
+                    request.resolved_at || "";
+
+                row.dataset.resolvedBy =
+                    request.resolved_by_username || "";
+
+
+                const badge =
+                    row.querySelector(".badge");
+
+
+                if (badge) {
+
+                    badge.className =
+                        "badge " + meta.className;
+
+                    badge.textContent =
+                        meta.label;
+
+                }
+
+
+                const button =
+                    row.querySelector(
+                        ".reset-action-btn"
+                    );
+
+
+                if (button) {
+
+                    button.dataset.status =
+                        status;
+
+                    button.textContent =
+                        meta.action;
+
+                }
+
+            }
+
+
+            // ==================================================
+            // SAVE STATUS
+            // ==================================================
+
+            async function saveStatus(
+                row,
+                nextStatus,
+                button
+            ) {
+
+                const requestId =
+                    row.dataset.id;
+
+
+                const previousStatus =
+                    row.dataset.status ||
+                    "Pending";
+
+
+                if (button) {
+                    button.disabled = true;
+                }
+
+
+                const formData =
+                    new FormData();
+
+
+                formData.append(
+                    "request_id",
+                    requestId
+                );
+
+
+                formData.append(
+                    "status",
+                    nextStatus
+                );
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            UPDATE_URL,
+                            {
+                                method: "POST",
+                                body: formData,
+                                credentials:
+                                    "same-origin"
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to update the request."
+                        );
+
+                    }
+
+
+                    applyStatus(
+                        row,
+                        result.request
+                    );
+
+
+                    // Keep the pending-count pill in step.
+
+                    if (
+                        previousStatus === "Pending" &&
+                        result.request.status === "Resolved"
+                    ) {
+
+                        pendingCount =
+                            Math.max(
+                                0,
+                                pendingCount - 1
+                            );
+
+                        renderPendingCount();
+
+                    } else if (
+                        previousStatus === "Resolved" &&
+                        result.request.status === "Pending"
+                    ) {
+
+                        pendingCount += 1;
+
+                        renderPendingCount();
+
+                    }
+
+
+                    return true;
+
+                } catch (error) {
+
+                    window.alert(
+                        error.message ||
+                        "Failed to update the request."
+                    );
+
+                    return false;
+
+                } finally {
+
+                    if (button) {
+                        button.disabled = false;
+                    }
+
+                }
+
+            }
+
+
+            // ==================================================
+            // ROW QUICK-ACTION BUTTONS
+            // ==================================================
+
+            resetTable.addEventListener(
+                "click",
+                function (event) {
+
+                    const button =
+                        event.target.closest(
+                            ".reset-action-btn"
+                        );
+
+
+                    if (!button) {
+                        return;
+                    }
+
+
+                    event.stopPropagation();
+
+
+                    const row =
+                        button.closest(
+                            "tr.reset-row"
+                        );
+
+
+                    if (!row) {
+                        return;
+                    }
+
+
+                    const status =
+                        row.dataset.status ||
+                        "Pending";
+
+
+                    const meta =
+                        STATUS_META[status] ||
+                        STATUS_META.Pending;
+
+
+                    const confirmText =
+                        status === "Resolved"
+                            ? "Reopen this password reset request?"
+                            : "Mark this password reset request as resolved? Make sure you have already reset the account.";
+
+
+                    if (!window.confirm(confirmText)) {
+                        return;
+                    }
+
+
+                    saveStatus(
+                        row,
+                        meta.next,
+                        button
+                    );
+
+                }
+            );
+
+
+            // ==================================================
+            // MODAL ACTION BUTTON
+            // ==================================================
+
+            modalAction?.addEventListener(
+                "click",
+                async function () {
+
+                    if (!currentRow) {
+                        return;
+                    }
+
+
+                    const status =
+                        currentRow.dataset.status ||
+                        "Pending";
+
+
+                    const meta =
+                        STATUS_META[status] ||
+                        STATUS_META.Pending;
+
+
+                    const confirmText =
+                        status === "Resolved"
+                            ? "Reopen this password reset request?"
+                            : "Mark this password reset request as resolved? Make sure you have already reset the account.";
+
+
+                    if (!window.confirm(confirmText)) {
+                        return;
+                    }
+
+
+                    modalAction.disabled = true;
+
+
+                    const saved =
+                        await saveStatus(
+                            currentRow,
+                            meta.next,
+                            null
+                        );
+
+
+                    modalAction.disabled = false;
+
+
+                    if (saved) {
+                        closeModal();
+                    }
+
+                }
+            );
+
+        }
+    );
+
+})();
