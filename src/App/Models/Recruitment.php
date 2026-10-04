@@ -251,7 +251,8 @@ class Recruitment
     {
         $stmt = $this->db->prepare("
             UPDATE job_postings
-            SET status = 'Closed'
+            SET status = 'Closed',
+                closed_at = CURRENT_TIMESTAMP
             WHERE posting_id = ?
             AND status = 'Open'
         ");
@@ -305,6 +306,35 @@ class Recruitment
             );
         }
 
+        $newStatus = (string) ($data['status'] ?? 'Open');
+
+        /*
+         * Keep closed_at aligned with the status transition so the retention
+         * window is measured from the moment the posting was actually closed:
+         *   - first move to Closed -> stamp now
+         *   - stays Closed         -> keep the original stamp
+         *   - reopened             -> clear it
+         */
+        $current = $this->db->prepare("
+            SELECT status, closed_at
+            FROM job_postings
+            WHERE posting_id = ?
+            LIMIT 1
+        ");
+        $current->execute([$data['posting_id']]);
+        $existing = $current->fetch(PDO::FETCH_ASSOC);
+
+        $closedAt = null;
+
+        if ($newStatus === 'Closed') {
+
+            $closedAt = $existing['closed_at'] ?? null;
+
+            if (!$existing || $existing['status'] !== 'Closed' || $closedAt === null) {
+                $closedAt = date('Y-m-d H:i:s');
+            }
+        }
+
         $sql = "
             UPDATE job_postings
             SET position_id = ?,
@@ -316,6 +346,7 @@ class Recruitment
                 vacancies = ?,
                 max_applicants = ?,
                 status = ?,
+                closed_at = ?,
                 application_deadline = ?
             WHERE posting_id = ?
         ";
@@ -331,7 +362,8 @@ class Recruitment
             $data['employment_type'],
             $data['vacancies'],
             $maxApplicants,
-            $data['status'],
+            $newStatus,
+            $closedAt,
             $data['application_deadline'],
             $data['posting_id']
         ]);

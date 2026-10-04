@@ -127,6 +127,10 @@ CREATE TABLE job_postings (
         'Closed'
     ) DEFAULT 'Open',
 
+    -- Set when the posting transitions to 'Closed'. Drives the application
+    -- retention window (see ApplicationRetentionService).
+    closed_at DATETIME NULL,
+
     application_token VARCHAR(64) UNIQUE NULL,
 
     application_deadline DATE NOT NULL,

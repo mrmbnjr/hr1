@@ -11,6 +11,7 @@ use App\Services\AcademicDocumentInputService;
 use App\Services\AcademicDocumentEvaluationService;
 use App\Models\ApplicationValidation;
 use App\Services\ApplicationValidationService;
+use App\Services\ApplicationRetentionService;
 
 class ApplicantController
 {
@@ -33,6 +34,12 @@ class ApplicantController
 
     public function index()
     {
+        /*
+         * Enforce the application retention policy before the list is read so
+         * the figures reflect the cleaned-up state.
+         */
+        (new ApplicationRetentionService())->runIfDue();
+
         $applicants = $this->applicant->getAllApplicants();
         $positions = $this->applicant->getAllJobPostings();
 
@@ -1266,6 +1273,21 @@ class ApplicantController
                     ->hireApplication(
                         $applicationId
                     );
+
+
+            /*
+             * Hiring the last vacancy closes the posting. Remove that posting's
+             * rejected applications straight away; never let a cleanup failure
+             * break the hiring response.
+             */
+            try {
+                (new ApplicationRetentionService())->run();
+            } catch (\Throwable $retentionError) {
+                error_log(
+                    'Application retention cleanup failed after hire: ' .
+                    $retentionError->getMessage()
+                );
+            }
 
 
             $emailSent = true;

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Recruitment;
+use App\Services\ApplicationRetentionService;
 
 class RecruitmentController
 {
@@ -15,6 +16,12 @@ class RecruitmentController
 
     public function recruitment()
     {
+        /*
+         * Enforce the application retention policy before the list is read so
+         * the figures reflect the cleaned-up state.
+         */
+        (new ApplicationRetentionService())->runIfDue();
+
         $jobs = $this->recruitment->getAllJobs();
         $departments = $this->recruitment->getDepartments();
 
@@ -173,6 +180,20 @@ class RecruitmentController
 
         try {
             $this->recruitment->close($postingId);
+
+            /*
+             * A closed posting no longer needs its rejected applications —
+             * remove them immediately. A cleanup failure must not undo the
+             * close or block the redirect.
+             */
+            try {
+                (new ApplicationRetentionService())->purgeRejectedForPosting($postingId);
+            } catch (\Throwable $retentionError) {
+                error_log(
+                    'Application retention cleanup failed after close: ' .
+                    $retentionError->getMessage()
+                );
+            }
 
             header("Location:?page=recruitment");
             exit;

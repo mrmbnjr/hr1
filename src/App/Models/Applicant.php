@@ -1170,7 +1170,8 @@ class Applicant
 
                 $closeStmt = $this->db->prepare("
                     UPDATE job_postings
-                    SET status = 'Closed'
+                    SET status = 'Closed',
+                        closed_at = CURRENT_TIMESTAMP
                     WHERE posting_id = :posting_id
                 ");
 
