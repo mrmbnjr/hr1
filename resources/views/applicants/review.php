@@ -293,7 +293,7 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
                                 <i class="fa-solid fa-certificate"></i>
 
                                 <div>
-                                    <span>
+                                    <span class="document-file-name">
                                         <?= htmlspecialchars(
                                             $document['original_file_name']
                                             ?? basename($document['file_name'] ?? 'Document')
@@ -424,7 +424,7 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
             <div class="resume-row document-file-row">
                 <div class="resume-file">
                     <i class="fa-solid fa-file-pdf"></i>
-                    <span><?= htmlspecialchars(basename($applicant['resume_file'])) ?></span>
+                    <span class="document-file-name"><?= htmlspecialchars(basename($applicant['resume_file'])) ?></span>
                 </div>
                 <div class="resume-actions resume-actions-right">
                     <a href="?page=download-resume&id=<?= (int) $applicant['application_id'] ?>" target="_blank" class="btn-outline">
