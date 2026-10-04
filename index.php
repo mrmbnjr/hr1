@@ -298,7 +298,7 @@ switch ($page) {
             </div>
 
             <div class="job-detail-actions">
-                <a class="btn btn--primary" href="index.php?page=apply&token=<?= (int)$job['posting_id'] ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                <a class="btn btn--primary" href="index.php?page=apply&amp;token=<?= rawurlencode((string)$job['application_token']) ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
             </div>
         </div>
         <?php
