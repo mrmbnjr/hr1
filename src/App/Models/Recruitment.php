@@ -37,6 +37,7 @@ class Recruitment
         $this->db = Database::connection();
     }
 
+
     public function getAllJobs(): array
     {
         $sql = "
@@ -411,6 +412,7 @@ class Recruitment
                 jp.requirements,
                 jp.employment_type,
                 jp.vacancies,
+                jp.academic_document_required,
                 jp.status,
                 jp.application_deadline,
                 jp.created_at,
@@ -718,6 +720,104 @@ class Recruitment
         ]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Get every applicant and the evaluation data used by job statistics.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getStatisticsCandidates(int $postingId): array
+    {
+        $sql = "
+            SELECT
+                ap.application_id,
+                ap.applicant_id,
+                ap.application_status,
+                ap.applied_at,
+                ap.resume_file,
+                ap.academic_document_file,
+                jp.academic_document_required,
+
+                CONCAT(
+                    a.first_name,
+                    ' ',
+                    COALESCE(a.middle_name, ''),
+                    CASE
+                        WHEN a.middle_name IS NOT NULL
+                        AND a.middle_name <> ''
+                        THEN ' '
+                        ELSE ''
+                    END,
+                    a.last_name
+                ) AS fullname,
+
+                a.email,
+
+                ai.overall_score AS ai_score,
+                ai.keyword_score AS requirement_match,
+                ai.skills_score,
+                ai.experience_score,
+                ai.education_score,
+                ai.recommendation,
+                ai.strengths,
+                ai.concerns,
+
+                i.interview_date,
+                i.result AS interview_result,
+
+                (
+                    SELECT COUNT(*)
+                    FROM academic_document_evaluations ade
+                    WHERE ade.application_id = ap.application_id
+                ) AS academic_document_count
+
+            FROM applications ap
+
+            INNER JOIN applicants a
+                ON a.applicant_id = ap.applicant_id
+
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
+
+            LEFT JOIN ai_screening ai
+                ON ai.application_id = ap.application_id
+
+            LEFT JOIN interviews i
+                ON i.application_id = ap.application_id
+
+            WHERE ap.posting_id = :posting_id
+
+            ORDER BY ap.applied_at DESC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':posting_id' => $postingId,
+        ]);
+
+        $candidates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($candidates as &$candidate) {
+            $missingDocuments = [];
+
+            if (trim((string) ($candidate['resume_file'] ?? '')) === '') {
+                $missingDocuments[] = 'Resume';
+            }
+
+            $hasAcademicDocument = (int) ($candidate['academic_document_count'] ?? 0) > 0
+                || trim((string) ($candidate['academic_document_file'] ?? '')) !== '';
+
+            if (!empty($candidate['academic_document_required']) && !$hasAcademicDocument) {
+                $missingDocuments[] = 'Academic document';
+            }
+
+            $candidate['missing_documents'] = $missingDocuments;
+        }
+        unset($candidate);
+
+        return $candidates;
     }
 
 }

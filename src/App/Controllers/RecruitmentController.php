@@ -284,7 +284,8 @@ class RecruitmentController
 
         $applicationTrend = $this->recruitment->getApplicationTrend($postingId);
 
-        $recentApplicants = $this->recruitment->getRecentApplicants($postingId);
+        $candidates = $this->recruitment->getStatisticsCandidates($postingId);
+        $recentApplicants = array_slice($candidates, 0, 8);
 
 
         /*
