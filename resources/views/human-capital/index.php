@@ -191,6 +191,7 @@ $departmentLookup = $departmentLookup ?? [];
                                             <th>Positions</th>
                                             <th>Headcount</th>
                                             <th>Open Roles</th>
+                                            <th>Status</th>
                                             <th width="80"></th>
                                         </tr>
                                     </thead>
@@ -215,6 +216,13 @@ $departmentLookup = $departmentLookup ?? [];
 
                                                 <td>
                                                     <?= (int) $department['vacancies']; ?>
+                                                </td>
+
+                                                <td>
+                                                    <span class="status-badge <?= strtolower($department['status'] ?? 'Active'); ?>">
+                                                        <span class="status-dot"></span>
+                                                        <?= htmlspecialchars($department['status'] ?? 'Active'); ?>
+                                                    </span>
                                                 </td>
 
                                                 <td>

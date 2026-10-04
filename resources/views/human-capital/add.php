@@ -11,7 +11,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
     <div class="modal-backdrop"></div>
     <div class="modal-content">
         <div class="modal-header">
-            <h3>New Department</h3>
+            <h3 id="departmentModalTitle">New Department</h3>
 
             <button type="button"
                     class="modal-close"
@@ -20,7 +20,9 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
             </button>
         </div>
 
-        <form id="addDepartmentForm" method="POST" action="?page=save-department">   
+        <form id="addDepartmentForm" method="POST" action="?page=save-department">
+            <input type="hidden" name="department_id" id="departmentId" value="">
+
             <div class="modal-body">
 
                 <div class="form-group">
@@ -35,6 +37,15 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
                         required>
                 </div>
 
+                <div class="form-group">
+                    <label for="departmentStatus">Status</label>
+
+                    <select id="departmentStatus" name="status" required>
+                        <option value="Active" selected>Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+
             </div>
 
             <div class="modal-footer">
@@ -47,7 +58,7 @@ $departmentOptions = $departmentLookup ?? $departments ?? [];
 
                 <button type="submit" class="btn-primary">
                     <i class="fa-solid fa-check"></i>
-                    Create Department
+                    <span id="departmentSubmitLabel">Create Department</span>
                 </button>
             </div>
         </form>

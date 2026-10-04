@@ -17,21 +17,59 @@ class HumanCapital
             d.department_id,
             d.department_name,
             d.created_at,
+            d.status,
 
             COUNT(DISTINCT p.position_id) AS position_count,
 
+            /*
+             * Positions that actually have at least one employee.
+             * Always a subset of position_count.
+             */
+            COUNT(
+                DISTINCT CASE
+                    WHEN e.employee_id IS NOT NULL
+                    THEN p.position_id
+                END
+            ) AS staffed_position_count,
+
             COUNT(DISTINCT e.employee_id) AS employee_count,
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN jp.status = 'Open'
-                        THEN jp.vacancies
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS vacancies
+            /*
+             * Open vacancies for this department.
+             *
+             * Computed with a correlated subquery instead of joining
+             * job_postings, so the employee fan-out cannot multiply the
+             * vacancy count (a posting with 3 vacancies and 2 employees
+             * must still count as 3, not 6).
+             */
+            COALESCE((
+                SELECT SUM(jp.vacancies)
+                FROM job_postings jp
+                INNER JOIN positions vp
+                    ON vp.position_id = jp.position_id
+                WHERE vp.department_id = d.department_id
+                  AND jp.status = 'Open'
+            ), 0) AS vacancies,
+
+            /*
+             * A department is considered to have a head when one of its
+             * positions is a Manager role (roles.role_code = 'MGR') and is
+             * filled by an employee.
+             *
+             * Correlated subquery: it only references the grouped
+             * d.department_id, so it does not need its own GROUP BY entry
+             * and cannot multiply the outer row count.
+             */
+            EXISTS (
+                SELECT 1
+                FROM positions hp
+                INNER JOIN employees he
+                    ON he.position_id = hp.position_id
+                INNER JOIN roles hr
+                    ON hr.role_id = hp.role_id
+                WHERE hp.department_id = d.department_id
+                  AND hr.role_code = 'MGR'
+            ) AS has_head
 
         FROM departments d
 
@@ -42,10 +80,6 @@ class HumanCapital
         /* Position -> Employee (employees belong to positions directly) */
         LEFT JOIN employees e
             ON e.position_id = p.position_id
-
-        /* Position -> Job Posting (vacancy information only) */
-        LEFT JOIN job_postings jp
-            ON jp.position_id = p.position_id
     ";
 
     private PDO $db;
@@ -107,7 +141,8 @@ class HumanCapital
             GROUP BY
                 d.department_id,
                 d.department_name,
-                d.created_at
+                d.created_at,
+                d.status
 
             ORDER BY
                 d.department_name
@@ -135,7 +170,8 @@ class HumanCapital
             GROUP BY
                 d.department_id,
                 d.department_name,
-                d.created_at
+                d.created_at,
+                d.status
 
             LIMIT 1
 
@@ -161,15 +197,16 @@ class HumanCapital
         $stmt = $this->db->prepare("
 
             INSERT INTO departments
-                (department_name)
+                (department_name, status)
 
             VALUES
-                (?)
+                (?, ?)
 
         ");
 
         return $stmt->execute([
-            $data['department_name']
+            $data['department_name'],
+            $data['status'] ?? 'Active'
         ]);
     }
 
@@ -187,7 +224,8 @@ class HumanCapital
             UPDATE departments
 
             SET
-                department_name = ?
+                department_name = ?,
+                status = ?
 
             WHERE department_id = ?
 
@@ -195,6 +233,7 @@ class HumanCapital
 
         return $stmt->execute([
             $data['department_name'],
+            $data['status'] ?? 'Active',
             $id
         ]);
     }
@@ -266,6 +305,7 @@ class HumanCapital
 
                 p.position_id,
                 p.position_name,
+                p.created_at,
 
                 d.department_name,
 
@@ -275,18 +315,18 @@ class HumanCapital
                 COUNT(DISTINCT e.employee_id) AS employee_count,
 
                 /*
-                 * Vacancies come from open job postings.
+                 * Open vacancies come from open job postings.
+                 *
+                 * Correlated subquery so the employee fan-out cannot
+                 * multiply the vacancy count (a posting with 3 vacancies
+                 * and 2 employees must still count as 3, not 6).
                  */
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN jp.status = 'Open'
-                            THEN jp.vacancies
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS vacancies,
+                COALESCE((
+                    SELECT SUM(jp.vacancies)
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                      AND jp.status = 'Open'
+                ), 0) AS vacancies,
 
                 /*
                  * Position is Open when it has
@@ -314,15 +354,10 @@ class HumanCapital
             LEFT JOIN employees e
                 ON e.position_id = p.position_id
 
-            /*
-             * Position → Job Posting
-             */
-            LEFT JOIN job_postings jp
-                ON jp.position_id = p.position_id
-
             GROUP BY
                 p.position_id,
                 p.position_name,
+                p.created_at,
                 d.department_name
 
             ORDER BY

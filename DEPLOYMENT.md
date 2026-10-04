@@ -26,6 +26,8 @@ For an existing installation that already created `application_validations`, run
 `database/migrations/20261002_extend_ai_validation_for_processing.sql` once.
 For an existing installation, also run `database/migrations/20261003_add_password_reset.sql`
 once to enable the self-service password reset page (`?page=reset-password`).
+For an existing installation, also run `database/migrations/20261004_add_department_status.sql`
+once to add the department Active/Inactive status used by the Department overview.
 
 ## 5. Upload the files
 Upload the **contents** of the `hr1` folder (not the folder itself) into the subdomain folder.

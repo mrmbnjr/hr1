@@ -110,7 +110,7 @@ document.addEventListener("click", (e) => {
         e.target.closest("#addDepartment") ||
         e.target.closest("#createFirstDepartment")
     ) {
-        document.getElementById("addDepartmentModal").classList.add("show");
+        openDepartmentModal();
     }
 
     // Position modal
@@ -139,6 +139,68 @@ document.addEventListener("click", (e) => {
 */
 
 const addDepartmentForm = document.getElementById("addDepartmentForm");
+
+/*
+|--------------------------------------------------------------------------
+| DEPARTMENT MODAL (create / edit)
+|--------------------------------------------------------------------------
+*/
+
+const departmentModalTitle = document.getElementById("departmentModalTitle");
+const departmentSubmitLabel = document.getElementById("departmentSubmitLabel");
+
+function openDepartmentModal(department = null) {
+    const modal = document.getElementById("addDepartmentModal");
+    if (!modal || !addDepartmentForm) return;
+
+    // Reset first so a "New Department" click never inherits a previous edit.
+    addDepartmentForm.reset();
+
+    document.getElementById("departmentId").value =
+        department ? department.department_id : "";
+
+    document.getElementById("departmentStatus").value =
+        department ? (department.status || "Active") : "Active";
+
+    departmentModalTitle.textContent =
+        department ? "Edit Department" : "New Department";
+
+    departmentSubmitLabel.textContent =
+        department ? "Update Department" : "Create Department";
+
+    modal.classList.add("show");
+}
+
+document.addEventListener("click", async (e) => {
+    const editBtn = e.target.closest(".editDepartment");
+    if (!editBtn) return;
+
+    const id = editBtn.dataset.id;
+
+    try {
+        const response = await fetch(`?page=get-department&id=${encodeURIComponent(id)}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+            openDepartmentModal(result.data);
+        } else {
+            showToast("Unable to load this department.", "error");
+        }
+    } catch (err) {
+        showToast("Something went wrong. Please try again.", "error");
+    }
+});
+
+// "View" opens the matching statistics page.
+document.addEventListener("click", (e) => {
+    if (e.target.closest(".viewDepartment")) {
+        window.location.href = "?page=department-statistics";
+    }
+
+    if (e.target.closest(".viewPosition")) {
+        window.location.href = "?page=position-statistics";
+    }
+});
 
 addDepartmentForm?.addEventListener("submit", async (e) => {
     e.preventDefault();

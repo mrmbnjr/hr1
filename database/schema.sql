@@ -80,6 +80,8 @@ CREATE TABLE departments (
     department_id INT AUTO_INCREMENT PRIMARY KEY,
     department_name VARCHAR(100) UNIQUE NOT NULL,
 
+    status ENUM('Active','Inactive') NOT NULL DEFAULT 'Active',
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

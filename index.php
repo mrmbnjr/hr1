@@ -475,6 +475,18 @@ switch ($page) {
 
         break;
 
+    case 'department-statistics':
+
+        (new HumanCapitalController())->statistics();
+
+        break;
+
+    case 'position-statistics':
+
+        (new HumanCapitalController())->positionStatistics();
+
+        break;
+
     case 'save-department':
 
         (new HumanCapitalController())->saveDepartment();

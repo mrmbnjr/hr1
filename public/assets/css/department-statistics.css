@@ -1,0 +1,437 @@
+/* Department Statistics page — Royyan theme tokens */
+
+/* ---------- Page shell ---------- */
+.dept-page {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 28px;
+    font-family: var(--font-body);
+}
+
+/* ---------- Row 1: stat cards ---------- */
+.dept-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dept-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.dept-stat-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--gold-light);
+    color: var(--maroon);
+    font-size: 18px;
+}
+
+.dept-stat-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.dept-stat-value {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--maroon);
+}
+
+.dept-stat-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.dept-stat-sub {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Row 2: highlight strip ---------- */
+.dept-highlights {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dept-highlight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif;
+}
+
+.dept-highlight > i {
+    font-size: 18px;
+    color: var(--gold);
+}
+
+.dept-highlight > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.dept-highlight-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+}
+
+.dept-highlight strong {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 17px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dept-highlight small {
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.dept-highlight.is-warning {
+    border-style: solid;
+    border-color: var(--maroon);
+}
+
+.dept-highlight.is-warning > i,
+.dept-highlight.is-warning strong {
+    color: var(--maroon);
+}
+
+/* ---------- Panels ---------- */
+.dept-panels {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.dept-panels-even {
+    grid-template-columns: 1fr 1fr;
+}
+
+.dept-panel {
+    padding: 18px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-family: 'Nunito', sans-serif;
+    min-width: 0;
+}
+
+.dept-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.dept-panel-head h3 {
+    margin: 0;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 16px;
+    color: var(--maroon);
+}
+
+.dept-panel-head h3 i {
+    margin-right: 6px;
+    color: var(--gold);
+}
+
+.dept-panel-meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.dept-empty {
+    margin: 0;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Headcount bars ---------- */
+.dept-bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dept-bar-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.dept-bar-name {
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dept-bar-track {
+    height: 10px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.dept-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--maroon-dark), var(--maroon));
+    transition: width .4s ease;
+}
+
+.dept-bar-value {
+    text-align: right;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.dept-bar-value small {
+    font-weight: 400;
+    color: var(--ink-soft);
+}
+
+/* ---------- Status donut ---------- */
+.dept-donut-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.dept-donut {
+    --active-deg: 0deg;
+    position: relative;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--maroon) 0deg var(--active-deg),
+        var(--gold) var(--active-deg) 360deg
+    );
+}
+
+.dept-donut-center {
+    position: absolute;
+    inset: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border-radius: 50%;
+}
+
+.dept-donut-center strong {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--maroon);
+}
+
+.dept-donut-center small {
+    font-size: 11px;
+    color: var(--ink-soft);
+}
+
+.dept-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.dept-legend .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+    border-radius: 50%;
+}
+
+.dot-active   { background: var(--maroon); }
+.dot-inactive { background: var(--gold); }
+
+/* ---------- Mini table ---------- */
+.dept-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.dept-mini-table th {
+    text-align: left;
+    padding: 8px 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--border);
+}
+
+.dept-mini-table td {
+    padding: 9px 6px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--border);
+}
+
+.dept-mini-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ---------- Recently added ---------- */
+.dept-recent {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dept-recent li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.dept-recent li:last-child {
+    border-bottom: none;
+}
+
+.dept-recent strong {
+    display: block;
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.dept-recent small {
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Departments needing attention ---------- */
+.dept-panel-full {
+    grid-column: 1 / -1;
+}
+
+.dept-attention {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dept-attention-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.dept-attention-item:last-child {
+    border-bottom: none;
+}
+
+.dept-attention-name {
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.dept-attention-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.dept-tag {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.dept-tag.is-vacant {
+    background: var(--badge-red-bg);
+    color: var(--badge-red-fg);
+}
+
+.dept-tag.is-hiring {
+    background: var(--badge-orange-bg);
+    color: var(--badge-orange-fg);
+}
+
+.dept-tag.is-headless {
+    background: var(--badge-gold-bg);
+    color: var(--badge-gold-fg);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .dept-stats,
+    .dept-highlights { grid-template-columns: repeat(2, 1fr); }
+    .dept-panels { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .dept-stats,
+    .dept-highlights,
+    .dept-panels-even { grid-template-columns: 1fr; }
+    .dept-bar-row { grid-template-columns: 90px 1fr 70px; gap: 8px; }
+    .dept-attention-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .dept-attention-reasons { justify-content: flex-start; }
+    .dept-page { padding: 16px; }
+}
