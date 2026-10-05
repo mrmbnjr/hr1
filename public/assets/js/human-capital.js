@@ -193,8 +193,11 @@ document.addEventListener("click", async (e) => {
 
 // "View" opens the matching statistics page.
 document.addEventListener("click", (e) => {
-    if (e.target.closest(".viewDepartment")) {
-        window.location.href = "?page=department-statistics";
+    const departmentButton = e.target.closest(".viewDepartment");
+    if (departmentButton) {
+        const departmentId = departmentButton.dataset.id;
+        window.location.href =
+            `?page=department-statistics&id=${encodeURIComponent(departmentId)}`;
     }
 
     if (e.target.closest(".viewPosition")) {

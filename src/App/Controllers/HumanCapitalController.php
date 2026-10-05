@@ -46,64 +46,26 @@ class HumanCapitalController
 
     public function statistics()
     {
-        $stats = $this->humanCapital->getOverviewStats();
+        $id = (int) ($_GET['id'] ?? 0);
 
-        $departments = $this->humanCapital->getDepartments();
+        if ($id <= 0) {
+            header('Location: ?page=human-capital');
+            exit;
+        }
 
-        /*
-         * Department overview figures.
-         *
-         * Derived from the rows already loaded above, so no additional
-         * queries are needed. Every employee maps to exactly one position
-         * and therefore one department, which is why the per-department
-         * counts can simply be summed.
-         */
-        $totalEmployees = array_sum(
-            array_column($departments, 'employee_count')
-        );
+        $department = $this->humanCapital->getDepartmentDetails($id);
 
-        $staffedPositions = array_sum(
-            array_column($departments, 'staffed_position_count')
-        );
+        if ($department === null) {
+            header('Location: ?page=human-capital');
+            exit;
+        }
 
-        $activeDepartments = count(
-            array_filter(
-                $departments,
-                fn($department) => ($department['status'] ?? 'Active') === 'Active'
-            )
-        );
-
-        $withoutHead = count(
-            array_filter(
-                $departments,
-                fn($department) => empty($department['has_head'])
-            )
-        );
-
-        $deptStats = [
-
-            'total_departments'    => $stats['departments'],
-            'active_departments'   => $activeDepartments,
-            'inactive_departments' => $stats['departments'] - $activeDepartments,
-            'total_employees'      => $totalEmployees,
-            'total_positions'      => $stats['positions'],
-            'staffed_positions'    => $staffedPositions,
-            'open_positions'       => $stats['vacancies'],
-            'without_head'         => $withoutHead,
-
-        ];
-
-        /*
-         * Most recently created departments (newest first).
-         */
-        $deptRecent = $departments;
-
-        usort(
-            $deptRecent,
-            fn($a, $b) => strcmp($b['created_at'], $a['created_at'])
-        );
-
-        $deptRecent = array_slice($deptRecent, 0, 5);
+        $departmentStats = $this->humanCapital->getDepartmentStats($id);
+        $positions       = $this->humanCapital->getDepartmentPositions($id);
+        $employees       = $this->humanCapital->getDepartmentEmployees($id);
+        $recruitment     = $this->humanCapital->getDepartmentRecruitment($id);
+        $onboarding      = $this->humanCapital->getDepartmentOnboarding($id);
+        $recentActivity  = $this->humanCapital->getDepartmentActivity($id);
 
         require BASE_PATH . '/resources/views/human-capital/department-statistics.php';
     }
