@@ -19,7 +19,9 @@ hPanel → **Databases → Management** → create a MySQL database and user. Ho
 hPanel → **phpMyAdmin** → open your new database → **Import**:
 1. `database/schema.sql`
 2. `database/seeds/seed.sql` (demo data — skip it if you want an empty system, but you then need to create an admin user yourself)
-3. `database/seeds/onboarding_assigned_requests_seed.sql` (optional, only with the demo seed)
+
+`seed.sql` is self-contained: it also fills the onboarding "assigned requests"
+columns, so no extra seed file is required.
 
 The `migrations/` files are not needed on a fresh database; `schema.sql` already includes them.
 For an existing installation that already created `application_validations`, run
