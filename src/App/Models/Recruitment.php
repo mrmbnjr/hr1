@@ -127,7 +127,6 @@ class Recruitment
                 SELECT 1
                 FROM job_postings jp
                 WHERE jp.position_id = p.position_id
-                AND jp.status = 'Open'
             )
 
             ORDER BY
@@ -161,12 +160,11 @@ class Recruitment
             );
         }
 
-        // Check whether this position already has an open posting
+        // A position can have only one posting, regardless of its status.
         $check = $this->db->prepare("
             SELECT posting_id
             FROM job_postings
             WHERE position_id = :position_id
-            AND status = 'Open'
             LIMIT 1
         ");
 
@@ -175,8 +173,8 @@ class Recruitment
         ]);
 
         if ($check->fetch()) {
-            throw new \Exception(
-                'This position already has an open job posting.'
+            throw new \InvalidArgumentException(
+                'This position already has a job posting.'
             );
         }
 
@@ -233,19 +231,31 @@ class Recruitment
         $stmt = $this->db->prepare($sql);
 
 
-        return $stmt->execute([
-            ':position_id' => $data['position_id'],
-            ':title' => $data['title'],
-            ':description' => $data['description'],
-            ':requirements' => $data['requirements'],
-            ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
-            ':employment_type' => $data['employment_type'],
-            ':vacancies' => $data['vacancies'],
-            ':max_applicants' => $maxApplicants,
-            ':application_deadline' => $data['application_deadline'],
-            ':created_by' => $data['created_by'],
-            ':application_token' => $applicationToken
-        ]);
+        try {
+            return $stmt->execute([
+                ':position_id' => $data['position_id'],
+                ':title' => $data['title'],
+                ':description' => $data['description'],
+                ':requirements' => $data['requirements'],
+                ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
+                ':employment_type' => $data['employment_type'],
+                ':vacancies' => $data['vacancies'],
+                ':max_applicants' => $maxApplicants,
+                ':application_deadline' => $data['application_deadline'],
+                ':created_by' => $data['created_by'],
+                ':application_token' => $applicationToken
+            ]);
+        } catch (\PDOException $e) {
+            if ($this->isPositionDuplicate($e)) {
+                throw new \InvalidArgumentException(
+                    'This position already has a job posting.',
+                    0,
+                    $e
+                );
+            }
+
+            throw $e;
+        }
     }
 
     public function close(int $id)
@@ -307,6 +317,24 @@ class Recruitment
             );
         }
 
+        $check = $this->db->prepare("
+            SELECT posting_id
+            FROM job_postings
+            WHERE position_id = :position_id
+              AND posting_id <> :posting_id
+            LIMIT 1
+        ");
+        $check->execute([
+            ':position_id' => $data['position_id'],
+            ':posting_id' => $data['posting_id']
+        ]);
+
+        if ($check->fetch()) {
+            throw new \InvalidArgumentException(
+                'This position already has a job posting.'
+            );
+        }
+
         $newStatus = (string) ($data['status'] ?? 'Open');
 
         /*
@@ -354,21 +382,43 @@ class Recruitment
 
         $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
-            $data['position_id'],
-            $data['title'],
-            $data['description'],
-            $data['requirements'],
-            !empty($data['academic_document_required']) ? 1 : 0,
-            $data['employment_type'],
-            $data['vacancies'],
-            $maxApplicants,
-            $newStatus,
-            $closedAt,
-            $data['application_deadline'],
-            $data['posting_id']
-        ]);
+        try {
+            return $stmt->execute([
+                $data['position_id'],
+                $data['title'],
+                $data['description'],
+                $data['requirements'],
+                !empty($data['academic_document_required']) ? 1 : 0,
+                $data['employment_type'],
+                $data['vacancies'],
+                $maxApplicants,
+                $newStatus,
+                $closedAt,
+                $data['application_deadline'],
+                $data['posting_id']
+            ]);
+        } catch (\PDOException $e) {
+            if ($this->isPositionDuplicate($e)) {
+                throw new \InvalidArgumentException(
+                    'This position already has a job posting.',
+                    0,
+                    $e
+                );
+            }
+
+            throw $e;
+        }
     }
+
+    private function isPositionDuplicate(\PDOException $exception): bool
+    {
+        return (int) ($exception->errorInfo[1] ?? 0) === 1062
+            && strpos(
+                (string) ($exception->errorInfo[2] ?? ''),
+                'uq_job_postings_position'
+            ) !== false;
+    }
+
     public function delete(int $id): bool
     {
         $stmt = $this->db->prepare("
@@ -387,7 +437,6 @@ class Recruitment
                     SELECT 1
                     FROM job_postings jp
                     WHERE jp.position_id = p.position_id
-                    AND jp.status = 'Open'
                     AND jp.posting_id <> :posting_id
                 )
 

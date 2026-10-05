@@ -141,6 +141,8 @@ CREATE TABLE job_postings (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    UNIQUE KEY uq_job_postings_position (position_id),
+
     FOREIGN KEY (position_id)
         REFERENCES positions(position_id),
 
