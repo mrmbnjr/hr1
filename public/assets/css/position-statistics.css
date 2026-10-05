@@ -1,19 +1,185 @@
-/* Position Statistics page — Royyan theme tokens */
+/* Position Details page — Royyan theme tokens */
 
 /* ---------- Page shell ---------- */
 .pos-page {
     display: flex;
     flex-direction: column;
+    gap: 16px;
     padding: 24px 28px;
     font-family: var(--font-body);
 }
 
-/* ---------- Row 1: stat cards ---------- */
+.pos-muted {
+    color: var(--ink-soft);
+    font-weight: 400;
+}
+
+.pos-link {
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.pos-link:hover {
+    color: var(--maroon);
+    text-decoration: underline;
+}
+
+/* ---------- Buttons ---------- */
+.pos-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+
+.pos-btn:hover {
+    border-color: var(--maroon);
+    color: var(--maroon);
+}
+
+.pos-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.pos-btn-primary {
+    background: var(--maroon);
+    border-color: var(--maroon);
+    color: #fff;
+}
+
+.pos-btn-primary:hover {
+    background: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+    color: #fff;
+}
+
+.pos-btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.pos-btn[disabled] {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* ---------- Position header ---------- */
+.pos-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.pos-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    min-width: 0;
+}
+
+.pos-header-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--gold-light);
+    color: var(--maroon);
+    font-size: 22px;
+}
+
+.pos-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pos-header-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.pos-header-title h1 {
+    margin: 0;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 24px;
+    line-height: 1.2;
+    color: var(--maroon);
+    overflow-wrap: anywhere;
+}
+
+.pos-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.pos-header-meta i {
+    margin-right: 6px;
+    color: var(--gold);
+}
+
+.pos-header-meta small {
+    color: var(--ink-soft);
+    font-size: 12px;
+}
+
+.pos-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ---------- Alerts under the header ---------- */
+.pos-alerts {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: -4px 0 0;
+    padding: 0;
+}
+
+.pos-alerts .pos-tag i {
+    margin-right: 4px;
+}
+
+/* ---------- KPI cards ---------- */
 .pos-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 16px;
 }
 
 .pos-stat-card {
@@ -26,6 +192,10 @@
     border-left: 4px solid var(--gold);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+}
+
+.pos-stat-card.is-warning {
+    border-left-color: var(--maroon);
 }
 
 .pos-stat-icon {
@@ -55,12 +225,6 @@
     color: var(--maroon);
 }
 
-.pos-stat-value small {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--ink-soft);
-}
-
 .pos-stat-label {
     font-family: 'Nunito', sans-serif;
     font-size: 13px;
@@ -74,73 +238,11 @@
     color: var(--ink-soft);
 }
 
-/* ---------- Row 2: highlight strip ---------- */
-.pos-highlights {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.pos-highlight {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    background: var(--card-bg);
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    font-family: 'Nunito', sans-serif;
-}
-
-.pos-highlight > i {
-    font-size: 18px;
-    color: var(--gold);
-}
-
-.pos-highlight > div {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.pos-highlight-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    color: var(--ink-soft);
-}
-
-.pos-highlight strong {
-    font-family: 'Baloo 2', sans-serif;
-    font-size: 17px;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pos-highlight small {
-    font-size: 12px;
-    color: var(--ink-soft);
-}
-
-.pos-highlight.is-warning {
-    border-style: solid;
-    border-color: var(--maroon);
-}
-
-.pos-highlight.is-warning > i,
-.pos-highlight.is-warning strong {
-    color: var(--maroon);
-}
-
 /* ---------- Panels ---------- */
 .pos-panels {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 16px;
-    margin-bottom: 16px;
 }
 
 .pos-panels-even {
@@ -157,10 +259,16 @@
     min-width: 0;
 }
 
+.pos-block {
+    width: 100%;
+}
+
 .pos-panel-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
     margin-bottom: 14px;
 }
 
@@ -176,13 +284,29 @@
     color: var(--gold);
 }
 
-.pos-legend-inline {
+.pos-panel-meta {
     font-size: 12px;
     color: var(--ink-soft);
 }
 
-.pos-panel-meta {
+.pos-subhead {
+    margin: 18px 0 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+}
+
+.pos-mini-stats + .pos-subhead {
+    margin-top: 0;
+}
+
+.pos-note {
+    margin: 14px 0 0;
     font-size: 12px;
+    line-height: 1.5;
     color: var(--ink-soft);
 }
 
@@ -194,128 +318,122 @@
     color: var(--ink-soft);
 }
 
-/* ---------- Shared legend dots ---------- */
-.pos-panel .dot {
+.pos-empty-tight {
+    padding: 8px 0 0;
+    text-align: left;
+}
+
+/* ---------- Position information ---------- */
+.pos-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+    margin: 0;
+}
+
+.pos-info > div {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.pos-info dt {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+}
+
+.pos-info dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Staffing overview ---------- */
+.pos-split {
+    display: flex;
+    height: 14px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--border);
+}
+
+.pos-split .seg {
+    display: block;
+    height: 100%;
+}
+
+.seg-filled { background: var(--maroon); }
+.seg-vacant { background: var(--gold); }
+
+.pos-legend {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-size: 13px;
+    color: var(--ink);
+}
+
+.pos-legend .dot {
     display: inline-block;
     width: 10px;
     height: 10px;
-    margin: 0 4px 0 10px;
+    margin-right: 4px;
     border-radius: 50%;
-}
-
-.pos-panel .dot:first-child {
-    margin-left: 0;
 }
 
 .dot-filled { background: var(--maroon); }
-.dot-open   { background: var(--gold); }
+.dot-vacant { background: var(--gold); }
 
-/* ---------- Slots by department (stacked bars) ---------- */
-.pos-bars {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.pos-bar-row {
+.pos-staffing-figures {
     display: grid;
-    grid-template-columns: 120px 1fr 56px;
-    align-items: center;
-    gap: 12px;
-    font-size: 13px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 16px;
 }
 
-.pos-bar-name {
-    color: var(--ink);
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.pos-bar-track {
-    display: flex;
-    height: 10px;
-    background: var(--border);
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.pos-bar-filled {
-    height: 100%;
-    background: linear-gradient(90deg, var(--maroon-dark), var(--maroon));
-    transition: width .4s ease;
-}
-
-.pos-bar-open {
-    height: 100%;
-    background: var(--gold);
-    transition: width .4s ease;
-}
-
-.pos-bar-value {
-    text-align: right;
-    font-weight: 700;
-    color: var(--ink);
-}
-
-/* ---------- Fill-status donut ---------- */
-.pos-donut-wrap {
+.pos-staffing-figures > div {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 16px;
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
 }
 
-.pos-donut {
-    --filled-deg: 0deg;
-    position: relative;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: conic-gradient(
-        var(--maroon) 0deg var(--filled-deg),
-        var(--gold) var(--filled-deg) 360deg
-    );
-}
-
-.pos-donut-center {
-    position: absolute;
-    inset: 22px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--card-bg);
-    border-radius: 50%;
-}
-
-.pos-donut-center strong {
+.pos-staffing-figures b {
     font-family: 'Baloo 2', sans-serif;
-    font-size: 24px;
-    line-height: 1;
+    font-size: 20px;
+    line-height: 1.1;
     color: var(--maroon);
 }
 
-.pos-donut-center small {
+.pos-staffing-figures span {
     font-size: 11px;
     color: var(--ink-soft);
 }
 
-.pos-legend {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 18px;
-    font-size: 13px;
-    color: var(--ink);
+/* ---------- Tables ---------- */
+.pos-table-wrap {
+    overflow-x: auto;
 }
 
-/* ---------- Mini table ---------- */
+.pos-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
 .pos-mini-table {
     width: 100%;
     border-collapse: collapse;
@@ -323,18 +441,24 @@
 }
 
 .pos-mini-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 8px 8px;
     text-align: left;
-    padding: 8px 6px;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: .04em;
     color: var(--ink-soft);
+    background: var(--card-bg);
     border-bottom: 1px solid var(--border);
+    white-space: nowrap;
 }
 
 .pos-mini-table td {
-    padding: 9px 6px;
+    padding: 10px 8px;
     color: var(--ink);
+    vertical-align: middle;
     border-bottom: 1px solid var(--border);
 }
 
@@ -342,14 +466,120 @@
     border-bottom: none;
 }
 
-/* ---------- Recently added ---------- */
-.pos-recent {
+.pos-cell-main {
+    display: block;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.pos-cell-sub {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Search ---------- */
+.pos-search {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.pos-search i {
+    position: absolute;
+    left: 10px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    pointer-events: none;
+}
+
+.pos-search input {
+    width: 240px;
+    max-width: 100%;
+    padding: 8px 12px 8px 30px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+}
+
+.pos-search input:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+}
+
+/* ---------- Tags ---------- */
+.pos-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pos-tag.is-vacant {
+    background: var(--badge-red-bg);
+    color: var(--badge-red-fg);
+}
+
+.pos-tag.is-hiring {
+    background: var(--badge-orange-bg);
+    color: var(--badge-orange-fg);
+}
+
+.pos-tag.is-headless {
+    background: var(--badge-gold-bg);
+    color: var(--badge-gold-fg);
+}
+
+.pos-tag.is-role {
+    background: var(--gold-light);
+    color: var(--maroon);
+}
+
+/* ---------- Recruitment ---------- */
+.pos-mini-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.pos-mini-stats > div {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+}
+
+.pos-mini-stats b {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 20px;
+    line-height: 1.1;
+    color: var(--maroon);
+}
+
+.pos-mini-stats span {
+    font-size: 11px;
+    color: var(--ink-soft);
+}
+
+.pos-postings,
+.pos-interviews,
+.pos-onboarding,
+.pos-timeline {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-.pos-recent li {
+.pos-postings li,
+.pos-interviews li {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -358,48 +588,303 @@
     border-bottom: 1px solid var(--border);
 }
 
-.pos-recent li:last-child {
+.pos-postings li:last-child,
+.pos-interviews li:last-child {
     border-bottom: none;
 }
 
-.pos-recent strong {
+.pos-postings strong,
+.pos-interviews strong,
+.pos-onboarding strong {
     display: block;
     font-size: 14px;
     color: var(--ink);
 }
 
-.pos-recent small {
+.pos-postings small,
+.pos-interviews small,
+.pos-onboarding small {
     font-size: 12px;
     color: var(--ink-soft);
 }
 
-/* ---------- Badges ---------- */
-.pos-badge {
-    display: inline-block;
-    min-width: 24px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
+.pos-posting-main {
+    min-width: 0;
 }
 
-.pos-badge.is-open {
+.pos-posting-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px 14px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+.pos-posting-stats b {
+    color: var(--ink);
+}
+
+.pos-posting-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
     background: var(--gold-light);
     color: var(--maroon);
+    text-decoration: none;
+}
+
+.pos-posting-link:hover {
+    background: var(--gold);
+}
+
+.pos-interview-when {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/* ---------- Onboarding ---------- */
+.pos-onboarding li {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.pos-onboarding li:first-child {
+    padding-top: 0;
+}
+
+.pos-onboarding li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pos-onboarding-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pos-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pos-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.pos-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--maroon-dark), var(--maroon));
+    transition: width .4s ease;
+}
+
+.pos-progress-value {
+    min-width: 36px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.pos-onboarding-foot {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Recent activity ---------- */
+.pos-timeline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 28px;
+}
+
+.pos-timeline li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.pos-timeline-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--gold-light);
+    color: var(--maroon);
+    font-size: 12px;
+}
+
+.pos-timeline-text {
+    display: block;
+    font-size: 13px;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.pos-timeline small {
+    font-size: 12px;
+    color: var(--ink-soft);
+}
+
+/* ---------- Edit modal ---------- */
+.pos-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.pos-modal[hidden] {
+    display: none;
+}
+
+.pos-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+}
+
+.pos-modal-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 440px;
+    padding: 20px 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-family: 'Nunito', sans-serif;
+}
+
+.pos-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pos-modal-head h3 {
+    margin: 0;
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 18px;
+    color: var(--maroon);
+}
+
+.pos-modal-x {
+    border: none;
+    background: none;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+.pos-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.pos-field input,
+.pos-field select {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.pos-field input:focus,
+.pos-field select:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+}
+
+.pos-modal-error {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    background: var(--badge-red-bg);
+    color: var(--badge-red-fg);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pos-modal-error[hidden] {
+    display: none;
+}
+
+.pos-modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
-    .pos-stats,
-    .pos-highlights { grid-template-columns: repeat(2, 1fr); }
-    .pos-panels { grid-template-columns: 1fr; }
+    .pos-stats { grid-template-columns: repeat(2, 1fr); }
+    .pos-panels,
+    .pos-panels-even { grid-template-columns: 1fr; }
+    .pos-header { flex-direction: column; }
+    .pos-header-actions { justify-content: flex-start; }
+    .pos-timeline { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 600px) {
-    .pos-stats,
-    .pos-highlights,
-    .pos-panels-even { grid-template-columns: 1fr; }
-    .pos-bar-row { grid-template-columns: 90px 1fr 48px; gap: 8px; }
+@media (max-width: 700px) {
     .pos-page { padding: 16px; }
+    .pos-stats,
+    .pos-info { grid-template-columns: 1fr; }
+    .pos-mini-stats { grid-template-columns: repeat(2, 1fr); }
+    .pos-staffing-figures { grid-template-columns: 1fr; }
+    .pos-header { padding: 16px; }
+    .pos-header-main { flex-direction: column; }
+    .pos-header-actions { width: 100%; }
+    .pos-header-actions .pos-btn { flex: 1 1 100%; }
+    .pos-search,
+    .pos-search input { width: 100%; }
+    .pos-postings li,
+    .pos-interviews li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .pos-posting-stats { justify-content: flex-start; }
+    .pos-interview-when { align-items: flex-start; }
 }

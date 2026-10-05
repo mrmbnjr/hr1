@@ -99,6 +99,24 @@ class RecruitmentController
         $departments = $this->recruitment->getDepartments();
         $positions   = $this->recruitment->getPositions();
 
+        /*
+         * Optional prefill when arriving from a Position Details page:
+         * ?page=create&position_id=<position_id>. Only positions that are
+         * still available for a new posting appear in $positions, so the
+         * selection is applied only when it can actually be honoured.
+         */
+        $preselectedPositionId   = (int) ($_GET['position_id'] ?? 0);
+        $preselectedDepartmentId = 0;
+
+        if ($preselectedPositionId > 0) {
+            foreach ($positions as $position) {
+                if ((int) $position['position_id'] === $preselectedPositionId) {
+                    $preselectedDepartmentId = (int) $position['department_id'];
+                    break;
+                }
+            }
+        }
+
         require BASE_PATH . '/resources/views/recruitment/create.php';
     }
 

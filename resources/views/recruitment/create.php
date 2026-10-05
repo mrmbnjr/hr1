@@ -60,7 +60,8 @@ if (!isset($_SESSION['user_id'])) {
 
                         <?php foreach ($departments as $department): ?>
                             <option
-                                value="<?= htmlspecialchars($department['department_id']) ?>">
+                                value="<?= htmlspecialchars($department['department_id']) ?>"
+                                <?= (int) ($preselectedDepartmentId ?? 0) === (int) $department['department_id'] ? 'selected' : '' ?>>
 
                                 <?= htmlspecialchars($department['department_name']); ?>
 
@@ -96,7 +97,9 @@ if (!isset($_SESSION['user_id'])) {
                             <option
                                 value="<?= htmlspecialchars($position['position_id']) ?>"
                                 data-department="<?= htmlspecialchars($position['department_id']) ?>"
-                                <?= isset($job) && $position['position_id'] == $job['position_id'] ? 'selected' : '' ?>>
+                                <?= (isset($job) && $position['position_id'] == $job['position_id'])
+                                    || (int) ($preselectedPositionId ?? 0) === (int) $position['position_id']
+                                    ? 'selected' : '' ?>>
 
                                 <?= htmlspecialchars($position['position_name']) ?>
 

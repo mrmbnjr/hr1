@@ -505,6 +505,12 @@ switch ($page) {
 
         break;
 
+    case 'save-position':
+
+        (new HumanCapitalController())->savePosition();
+
+        break;
+
     case 'delete-position':
 
         (new HumanCapitalController())->deletePosition();

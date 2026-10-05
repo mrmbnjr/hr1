@@ -191,7 +191,7 @@ document.addEventListener("click", async (e) => {
     }
 });
 
-// "View" opens the matching statistics page.
+// "View" opens the matching details page.
 document.addEventListener("click", (e) => {
     const departmentButton = e.target.closest(".viewDepartment");
     if (departmentButton) {
@@ -200,8 +200,11 @@ document.addEventListener("click", (e) => {
             `?page=department-statistics&id=${encodeURIComponent(departmentId)}`;
     }
 
-    if (e.target.closest(".viewPosition")) {
-        window.location.href = "?page=position-statistics";
+    const positionButton = e.target.closest(".viewPosition");
+    if (positionButton) {
+        const positionId = positionButton.dataset.id;
+        window.location.href =
+            `?page=position-statistics&id=${encodeURIComponent(positionId)}`;
     }
 });
 

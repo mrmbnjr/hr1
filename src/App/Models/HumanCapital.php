@@ -1316,4 +1316,701 @@ class HumanCapital
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+
+    /*
+    |==========================================================================
+    | POSITION DETAILS PAGE  (?page=position-statistics&id=<position_id>)
+    |==========================================================================
+    |
+    | Everything below is scoped to ONE position_id and reads real rows only.
+    |
+    | How the schema is traversed:
+    |   - positions.department_id    -> departments                (header)
+    |   - positions.role_id          -> roles                      (assigned role)
+    |   - employees.position_id      -> employees                  (headcount)
+    |   - employees.applicant_id     -> applicants                 (names)
+    |   - users.employee_id          -> employees                  (account status)
+    |   - job_postings.position_id   -> positions                  (hiring)
+    |   - applications.posting_id    -> job_postings               (applicants)
+    |   - interviews.application_id  -> applications               (interviews)
+    |   - onboarding.application_id  -> employees.application_id   (onboarding)
+    |
+    | Counts that could be multiplied by a join fan-out use correlated
+    | subqueries, the same approach the department section takes.
+    |
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | POSITION HEADER  ($position)
+    |--------------------------------------------------------------------------
+    |
+    | The positions table has no status or employment_type column, so both are
+    | derived from the position's real job postings: status is Open when an
+    | open posting exists, and employment_type is taken from the most relevant
+    | posting (an open one first, then the newest).
+    |
+    */
+
+    public function getPositionDetails(int $id): ?array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                p.position_id,
+                p.position_name,
+                p.created_at,
+
+                d.department_id,
+                d.department_name,
+                d.status AS department_status,
+
+                r.role_id,
+                r.role_code,
+                r.role_name,
+
+                (
+                    SELECT COUNT(*)
+                    FROM employees e
+                    WHERE e.position_id = p.position_id
+                ) AS employee_count,
+
+                COALESCE((
+                    SELECT SUM(jp.vacancies)
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                      AND jp.status = 'Open'
+                ), 0) AS vacancies,
+
+                (
+                    SELECT COUNT(*)
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                      AND jp.status = 'Open'
+                ) AS open_postings,
+
+                (
+                    SELECT COUNT(*)
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                ) AS total_postings,
+
+                CASE
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM job_postings ojp
+                        WHERE ojp.position_id = p.position_id
+                          AND ojp.status = 'Open'
+                    )
+                    THEN 'Open'
+                    ELSE 'Closed'
+                END AS status,
+
+                (
+                    SELECT jp.employment_type
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                    ORDER BY (jp.status = 'Open') DESC, jp.created_at DESC
+                    LIMIT 1
+                ) AS employment_type,
+
+                (
+                    SELECT jp.created_at
+                    FROM job_postings jp
+                    WHERE jp.position_id = p.position_id
+                    ORDER BY jp.created_at DESC
+                    LIMIT 1
+                ) AS last_posting_at
+
+            FROM positions p
+
+            INNER JOIN departments d
+                ON d.department_id = p.department_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
+
+            WHERE p.position_id = ?
+
+            LIMIT 1
+        ");
+
+        $stmt->execute([$id]);
+
+        $position = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $position ?: null;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KPI FIGURES  ($positionStats)
+    |--------------------------------------------------------------------------
+    |
+    | employees.employment_status is the only employment-type field on an
+    | employee (Probationary / Regular / Contract). The employees table has no
+    | active/inactive column, so "active vs inactive" comes from the linked
+    | users.status; employees with no user account are counted separately.
+    |
+    | Applicant figures count every application submitted to this position's
+    | postings; vacancies count only the OPEN postings.
+    |
+    */
+
+    public function getPositionStats(int $id): array
+    {
+        $row = function (string $sql) use ($id): array {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        };
+
+        $emp = $row("
+            SELECT
+                COUNT(*)                                               AS total,
+                COALESCE(SUM(u.status = 'Active'), 0)                  AS active_accounts,
+                COALESCE(SUM(u.status = 'Inactive'), 0)                AS inactive_accounts,
+                COALESCE(SUM(u.user_id IS NULL), 0)                    AS no_account,
+                COALESCE(SUM(e.employment_status = 'Regular'), 0)      AS regular,
+                COALESCE(SUM(e.employment_status = 'Probationary'), 0) AS probationary,
+                COALESCE(SUM(e.employment_status = 'Contract'), 0)     AS contract,
+                COALESCE(SUM(e.hire_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 0) AS new_hires_30d
+            FROM employees e
+            LEFT JOIN users u
+                ON u.employee_id = e.employee_id
+            WHERE e.position_id = ?
+        ");
+
+        $hire = $row("
+            SELECT
+                COUNT(*)                       AS open_postings,
+                COALESCE(SUM(jp.vacancies), 0) AS vacancies
+            FROM job_postings jp
+            WHERE jp.position_id = ?
+              AND jp.status = 'Open'
+        ");
+
+        $apps = $row("
+            SELECT
+                COUNT(*) AS total,
+                COALESCE(SUM(ap.application_status IN ('Submitted', 'Under Review', 'Interview')), 0) AS active,
+                COALESCE(SUM(ap.application_status = 'Hired'), 0) AS hired
+            FROM applications ap
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
+            WHERE jp.position_id = ?
+        ");
+
+        $iv = $row("
+            SELECT
+                COUNT(*) AS upcoming
+            FROM interviews i
+            INNER JOIN applications ap
+                ON ap.application_id = i.application_id
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
+            WHERE jp.position_id = ?
+              AND i.result = 'Pending'
+              AND i.interview_date >= NOW()
+        ");
+
+        $onb = $row("
+            SELECT
+                COUNT(*)                                         AS active,
+                COALESCE(SUM(o.onboarding_status = 'Overdue'), 0) AS overdue
+            " . self::ONBOARDING_FROM . "
+            WHERE p.position_id = ?
+              AND o.onboarding_status <> 'Completed'
+        ");
+
+        $total        = (int) ($emp['total'] ?? 0);
+        $regular      = (int) ($emp['regular'] ?? 0);
+        $probationary = (int) ($emp['probationary'] ?? 0);
+        $contract     = (int) ($emp['contract'] ?? 0);
+
+        return [
+
+            'employees' => [
+                'total'         => $total,
+                'active'        => (int) ($emp['active_accounts'] ?? 0),
+                'inactive'      => (int) ($emp['inactive_accounts'] ?? 0),
+                'no_account'    => (int) ($emp['no_account'] ?? 0),
+                'regular'       => $regular,
+                'probationary'  => $probationary,
+                'contract'      => $contract,
+                'other'         => max(0, $total - $regular - $probationary - $contract),
+                'new_hires_30d' => (int) ($emp['new_hires_30d'] ?? 0),
+            ],
+
+            'open_postings'       => (int) ($hire['open_postings'] ?? 0),
+            'vacancies'           => (int) ($hire['vacancies'] ?? 0),
+
+            'applicants'          => (int) ($apps['total'] ?? 0),
+            'active_applicants'   => (int) ($apps['active'] ?? 0),
+            'hired'               => (int) ($apps['hired'] ?? 0),
+
+            'upcoming_interviews' => (int) ($iv['upcoming'] ?? 0),
+
+            'onboarding' => [
+                'active'  => (int) ($onb['active'] ?? 0),
+                'overdue' => (int) ($onb['overdue'] ?? 0),
+            ],
+
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EMPLOYEES IN THE POSITION  ($employees)
+    |--------------------------------------------------------------------------
+    */
+
+    public function getPositionEmployees(int $id): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                e.employee_id,
+                e.employee_number,
+                e.hire_date,
+                e.employment_status,
+
+                p.position_name,
+
+                r.role_name,
+                (r.role_code = 'MGR') AS is_head,
+
+                u.status AS account_status,
+
+                " . $this->personName('a') . " AS employee_name
+
+            FROM employees e
+
+            INNER JOIN positions p
+                ON p.position_id = e.position_id
+
+            LEFT JOIN roles r
+                ON r.role_id = p.role_id
+
+            LEFT JOIN applicants a
+                ON a.applicant_id = e.applicant_id
+
+            LEFT JOIN users u
+                ON u.employee_id = e.employee_id
+
+            WHERE e.position_id = ?
+
+            ORDER BY
+                a.last_name,
+                a.first_name
+        ");
+
+        $stmt->execute([$id]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECRUITMENT  ($recruitment)
+    |--------------------------------------------------------------------------
+    |
+    | Returns:
+    |   summary    — roll-up across the position's postings
+    |   postings   — every posting for the position (open first)
+    |   interviews — interviews still waiting for a result (soonest first)
+    |
+    */
+
+    public function getPositionRecruitment(int $id): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                jp.posting_id,
+                jp.title,
+                jp.employment_type,
+                jp.vacancies,
+                jp.max_applicants,
+                jp.application_deadline,
+                jp.status,
+                jp.created_at,
+
+                p.position_name,
+
+                (
+                    SELECT COUNT(*)
+                    FROM applications ap
+                    WHERE ap.posting_id = jp.posting_id
+                ) AS applicants,
+
+                (
+                    SELECT COUNT(*)
+                    FROM applications ap
+                    WHERE ap.posting_id = jp.posting_id
+                      AND ap.application_status IN ('Submitted', 'Under Review', 'Interview')
+                ) AS active_applicants,
+
+                (
+                    SELECT COUNT(*)
+                    FROM applications ap
+                    WHERE ap.posting_id = jp.posting_id
+                      AND ap.application_status = 'Hired'
+                ) AS hired,
+
+                (
+                    SELECT COUNT(*)
+                    FROM interviews i
+                    INNER JOIN applications ap
+                        ON ap.application_id = i.application_id
+                    WHERE ap.posting_id = jp.posting_id
+                      AND i.result = 'Pending'
+                      AND i.interview_date >= NOW()
+                ) AS upcoming_interviews
+
+            FROM job_postings jp
+
+            INNER JOIN positions p
+                ON p.position_id = jp.position_id
+
+            WHERE jp.position_id = ?
+
+            ORDER BY
+                (jp.status = 'Open') DESC,
+                jp.application_deadline ASC,
+                jp.created_at DESC
+        ");
+
+        $stmt->execute([$id]);
+
+        $postings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $summary = [
+            'total_postings'      => count($postings),
+            'open_postings'       => 0,
+            'vacancies'           => 0,
+            'applicants'          => 0,
+            'active_applicants'   => 0,
+            'upcoming_interviews' => 0,
+            'hired'               => 0,
+        ];
+
+        foreach ($postings as $posting) {
+
+            if (($posting['status'] ?? '') === 'Open') {
+                $summary['open_postings']++;
+                $summary['vacancies'] += (int) $posting['vacancies'];
+            }
+
+            $summary['applicants']          += (int) $posting['applicants'];
+            $summary['active_applicants']   += (int) $posting['active_applicants'];
+            $summary['upcoming_interviews'] += (int) $posting['upcoming_interviews'];
+            $summary['hired']               += (int) $posting['hired'];
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT
+                i.interview_id,
+                i.interview_type,
+                i.interview_date,
+                i.location,
+                i.result,
+
+                jp.title AS posting_title,
+                u.username AS interviewer,
+
+                " . $this->personName('a') . " AS applicant_name
+
+            FROM interviews i
+
+            INNER JOIN applications ap
+                ON ap.application_id = i.application_id
+
+            INNER JOIN applicants a
+                ON a.applicant_id = ap.applicant_id
+
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
+
+            LEFT JOIN users u
+                ON u.user_id = i.interviewer_id
+
+            WHERE jp.position_id = ?
+              AND i.result = 'Pending'
+
+            ORDER BY i.interview_date ASC
+
+            LIMIT 5
+        ");
+
+        $stmt->execute([$id]);
+
+        return [
+            'summary'    => $summary,
+            'postings'   => $postings,
+            'interviews' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ONBOARDING FOR THE POSITION  ($onboarding)
+    |--------------------------------------------------------------------------
+    |
+    | Employees whose onboarding is not Completed. Progress is the share of the
+    | four onboarding checklist flags that are done.
+    |
+    */
+
+    public function getPositionOnboarding(int $id): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                o.onboarding_id,
+                o.onboarding_status,
+                o.orientation_date,
+                o.started_at,
+
+                o.system_access_setup_completed,
+                o.orientation_setup_completed,
+                o.document_submission_completed,
+                o.document_verification_completed,
+
+                e.employee_id,
+                e.employee_number,
+                e.hire_date,
+
+                p.position_name,
+
+                " . $this->personName('a') . " AS employee_name,
+
+                (
+                    SELECT COUNT(*)
+                    FROM onboarding_documents od
+                    WHERE od.onboarding_id = o.onboarding_id
+                ) AS docs_total,
+
+                (
+                    SELECT COUNT(*)
+                    FROM onboarding_documents od
+                    WHERE od.onboarding_id = o.onboarding_id
+                      AND od.status = 'Verified'
+                ) AS docs_verified
+
+            " . self::ONBOARDING_FROM . "
+
+            WHERE p.position_id = ?
+              AND o.onboarding_status <> 'Completed'
+
+            ORDER BY
+                FIELD(o.onboarding_status, 'Overdue', 'In Progress', 'Pending'),
+                o.started_at ASC,
+                o.onboarding_id ASC
+        ");
+
+        $stmt->execute([$id]);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $steps = [
+            'system_access_setup_completed'   => 'System access setup',
+            'orientation_setup_completed'     => 'Orientation setup',
+            'document_submission_completed'   => 'Document submission',
+            'document_verification_completed' => 'Document verification',
+        ];
+
+        foreach ($rows as &$row) {
+
+            $done     = 0;
+            $nextStep = null;
+
+            foreach ($steps as $column => $label) {
+                if (!empty($row[$column])) {
+                    $done++;
+                } elseif ($nextStep === null) {
+                    $nextStep = $label;
+                }
+            }
+
+            $row['steps_done']  = $done;
+            $row['steps_total'] = count($steps);
+            $row['progress']    = (int) round($done / count($steps) * 100);
+            $row['next_step']   = $nextStep;
+        }
+
+        unset($row);
+
+        return $rows;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECENT POSITION ACTIVITY  ($recentActivity)
+    |--------------------------------------------------------------------------
+    |
+    | Built from real events tied to this position, newest first: hires,
+    | the position being created, postings opened / closed, applications
+    | received, interviews scheduled and onboarding completed.
+    |
+    */
+
+    public function getPositionActivity(int $id, int $limit = 10): array
+    {
+        $limit = max(1, min(50, $limit));
+        $name  = $this->personName('a');
+
+        $sql = "
+            SELECT event_at, event_type, description
+            FROM (
+
+                (
+                    SELECT
+                        CAST(e.hire_date AS DATETIME) AS event_at,
+                        'hire' AS event_type,
+                        CONCAT($name, ' joined as ', p.position_name) AS description
+                    FROM employees e
+                    INNER JOIN positions p
+                        ON p.position_id = e.position_id
+                    LEFT JOIN applicants a
+                        ON a.applicant_id = e.applicant_id
+                    WHERE e.position_id = ?
+                    ORDER BY e.hire_date DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        p.created_at,
+                        'position',
+                        CONCAT('Position created: ', p.position_name)
+                    FROM positions p
+                    WHERE p.position_id = ?
+                    ORDER BY p.created_at DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        jp.created_at,
+                        'posting',
+                        CONCAT('Job posting opened: ', jp.title)
+                    FROM job_postings jp
+                    WHERE jp.position_id = ?
+                    ORDER BY jp.created_at DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        jp.closed_at,
+                        'posting_closed',
+                        CONCAT('Job posting closed: ', jp.title)
+                    FROM job_postings jp
+                    WHERE jp.position_id = ?
+                      AND jp.closed_at IS NOT NULL
+                    ORDER BY jp.closed_at DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        ap.applied_at,
+                        'application',
+                        CONCAT($name, ' applied for ', jp.title)
+                    FROM applications ap
+                    INNER JOIN applicants a
+                        ON a.applicant_id = ap.applicant_id
+                    INNER JOIN job_postings jp
+                        ON jp.posting_id = ap.posting_id
+                    WHERE jp.position_id = ?
+                    ORDER BY ap.applied_at DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        i.created_at,
+                        'interview',
+                        CONCAT('Interview scheduled for ', $name, ' (', jp.title, ')')
+                    FROM interviews i
+                    INNER JOIN applications ap
+                        ON ap.application_id = i.application_id
+                    INNER JOIN applicants a
+                        ON a.applicant_id = ap.applicant_id
+                    INNER JOIN job_postings jp
+                        ON jp.posting_id = ap.posting_id
+                    WHERE jp.position_id = ?
+                    ORDER BY i.created_at DESC
+                    LIMIT $limit
+                )
+
+                UNION ALL
+
+                (
+                    SELECT
+                        CAST(o.completed_at AS DATETIME),
+                        'onboarding',
+                        CONCAT('Onboarding completed: ', $name)
+                    " . self::ONBOARDING_FROM . "
+                    WHERE p.position_id = ?
+                      AND o.completed_at IS NOT NULL
+                    ORDER BY o.completed_at DESC
+                    LIMIT $limit
+                )
+
+            ) AS position_events
+
+            WHERE event_at IS NOT NULL
+
+            ORDER BY event_at DESC
+
+            LIMIT $limit
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        // One position_id placeholder per UNION branch (7).
+        $stmt->execute(array_fill(0, 7, $id));
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE POSITION (Edit Position modal)
+    |--------------------------------------------------------------------------
+    */
+
+    public function updatePosition(int $id, array $data): bool
+    {
+        $stmt = $this->db->prepare("
+            UPDATE positions
+            SET
+                department_id = ?,
+                role_id = ?,
+                position_name = ?
+            WHERE position_id = ?
+        ");
+
+        return $stmt->execute([
+            $data['department_id'],
+            $data['role_id'],
+            $data['position_name'],
+            $id
+        ]);
+    }
+
 }

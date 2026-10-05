@@ -72,68 +72,45 @@ class HumanCapitalController
 
     /*
     |--------------------------------------------------------------------------
-    | POSITION STATISTICS PAGE
+    | POSITION DETAILS PAGE
     |--------------------------------------------------------------------------
+    |
+    | Opened from the "View" action in the Positions table:
+    |     ?page=position-statistics&id=<position_id>
+    |
+    | Only the selected position is loaded. When the id is missing or the
+    | position does not exist the page redirects back to Human Capital rather
+    | than rendering placeholder data.
+    |
     */
 
     public function positionStatistics()
     {
-        $stats = $this->humanCapital->getOverviewStats();
+        $id = (int) ($_GET['id'] ?? 0);
 
-        $departments = $this->humanCapital->getDepartments();
+        if ($id <= 0) {
+            header('Location: ?page=human-capital');
+            exit;
+        }
 
-        $positions = $this->humanCapital->getPositions();
+        $position = $this->humanCapital->getPositionDetails($id);
 
-        /*
-         * A "slot" is a position's planned headcount: the people who
-         * currently hold it (filled) plus the open vacancies still to fill.
-         * There is no slots column, so slots are derived from real records.
-         */
-        $filledSlots = array_sum(
-            array_column($departments, 'employee_count')
-        );
+        if ($position === null) {
+            header('Location: ?page=human-capital');
+            exit;
+        }
 
-        $openSlots = $stats['vacancies'];
-
-        $totalSlots = $filledSlots + $openSlots;
-
-        $departmentsCovered = count(
-            array_filter(
-                $departments,
-                fn($department) => (int) $department['position_count'] > 0
-            )
-        );
-
-        $unassignedPositions = count(
-            array_filter(
-                $positions,
-                fn($position) => (int) $position['employee_count'] === 0
-            )
-        );
-
-        $posStats = [
-
-            'total_positions'      => $stats['positions'],
-            'total_slots'          => $totalSlots,
-            'filled_slots'         => $filledSlots,
-            'open_slots'           => $openSlots,
-            'departments_covered'  => $departmentsCovered,
-            'total_departments'    => $stats['departments'],
-            'unassigned_positions' => $unassignedPositions,
-
-        ];
+        $positionStats  = $this->humanCapital->getPositionStats($id);
+        $employees      = $this->humanCapital->getPositionEmployees($id);
+        $recruitment    = $this->humanCapital->getPositionRecruitment($id);
+        $onboarding     = $this->humanCapital->getPositionOnboarding($id);
+        $recentActivity = $this->humanCapital->getPositionActivity($id);
 
         /*
-         * Most recently created positions (newest first).
+         * Lookups that feed the Edit Position modal.
          */
-        $posRecent = $positions;
-
-        usort(
-            $posRecent,
-            fn($a, $b) => strcmp($b['created_at'], $a['created_at'])
-        );
-
-        $posRecent = array_slice($posRecent, 0, 5);
+        $departmentLookup = $this->humanCapital->getDepartmentLookup();
+        $roles            = $this->humanCapital->getRoles();
 
         require BASE_PATH . '/resources/views/human-capital/position-statistics.php';
     }
@@ -293,6 +270,75 @@ class HumanCapitalController
         $this->json(
             $this->humanCapital->deletePosition($id)
         );
+    }
+
+    /*
+     * Create or update a position from the Edit Position modal.
+     */
+    public function savePosition()
+    {
+        $id = (int) ($_POST['position_id'] ?? 0);
+
+        $positionName = trim($_POST['position_name'] ?? '');
+        $departmentId = (int) ($_POST['department_id'] ?? 0);
+        $roleId       = (int) ($_POST['role_id'] ?? 0);
+
+        if ($positionName === '') {
+
+            $this->json([
+                'success' => false,
+                'message' => 'Position name is required.'
+            ]);
+
+        }
+
+        if ($departmentId <= 0) {
+
+            $this->json([
+                'success' => false,
+                'message' => 'Department is required.'
+            ]);
+
+        }
+
+        if ($roleId <= 0) {
+
+            $this->json([
+                'success' => false,
+                'message' => 'System role is required.'
+            ]);
+
+        }
+
+        $data = [
+            'position_name' => $positionName,
+            'department_id' => $departmentId,
+            'role_id'       => $roleId,
+        ];
+
+        try {
+
+            if ($id > 0) {
+                $success = $this->humanCapital->updatePosition($id, $data);
+            } else {
+                $success = $this->humanCapital->createPosition($data);
+            }
+
+        } catch (\Exception $e) {
+
+            $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+
+        }
+
+        $this->json([
+            'success' => $success,
+            'message' => $id > 0
+                ? 'Position updated successfully.'
+                : 'Position created successfully.'
+        ]);
     }
 
     /*
