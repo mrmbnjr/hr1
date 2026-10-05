@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\EmployeeRequests;
 use App\Models\PasswordResetRequest;
+use App\Services\AssignedDocumentService;
 use App\Services\Auth;
 
 class EmployeeRequestsController
@@ -11,6 +12,8 @@ class EmployeeRequestsController
     private EmployeeRequests $employeeRequests;
 
     private PasswordResetRequest $passwordResetRequest;
+
+    private AssignedDocumentService $documents;
 
 
     public function __construct()
@@ -20,6 +23,9 @@ class EmployeeRequestsController
 
         $this->passwordResetRequest =
             new PasswordResetRequest();
+
+        $this->documents =
+            new AssignedDocumentService();
     }
 
 
@@ -71,6 +77,50 @@ class EmployeeRequestsController
             $passwordResetPendingCount =
                 $this->passwordResetRequest->getPendingCount();
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Onboarding document requests (files requested by HR / Admin)
+        |--------------------------------------------------------------------------
+        |
+        | Every file HR or Administration requested during onboarding is shown
+        | in the same queue, so submitted documents land in HR's review list
+        | instead of only living inside the Onboarding module.
+        |
+        | has_file tells the view whether the submitted file is actually on
+        | disk, so it never renders a dead download link.
+        |
+        */
+
+        $documentRequests =
+            $this->employeeRequests
+                ->getOnboardingDocumentRequests();
+
+        foreach ($documentRequests as &$document) {
+
+            $storedName = trim(
+                (string) ($document['file_path'] ?? '')
+            );
+
+            $document['has_file'] =
+                $storedName !== ''
+                && $this->documents->resolve($storedName) !== null;
+        }
+
+        unset($document);
+
+
+        /*
+         * Managers may review the queue but only HR and Admin may verify or
+         * reject a submitted document.
+         */
+
+        $canManageDocuments =
+            Auth::hasAnyRole([
+                'ADMIN',
+                'HR'
+            ]);
 
 
         require BASE_PATH . '/resources/views/employee-requests/index.php';
@@ -741,8 +791,14 @@ class EmployeeRequestsController
 
         /*
         |--------------------------------------------------------------------------
-        | Status — only Pending / Resolved exist for this queue
+        | Status — Pending / Completed / Rejected for this queue
         |--------------------------------------------------------------------------
+        |
+        | Password resets share the canonical request statuses but never use
+        | the Approved stage: a reset is either still Pending, Completed once
+        | the password has actually been reset, or Rejected when the request
+        | is not honoured. Reopening returns the row to Pending.
+        |
         */
 
         $status =
@@ -755,7 +811,8 @@ class EmployeeRequestsController
             $status,
             [
                 'Pending',
-                'Resolved'
+                'Completed',
+                'Rejected'
             ],
             true
         )) {
@@ -765,7 +822,7 @@ class EmployeeRequestsController
             echo json_encode([
                 'success' => false,
                 'message' =>
-                    'Please choose Resolved or Pending before saving.'
+                    'Please choose Completed, Rejected or Pending before saving.'
             ]);
 
             return;
@@ -806,7 +863,7 @@ class EmployeeRequestsController
         */
 
         $handledBy =
-            $status === 'Resolved'
+            $status !== 'Pending'
                 ? (int) Auth::userId()
                 : null;
 
@@ -845,9 +902,11 @@ class EmployeeRequestsController
             echo json_encode([
                 'success' => true,
                 'message' =>
-                    $status === 'Resolved'
-                        ? 'Password reset request marked as resolved.'
-                        : 'Password reset request reopened.',
+                    match ($status) {
+                        'Completed' => 'Password reset request marked as completed.',
+                        'Rejected'  => 'Password reset request rejected.',
+                        default     => 'Password reset request reopened.',
+                    },
                 'request' =>
                     $request
             ]);

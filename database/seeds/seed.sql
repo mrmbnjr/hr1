@@ -756,41 +756,43 @@ INSERT INTO onboarding_documents (
     due_date,
     assigned_by,
     action_type,
-    created_at
+    created_at,
+    submitted_at
 ) VALUES
 -- Juan Dela Cruz (completed)
-(1, 1, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY)),
-(1, 1, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Verified', 'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY)),
-(1, 1, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Verified', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY)),
-(1, 1, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY)),
+(1, 1, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Approved',  'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
+(1, 1, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Approved',  'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
+(1, 1, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Approved',  'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
+(1, 1, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved',  'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
+(1, 1, 'Medical Certificate',                  'Upload your pre-employment medical certificate.',               'Completed', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
 
 -- Ana Bautista (in progress)
-(2, 2, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Submitted', 'Submit Required Document',             'High',   DATE_SUB(CURDATE(), INTERVAL 7 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY)),
-(2, 2, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending',   'Submit Missing Requirement',           'Urgent', DATE_SUB(CURDATE(), INTERVAL 2 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY)),
-(2, 2, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Submitted', 'Submit Additional Employment Document', 'High',   DATE_ADD(CURDATE(), INTERVAL 3 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY)),
-(2, 2, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Verified',  'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 7 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY)),
+(2, 2, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Pending',  'Submit Required Document',             'High',   DATE_SUB(CURDATE(), INTERVAL 7 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY),  DATE_SUB(@now, INTERVAL 12 DAY)),
+(2, 2, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending',  'Submit Missing Requirement',           'Urgent', DATE_SUB(CURDATE(), INTERVAL 2 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY),  NULL),
+(2, 2, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Pending',  'Submit Additional Employment Document', 'High',   DATE_ADD(CURDATE(), INTERVAL 3 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY),  DATE_SUB(@now, INTERVAL 12 DAY)),
+(2, 2, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 7 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY),  DATE_SUB(@now, INTERVAL 12 DAY)),
 
 -- Leonardo Navarro (completed)
-(3, 3, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY)),
-(3, 3, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Verified', 'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY)),
-(3, 3, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY)),
+(3, 3, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY),  DATE_SUB(@now, INTERVAL 26 DAY)),
+(3, 3, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Approved', 'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY),  DATE_SUB(@now, INTERVAL 26 DAY)),
+(3, 3, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 14 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 28 DAY),  DATE_SUB(@now, INTERVAL 26 DAY)),
 
 -- Sofia Cabrera (pending — nothing submitted yet)
-(4, 4, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Pending', 'Submit Required Document',             'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY)),
-(4, 4, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending', 'Submit Missing Requirement',           'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY)),
-(4, 4, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Pending', 'Submit Required Document',             'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY)),
+(4, 4, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Pending', 'Submit Required Document',             'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY),   NULL),
+(4, 4, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending', 'Submit Missing Requirement',           'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY),   NULL),
+(4, 4, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Pending', 'Submit Required Document',             'High',   DATE_ADD(CURDATE(), INTERVAL 11 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 3 DAY),   NULL),
 
 -- Victor Salazar (completed)
-(5, 5, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY)),
-(5, 5, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Verified', 'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY)),
-(5, 5, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Verified', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY)),
-(5, 5, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Verified', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY)),
+(5, 5, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY), DATE_SUB(@now, INTERVAL 178 DAY)),
+(5, 5, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Approved', 'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY), DATE_SUB(@now, INTERVAL 178 DAY)),
+(5, 5, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Approved', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY), DATE_SUB(@now, INTERVAL 178 DAY)),
+(5, 5, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 159 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 180 DAY), DATE_SUB(@now, INTERVAL 178 DAY)),
 
 -- Rafael Mendoza (overdue)
-(6, 6, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Submitted', 'Submit Required Document',             'High',   DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY)),
-(6, 6, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending',   'Submit Missing Requirement',           'Urgent', DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY)),
-(6, 6, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Rejected',  'Submit Additional Employment Document', 'High',   DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY)),
-(6, 6, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Verified',  'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY));
+(6, 6, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Pending',  'Submit Required Document',             'High',   DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY), DATE_SUB(@now, INTERVAL 128 DAY)),
+(6, 6, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Pending',  'Submit Missing Requirement',           'Urgent', DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY), NULL),
+(6, 6, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Rejected', 'Submit Additional Employment Document', 'High',   DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY), DATE_SUB(@now, INTERVAL 128 DAY)),
+(6, 6, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved', 'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 109 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 130 DAY), DATE_SUB(@now, INTERVAL 128 DAY));
 
 
 -- =====================================================================
@@ -1026,7 +1028,7 @@ INSERT INTO application_validations (
 -- 19. PASSWORD RESET REQUESTS ("Contact HR")
 -- =====================================================================
 -- Shows up on the Employee Requests page for ADMIN / HR. One row is
--- already resolved so both states are visible.
+-- already completed so both states are visible.
 -- =====================================================================
 
 INSERT INTO password_reset_requests (
@@ -1041,7 +1043,7 @@ INSERT INTO password_reset_requests (
 ) VALUES
 ('Kristine Aquino', 'kristine.aquino',      'kristine.aquino@gmail.com',  'I no longer have access to the email address on my account and need help signing in.', 'Pending',  DATE_SUB(@now, INTERVAL 1 DAY),  NULL, NULL),
 ('Nathan Manalo',   'nathan.manalo',        '0905-662-1147',              'I forgot my password after being away for a few weeks. Please help me reset it.',      'Pending',  DATE_SUB(@now, INTERVAL 3 HOUR), NULL, NULL),
-('Paolo Mendoza',   'paolo.mendoza',        'paolo.mendoza@outlook.com',  'Requesting a password reset for my applicant account.',                                'Resolved', DATE_SUB(@now, INTERVAL 6 DAY),  DATE_SUB(@now, INTERVAL 5 DAY), 1);
+('Paolo Mendoza',   'paolo.mendoza',        'paolo.mendoza@outlook.com',  'Requesting a password reset for my applicant account.',                                'Completed', DATE_SUB(@now, INTERVAL 6 DAY),  DATE_SUB(@now, INTERVAL 5 DAY), 1);
 
 
 -- =====================================================================
@@ -1052,34 +1054,30 @@ INSERT INTO password_reset_requests (
 -- without depending on a second seed file.
 -- =====================================================================
 
--- Every submitted / verified / rejected document has a stored file.
+-- Every document the employee actually submitted has a stored file.
 UPDATE onboarding_documents
 SET
     file_path = CONCAT('onboarding_document_', document_id, '.pdf'),
     submission_mime = 'application/pdf',
-    submission_file_size = 780 + (document_id * 7),
-    submitted_at = DATE_ADD(created_at, INTERVAL 2 DAY)
-WHERE status IN ('Submitted', 'Verified', 'Rejected');
+    submission_file_size = 780 + (document_id * 7)
+WHERE submitted_at IS NOT NULL;
 
--- Verified documents were reviewed and completed after submission.
-UPDATE onboarding_documents
-SET
-    reviewed_by = assigned_by,
-    reviewed_at = DATE_ADD(created_at, INTERVAL 4 DAY),
-    completed_at = DATE_ADD(created_at, INTERVAL 4 DAY)
-WHERE status = 'Verified';
-
--- Rejected documents were reviewed but not completed.
+-- Approved / Completed / Rejected documents were reviewed by HR.
 UPDATE onboarding_documents
 SET
     reviewed_by = assigned_by,
     reviewed_at = DATE_ADD(created_at, INTERVAL 4 DAY)
-WHERE status = 'Rejected';
+WHERE status IN ('Approved', 'Completed', 'Rejected');
+
+-- Completed documents were carried out after being approved.
+UPDATE onboarding_documents
+SET completed_at = DATE_ADD(created_at, INTERVAL 4 DAY)
+WHERE status = 'Completed';
 
 -- Response-only requests keep the reviewer/assignee traceable.
 UPDATE onboarding_documents
 SET response_text = 'Noted and verified against the submitted record.'
-WHERE status = 'Verified'
+WHERE status IN ('Approved', 'Completed')
   AND response_text IS NULL;
 
 

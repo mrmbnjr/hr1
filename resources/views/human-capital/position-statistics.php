@@ -547,7 +547,7 @@ $tenure = function ($date) {
                                     <?= (int) $ob['steps_done'] ?>/<?= (int) $ob['steps_total'] ?> steps
                                     <?= $ob['next_step'] ? '· Next: ' . $e($ob['next_step']) : '· All steps done' ?>
                                     <?php if ((int) $ob['docs_total'] > 0): ?>
-                                        · Docs <?= (int) $ob['docs_verified'] ?>/<?= (int) $ob['docs_total'] ?> verified
+                                        · Docs <?= (int) $ob['docs_accepted'] ?>/<?= (int) $ob['docs_total'] ?> accepted
                                     <?php endif; ?>
                                     <?php if (!empty($ob['orientation_date'])): ?>
                                         · Orientation <?= $e($fmtDate($ob['orientation_date'])) ?>

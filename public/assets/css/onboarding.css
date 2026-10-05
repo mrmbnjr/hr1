@@ -838,14 +838,15 @@
     white-space: nowrap;
 }
 
-.document-status.verified {
+.document-status.approved,
+.document-status.completed {
     background: var(--badge-green-bg);
     color: var(--badge-green-fg);
 }
 
-.document-status.review {
-    background: var(--badge-orange-bg);
-    color: var(--badge-orange-fg);
+.document-status.rejected {
+    background: var(--badge-red-bg);
+    color: var(--badge-red-fg);
 }
 
 .document-status.pending {
@@ -958,6 +959,11 @@
     color: var(--badge-red-fg);
 }
 
+.decision-icon-complete {
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-fg);
+}
+
 
 /* =========================================================
    DECISION BUTTONS
@@ -981,6 +987,16 @@
 
 .decision-reject-btn:hover {
     background: #c53030;
+}
+
+.decision-complete-btn {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--white);
+}
+
+.decision-complete-btn:hover {
+    background: var(--gold-dark);
 }
 
 

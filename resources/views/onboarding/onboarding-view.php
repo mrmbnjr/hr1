@@ -173,14 +173,29 @@ $avatarInitial =
 $totalDocuments =
     (int) ($documentProgress['total'] ?? 0);
 
-$verifiedDocuments =
-    (int) ($documentProgress['verified'] ?? 0);
+$approvedDocuments =
+    (int) ($documentProgress['approved'] ?? 0);
+
+$completedDocuments =
+    (int) ($documentProgress['completed'] ?? 0);
+
+$acceptedDocuments =
+    (int) ($documentProgress['accepted'] ?? 0);
 
 $submittedDocuments =
     (int) ($documentProgress['submitted'] ?? 0);
 
 $pendingDocuments =
     (int) ($documentProgress['pending'] ?? 0);
+
+/*
+| Documents the employee has already sent back but HR has not yet
+| confirmed — the actionable "awaiting review" count (submitted minus
+| accepted). Canonically these rows are still Pending.
+*/
+
+$awaitingReviewDocuments =
+    max(0, $submittedDocuments - $acceptedDocuments);
 
 
 $documentPercent = 0;
@@ -190,7 +205,7 @@ if ($totalDocuments > 0) {
     $documentPercent = min(
         100,
         round(
-            ($verifiedDocuments / $totalDocuments) * 100,
+            ($acceptedDocuments / $totalDocuments) * 100,
             1
         )
     );
@@ -354,20 +369,20 @@ $onboardingId =
                     <i class="fa-solid fa-file-circle-check"></i>
                 </div>
                 <div class="stat-content">
-                    <span>Verified</span>
-                    <strong><?= $verifiedDocuments ?></strong>
-                    <small>Approved by HR</small>
+                    <span>Approved</span>
+                    <strong><?= $approvedDocuments ?></strong>
+                    <small>Confirmed by HR</small>
                 </div>
             </div>
 
             <div class="onboarding-stat-card">
                 <div class="stat-icon">
-                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <i class="fa-solid fa-circle-check"></i>
                 </div>
                 <div class="stat-content">
-                    <span>Submitted</span>
-                    <strong><?= $submittedDocuments ?></strong>
-                    <small>Awaiting verification</small>
+                    <span>Completed</span>
+                    <strong><?= $completedDocuments ?></strong>
+                    <small>Carried out</small>
                 </div>
             </div>
 
@@ -378,7 +393,11 @@ $onboardingId =
                 <div class="stat-content">
                     <span>Pending</span>
                     <strong><?= $pendingDocuments ?></strong>
-                    <small>Not yet uploaded</small>
+                    <small>
+                        <?= $awaitingReviewDocuments > 0
+                            ? $awaitingReviewDocuments . ' awaiting review'
+                            : 'Not yet settled' ?>
+                    </small>
                 </div>
             </div>
 
@@ -500,7 +519,7 @@ $onboardingId =
                     </div>
 
                     <span class="document-count">
-                        <?= $verifiedDocuments ?>
+                        <?= $acceptedDocuments ?>
                         /
                         <?= $totalDocuments ?>
                     </span>
@@ -510,7 +529,7 @@ $onboardingId =
                 <div class="overall-progress document-progress">
 
                     <div class="progress-label">
-                        <span>Verification</span>
+                        <span>Accepted</span>
                         <strong><?= $documentPercent ?>%</strong>
                     </div>
 
@@ -546,12 +565,16 @@ $onboardingId =
 
                             switch ($documentStatus) {
 
-                                case 'Verified':
-                                    $statusClass = 'verified';
+                                case 'Approved':
+                                    $statusClass = 'approved';
                                     break;
 
-                                case 'Submitted':
-                                    $statusClass = 'review';
+                                case 'Completed':
+                                    $statusClass = 'completed';
+                                    break;
+
+                                case 'Rejected':
+                                    $statusClass = 'rejected';
                                     break;
 
                                 case 'Pending':
@@ -659,7 +682,7 @@ $onboardingId =
                                         : 'fa-magnifying-glass',
                                     'text' => $documentStatus === 'Rejected'
                                         ? 'HR rejected this document.'
-                                        : 'HR verified this document.',
+                                        : 'HR approved this document.',
                                     'date' => $docReviewedAt !== '' ? $docReviewedAt : 'Date unavailable',
                                 ];
                             }
@@ -667,7 +690,7 @@ $onboardingId =
                             if (!empty($document['completed_at'])) {
                                 $docActivities[] = [
                                     'icon' => 'fa-circle-check',
-                                    'text' => 'Onboarding requirement marked complete.',
+                                    'text' => 'Document marked as completed.',
                                     'date' => $docCompletedAt !== '' ? $docCompletedAt : 'Date unavailable',
                                 ];
                             }
@@ -733,7 +756,7 @@ $onboardingId =
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
 
-                                    <?php if ($documentStatus === 'Pending'): ?>
+                                    <?php if ($documentStatus === 'Pending' && empty($document['submitted_at'])): ?>
 
                                         <button
                                             type="button"
@@ -769,9 +792,9 @@ $onboardingId =
 
                                         </button>
 
-                                    <?php elseif ($documentStatus === 'Submitted'): ?>
+                                    <?php elseif ($documentStatus === 'Pending'): ?>
 
-                                        <!-- Verify -->
+                                        <!-- Approve (confirm the submission) -->
                                         <button
                                             type="button"
                                             class="document-action verify-document"
@@ -780,7 +803,7 @@ $onboardingId =
                                                 $document['document_name'] ?? '',
                                                 ENT_QUOTES
                                             ) ?>"
-                                            title="Verify document">
+                                            title="Approve document">
 
                                             <i class="fa-solid fa-check"></i>
 
@@ -798,6 +821,23 @@ $onboardingId =
                                             title="Reject document">
 
                                             <i class="fa-solid fa-xmark"></i>
+
+                                        </button>
+
+                                    <?php elseif ($documentStatus === 'Approved'): ?>
+
+                                        <!-- Mark completed (carry the request out) -->
+                                        <button
+                                            type="button"
+                                            class="document-action complete-document"
+                                            data-id="<?= (int) ($document['document_id'] ?? 0) ?>"
+                                            data-name="<?= htmlspecialchars(
+                                                $document['document_name'] ?? '',
+                                                ENT_QUOTES
+                                            ) ?>"
+                                            title="Mark as completed">
+
+                                            <i class="fa-solid fa-flag-checkered"></i>
 
                                         </button>
 
@@ -1345,6 +1385,129 @@ $onboardingId =
 
                     <i class="fa-solid fa-xmark"></i>
                     Reject Document
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ==============================================================
+    MARK DOCUMENT COMPLETED MODAL
+=============================================================== -->
+
+<div
+    class="document-modal-overlay"
+    id="completeDocumentModal"
+    aria-hidden="true">
+
+    <div
+        class="document-modal document-decision-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="completeDocumentModalTitle">
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="modal-icon decision-icon-complete">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                </span>
+
+                <div>
+
+                    <h2 id="completeDocumentModalTitle">
+                        Mark Document Completed
+                    </h2>
+
+                    <p>
+                        Record that this approved requirement has been carried out.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="modal-close"
+                data-close-document-decision="completeDocumentModal"
+                aria-label="Close">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+        <form
+            method="POST"
+            id="completeDocumentForm">
+
+            <input
+                type="hidden"
+                name="document_id"
+                id="completeDocumentId">
+
+            <input
+                type="hidden"
+                name="document_action"
+                value="complete">
+
+            <div class="decision-message">
+
+                <p>
+                    Mark this document as completed? This confirms the request
+                    has actually been carried out.
+                </p>
+
+                <span
+                    class="decision-document-name"
+                    id="completeDocumentName">
+                </span>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="completeDocumentRemarks">
+
+                    Remarks
+
+                    <span>Optional</span>
+
+                </label>
+
+                <textarea
+                    id="completeDocumentRemarks"
+                    name="remarks"
+                    rows="4"
+                    placeholder="Add remarks about the completion, if needed..."></textarea>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="modal-cancel"
+                    data-close-document-decision="completeDocumentModal">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="modal-submit decision-complete-btn">
+
+                    <i class="fa-solid fa-flag-checkered"></i>
+                    Mark Completed
 
                 </button>
 

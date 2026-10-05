@@ -68,7 +68,7 @@ CREATE TABLE password_reset_requests (
     identifier VARCHAR(150) NOT NULL,
     contact VARCHAR(150) NOT NULL,
     message TEXT NULL,
-    status ENUM('Pending', 'Resolved') NOT NULL DEFAULT 'Pending',
+    status ENUM('Pending', 'Approved', 'Rejected', 'Completed') NOT NULL DEFAULT 'Pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at DATETIME NULL,
     resolved_by INT NULL,
@@ -379,9 +379,9 @@ CREATE TABLE onboarding_documents (
 
     status ENUM(
         'Pending',
-        'Submitted',
-        'Verified',
-        'Rejected'
+        'Approved',
+        'Rejected',
+        'Completed'
     ) DEFAULT 'Pending',
 
     -- Request workflow extensions

@@ -13,18 +13,22 @@ use PDO;
  * `onboarding_documents` — rather than a table of their own:
  *
  *   HR  requests a document during onboarding  -> onboarding_documents
- *   employee fulfils it on this page           -> status becomes Submitted
- *   HR  verifies or rejects it in onboarding   -> Verified / Rejected
+ *   employee fulfils it on this page           -> stays Pending, submitted_at set
+ *   HR  verifies or rejects it in onboarding   -> Approved / Rejected
+ *   HR  finalises an approved document         -> Completed
  *
- * The page therefore has its own vocabulary derived from that enum:
+ * The page therefore has its own vocabulary derived from the canonical
+ * request statuses:
  *
- *   Pending   -> Pending Action
- *   Submitted -> In Progress
- *   Verified  -> Completed
- *   Rejected  -> Pending Action (returned to the employee)
+ *   Pending (not submitted)  -> Pending Action
+ *   Pending (submitted)      -> In Progress
+ *   Approved                 -> In Progress
+ *   Completed                -> Completed
+ *   Rejected                 -> Pending Action (returned to the employee)
  *
- * "Overdue" is derived from due_date on read, so it can never disagree
- * with the real status.
+ * "Submitted" is derived from submitted_at, since the canonical enum has no
+ * separate Submitted state. "Overdue" is derived from due_date on read, so
+ * it can never disagree with the real status.
  */
 class AssignedRequests
 {
@@ -66,9 +70,11 @@ class AssignedRequests
 
         od.status AS source_status,
 
-        CASE od.status
-            WHEN 'Verified' THEN 'Completed'
-            WHEN 'Submitted' THEN 'In Progress'
+        CASE
+            WHEN od.status = 'Completed' THEN 'Completed'
+            WHEN od.status = 'Approved' THEN 'In Progress'
+            WHEN od.status = 'Pending' AND od.submitted_at IS NOT NULL
+                THEN 'In Progress'
             ELSE 'Pending Action'
         END AS status,
 
@@ -114,7 +120,10 @@ class AssignedRequests
         (
             od.due_date IS NOT NULL
             AND od.due_date < CURDATE()
-            AND od.status IN ('Pending', 'Rejected')
+            AND (
+                (od.status = 'Pending' AND od.submitted_at IS NULL)
+                OR od.status = 'Rejected'
+            )
         ) AS is_overdue
     ";
 
@@ -171,12 +180,15 @@ class AssignedRequests
             WHERE od.employee_id = :employee_id
 
             ORDER BY
-                (od.status = 'Verified') ASC,
+                (od.status = 'Completed') ASC,
 
                 (
                     od.due_date IS NOT NULL
                     AND od.due_date < CURDATE()
-                    AND od.status IN ('Pending', 'Rejected')
+                    AND (
+                        (od.status = 'Pending' AND od.submitted_at IS NULL)
+                        OR od.status = 'Rejected'
+                    )
                 ) DESC,
 
                 FIELD(od.priority, 'Urgent', 'High', 'Normal'),
@@ -361,8 +373,9 @@ class AssignedRequests
     |--------------------------------------------------------------------------
     |
     | The request's own action_type decides what is required, never the
-    | client. Every action type funnels into the same "Submitted" state so
-    | there is exactly one completion mechanism: HR's review in Onboarding.
+    | client. Every action type funnels into the same state — the row stays
+    | "Pending" with submitted_at stamped — so there is exactly one
+    | completion mechanism: HR's review in Onboarding.
     |
     | $file is already validated and stored by the controller and arrives
     | as metadata only, so this method never touches the filesystem.
@@ -390,11 +403,17 @@ class AssignedRequests
             ];
         }
 
-        if (($request['source_status'] ?? '') === 'Verified') {
+        if (
+            in_array(
+                $request['source_status'] ?? '',
+                ['Approved', 'Completed'],
+                true
+            )
+        ) {
 
             return [
                 'success' => false,
-                'message' => 'This request has already been completed.'
+                'message' => 'This request has already been accepted and cannot be resubmitted.'
             ];
         }
 
@@ -450,7 +469,7 @@ class AssignedRequests
         ];
 
         $params = [
-            ':status' => 'Submitted',
+            ':status' => 'Pending',
             ':submitted_at' => $now,
             ':request_id' => $requestId,
             ':employee_id' => $employeeId
@@ -481,7 +500,7 @@ class AssignedRequests
             WHERE
                 document_id = :request_id
                 AND employee_id = :employee_id
-                AND status <> 'Verified'
+                AND status NOT IN ('Approved', 'Completed')
         ";
 
         $stmt = $this->db->prepare($sql);

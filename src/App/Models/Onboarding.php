@@ -137,8 +137,10 @@ class Onboarding
                 ? $this->getDocumentProgress($onboardingId)
                 : [
                     'total' => 0,
+                    'approved' => 0,
+                    'completed' => 0,
+                    'accepted' => 0,
                     'submitted' => 0,
-                    'verified' => 0,
                     'pending' => 0,
                 ];
 
@@ -282,6 +284,7 @@ class Onboarding
                 due_date,
                 remarks,
                 status,
+                submitted_at,
                 reviewed_at,
                 completed_at,
                 response_text
@@ -313,18 +316,46 @@ class Onboarding
                 COALESCE(
                     SUM(
                         CASE
-                            WHEN status = 'Verified'
+                            WHEN status = 'Approved'
                             THEN 1
                             ELSE 0
                         END
                     ),
                     0
-                ) AS verified,
+                ) AS approved,
 
                 COALESCE(
                     SUM(
                         CASE
-                            WHEN status IN ('Submitted', 'Verified')
+                            WHEN status = 'Completed'
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS completed,
+
+                /* Accepted = approved or completed (HR confirmed it). */
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN status IN ('Approved', 'Completed')
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS accepted,
+
+                /*
+                 * Submitted = the employee has responded. A still-pending
+                 * row counts once submitted_at is stamped.
+                 */
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN status IN ('Approved', 'Completed')
+                              OR (status = 'Pending' AND submitted_at IS NOT NULL)
                             THEN 1
                             ELSE 0
                         END
@@ -332,6 +363,7 @@ class Onboarding
                     0
                 ) AS submitted,
 
+                /* Pending = not yet settled (submitted or not). */
                 COALESCE(
                     SUM(
                         CASE
@@ -341,7 +373,19 @@ class Onboarding
                         END
                     ),
                     0
-                ) AS pending
+                ) AS pending,
+
+                /* Rejected = not accepted; returned to the employee. */
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN status = 'Rejected'
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS rejected
 
             FROM onboarding_documents
 
@@ -356,9 +400,12 @@ class Onboarding
 
         return [
             'total' => (int) ($result['total'] ?? 0),
-            'verified' => (int) ($result['verified'] ?? 0),
+            'approved' => (int) ($result['approved'] ?? 0),
+            'completed' => (int) ($result['completed'] ?? 0),
+            'accepted' => (int) ($result['accepted'] ?? 0),
             'submitted' => (int) ($result['submitted'] ?? 0),
-            'pending' => (int) ($result['pending'] ?? 0)
+            'pending' => (int) ($result['pending'] ?? 0),
+            'rejected' => (int) ($result['rejected'] ?? 0)
         ];
     }
 
@@ -446,7 +493,7 @@ class Onboarding
             FROM onboarding_documents
             WHERE onboarding_id = ?
             AND document_name = ?
-            AND status IN ('Pending', 'Submitted')
+            AND status IN ('Pending', 'Approved')
             LIMIT 1
         ");
 
@@ -660,7 +707,7 @@ class Onboarding
         }
 
         $stmt = $this->db->prepare("
-            SELECT document_id, status
+            SELECT document_id, status, submitted_at
             FROM onboarding_documents
             WHERE document_id = ?
             LIMIT 1
@@ -676,10 +723,16 @@ class Onboarding
             ];
         }
 
-        if (($document['status'] ?? '') !== 'Pending') {
+        /*
+         * Only a request the employee has not answered yet can be edited.
+         */
+        if (
+            ($document['status'] ?? '') !== 'Pending'
+            || !empty($document['submitted_at'])
+        ) {
             return [
                 'success' => false,
-                'message' => 'Only pending documents can be edited.'
+                'message' => 'Only pending documents that have not been submitted can be edited.'
             ];
         }
 
@@ -721,7 +774,7 @@ class Onboarding
         }
 
         $stmt = $this->db->prepare("
-            SELECT document_id, onboarding_id, status
+            SELECT document_id, onboarding_id, status, submitted_at
             FROM onboarding_documents
             WHERE document_id = ?
             LIMIT 1
@@ -737,10 +790,16 @@ class Onboarding
             ];
         }
 
-        if (($document['status'] ?? '') !== 'Pending') {
+        /*
+         * Only a request the employee has not answered yet can be deleted.
+         */
+        if (
+            ($document['status'] ?? '') !== 'Pending'
+            || !empty($document['submitted_at'])
+        ) {
             return [
                 'success' => false,
-                'message' => 'Only pending document requests can be deleted.'
+                'message' => 'Only pending document requests that have not been submitted can be deleted.'
             ];
         }
 
@@ -796,7 +855,8 @@ class Onboarding
             SELECT
                 document_id,
                 onboarding_id,
-                status
+                status,
+                submitted_at
             FROM onboarding_documents
             WHERE document_id = ?
             LIMIT 1
@@ -817,37 +877,37 @@ class Onboarding
         }
 
         /*
-        * Only submitted documents can be verified.
+        * Only a submitted document awaiting review can be verified.
         */
-        if (($document['status'] ?? '') !== 'Submitted') {
+        if (
+            ($document['status'] ?? '') !== 'Pending'
+            || empty($document['submitted_at'])
+        ) {
 
             return [
                 'success' => false,
-                'message' => 'Only submitted documents can be verified.'
+                'message' => 'Only a submitted document awaiting review can be verified.'
             ];
         }
 
         /*
-        * Approve document and save optional remarks.
+        * Approve the document — the confirmation stage. completed_at is
+        * reserved for markCompleted(), which actually carries the request out.
         */
-        $now = date('Y-m-d H:i:s');
-
         $stmt = $this->db->prepare("
             UPDATE onboarding_documents
             SET
-                status = 'Verified',
+                status = 'Approved',
                 remarks = ?,
                 reviewed_by = ?,
-                reviewed_at = ?,
-                completed_at = ?
+                reviewed_at = ?
             WHERE document_id = ?
         ");
 
         $stmt->execute([
             $remarks !== '' ? $remarks : null,
             $reviewedBy,
-            $now,
-            $now,
+            date('Y-m-d H:i:s'),
             $documentId
         ]);
 
@@ -912,7 +972,8 @@ class Onboarding
             SELECT
                 document_id,
                 onboarding_id,
-                status
+                status,
+                submitted_at
             FROM onboarding_documents
             WHERE document_id = ?
             LIMIT 1
@@ -933,13 +994,16 @@ class Onboarding
         }
 
         /*
-        * Only submitted documents can be rejected.
+        * Only a submitted document awaiting review can be rejected.
         */
-        if (($document['status'] ?? '') !== 'Submitted') {
+        if (
+            ($document['status'] ?? '') !== 'Pending'
+            || empty($document['submitted_at'])
+        ) {
 
             return [
                 'success' => false,
-                'message' => 'Only submitted documents can be rejected.'
+                'message' => 'Only a submitted document awaiting review can be rejected.'
             ];
         }
 
@@ -973,6 +1037,112 @@ class Onboarding
         return [
             'success' => true,
             'message' => 'Document rejected successfully.'
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MARK DOCUMENT COMPLETED
+    |--------------------------------------------------------------------------
+    |
+    | The request has actually been carried out: an approved document is
+    | finalised. Mirrors verifyDocument()/rejectDocument() in shape.
+    |
+    */
+
+    public function markCompleted(
+        int $documentId,
+        string $remarks = '',
+        ?int $reviewedBy = null
+    ): array {
+
+        $remarks = trim($remarks);
+
+        if ($documentId <= 0) {
+
+            return [
+                'success' => false,
+                'message' => 'Invalid document.'
+            ];
+        }
+
+        if (mb_strlen($remarks) > 1000) {
+
+            return [
+                'success' => false,
+                'message' => 'Remarks must not exceed 1000 characters.'
+            ];
+        }
+
+        /*
+        * Get the document.
+        */
+        $stmt = $this->db->prepare("
+            SELECT
+                document_id,
+                onboarding_id,
+                status
+            FROM onboarding_documents
+            WHERE document_id = ?
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            $documentId
+        ]);
+
+        $document = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$document) {
+
+            return [
+                'success' => false,
+                'message' => 'Document not found.'
+            ];
+        }
+
+        /*
+        * Only an approved document can be completed.
+        */
+        if (($document['status'] ?? '') !== 'Approved') {
+
+            return [
+                'success' => false,
+                'message' => 'Only an approved document can be marked as completed.'
+            ];
+        }
+
+        $now = date('Y-m-d H:i:s');
+
+        $stmt = $this->db->prepare("
+            UPDATE onboarding_documents
+            SET
+                status = 'Completed',
+                remarks = ?,
+                reviewed_by = ?,
+                reviewed_at = ?,
+                completed_at = ?
+            WHERE document_id = ?
+        ");
+
+        $stmt->execute([
+            $remarks !== '' ? $remarks : null,
+            $reviewedBy,
+            $now,
+            $now,
+            $documentId
+        ]);
+
+        /*
+        * Recalculate onboarding status.
+        */
+        $this->updateOnboardingStatus(
+            (int) $document['onboarding_id']
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Document marked as completed successfully.'
         ];
     }
 
@@ -1026,12 +1196,12 @@ class Onboarding
          *
          * - Orientation recorded
          * - At least one document exists
-         * - Every document is verified
+         * - Every document has been accepted (approved or completed)
          */
         if (
             !empty($onboarding['orientation_date']) &&
             $progress['total'] > 0 &&
-            $progress['verified'] === $progress['total']
+            $progress['accepted'] === $progress['total']
         ) {
 
             $status = 'Completed';

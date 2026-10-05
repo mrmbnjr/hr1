@@ -1,5 +1,7 @@
 <?php
 
+use App\Services\AssignedDocumentService;
+
 $pageTitle =
     "Employee Requests";
 
@@ -78,6 +80,60 @@ $passwordResetPendingCount =
     $passwordResetPendingCount ?? 0;
 
 
+/*
+|--------------------------------------------------------------------------
+| Onboarding document requests (files requested by HR / Admin)
+|--------------------------------------------------------------------------
+|
+| Supplied by EmployeeRequestsController. These are the documents HR or
+| Administration requested during onboarding, including the ones employees
+| have already submitted back for review.
+|
+*/
+
+$documentRequests =
+    $documentRequests ?? [];
+
+$canManageDocuments =
+    $canManageDocuments ?? false;
+
+
+$documentStatusMeta = [
+
+    "Pending" => [
+        "label" => "Pending",
+        "class" => "badge-gray"
+    ],
+
+    "Approved" => [
+        "label" => "Approved",
+        "class" => "badge-green"
+    ],
+
+    "Completed" => [
+        "label" => "Completed",
+        "class" => "badge-green"
+    ],
+
+    "Rejected" => [
+        "label" => "Rejected",
+        "class" => "badge-red"
+    ]
+
+];
+
+
+$documentActionMeta = [
+
+    "document" => "Document submission",
+
+    "response" => "Written response",
+
+    "confirmation" => "Confirmation required"
+
+];
+
+
 $resetStatusMeta = [
 
     "Pending" => [
@@ -85,9 +141,14 @@ $resetStatusMeta = [
         "class" => "badge-gray"
     ],
 
-    "Resolved" => [
-        "label" => "Resolved",
+    "Completed" => [
+        "label" => "Completed",
         "class" => "badge-green"
+    ],
+
+    "Rejected" => [
+        "label" => "Rejected",
+        "class" => "badge-red"
     ]
 
 ];
@@ -129,6 +190,32 @@ $formatRelativeTime = static function (?string $createdAt): string {
 
 /*
 |--------------------------------------------------------------------------
+| Absolute date / time formatter
+|--------------------------------------------------------------------------
+|
+| Used by the onboarding document modal, which shows exact timestamps.
+|
+*/
+
+$formatDateTime = static function (
+    ?string $value,
+    string $format = 'F j, Y'
+): string {
+
+    $value = trim((string) ($value ?? ''));
+
+    if ($value === '') {
+        return '—';
+    }
+
+    $timestamp = strtotime($value);
+
+    return $timestamp ? date($format, $timestamp) : '—';
+};
+
+
+/*
+|--------------------------------------------------------------------------
 | Summary counts (stat cards)
 |--------------------------------------------------------------------------
 |
@@ -138,12 +225,11 @@ $formatRelativeTime = static function (?string $createdAt): string {
 */
 
 $summary = [
-    "total"     => count($requests) + count($passwordResetRequests),
+    "total"     => count($requests) + count($passwordResetRequests) + count($documentRequests),
     "pending"   => 0,
     "approved"  => 0,
     "completed" => 0,
     "rejected"  => 0,
-    "resets"    => count($passwordResetRequests),
 ];
 
 $employeeStatusKeys = [
@@ -165,7 +251,39 @@ foreach ($requests as $request) {
 
 foreach ($passwordResetRequests as $reset) {
 
-    if (($reset["status"] ?? "Pending") === "Pending") {
+    $resetStatus =
+        $reset["status"] ?? "Pending";
+
+    if (isset($employeeStatusKeys[$resetStatus])) {
+        $summary[$employeeStatusKeys[$resetStatus]]++;
+    }
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Onboarding document requests feed the same status buckets
+|--------------------------------------------------------------------------
+|
+| Documents carry the same canonical statuses as every other request:
+| Pending (not yet settled), Approved (confirmed), Completed (carried out)
+| and Rejected (not accepted). A Pending row is awaiting HR review once the
+| employee has submitted it, and awaiting the employee otherwise.
+|
+*/
+
+foreach ($documentRequests as $document) {
+
+    $documentStatus =
+        $document["status"] ?? "Pending";
+
+    if ($documentStatus === "Approved") {
+        $summary["approved"]++;
+    } elseif ($documentStatus === "Completed") {
+        $summary["completed"]++;
+    } elseif ($documentStatus === "Rejected") {
+        $summary["rejected"]++;
+    } else {
         $summary["pending"]++;
     }
 }
@@ -220,22 +338,11 @@ $summaryCards = [
 
 ];
 
-if ($canViewPasswordResets) {
-
-    $summaryCards[] = [
-        "filterKind"  => "category",
-        "filterValue" => "reset",
-        "icon"        => "fa-key",
-        "label"       => "Password Resets",
-        "value"       => $summary["resets"],
-        "note"        => "Account recovery requests",
-    ];
-}
-
 
 $hasAnyRows =
     !empty($requests) ||
-    !empty($passwordResetRequests);
+    !empty($passwordResetRequests) ||
+    !empty($documentRequests);
 
 ?>
 
@@ -320,7 +427,7 @@ $hasAnyRows =
             </div>
 
 
-            <?php if ($canViewPasswordResets): ?>
+            <?php if ($canViewPasswordResets || !empty($documentRequests)): ?>
 
                 <select id="categoryFilter">
 
@@ -332,8 +439,16 @@ $hasAnyRows =
                         Employee Requests
                     </option>
 
-                    <option value="reset">
-                        Password Resets
+                    <?php if ($canViewPasswordResets): ?>
+
+                        <option value="reset">
+                            Password Resets
+                        </option>
+
+                    <?php endif; ?>
+
+                    <option value="document">
+                        Onboarding Documents
                     </option>
 
                 </select>
@@ -362,14 +477,6 @@ $hasAnyRows =
                 <option value="Completed">
                     Completed
                 </option>
-
-                <?php if ($canViewPasswordResets): ?>
-
-                    <option value="Resolved">
-                        Resolved
-                    </option>
-
-                <?php endif; ?>
 
             </select>
 
@@ -902,6 +1009,451 @@ $hasAnyRows =
 
                             <?php endforeach; ?>
 
+
+                            <?php foreach ($documentRequests as $document): ?>
+
+                                <?php
+
+                                $documentId =
+                                    (int) (
+                                        $document['document_id']
+                                        ?? 0
+                                    );
+
+
+                                $documentStatus =
+                                    $document['status']
+                                    ?? 'Pending';
+
+
+                                $documentMeta =
+                                    $documentStatusMeta[$documentStatus]
+                                    ?? $documentStatusMeta['Pending'];
+
+
+                                $documentFullName =
+                                    trim(
+                                        (string) (
+                                            $document['fullname']
+                                            ?? ''
+                                        )
+                                    );
+
+
+                                if ($documentFullName === '') {
+
+                                    $documentFullName =
+                                        'Unknown Employee';
+                                }
+
+
+                                $documentInitial =
+                                    strtoupper(
+                                        substr(
+                                            $documentFullName,
+                                            0,
+                                            1
+                                        )
+                                    );
+
+
+                                $documentTitle =
+                                    trim(
+                                        (string) (
+                                            $document['document_name']
+                                            ?? ''
+                                        )
+                                    );
+
+
+                                if ($documentTitle === '') {
+
+                                    $documentTitle =
+                                        'Requested Document';
+                                }
+
+
+                                $documentType =
+                                    trim(
+                                        (string) (
+                                            $document['request_type']
+                                            ?? ''
+                                        )
+                                    );
+
+
+                                if ($documentType === '') {
+
+                                    $documentType =
+                                        'Submit Required Document';
+                                }
+
+
+                                $documentActionType =
+                                    (string) (
+                                        $document['action_type']
+                                        ?? 'document'
+                                    );
+
+
+                                $documentActionLabel =
+                                    $documentActionMeta[
+                                        $documentActionType
+                                    ]
+                                    ?? 'Document submission';
+
+
+                                $documentAssignedBy =
+                                    trim(
+                                        (string) (
+                                            $document[
+                                                'assigned_by_name'
+                                            ] ?? ''
+                                        )
+                                    );
+
+
+                                if ($documentAssignedBy === '') {
+
+                                    $documentAssignedBy =
+                                        'HR';
+                                }
+
+
+                                $documentPriority =
+                                    (string) (
+                                        $document['priority']
+                                        ?? 'Normal'
+                                    );
+
+
+                                $documentHasFile =
+                                    !empty(
+                                        $document['has_file']
+                                    );
+
+
+                                $documentIsSubmitted =
+                                    !empty(
+                                        $document['submitted_at']
+                                    );
+
+
+                                /*
+                                 * Approve / Reject are available once the
+                                 * employee has submitted a still-Pending
+                                 * document. Mark completed is available once
+                                 * HR has approved it.
+                                 */
+
+                                $documentCanReview =
+                                    $canManageDocuments
+                                    && $documentStatus === 'Pending'
+                                    && $documentIsSubmitted;
+
+
+                                $documentCanComplete =
+                                    $canManageDocuments
+                                    && $documentStatus === 'Approved';
+
+
+                                $documentPayload = [
+
+                                    'id' => $documentId,
+
+                                    'employeeName' =>
+                                        $documentFullName,
+
+                                    'employeeNumber' =>
+                                        (string) (
+                                            $document[
+                                                'employee_number'
+                                            ] ?? ''
+                                        ),
+
+                                    'department' =>
+                                        (string) (
+                                            $document[
+                                                'department_name'
+                                            ] ?? ''
+                                        ),
+
+                                    'title' =>
+                                        $documentTitle,
+
+                                    'type' =>
+                                        $documentType,
+
+                                    'actionType' =>
+                                        $documentActionType,
+
+                                    'actionLabel' =>
+                                        $documentActionLabel,
+
+                                    'priority' =>
+                                        $documentPriority,
+
+                                    'dueDate' =>
+                                        $formatDateTime(
+                                            $document['due_date']
+                                            ?? null
+                                        ),
+
+                                    'hasDue' =>
+                                        !empty(
+                                            $document['due_date']
+                                        ),
+
+                                    'assignedBy' =>
+                                        $documentAssignedBy,
+
+                                    'assignedByRole' =>
+                                        trim(
+                                            (string) (
+                                                $document[
+                                                    'assigned_by_role'
+                                                ] ?? ''
+                                            )
+                                        ),
+
+                                    'assignedAt' =>
+                                        $formatDateTime(
+                                            $document['created_at']
+                                            ?? null,
+                                            'F j, Y — g:i A'
+                                        ),
+
+                                    'status' =>
+                                        $documentStatus,
+
+                                    'statusLabel' =>
+                                        $documentMeta['label'],
+
+                                    'statusClass' =>
+                                        $documentMeta['class'],
+
+                                    'instruction' =>
+                                        (string) (
+                                            $document['instruction']
+                                            ?? ''
+                                        ),
+
+                                    'responseText' =>
+                                        (string) (
+                                            $document['response_text']
+                                            ?? ''
+                                        ),
+
+                                    'hasFile' =>
+                                        $documentHasFile,
+
+                                    'fileUrl' =>
+                                        $documentHasFile
+                                            ? '?page=assigned-requests-download&request_id='
+                                                . $documentId
+                                            : '',
+
+                                    'fileName' =>
+                                        $documentHasFile
+                                            ? $documentTitle
+                                            : '',
+
+                                    'fileSize' =>
+                                        AssignedDocumentService::formatSize(
+                                            isset(
+                                                $document[
+                                                    'submission_file_size'
+                                                ]
+                                            )
+                                                ? (int) $document[
+                                                    'submission_file_size'
+                                                ]
+                                                : null
+                                        ),
+
+                                    'submittedAt' =>
+                                        $formatDateTime(
+                                            $document['submitted_at']
+                                            ?? null,
+                                            'F j, Y — g:i A'
+                                        ),
+
+                                    'reviewRemarks' =>
+                                        (string) (
+                                            $document['remarks']
+                                            ?? ''
+                                        ),
+
+                                    'canReview' =>
+                                        $documentCanReview,
+
+                                    'canComplete' =>
+                                        $documentCanComplete,
+
+                                ];
+
+                                ?>
+
+                                <tr
+                                    class="request-row document-row"
+                                    data-kind="document"
+                                    tabindex="0"
+                                    role="button"
+
+                                    data-id="<?= htmlspecialchars(
+                                        (string) $documentId
+                                    ) ?>"
+
+                                    data-name="<?= htmlspecialchars(
+                                        $documentFullName
+                                    ) ?>"
+
+                                    data-status="<?= htmlspecialchars(
+                                        $documentStatus
+                                    ) ?>"
+
+                                    data-date="<?= htmlspecialchars(
+                                        (string) (
+                                            $document['created_at']
+                                            ?? ''
+                                        )
+                                    ) ?>"
+
+                                    data-document="<?= htmlspecialchars(
+                                        json_encode($documentPayload),
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>"
+                                >
+
+
+                                    <!-- Requester -->
+
+                                    <td>
+
+                                        <div class="request-cell">
+
+                                            <div class="avatar-circle">
+
+                                                <?= htmlspecialchars(
+                                                    $documentInitial
+                                                ) ?>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <strong>
+
+                                                    <?= htmlspecialchars(
+                                                        $documentFullName
+                                                    ) ?>
+
+                                                </strong>
+
+
+                                                <span class="sub-text">
+
+                                                    <?= htmlspecialchars(
+                                                        (string) (
+                                                            $document[
+                                                                'employee_number'
+                                                            ] ?? ''
+                                                        )
+                                                    ) ?>
+
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Type -->
+
+                                    <td>
+
+                                        <span class="request-kind request-kind--document">
+
+                                            <i class="fa-solid fa-file-arrow-up"></i>
+
+                                            Onboarding Document
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Details -->
+
+                                    <td>
+
+                                        <button
+                                            type="button"
+                                            class="request-type request-view-btn"
+                                            data-request-id="<?= htmlspecialchars(
+                                                (string) $documentId
+                                            ) ?>"
+                                        >
+
+                                            <?= htmlspecialchars(
+                                                $documentTitle
+                                            ) ?>
+
+                                        </button>
+
+
+                                        <span class="sub-text">
+
+                                            <?= htmlspecialchars(
+                                                (string) (
+                                                    $document[
+                                                        'department_name'
+                                                    ] ?? '—'
+                                                )
+                                            ) ?>
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+
+                                    <td>
+
+                                        <span
+                                            class="badge <?= htmlspecialchars(
+                                                $documentMeta['class']
+                                            ) ?>"
+                                        >
+
+                                            <?= htmlspecialchars(
+                                                $documentMeta['label']
+                                            ) ?>
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <span class="sub-text application-time">
+                                            <?= htmlspecialchars(
+                                                $formatRelativeTime($document['created_at'] ?? null)
+                                            ) ?>
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
+
                         <?php endif; ?>
 
 
@@ -1019,8 +1571,8 @@ $hasAnyRows =
 
                 <div>
 
-                    <span class="modal-eyebrow">
-                        Employee Request
+                    <span class="modal-eyebrow" id="requestModalEyebrow">
+                        Request
                     </span>
 
 
@@ -1070,7 +1622,9 @@ $hasAnyRows =
 
                             <i class="fa-solid fa-user"></i>
 
-                            Employee Information
+                            <span id="modalPartyHeading">
+                                Employee Information
+                            </span>
 
                         </h3>
 
@@ -1079,7 +1633,7 @@ $hasAnyRows =
 
                             <div class="request-detail-item">
 
-                                <span class="detail-label">
+                                <span class="detail-label" id="modalPartyLabelOne">
                                     Employee
                                 </span>
 
@@ -1092,7 +1646,7 @@ $hasAnyRows =
 
                             <div class="request-detail-item">
 
-                                <span class="detail-label">
+                                <span class="detail-label" id="modalPartyLabelTwo">
                                     Employee Number
                                 </span>
 
@@ -1105,7 +1659,7 @@ $hasAnyRows =
 
                             <div class="request-detail-item">
 
-                                <span class="detail-label">
+                                <span class="detail-label" id="modalPartyLabelThree">
                                     Department
                                 </span>
 
@@ -1137,7 +1691,7 @@ $hasAnyRows =
 
                             <div class="request-detail-item">
 
-                                <span class="detail-label">
+                                <span class="detail-label" id="modalRequestTypeLabel">
                                     Request Type
                                 </span>
 
@@ -1148,13 +1702,78 @@ $hasAnyRows =
                             </div>
 
 
-                            <div class="request-detail-item">
+                            <div class="request-detail-item" id="modalRequestCategoryItem" hidden>
 
                                 <span class="detail-label">
+                                    Request Type
+                                </span>
+
+                                <strong id="modalRequestCategory">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item">
+
+                                <span class="detail-label" id="modalRequestDateLabel">
                                     Date Submitted
                                 </span>
 
                                 <strong id="modalRequestDate">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item" id="modalRequestDueItem" hidden>
+
+                                <span class="detail-label">
+                                    Due Date
+                                </span>
+
+                                <strong id="modalRequestDue">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item" id="modalRequestPriorityItem" hidden>
+
+                                <span class="detail-label">
+                                    Priority
+                                </span>
+
+                                <strong id="modalRequestPriority">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item" id="modalRequestAssignedByItem" hidden>
+
+                                <span class="detail-label">
+                                    Assigned By
+                                </span>
+
+                                <strong id="modalRequestAssignedBy">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="request-detail-item" id="modalRequestHandledByItem" hidden>
+
+                                <span class="detail-label">
+                                    Handled By
+                                </span>
+
+                                <strong id="modalRequestHandledBy">
                                     —
                                 </strong>
 
@@ -1167,7 +1786,7 @@ $hasAnyRows =
                                     Status
                                 </span>
 
-                                <span id="modalRequestStatus">
+                                <span id="modalRequestStatus" class="badge badge-gray">
                                     —
                                 </span>
 
@@ -1180,7 +1799,10 @@ $hasAnyRows =
 
                     <!-- Subject -->
 
-                    <div class="request-detail-section">
+                    <div
+                        class="request-detail-section"
+                        id="modalSubjectSection"
+                    >
 
                         <h3>
 
@@ -1209,7 +1831,9 @@ $hasAnyRows =
 
                             <i class="fa-solid fa-align-left"></i>
 
-                            Request Details
+                            <span id="modalDetailsHeading">
+                                Request Details
+                            </span>
 
                         </h3>
 
@@ -1220,6 +1844,59 @@ $hasAnyRows =
                         >
                             —
                         </div>
+
+                    </div>
+
+
+                    <!-- Employee submission (documents) -->
+
+                    <div
+                        class="request-detail-section"
+                        id="modalSubmissionSection"
+                        hidden
+                    >
+
+                        <h3>
+
+                            <i class="fa-solid fa-paper-plane"></i>
+
+                            Employee Submission
+
+                        </h3>
+
+
+                        <div
+                            class="request-detail-message"
+                            id="modalSubmissionText"
+                            hidden
+                        ></div>
+
+
+                        <a
+                            class="doc-download"
+                            id="modalSubmissionFile"
+                            href="#"
+                            hidden
+                        >
+
+                            <i class="fa-solid fa-file-arrow-down"></i>
+
+                            <span id="modalSubmissionFileName">
+                                document
+                            </span>
+
+                            <span
+                                class="doc-download__size"
+                                id="modalSubmissionFileSize"
+                            ></span>
+
+                        </a>
+
+
+                        <p
+                            class="doc-submitted-at"
+                            id="modalSubmissionAt"
+                        ></p>
 
                     </div>
 
@@ -1250,108 +1927,20 @@ $hasAnyRows =
                         </h3>
 
 
-                        <div class="request-status-list">
-
-
-                            <button
-                                type="button"
-                                class="request-status-item"
-                                data-status="Pending"
-                            >
-
-                                <span class="status-dot"></span>
-
-                                <div>
-
-                                    <strong>
-                                        Pending
-                                    </strong>
-
-                                    <span>
-                                        Request is waiting for HR review.
-                                    </span>
-
-                                </div>
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="request-status-item"
-                                data-status="Approved"
-                            >
-
-                                <span class="status-dot"></span>
-
-                                <div>
-
-                                    <strong>
-                                        Approved
-                                    </strong>
-
-                                    <span>
-                                        Request has been approved by HR.
-                                    </span>
-
-                                </div>
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="request-status-item"
-                                data-status="Rejected"
-                            >
-
-                                <span class="status-dot"></span>
-
-                                <div>
-
-                                    <strong>
-                                        Rejected
-                                    </strong>
-
-                                    <span>
-                                        Request has been rejected by HR.
-                                    </span>
-
-                                </div>
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                class="request-status-item"
-                                data-status="Completed"
-                            >
-
-                                <span class="status-dot"></span>
-
-                                <div>
-
-                                    <strong>
-                                        Completed
-                                    </strong>
-
-                                    <span>
-                                        Request has been completed.
-                                    </span>
-
-                                </div>
-
-                            </button>
-
-                        </div>
+                        <div
+                            class="request-status-list"
+                            id="requestStatusList"
+                        ></div>
 
                     </div>
 
 
                     <!-- HR Remarks -->
 
-                    <div class="request-detail-section">
+                    <div
+                        class="request-detail-section"
+                        id="modalRemarksSection"
+                    >
 
                         <h3>
 
@@ -1444,237 +2033,6 @@ $hasAnyRows =
     </div>
 
 
-    <!-- ==========================================================
-        PASSWORD RESET REQUEST MODAL
-    =========================================================== -->
-
-    <div
-        class="request-modal"
-        id="resetRequestModal"
-        aria-hidden="true"
-    >
-
-        <div class="request-modal-backdrop"></div>
-
-
-        <div
-            class="request-modal-content"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="resetRequestModalTitle"
-        >
-
-
-            <div class="request-modal-header">
-
-                <div>
-
-                    <span class="modal-eyebrow">
-                        Password Reset Request
-                    </span>
-
-
-                    <h2 id="resetRequestModalTitle">
-                        Request Details
-                    </h2>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="request-modal-close"
-                    id="resetRequestModalClose"
-                    aria-label="Close request details"
-                >
-
-                    <i class="fa-solid fa-xmark"></i>
-
-                </button>
-
-            </div>
-
-
-            <div class="request-modal-body">
-
-
-                <!-- Requester -->
-
-                <div class="request-detail-section">
-
-                    <h3>
-
-                        <i class="fa-solid fa-user"></i>
-
-                        Requester Information
-
-                    </h3>
-
-
-                    <div class="request-detail-grid">
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Full Name
-                            </span>
-
-                            <strong id="resetModalName">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Username / Employee ID
-                            </span>
-
-                            <strong id="resetModalIdentifier">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Contact
-                            </span>
-
-                            <strong id="resetModalContact">
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Request -->
-
-                <div class="request-detail-section">
-
-                    <h3>
-
-                        <i class="fa-solid fa-file-lines"></i>
-
-                        Request Information
-
-                    </h3>
-
-
-                    <div class="request-detail-grid">
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Date Requested
-                            </span>
-
-                            <strong id="resetModalCreated">
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Status
-                            </span>
-
-                            <span id="resetModalStatus">
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="request-detail-item">
-
-                            <span class="detail-label">
-                                Handled By
-                            </span>
-
-                            <strong id="resetModalResolvedBy">
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Message -->
-
-                <div class="request-detail-section">
-
-                    <h3>
-
-                        <i class="fa-solid fa-align-left"></i>
-
-                        Message to HR
-
-                    </h3>
-
-
-                    <div
-                        class="request-detail-message"
-                        id="resetModalMessage"
-                    >
-                        —
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="request-modal-footer">
-
-                <div class="request-modal-actions">
-
-                    <button
-                        type="button"
-                        class="modal-btn modal-btn-secondary"
-                        id="resetRequestModalCloseFooter"
-                    >
-
-                        Close
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="modal-btn modal-btn-primary"
-                        id="resetRequestModalAction"
-                    >
-
-                        <i class="fa-solid fa-check"></i>
-
-                        Mark as resolved
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 
 <?php require BASE_PATH . '/resources/views/includes/scripts.php'; ?>

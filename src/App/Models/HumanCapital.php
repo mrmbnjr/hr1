@@ -1116,8 +1116,8 @@ class HumanCapital
                     SELECT COUNT(*)
                     FROM onboarding_documents od
                     WHERE od.onboarding_id = o.onboarding_id
-                      AND od.status = 'Verified'
-                ) AS docs_verified
+                      AND od.status IN ('Approved', 'Completed')
+                ) AS docs_accepted
 
             " . self::ONBOARDING_FROM . "
 
@@ -1795,8 +1795,8 @@ class HumanCapital
                     SELECT COUNT(*)
                     FROM onboarding_documents od
                     WHERE od.onboarding_id = o.onboarding_id
-                      AND od.status = 'Verified'
-                ) AS docs_verified
+                      AND od.status IN ('Approved', 'Completed')
+                ) AS docs_accepted
 
             " . self::ONBOARDING_FROM . "
 

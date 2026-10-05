@@ -220,6 +220,132 @@ class EmployeeRequests
 
     /*
     |--------------------------------------------------------------------------
+    | GET ONBOARDING DOCUMENT REQUESTS (HR / Admin requested files)
+    |--------------------------------------------------------------------------
+    |
+    | The files HR or Administration request during onboarding live in
+    | onboarding_documents. They are surfaced in the same review queue as
+    | employee requests so HR has one place to see every outstanding item,
+    | including the ones an employee has already submitted back.
+    |
+    | status vocabulary (canonical):
+    |   Pending   -> not yet settled; submitted_at is set once the employee
+    |                submits, so "submitted, awaiting HR" is Pending +
+    |                submitted_at IS NOT NULL
+    |   Approved  -> HR confirmed the submission
+    |   Rejected  -> not accepted; returned to the employee
+    |   Completed -> the document requirement has been carried out
+    |
+    */
+
+    public function getOnboardingDocumentRequests(): array
+    {
+        $sql = "
+            SELECT
+                od.document_id,
+                od.onboarding_id,
+                od.employee_id,
+
+                od.document_name,
+
+                COALESCE(
+                    NULLIF(od.request_type, ''),
+                    'Submit Required Document'
+                ) AS request_type,
+
+                COALESCE(od.instruction, '') AS instruction,
+                od.action_type,
+                od.priority,
+                od.due_date,
+
+                od.status,
+
+                od.response_text,
+                od.file_path,
+                od.submission_file_size,
+                od.submission_mime,
+                od.submitted_at,
+
+                od.remarks,
+                od.reviewed_at,
+                od.completed_at,
+                od.created_at,
+
+                e.employee_number,
+
+                CONCAT_WS(
+                    ' ',
+                    NULLIF(ap.first_name, ''),
+                    NULLIF(ap.middle_name, ''),
+                    NULLIF(ap.last_name, '')
+                ) AS fullname,
+
+                d.department_name,
+                p.position_name AS job_title,
+
+                COALESCE(
+                    NULLIF(
+                        TRIM(
+                            CONCAT_WS(
+                                ' ',
+                                NULLIF(hr_ap.first_name, ''),
+                                NULLIF(hr_ap.last_name, '')
+                            )
+                        ),
+                        ''
+                    ),
+                    hr_user.username
+                ) AS assigned_by_name,
+
+                hr_role.role_name AS assigned_by_role
+
+            FROM onboarding_documents od
+
+            LEFT JOIN employees e
+                ON od.employee_id = e.employee_id
+
+            LEFT JOIN applications emp_app
+                ON e.application_id = emp_app.application_id
+
+            LEFT JOIN applicants ap
+                ON emp_app.applicant_id = ap.applicant_id
+
+            LEFT JOIN positions p
+                ON e.position_id = p.position_id
+
+            LEFT JOIN departments d
+                ON p.department_id = d.department_id
+
+            LEFT JOIN users hr_user
+                ON od.assigned_by = hr_user.user_id
+
+            LEFT JOIN roles hr_role
+                ON hr_user.role_id = hr_role.role_id
+
+            LEFT JOIN employees hr_emp
+                ON hr_user.employee_id = hr_emp.employee_id
+
+            LEFT JOIN applications hr_app
+                ON hr_emp.application_id = hr_app.application_id
+
+            LEFT JOIN applicants hr_ap
+                ON hr_app.applicant_id = hr_ap.applicant_id
+
+            ORDER BY
+                (od.submitted_at IS NOT NULL AND od.status = 'Pending') DESC,
+                od.created_at DESC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | GET REQUESTS BY EMPLOYEE
     |--------------------------------------------------------------------------
     */

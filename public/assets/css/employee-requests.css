@@ -1034,3 +1034,105 @@ body.modal-open {
 .reset-row {
     cursor: pointer;
 }
+
+
+/* ==========================================================
+   TYPE LABEL — "Onboarding Document"
+========================================================== */
+
+.request-kind--document {
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-fg);
+}
+
+.request-kind--document i {
+    color: var(--badge-blue-fg);
+}
+
+
+/* ==========================================================
+   DOCUMENT ROWS
+========================================================== */
+
+.document-row {
+    cursor: pointer;
+}
+
+
+/* ==========================================================
+   SUBMITTED FILE DOWNLOAD
+========================================================== */
+
+.doc-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-top: 4px;
+    padding: 10px 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    background: var(--surface-muted);
+    color: var(--accent);
+
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.doc-download:hover {
+    border-color: var(--gold);
+    background: var(--tint-gold-12);
+}
+
+.doc-download i {
+    font-size: 14px;
+    color: var(--gold-dark);
+}
+
+.doc-download__size {
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.doc-submitted-at {
+    margin: 10px 0 0;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+}
+
+
+/* ==========================================================
+   MODAL ACTION BUTTONS — VERIFY / REJECT
+========================================================== */
+
+.modal-btn-success {
+    background: var(--green);
+    color: var(--white);
+}
+
+.modal-btn-success:hover {
+    background: var(--green-dark);
+}
+
+.modal-btn-danger {
+    background: var(--red);
+    color: var(--white);
+}
+
+.modal-btn-danger:hover {
+    background: var(--red-dark);
+}
+
+.modal-btn-success:disabled,
+.modal-btn-danger:disabled {
+    opacity: 0.7;
+    cursor: default;
+}

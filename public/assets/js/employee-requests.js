@@ -94,8 +94,7 @@
                 "Pending",
                 "Approved",
                 "Rejected",
-                "Completed",
-                "Resolved"
+                "Completed"
             ];
 
 
@@ -135,31 +134,93 @@
                     approved: 0,
                     completed: 0,
                     rejected: 0,
-                    resets: 0
+                    resets: 0,
+                    documents: 0
+                };
+
+
+                const byKind = {
+                    employee: 0,
+                    reset: 0,
+                    document: 0
                 };
 
 
                 rows.forEach(
                     function (row) {
 
+                        const kind =
+                            row.dataset.kind || "employee";
+
+
                         const status =
-                            row.dataset.status ||
-                            "Pending";
+                            row.dataset.status || "Pending";
 
 
-                        if (row.dataset.kind === "reset") {
-                            counts.resets++;
+                        if (byKind[kind] !== undefined) {
+                            byKind[kind]++;
                         }
 
 
-                        if (status === "Pending") {
-                            counts.pending++;
-                        } else if (status === "Approved") {
+                        /*
+                         * Password resets share the canonical statuses
+                         * but never use Approved: a reset is Pending,
+                         * Completed once carried out, or Rejected.
+                         */
+
+                        if (kind === "reset") {
+
+                            counts.resets++;
+
+
+                            if (status === "Completed") {
+                                counts.completed++;
+                            } else if (status === "Rejected") {
+                                counts.rejected++;
+                            } else {
+                                counts.pending++;
+                            }
+
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * Onboarding documents carry the same canonical
+                         * statuses as every other request.
+                         */
+
+                        if (kind === "document") {
+
+                            counts.documents++;
+
+
+                            if (status === "Approved") {
+                                counts.approved++;
+                            } else if (status === "Completed") {
+                                counts.completed++;
+                            } else if (status === "Rejected") {
+                                counts.rejected++;
+                            } else {
+                                counts.pending++;
+                            }
+
+
+                            return;
+
+                        }
+
+
+                        if (status === "Approved") {
                             counts.approved++;
                         } else if (status === "Completed") {
                             counts.completed++;
                         } else if (status === "Rejected") {
                             counts.rejected++;
+                        } else {
+                            counts.pending++;
                         }
 
                     }
@@ -183,7 +244,10 @@
                         if (kind === "all") {
                             next = counts.total;
                         } else if (kind === "category") {
-                            next = counts.resets;
+                            next =
+                                byKind[value] !== undefined
+                                    ? byKind[value]
+                                    : 0;
                         } else if (kind === "status") {
                             next =
                                 counts[
@@ -694,8 +758,6 @@
 
                     case "Completed":
 
-                    case "Resolved":
-
                         return "badge-green";
 
 
@@ -716,7 +778,14 @@
 
 
             // ==================================================
-            // EMPLOYEE REQUEST MODAL
+            // REQUEST MODAL (unified — employee / reset / document)
+            // --------------------------------------------------
+            // One confirmation modal for every request type:
+            //   Step 1 — read-only details (fields adapt per kind)
+            //   Step 2 — status selection + HR remarks
+            // The statuses offered in Step 2 differ per kind: the three
+            // request types share the same four-state vocabulary but
+            // expose different actions.
             // ==================================================
 
             const requestModal =
@@ -753,8 +822,36 @@
                 document.getElementById("requestStepTwo");
 
 
+            const requestStatusList =
+                document.getElementById("requestStatusList");
+
+
             const requestReadonlyMessage =
                 document.getElementById("requestReadonlyMessage");
+
+
+            const requestModalEyebrow =
+                document.getElementById("requestModalEyebrow");
+
+
+            const requestModalTitle =
+                document.getElementById("requestModalTitle");
+
+
+            const modalPartyHeading =
+                document.getElementById("modalPartyHeading");
+
+
+            const modalPartyLabelOne =
+                document.getElementById("modalPartyLabelOne");
+
+
+            const modalPartyLabelTwo =
+                document.getElementById("modalPartyLabelTwo");
+
+
+            const modalPartyLabelThree =
+                document.getElementById("modalPartyLabelThree");
 
 
             const employeeName =
@@ -769,28 +866,236 @@
                 document.getElementById("modalDepartment");
 
 
+            const requestTypeLabel =
+                document.getElementById("modalRequestTypeLabel");
+
+
             const requestType =
                 document.getElementById("modalRequestType");
+
+
+            const requestCategoryItem =
+                document.getElementById("modalRequestCategoryItem");
+
+
+            const requestCategory =
+                document.getElementById("modalRequestCategory");
+
+
+            const requestDateLabel =
+                document.getElementById("modalRequestDateLabel");
 
 
             const requestDate =
                 document.getElementById("modalRequestDate");
 
 
+            const requestDueItem =
+                document.getElementById("modalRequestDueItem");
+
+
+            const requestDue =
+                document.getElementById("modalRequestDue");
+
+
+            const requestPriorityItem =
+                document.getElementById("modalRequestPriorityItem");
+
+
+            const requestPriority =
+                document.getElementById("modalRequestPriority");
+
+
+            const requestAssignedByItem =
+                document.getElementById("modalRequestAssignedByItem");
+
+
+            const requestAssignedBy =
+                document.getElementById("modalRequestAssignedBy");
+
+
+            const requestHandledByItem =
+                document.getElementById("modalRequestHandledByItem");
+
+
+            const requestHandledBy =
+                document.getElementById("modalRequestHandledBy");
+
+
             const requestStatus =
                 document.getElementById("modalRequestStatus");
+
+
+            const subjectSection =
+                document.getElementById("modalSubjectSection");
 
 
             const requestSubject =
                 document.getElementById("modalRequestSubject");
 
 
+            const detailsHeading =
+                document.getElementById("modalDetailsHeading");
+
+
             const requestDescription =
                 document.getElementById("modalRequestDescription");
 
 
+            const submissionSection =
+                document.getElementById("modalSubmissionSection");
+
+
+            const submissionText =
+                document.getElementById("modalSubmissionText");
+
+
+            const submissionFile =
+                document.getElementById("modalSubmissionFile");
+
+
+            const submissionFileName =
+                document.getElementById("modalSubmissionFileName");
+
+
+            const submissionFileSize =
+                document.getElementById("modalSubmissionFileSize");
+
+
+            const submissionAt =
+                document.getElementById("modalSubmissionAt");
+
+
+            const remarksSection =
+                document.getElementById("modalRemarksSection");
+
+
             const requestRemarks =
                 document.getElementById("modalRequestRemarks");
+
+
+            const STATUS_LABELS = {
+                Pending: "Request is waiting for HR review.",
+                Approved: "Request has been approved by HR.",
+                Rejected: "Request has been rejected by HR.",
+                Completed: "Request has been completed."
+            };
+
+
+            /*
+             * Per-kind presentation and behaviour.
+             *
+             *   options()  — the statuses HR may set from the current one
+             *                (empty array = nothing left to do).
+             *   editable() — whether the confirmation step is interactive.
+             *
+             * The three request types share the canonical four statuses but
+             * expose different actions: onboarding documents walk
+             * Pending -> Approved -> Completed, password resets skip the
+             * Approved stage entirely.
+             */
+
+            const REQUEST_KINDS = {
+
+                employee: {
+                    eyebrow: "Employee Request",
+                    title: "Request Details",
+                    partyHeading: "Employee Information",
+                    partyLabels: [
+                        "Employee",
+                        "Employee Number",
+                        "Department"
+                    ],
+                    requestTypeLabel: "Request Type",
+                    dateLabel: "Date Submitted",
+                    detailsHeading: "Request Details",
+                    showSubject: true,
+                    showSubmission: false,
+                    showCategory: false,
+                    showDue: false,
+                    showPriority: false,
+                    showAssignedBy: false,
+                    showHandledBy: false,
+                    showRemarks: true,
+                    options: function () {
+                        return [
+                            "Pending",
+                            "Approved",
+                            "Rejected",
+                            "Completed"
+                        ];
+                    },
+                    editable: function (status) {
+                        return status === "Pending";
+                    }
+                },
+
+                reset: {
+                    eyebrow: "Password Reset Request",
+                    title: "Request Details",
+                    partyHeading: "Requester Information",
+                    partyLabels: [
+                        "Full Name",
+                        "Username / Employee ID",
+                        "Contact"
+                    ],
+                    requestTypeLabel: "Request Type",
+                    dateLabel: "Date Requested",
+                    detailsHeading: "Message to HR",
+                    showSubject: false,
+                    showSubmission: false,
+                    showCategory: false,
+                    showDue: false,
+                    showPriority: false,
+                    showAssignedBy: false,
+                    showHandledBy: true,
+                    showRemarks: false,
+                    options: function (status) {
+                        if (status === "Pending") {
+                            return ["Completed", "Rejected"];
+                        }
+                        return ["Pending"];
+                    },
+                    editable: function () {
+                        return true;
+                    }
+                },
+
+                document: {
+                    eyebrow: "Onboarding Document Request",
+                    title: "Document Details",
+                    partyHeading: "Employee Information",
+                    partyLabels: [
+                        "Employee",
+                        "Employee Number",
+                        "Department"
+                    ],
+                    requestTypeLabel: "Document",
+                    dateLabel: "Date Requested",
+                    detailsHeading: "Instructions",
+                    showSubject: false,
+                    showSubmission: true,
+                    showCategory: true,
+                    showDue: true,
+                    showPriority: true,
+                    showAssignedBy: true,
+                    showHandledBy: false,
+                    showRemarks: true,
+                    options: function (status, data) {
+                        if (status === "Pending" && data.canReview) {
+                            return ["Approved", "Rejected"];
+                        }
+                        if (status === "Approved" && data.canComplete) {
+                            return ["Completed"];
+                        }
+                        return [];
+                    },
+                    editable: function (status, data) {
+                        return this.options(status, data).length > 0;
+                    }
+                }
+
+            };
 
 
             let requestModalStep = 1;
@@ -799,9 +1104,116 @@
 
             let currentRequestId = null;
 
-            let requestIsFinalized = false;
+            let currentRequestKind = "employee";
+
+            let requestIsEditable = false;
 
             let selectedStatus = "Pending";
+
+
+            // ==================================================
+            // PARSE DOCUMENT PAYLOAD (JSON blob on the row)
+            // ==================================================
+
+            function parseDocumentPayload(row) {
+
+                if (!row) {
+                    return {};
+                }
+
+
+                try {
+
+                    return JSON.parse(
+                        row.dataset.document || "{}"
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Invalid document payload:",
+                        error
+                    );
+
+                    return {};
+
+                }
+
+            }
+
+
+            function requestData(row, kind) {
+
+                if (kind === "document") {
+                    return parseDocumentPayload(row);
+                }
+
+
+                return Object.assign({}, row.dataset);
+
+            }
+
+
+            // ==================================================
+            // BUILD STATUS LIST (per kind / current status)
+            // ==================================================
+
+            function buildStatusList(options) {
+
+                if (!requestStatusList) {
+                    return;
+                }
+
+
+                requestStatusList.innerHTML = "";
+
+
+                options.forEach(
+                    function (status) {
+
+                        const button =
+                            document.createElement("button");
+
+                        button.type = "button";
+                        button.className = "request-status-item";
+                        button.dataset.status = status;
+
+
+                        const dot =
+                            document.createElement("span");
+
+                        dot.className = "status-dot";
+
+
+                        const body =
+                            document.createElement("div");
+
+
+                        const strong =
+                            document.createElement("strong");
+
+                        strong.textContent = status;
+
+
+                        const span =
+                            document.createElement("span");
+
+                        span.textContent =
+                            STATUS_LABELS[status] || "";
+
+
+                        body.appendChild(strong);
+                        body.appendChild(span);
+
+                        button.appendChild(dot);
+                        button.appendChild(body);
+
+                        requestStatusList.appendChild(button);
+
+                    }
+                );
+
+            }
 
 
             // ==================================================
@@ -827,25 +1239,10 @@
 
 
             // ==================================================
-            // CHECK EDITABILITY
-            // ==================================================
-
-            function isRequestEditable() {
-
-                return !requestIsFinalized;
-
-            }
-
-
-            // ==================================================
-            // UPDATE MODAL EDITABILITY
+            // MODAL EDITABILITY
             // ==================================================
 
             function updateModalEditability() {
-
-                const editable =
-                    isRequestEditable();
-
 
                 document
                     .querySelectorAll(".request-status-item")
@@ -854,13 +1251,13 @@
 
                             item.classList.toggle(
                                 "is-disabled",
-                                !editable
+                                !requestIsEditable
                             );
 
 
                             item.setAttribute(
                                 "aria-disabled",
-                                editable ? "false" : "true"
+                                requestIsEditable ? "false" : "true"
                             );
 
                         }
@@ -868,19 +1265,19 @@
 
 
                 if (requestRemarks) {
-                    requestRemarks.readOnly = !editable;
+                    requestRemarks.readOnly = !requestIsEditable;
                 }
 
 
                 if (requestReadonlyMessage) {
-                    requestReadonlyMessage.hidden = editable;
+                    requestReadonlyMessage.hidden = requestIsEditable;
                 }
 
 
                 if (requestModalSave) {
 
                     requestModalSave.hidden =
-                        !editable ||
+                        !requestIsEditable ||
                         requestModalStep !== 2;
 
                 }
@@ -889,7 +1286,7 @@
 
 
             // ==================================================
-            // RESET SAVE BUTTON
+            // SAVE BUTTON RESET
             // ==================================================
 
             function resetSaveButton() {
@@ -910,7 +1307,7 @@
 
 
             // ==================================================
-            // RESET MODAL STEP
+            // STEP RESET
             // ==================================================
 
             function resetModalStep() {
@@ -951,94 +1348,309 @@
 
 
             // ==================================================
-            // OPEN REQUEST MODAL
+            // SET TEXT (with em-dash fallback)
             // ==================================================
 
-            function openRequestModal(row) {
+            function setText(element, value) {
 
-                const data = row.dataset;
+                if (!element) {
+                    return;
+                }
 
 
-                currentRequestRow = row;
+                element.textContent =
+                    (value === undefined ||
+                        value === null ||
+                        value === "")
+                        ? "—"
+                        : value;
 
-                currentRequestId = data.id || null;
+            }
+
+
+            // ==================================================
+            // APPLY KIND CONFIG TO STEP 1
+            // ==================================================
+
+            function applyKindConfig(kind) {
+
+                const config =
+                    REQUEST_KINDS[kind] || REQUEST_KINDS.employee;
+
+
+                if (requestModalEyebrow) {
+                    requestModalEyebrow.textContent = config.eyebrow;
+                }
+
+
+                if (requestModalTitle) {
+                    requestModalTitle.textContent = config.title;
+                }
+
+
+                if (modalPartyHeading) {
+                    modalPartyHeading.textContent =
+                        config.partyHeading;
+                }
+
+
+                [
+                    [modalPartyLabelOne, config.partyLabels[0]],
+                    [modalPartyLabelTwo, config.partyLabels[1]],
+                    [modalPartyLabelThree, config.partyLabels[2]]
+                ].forEach(
+                    function (pair) {
+
+                        if (pair[0]) {
+                            pair[0].textContent = pair[1];
+                        }
+
+                    }
+                );
+
+
+                if (requestTypeLabel) {
+                    requestTypeLabel.textContent =
+                        config.requestTypeLabel;
+                }
+
+
+                if (requestDateLabel) {
+                    requestDateLabel.textContent = config.dateLabel;
+                }
+
+
+                if (detailsHeading) {
+                    detailsHeading.textContent =
+                        config.detailsHeading;
+                }
+
+
+                if (subjectSection) {
+                    subjectSection.hidden = !config.showSubject;
+                }
+
+
+                if (submissionSection) {
+                    submissionSection.hidden = !config.showSubmission;
+                }
+
+
+                if (requestCategoryItem) {
+                    requestCategoryItem.hidden = !config.showCategory;
+                }
+
+
+                if (requestDueItem) {
+                    requestDueItem.hidden = !config.showDue;
+                }
+
+
+                if (requestPriorityItem) {
+                    requestPriorityItem.hidden = !config.showPriority;
+                }
+
+
+                if (requestAssignedByItem) {
+                    requestAssignedByItem.hidden =
+                        !config.showAssignedBy;
+                }
+
+
+                if (requestHandledByItem) {
+                    requestHandledByItem.hidden =
+                        !config.showHandledBy;
+                }
+
+
+                if (remarksSection) {
+                    remarksSection.hidden = !config.showRemarks;
+                }
+
+            }
+
+
+            // ==================================================
+            // FILL STEP 1 (per kind)
+            // ==================================================
+
+            function fillStepOne(kind, data) {
+
+                applyKindConfig(kind);
+
+
+                if (kind === "document") {
+
+                    setText(employeeName, data.employeeName);
+                    setText(employeeNumber, data.employeeNumber);
+                    setText(department, data.department);
+
+                    setText(requestType, data.title);
+                    setText(requestCategory, data.type);
+                    setText(requestDate, data.assignedAt);
+                    setText(
+                        requestDue,
+                        data.hasDue ? data.dueDate : "No due date"
+                    );
+                    setText(requestPriority, data.priority);
+                    setText(requestAssignedBy, data.assignedBy);
+
+                    setText(requestDescription, data.instruction);
+
+
+                    if (submissionText) {
+
+                        const hasText =
+                            !!(data.responseText &&
+                                data.responseText.trim());
+
+                        submissionText.hidden = !hasText;
+
+                        submissionText.textContent =
+                            hasText ? data.responseText : "";
+
+                    }
+
+
+                    if (submissionFile) {
+
+                        const hasFile =
+                            !!(data.hasFile && data.fileUrl);
+
+                        submissionFile.hidden = !hasFile;
+
+                        if (hasFile) {
+                            submissionFile.href = data.fileUrl;
+                        }
+
+                    }
+
+
+                    if (submissionFileName) {
+                        submissionFileName.textContent =
+                            data.fileName || "document";
+                    }
+
+
+                    if (submissionFileSize) {
+                        submissionFileSize.textContent =
+                            data.fileSize || "";
+                    }
+
+
+                    if (submissionAt) {
+
+                        submissionAt.textContent =
+                            (data.submittedAt &&
+                                data.submittedAt !== "—")
+                                ? "Submitted " + data.submittedAt
+                                : "";
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                if (kind === "reset") {
+
+                    setText(employeeName, data.name);
+                    setText(employeeNumber, data.identifier);
+                    setText(department, data.contact);
+
+                    setText(requestType, "Password Reset");
+                    setText(requestDate, data.date);
+                    setText(requestHandledBy, data.resolvedBy);
+                    setText(requestDescription, data.message);
+
+
+                    return;
+
+                }
+
+
+                setText(employeeName, data.name);
+                setText(employeeNumber, data.employeeNumber);
+                setText(department, data.department);
+
+                setText(requestType, data.requestType);
+                setText(requestDate, data.date);
+                setText(requestSubject, data.subject);
+                setText(requestDescription, data.description);
+
+            }
+
+
+            // ==================================================
+            // OPEN MODAL
+            // ==================================================
+
+            function openRequestModal(row, kind) {
+
+                const config =
+                    REQUEST_KINDS[kind] || REQUEST_KINDS.employee;
+
+
+                const data = requestData(row, kind);
 
 
                 const originalStatus =
                     data.status || "Pending";
 
 
+                currentRequestRow = row;
+
+                currentRequestKind = kind;
+
+                currentRequestId =
+                    kind === "document"
+                        ? data.id
+                        : (row.dataset.id || null);
+
+
                 selectedStatus = originalStatus;
 
-                requestIsFinalized =
-                    originalStatus !== "Pending";
+
+                requestIsEditable =
+                    config.editable(originalStatus, data);
 
 
                 resetModalStep();
 
+                resetSaveButton();
 
-                if (employeeName) {
-                    employeeName.textContent =
-                        data.name || "Unknown Employee";
-                }
+                fillStepOne(kind, data);
 
 
-                if (employeeNumber) {
-                    employeeNumber.textContent =
-                        data.employeeNumber || "—";
-                }
+                buildStatusList(
+                    config.options(originalStatus, data)
+                );
 
 
-                if (department) {
-                    department.textContent =
-                        data.department || "—";
-                }
-
-
-                if (requestType) {
-                    requestType.textContent =
-                        data.requestType || "—";
-                }
-
-
-                if (requestDate) {
-                    requestDate.textContent =
-                        data.date || "—";
-                }
-
-
-                if (requestSubject) {
-                    requestSubject.textContent =
-                        data.subject || "No subject provided.";
-                }
-
-
-                if (requestDescription) {
-                    requestDescription.textContent =
-                        data.description ||
-                        "No additional details provided.";
-                }
+                highlightStatus(originalStatus);
 
 
                 if (requestStatus) {
 
-                    requestStatus.textContent =
-                        selectedStatus;
-
+                    requestStatus.textContent = originalStatus;
 
                     requestStatus.className =
-                        "badge " +
-                        getStatusClass(selectedStatus);
+                        "badge " + getStatusClass(originalStatus);
 
                 }
 
 
-                highlightStatus(selectedStatus);
-
-
                 if (requestRemarks) {
+
                     requestRemarks.value =
-                        data.hrRemarks || "";
+                        data.hrRemarks ||
+                        data.reviewRemarks ||
+                        "";
+
+                    requestRemarks.readOnly = false;
+
                 }
 
 
@@ -1058,7 +1670,7 @@
 
 
             // ==================================================
-            // CLOSE REQUEST MODAL
+            // CLOSE MODAL
             // ==================================================
 
             function closeRequestModal() {
@@ -1082,7 +1694,9 @@
 
                 currentRequestId = null;
 
-                requestIsFinalized = false;
+                currentRequestKind = "employee";
+
+                requestIsEditable = false;
 
                 selectedStatus = "Pending";
 
@@ -1101,7 +1715,7 @@
 
 
             // ==================================================
-            // REQUEST TYPE CLICK
+            // VIEW BUTTON → OPEN
             // ==================================================
 
             document.addEventListener(
@@ -1128,7 +1742,7 @@
                     }
 
 
-                    openRequestModal(row);
+                    openRowModal(row);
 
                 }
             );
@@ -1161,7 +1775,7 @@
                     }
 
 
-                    if (!isRequestEditable()) {
+                    if (!requestIsEditable) {
                         return;
                     }
 
@@ -1178,7 +1792,6 @@
 
                         requestStatus.textContent =
                             selectedStatus;
-
 
                         requestStatus.className =
                             "badge " +
@@ -1210,30 +1823,28 @@
                 "click",
                 function () {
 
-                    if (requestModalStep === 1) {
-
-                        requestStepOne.hidden = true;
-
-                        requestStepTwo.hidden = false;
-
-                        requestModalStep = 2;
-
-                        requestModalNext.hidden = true;
-
-
-                        if (requestModalBack) {
-                            requestModalBack.hidden = false;
-                        }
-
-
-                        if (requestModalSave) {
-                            requestModalSave.hidden =
-                                requestIsFinalized;
-                        }
-
-
+                    if (requestModalStep !== 1) {
                         return;
+                    }
 
+
+                    requestStepOne.hidden = true;
+
+                    requestStepTwo.hidden = false;
+
+                    requestModalStep = 2;
+
+                    requestModalNext.hidden = true;
+
+
+                    if (requestModalBack) {
+                        requestModalBack.hidden = false;
+                    }
+
+
+                    if (requestModalSave) {
+                        requestModalSave.hidden =
+                            !requestIsEditable;
                     }
 
                 }
@@ -1267,30 +1878,17 @@
 
 
             // ==================================================
-            // UPDATE TABLE ROW
+            // ROW STATUS UPDATE (in place, after a save)
             // ==================================================
 
-            function updateRequestRow(row, request) {
+            function setRowStatus(row, status) {
 
-                if (!row || !request) {
+                if (!row) {
                     return;
                 }
 
 
-                const status =
-                    request.status || "Pending";
-
-
-                const remarks =
-                    request.hr_remarks || "";
-
-
                 row.dataset.status = status;
-
-                row.dataset.hrRemarks = remarks;
-
-                row.dataset.id =
-                    request.request_id || row.dataset.id;
 
 
                 const badge =
@@ -1302,17 +1900,226 @@
                     badge.textContent = status;
 
                     badge.className =
-                        "badge " +
-                        getStatusClass(status);
+                        "badge " + getStatusClass(status);
 
                 }
 
             }
 
 
+            function updateRequestRow(row, request) {
+
+                if (!row || !request) {
+                    return;
+                }
+
+
+                row.dataset.hrRemarks =
+                    request.hr_remarks || "";
+
+                row.dataset.id =
+                    request.request_id || row.dataset.id;
+
+
+                setRowStatus(row, request.status || "Pending");
+
+            }
+
+
+            function updateDocumentRow(row, status, remarks) {
+
+                const data = parseDocumentPayload(row);
+
+
+                data.status = status;
+
+                data.statusLabel = status;
+
+                data.statusClass = getStatusClass(status);
+
+                data.canReview = false;
+
+                data.canComplete = status === "Approved";
+
+
+                if (remarks) {
+                    data.reviewRemarks = remarks;
+                }
+
+
+                row.dataset.document = JSON.stringify(data);
+
+            }
+
+
             // ==================================================
-            // SAVE REQUEST
+            // SAVE (dispatch per kind)
             // ==================================================
+
+            async function saveRequest() {
+
+                const hrRemarks =
+                    requestRemarks?.value.trim() || "";
+
+
+                /*
+                 * Employee request — its own endpoint.
+                 */
+
+                if (currentRequestKind === "employee") {
+
+                    const formData = new FormData();
+
+                    formData.append("request_id", currentRequestId);
+
+                    formData.append("status", selectedStatus);
+
+                    formData.append("hr_remarks", hrRemarks);
+
+
+                    const response = await fetch(
+                        "?page=employee-requests-update",
+                        {
+                            method: "POST",
+                            body: formData,
+                            credentials: "same-origin"
+                        }
+                    );
+
+
+                    const result = await response.json();
+
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to save the request."
+                        );
+
+                    }
+
+
+                    updateRequestRow(
+                        currentRequestRow,
+                        result.request
+                    );
+
+
+                    if (requestRemarks) {
+                        requestRemarks.value =
+                            result.request.hr_remarks || "";
+                    }
+
+
+                    return result.request.status;
+
+                }
+
+
+                /*
+                 * Password reset request — status only (the endpoint
+                 * does not accept remarks).
+                 */
+
+                if (currentRequestKind === "reset") {
+
+                    const formData = new FormData();
+
+                    formData.append("request_id", currentRequestId);
+
+                    formData.append("status", selectedStatus);
+
+
+                    const response = await fetch(
+                        "?page=password-reset-request-update",
+                        {
+                            method: "POST",
+                            body: formData,
+                            credentials: "same-origin"
+                        }
+                    );
+
+
+                    const result = await response.json();
+
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to update the password reset request."
+                        );
+
+                    }
+
+
+                    setRowStatus(currentRequestRow, selectedStatus);
+
+
+                    return selectedStatus;
+
+                }
+
+
+                /*
+                 * Onboarding document — the chosen status maps to the
+                 * matching Onboarding endpoint.
+                 */
+
+                const endpoint =
+                    selectedStatus === "Approved"
+                        ? "?page=onboarding-verify-document"
+                        : (
+                            selectedStatus === "Completed"
+                                ? "?page=onboarding-complete-document"
+                                : "?page=onboarding-reject-document"
+                        );
+
+
+                const formData = new FormData();
+
+                formData.append("document_id", currentRequestId);
+
+                formData.append("remarks", hrRemarks);
+
+
+                const response = await fetch(
+                    endpoint,
+                    {
+                        method: "POST",
+                        body: formData,
+                        credentials: "same-origin"
+                    }
+                );
+
+
+                const result = await response.json();
+
+
+                if (!response.ok || !result.success) {
+
+                    throw new Error(
+                        result.message ||
+                        "Failed to update the document."
+                    );
+
+                }
+
+
+                setRowStatus(currentRequestRow, selectedStatus);
+
+                updateDocumentRow(
+                    currentRequestRow,
+                    selectedStatus,
+                    hrRemarks
+                );
+
+
+                return selectedStatus;
+
+            }
+
 
             requestModalSave?.addEventListener(
                 "click",
@@ -1321,7 +2128,7 @@
                     if (!currentRequestId) {
 
                         alert(
-                            "Unable to identify the employee request."
+                            "Unable to identify this request."
                         );
 
                         return;
@@ -1329,12 +2136,15 @@
                     }
 
 
-                    if (!isRequestEditable()) {
+                    if (!requestIsEditable) {
                         return;
                     }
 
 
-                    if (selectedStatus === "Pending") {
+                    if (
+                        currentRequestKind === "employee" &&
+                        selectedStatus === "Pending"
+                    ) {
 
                         alert(
                             "Please select Approved, Rejected, or Completed before saving."
@@ -1345,13 +2155,9 @@
                     }
 
 
-                    const hrRemarks =
-                        requestRemarks?.value.trim() || "";
-
-
                     const confirmed =
                         window.confirm(
-                            `Are you sure you want to finalize this request as "${selectedStatus}"? Once saved, the request cannot be changed.`
+                            `Mark this request as "${selectedStatus}"?`
                         );
 
 
@@ -1368,81 +2174,24 @@
 
                     try {
 
-                        const formData = new FormData();
-
-                        formData.append(
-                            "request_id",
-                            currentRequestId
-                        );
-
-                        formData.append(
-                            "status",
-                            selectedStatus
-                        );
-
-                        formData.append(
-                            "hr_remarks",
-                            hrRemarks
-                        );
+                        const savedStatus =
+                            await saveRequest();
 
 
-                        const response =
-                            await fetch(
-                                "?page=employee-requests-update",
-                                {
-                                    method: "POST",
-                                    body: formData,
-                                    credentials: "same-origin"
-                                }
-                            );
+                        requestIsEditable = false;
 
-
-                        const result =
-                            await response.json();
-
-
-                        if (!response.ok || !result.success) {
-
-                            throw new Error(
-                                result.message ||
-                                "Failed to save the request."
-                            );
-
-                        }
-
-
-                        updateRequestRow(
-                            currentRequestRow,
-                            result.request
-                        );
-
-
-                        requestIsFinalized = true;
-
-                        selectedStatus = result.request.status;
+                        selectedStatus = savedStatus;
 
 
                         if (requestStatus) {
 
                             requestStatus.textContent =
-                                result.request.status;
-
+                                savedStatus;
 
                             requestStatus.className =
                                 "badge " +
-                                getStatusClass(
-                                    result.request.status
-                                );
+                                getStatusClass(savedStatus);
 
-                        }
-
-
-                        highlightStatus(result.request.status);
-
-
-                        if (requestRemarks) {
-                            requestRemarks.value =
-                                result.request.hr_remarks || "";
                         }
 
 
@@ -1457,20 +2206,20 @@
 
 
                         alert(
-                            "Employee request finalized successfully."
+                            "Request updated successfully."
                         );
 
                     } catch (error) {
 
                         console.error(
-                            "Employee request update error:",
+                            "Request update error:",
                             error
                         );
 
 
                         alert(
                             error.message ||
-                            "Failed to save the employee request."
+                            "Failed to save the request."
                         );
 
 
@@ -1486,405 +2235,16 @@
 
 
             // ==================================================
-            // PASSWORD RESET REQUEST MODAL
-            // ==================================================
-
-            const UPDATE_URL =
-                "?page=password-reset-request-update";
-
-
-            const RESET_STATUS_META = {
-
-                Pending: {
-                    label: "Pending",
-                    className: "badge-gray",
-                    action: "Mark resolved",
-                    next: "Resolved"
-                },
-
-                Resolved: {
-                    label: "Resolved",
-                    className: "badge-green",
-                    action: "Reopen",
-                    next: "Pending"
-                }
-
-            };
-
-
-            const resetModal =
-                document.getElementById("resetRequestModal");
-
-
-            const resetModalName =
-                document.getElementById("resetModalName");
-
-
-            const resetModalIdentifier =
-                document.getElementById("resetModalIdentifier");
-
-
-            const resetModalContact =
-                document.getElementById("resetModalContact");
-
-
-            const resetModalCreated =
-                document.getElementById("resetModalCreated");
-
-
-            const resetModalStatus =
-                document.getElementById("resetModalStatus");
-
-
-            const resetModalResolvedBy =
-                document.getElementById("resetModalResolvedBy");
-
-
-            const resetModalMessage =
-                document.getElementById("resetModalMessage");
-
-
-            const resetModalAction =
-                document.getElementById("resetRequestModalAction");
-
-
-            const resetModalBackdrop =
-                resetModal?.querySelector(
-                    ".request-modal-backdrop"
-                );
-
-
-            let currentResetRow = null;
-
-
-            function resetStatusBadge(status) {
-
-                const meta =
-                    RESET_STATUS_META[status] ||
-                    RESET_STATUS_META.Pending;
-
-
-                return (
-                    '<span class="badge ' +
-                    meta.className +
-                    '">' +
-                    meta.label +
-                    "</span>"
-                );
-
-            }
-
-
-            function openResetModal(row) {
-
-                if (!resetModal) {
-                    return;
-                }
-
-
-                currentResetRow = row;
-
-
-                const status =
-                    row.dataset.status || "Pending";
-
-
-                const meta =
-                    RESET_STATUS_META[status] ||
-                    RESET_STATUS_META.Pending;
-
-
-                if (resetModalName) {
-                    resetModalName.textContent =
-                        row.dataset.name || "—";
-                }
-
-
-                if (resetModalIdentifier) {
-                    resetModalIdentifier.textContent =
-                        row.dataset.identifier || "—";
-                }
-
-
-                if (resetModalContact) {
-                    resetModalContact.textContent =
-                        row.dataset.contact || "—";
-                }
-
-
-                if (resetModalCreated) {
-                    resetModalCreated.textContent =
-                        row.dataset.created || "—";
-                }
-
-
-                if (resetModalStatus) {
-                    resetModalStatus.innerHTML =
-                        resetStatusBadge(status);
-                }
-
-
-                if (resetModalResolvedBy) {
-                    resetModalResolvedBy.textContent =
-                        row.dataset.resolvedBy || "—";
-                }
-
-
-                if (resetModalMessage) {
-                    resetModalMessage.textContent =
-                        row.dataset.message || "(no message)";
-                }
-
-
-                if (resetModalAction) {
-
-                    resetModalAction.dataset.status = status;
-
-                    resetModalAction.innerHTML =
-                        status === "Resolved"
-                            ? '<i class="fa-solid fa-rotate-left"></i> ' +
-                                meta.action
-                            : '<i class="fa-solid fa-check"></i> ' +
-                                meta.action;
-
-                }
-
-
-                resetModal.classList.add("is-open");
-
-                resetModal.setAttribute(
-                    "aria-hidden",
-                    "false"
-                );
-
-                document.body.classList.add("modal-open");
-
-            }
-
-
-            function closeResetModal() {
-
-                if (!resetModal) {
-                    return;
-                }
-
-
-                resetModal.classList.remove("is-open");
-
-                resetModal.setAttribute(
-                    "aria-hidden",
-                    "true"
-                );
-
-                document.body.classList.remove("modal-open");
-
-
-                currentResetRow = null;
-
-            }
-
-
-            document
-                .getElementById("resetRequestModalClose")
-                ?.addEventListener("click", closeResetModal);
-
-
-            document
-                .getElementById("resetRequestModalCloseFooter")
-                ?.addEventListener("click", closeResetModal);
-
-
-            resetModalBackdrop?.addEventListener(
-                "click",
-                closeResetModal
-            );
-
-
-            // ==================================================
-            // APPLY A NEW STATUS TO THE RESET ROW
-            // ==================================================
-
-            function applyResetStatus(row, request) {
-
-                const status =
-                    request.status || "Pending";
-
-
-                const meta =
-                    RESET_STATUS_META[status] ||
-                    RESET_STATUS_META.Pending;
-
-
-                row.dataset.status = status;
-
-                row.dataset.resolvedAt =
-                    request.resolved_at || "";
-
-                row.dataset.resolvedBy =
-                    request.resolved_by_username || "";
-
-
-                const badge =
-                    row.querySelector(".badge");
-
-
-                if (badge) {
-
-                    badge.className =
-                        "badge " + meta.className;
-
-                    badge.textContent = meta.label;
-
-                }
-
-            }
-
-
-            // ==================================================
-            // SAVE RESET STATUS
-            // ==================================================
-
-            async function saveResetStatus(row, nextStatus, button) {
-
-                const requestId =
-                    row.dataset.id;
-
-
-                if (button) {
-                    button.disabled = true;
-                }
-
-
-                const formData = new FormData();
-
-                formData.append("request_id", requestId);
-
-                formData.append("status", nextStatus);
-
-
-                try {
-
-                    const response =
-                        await fetch(
-                            UPDATE_URL,
-                            {
-                                method: "POST",
-                                body: formData,
-                                credentials: "same-origin"
-                            }
-                        );
-
-
-                    const result =
-                        await response.json();
-
-
-                    if (!response.ok || !result.success) {
-
-                        throw new Error(
-                            result.message ||
-                            "Failed to update the request."
-                        );
-
-                    }
-
-
-                    applyResetStatus(row, result.request);
-
-                    refreshSummaryCounts();
-
-                    applyFilters();
-
-
-                    return true;
-
-                } catch (error) {
-
-                    window.alert(
-                        error.message ||
-                        "Failed to update the request."
-                    );
-
-                    return false;
-
-                } finally {
-
-                    if (button) {
-                        button.disabled = false;
-                    }
-
-                }
-
-            }
-
-
-            // ==================================================
-            // MODAL ACTION BUTTON
-            // ==================================================
-
-            resetModalAction?.addEventListener(
-                "click",
-                async function () {
-
-                    if (!currentResetRow) {
-                        return;
-                    }
-
-
-                    const status =
-                        currentResetRow.dataset.status ||
-                        "Pending";
-
-
-                    const meta =
-                        RESET_STATUS_META[status] ||
-                        RESET_STATUS_META.Pending;
-
-
-                    const confirmText =
-                        status === "Resolved"
-                            ? "Reopen this password reset request?"
-                            : "Mark this password reset request as resolved? Make sure you have already reset the account.";
-
-
-                    if (!window.confirm(confirmText)) {
-                        return;
-                    }
-
-
-                    resetModalAction.disabled = true;
-
-
-                    const saved =
-                        await saveResetStatus(
-                            currentResetRow,
-                            meta.next,
-                            null
-                        );
-
-
-                    resetModalAction.disabled = false;
-
-
-                    if (saved) {
-                        closeResetModal();
-                    }
-
-                }
-            );
-
-
-            // ==================================================
-            // ROW CLICK → OPEN THE RIGHT MODAL
+            // ROW CLICK → OPEN THE UNIFIED MODAL
             // ==================================================
 
             function openRowModal(row) {
 
-                if ((row.dataset.kind || "employee") === "reset") {
-                    openResetModal(row);
-                } else {
-                    openRequestModal(row);
-                }
+                const kind =
+                    row.dataset.kind || "employee";
+
+
+                openRequestModal(row, kind);
 
             }
 
@@ -1952,12 +2312,8 @@
                     }
 
 
-                    if (
-                        resetModal &&
-                        resetModal.classList.contains("is-open")
-                    ) {
-                        closeResetModal();
-                    }
+
+
 
                 }
             );

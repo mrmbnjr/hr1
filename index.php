@@ -463,6 +463,12 @@ switch ($page) {
 
         break;
 
+    case 'onboarding-complete-document':
+
+        (new OnboardingController())->markCompleted();
+
+        break;
+
     /*
     |--------------------------------------------------------------------------
     | HUMAN CAPITAL

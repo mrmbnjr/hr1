@@ -441,7 +441,7 @@ class Dashboard
                 o.onboarding_status,
                 o.completed_at,
                 COALESCE(documents.total, 0) AS document_total,
-                COALESCE(documents.verified, 0) AS document_verified,
+                COALESCE(documents.accepted, 0) AS document_accepted,
                 COALESCE(documents.pending, 0) AS pending_documents,
                 (
                     SELECT od.document_name
@@ -473,7 +473,7 @@ class Dashboard
                 SELECT
                     onboarding_id,
                     COUNT(*) AS total,
-                    SUM(status = 'Verified') AS verified,
+                    SUM(status IN ('Approved', 'Completed')) AS accepted,
                     SUM(status = 'Pending') AS pending
                 FROM onboarding_documents
                 GROUP BY onboarding_id
@@ -505,7 +505,7 @@ class Dashboard
             } elseif ((int) $employee['document_total'] > 0) {
                 $completedSteps = 3;
 
-                if ((int) $employee['document_verified'] === (int) $employee['document_total']) {
+                if ((int) $employee['document_accepted'] === (int) $employee['document_total']) {
                     $completedSteps++;
                 }
 
