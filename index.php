@@ -26,7 +26,7 @@ define('BASE_PATH', __DIR__);
 
 require BASE_PATH . '/src/bootstrap.php';
 
-$page = $_GET['page'] ?? 'login';
+$page = $_GET['page'] ?? 'home';
 
 if (isset($_SESSION['user_id']) && $page !== 'login') {
     $activityAction = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST'
@@ -44,6 +44,12 @@ if (isset($_SESSION['user_id']) && $page !== 'login') {
 */
 
 switch ($page) {
+
+    case 'home':
+
+        require BASE_PATH . '/resources/views/public/landing.php';
+
+        break;
 
     /*
     |--------------------------------------------------------------------------
