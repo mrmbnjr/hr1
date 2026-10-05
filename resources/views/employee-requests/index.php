@@ -110,11 +110,6 @@ $documentStatusMeta = [
         "class" => "badge-green"
     ],
 
-    "Completed" => [
-        "label" => "Completed",
-        "class" => "badge-green"
-    ],
-
     "Rejected" => [
         "label" => "Rejected",
         "class" => "badge-red"
@@ -265,10 +260,9 @@ foreach ($passwordResetRequests as $reset) {
 | Onboarding document requests feed the same status buckets
 |--------------------------------------------------------------------------
 |
-| Documents carry the same canonical statuses as every other request:
-| Pending (not yet settled), Approved (confirmed), Completed (carried out)
-| and Rejected (not accepted). A Pending row is awaiting HR review once the
-| employee has submitted it, and awaiting the employee otherwise.
+| Documents use Pending, Approved, and Rejected. Approval is the final
+| accepted state. A Pending row is awaiting HR review once the employee has
+| submitted it, and awaiting the employee otherwise.
 |
 */
 
@@ -279,8 +273,6 @@ foreach ($documentRequests as $document) {
 
     if ($documentStatus === "Approved") {
         $summary["approved"]++;
-    } elseif ($documentStatus === "Completed") {
-        $summary["completed"]++;
     } elseif ($documentStatus === "Rejected") {
         $summary["rejected"]++;
     } else {
@@ -470,12 +462,12 @@ $hasAnyRows =
                     Approved
                 </option>
 
-                <option value="Rejected">
-                    Rejected
-                </option>
-
                 <option value="Completed">
                     Completed
+                </option>
+
+                <option value="Rejected">
+                    Rejected
                 </option>
 
             </select>
@@ -890,6 +882,7 @@ $hasAnyRows =
                                         $reset['resolved_by_username']
                                         ?? ''
                                     ) ?>"
+
                                 >
 
 
@@ -1142,19 +1135,13 @@ $hasAnyRows =
                                 /*
                                  * Approve / Reject are available once the
                                  * employee has submitted a still-Pending
-                                 * document. Mark completed is available once
-                                 * HR has approved it.
+                                 * document.
                                  */
 
                                 $documentCanReview =
                                     $canManageDocuments
                                     && $documentStatus === 'Pending'
                                     && $documentIsSubmitted;
-
-
-                                $documentCanComplete =
-                                    $canManageDocuments
-                                    && $documentStatus === 'Approved';
 
 
                                 $documentPayload = [
@@ -1286,9 +1273,6 @@ $hasAnyRows =
 
                                     'canReview' =>
                                         $documentCanReview,
-
-                                    'canComplete' =>
-                                        $documentCanComplete,
 
                                 ];
 
@@ -1957,7 +1941,6 @@ $hasAnyRows =
                             rows="5"
                             placeholder="Enter HR remarks..."
                         ></textarea>
-
 
                         <p
                             class="request-readonly-message"

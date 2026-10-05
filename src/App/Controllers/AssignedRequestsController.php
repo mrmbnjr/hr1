@@ -144,10 +144,10 @@ class AssignedRequestsController
             );
         }
 
-        if (in_array($request['source_status'] ?? '', ['Approved', 'Completed'], true)) {
+        if (($request['source_status'] ?? '') === 'Approved') {
             $this->redirect(
                 'assigned-requests',
-                ['error' => 'already-completed']
+                ['error' => 'already-approved']
             );
         }
 

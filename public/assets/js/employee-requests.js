@@ -188,8 +188,7 @@
 
 
                         /*
-                         * Onboarding documents carry the same canonical
-                         * statuses as every other request.
+                         * Onboarding documents are accepted when approved.
                          */
 
                         if (kind === "document") {
@@ -199,8 +198,6 @@
 
                             if (status === "Approved") {
                                 counts.approved++;
-                            } else if (status === "Completed") {
-                                counts.completed++;
                             } else if (status === "Rejected") {
                                 counts.rejected++;
                             } else {
@@ -254,7 +251,6 @@
                                     value.toLowerCase()
                                 ];
                         }
-
 
                         if (
                             next === null ||
@@ -973,7 +969,6 @@
             const requestRemarks =
                 document.getElementById("modalRequestRemarks");
 
-
             const STATUS_LABELS = {
                 Pending: "Request is waiting for HR review.",
                 Approved: "Request has been approved by HR.",
@@ -990,9 +985,8 @@
              *   editable() — whether the confirmation step is interactive.
              *
              * The three request types share the canonical four statuses but
-             * expose different actions: onboarding documents walk
-             * Pending -> Approved -> Completed, password resets skip the
-             * Approved stage entirely.
+             * expose different actions: onboarding documents finish at
+             * Approved, while password resets skip the Approved stage.
              */
 
             const REQUEST_KINDS = {
@@ -1054,10 +1048,10 @@
                         if (status === "Pending") {
                             return ["Completed", "Rejected"];
                         }
-                        return ["Pending"];
+                        return [];
                     },
-                    editable: function () {
-                        return true;
+                    editable: function (status) {
+                        return status === "Pending";
                     }
                 },
 
@@ -1084,9 +1078,6 @@
                     options: function (status, data) {
                         if (status === "Pending" && data.canReview) {
                             return ["Approved", "Rejected"];
-                        }
-                        if (status === "Approved" && data.canComplete) {
-                            return ["Completed"];
                         }
                         return [];
                     },
@@ -1268,7 +1259,6 @@
                     requestRemarks.readOnly = !requestIsEditable;
                 }
 
-
                 if (requestReadonlyMessage) {
                     requestReadonlyMessage.hidden = requestIsEditable;
                 }
@@ -1278,7 +1268,8 @@
 
                     requestModalSave.hidden =
                         !requestIsEditable ||
-                        requestModalStep !== 2;
+                        (requestModalStep !== 2 &&
+                            currentRequestKind !== "reset");
 
                 }
 
@@ -1623,6 +1614,12 @@
 
                 fillStepOne(kind, data);
 
+                if (kind === "reset") {
+                    requestStepTwo.hidden = false;
+                    requestModalNext.hidden = true;
+                    requestModalBack.hidden = true;
+                }
+
 
                 buildStatusList(
                     config.options(originalStatus, data)
@@ -1643,16 +1640,15 @@
 
 
                 if (requestRemarks) {
-
-                    requestRemarks.value =
-                        data.hrRemarks ||
-                        data.reviewRemarks ||
-                        "";
-
+                    requestRemarks.value = kind === "reset"
+                        ? ""
+                        : data.hrRemarks || data.reviewRemarks || "";
                     requestRemarks.readOnly = false;
-
                 }
 
+                if (requestReadonlyMessage) {
+                    requestReadonlyMessage.hidden = requestIsEditable;
+                }
 
                 updateModalEditability();
 
@@ -1823,7 +1819,10 @@
                 "click",
                 function () {
 
-                    if (requestModalStep !== 1) {
+                    if (
+                        requestModalStep !== 1 ||
+                        currentRequestKind === "reset"
+                    ) {
                         return;
                     }
 
@@ -1925,7 +1924,6 @@
 
             }
 
-
             function updateDocumentRow(row, status, remarks) {
 
                 const data = parseDocumentPayload(row);
@@ -1938,9 +1936,6 @@
                 data.statusClass = getStatusClass(status);
 
                 data.canReview = false;
-
-                data.canComplete = status === "Approved";
-
 
                 if (remarks) {
                     data.reviewRemarks = remarks;
@@ -1975,7 +1970,6 @@
                     formData.append("status", selectedStatus);
 
                     formData.append("hr_remarks", hrRemarks);
-
 
                     const response = await fetch(
                         "?page=employee-requests-update",
@@ -2018,8 +2012,7 @@
 
 
                 /*
-                 * Password reset request — status only (the endpoint
-                 * does not accept remarks).
+                 * Password reset requests are actioned once, while Pending.
                  */
 
                 if (currentRequestKind === "reset") {
@@ -2070,11 +2063,7 @@
                 const endpoint =
                     selectedStatus === "Approved"
                         ? "?page=onboarding-verify-document"
-                        : (
-                            selectedStatus === "Completed"
-                                ? "?page=onboarding-complete-document"
-                                : "?page=onboarding-reject-document"
-                        );
+                        : "?page=onboarding-reject-document";
 
 
                 const formData = new FormData();
@@ -2147,7 +2136,20 @@
                     ) {
 
                         alert(
-                            "Please select Approved, Rejected, or Completed before saving."
+                            "Please select Approved or Rejected before saving."
+                        );
+
+                        return;
+
+                    }
+
+                    if (
+                        currentRequestKind === "reset" &&
+                        selectedStatus === "Pending"
+                    ) {
+
+                        alert(
+                            "Please select Completed or Rejected before saving."
                         );
 
                         return;

@@ -380,8 +380,7 @@ CREATE TABLE onboarding_documents (
     status ENUM(
         'Pending',
         'Approved',
-        'Rejected',
-        'Completed'
+        'Rejected'
     ) DEFAULT 'Pending',
 
     -- Request workflow extensions
@@ -400,7 +399,6 @@ CREATE TABLE onboarding_documents (
     -- HR review
     reviewed_by INT NULL,
     reviewed_at TIMESTAMP NULL DEFAULT NULL,
-    completed_at TIMESTAMP NULL DEFAULT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

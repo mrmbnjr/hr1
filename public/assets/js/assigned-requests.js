@@ -329,7 +329,7 @@
     /* ---------- populate + open ---------- */
 
     function openRequest(data) {
-        var isCompleted = data.status === 'Completed';
+        var isFinalized = data.status === 'Approved';
 
         el.title.textContent = data.title;
         el.type.textContent = data.type;
@@ -356,7 +356,7 @@
         var showDocument = false;
         var showConfirm = false;
 
-        if (!isCompleted) {
+        if (!isFinalized) {
             if (data.actionType === 'document') {
                 showDocument = true;
                 showResponse = true;
@@ -387,7 +387,7 @@
 
         var hasText = !!(data.response && data.response.trim());
         var hasFile = !!(data.fileOriginal);
-        var hasSubmission = isCompleted || hasText || hasFile;
+        var hasSubmission = isFinalized || hasText || hasFile;
 
         blocks.submitted.hidden = !hasSubmission;
 
@@ -412,10 +412,6 @@
                 meta.push('Submitted ' + data.submittedAt);
             }
 
-            if (data.completedAt && data.completedAt !== '—') {
-                meta.push('Completed ' + data.completedAt);
-            }
-
             el.submittedAt.textContent = meta.join(' · ');
             el.submittedAt.hidden = meta.length === 0;
         }
@@ -433,9 +429,9 @@
 
         submitting = false;
         el.submitBtn.disabled = false;
-        el.submitBtn.hidden = isCompleted;
+        el.submitBtn.hidden = isFinalized;
 
-        if (!isCompleted) {
+        if (!isFinalized) {
             el.submitBtn.innerHTML = data.actionType === 'confirmation'
                 ? '<i class="fa-solid fa-circle-check"></i> Confirm Completion'
                 : '<i class="fa-solid fa-paper-plane"></i> Submit';

@@ -138,7 +138,6 @@ class Onboarding
                 : [
                     'total' => 0,
                     'approved' => 0,
-                    'completed' => 0,
                     'accepted' => 0,
                     'submitted' => 0,
                     'pending' => 0,
@@ -286,7 +285,6 @@ class Onboarding
                 status,
                 submitted_at,
                 reviewed_at,
-                completed_at,
                 response_text
             FROM onboarding_documents
             WHERE onboarding_id = ?
@@ -324,22 +322,11 @@ class Onboarding
                     0
                 ) AS approved,
 
+                /* Approval is the accepted final state. */
                 COALESCE(
                     SUM(
                         CASE
-                            WHEN status = 'Completed'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS completed,
-
-                /* Accepted = approved or completed (HR confirmed it). */
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN status IN ('Approved', 'Completed')
+                            WHEN status = 'Approved'
                             THEN 1
                             ELSE 0
                         END
@@ -354,7 +341,7 @@ class Onboarding
                 COALESCE(
                     SUM(
                         CASE
-                            WHEN status IN ('Approved', 'Completed')
+                            WHEN status = 'Approved'
                               OR (status = 'Pending' AND submitted_at IS NOT NULL)
                             THEN 1
                             ELSE 0
@@ -401,7 +388,6 @@ class Onboarding
         return [
             'total' => (int) ($result['total'] ?? 0),
             'approved' => (int) ($result['approved'] ?? 0),
-            'completed' => (int) ($result['completed'] ?? 0),
             'accepted' => (int) ($result['accepted'] ?? 0),
             'submitted' => (int) ($result['submitted'] ?? 0),
             'pending' => (int) ($result['pending'] ?? 0),
@@ -891,8 +877,7 @@ class Onboarding
         }
 
         /*
-        * Approve the document — the confirmation stage. completed_at is
-        * reserved for markCompleted(), which actually carries the request out.
+        * Approval is the final accepted state for the requested document.
         */
         $stmt = $this->db->prepare("
             UPDATE onboarding_documents
@@ -1042,112 +1027,6 @@ class Onboarding
 
     /*
     |--------------------------------------------------------------------------
-    | MARK DOCUMENT COMPLETED
-    |--------------------------------------------------------------------------
-    |
-    | The request has actually been carried out: an approved document is
-    | finalised. Mirrors verifyDocument()/rejectDocument() in shape.
-    |
-    */
-
-    public function markCompleted(
-        int $documentId,
-        string $remarks = '',
-        ?int $reviewedBy = null
-    ): array {
-
-        $remarks = trim($remarks);
-
-        if ($documentId <= 0) {
-
-            return [
-                'success' => false,
-                'message' => 'Invalid document.'
-            ];
-        }
-
-        if (mb_strlen($remarks) > 1000) {
-
-            return [
-                'success' => false,
-                'message' => 'Remarks must not exceed 1000 characters.'
-            ];
-        }
-
-        /*
-        * Get the document.
-        */
-        $stmt = $this->db->prepare("
-            SELECT
-                document_id,
-                onboarding_id,
-                status
-            FROM onboarding_documents
-            WHERE document_id = ?
-            LIMIT 1
-        ");
-
-        $stmt->execute([
-            $documentId
-        ]);
-
-        $document = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$document) {
-
-            return [
-                'success' => false,
-                'message' => 'Document not found.'
-            ];
-        }
-
-        /*
-        * Only an approved document can be completed.
-        */
-        if (($document['status'] ?? '') !== 'Approved') {
-
-            return [
-                'success' => false,
-                'message' => 'Only an approved document can be marked as completed.'
-            ];
-        }
-
-        $now = date('Y-m-d H:i:s');
-
-        $stmt = $this->db->prepare("
-            UPDATE onboarding_documents
-            SET
-                status = 'Completed',
-                remarks = ?,
-                reviewed_by = ?,
-                reviewed_at = ?,
-                completed_at = ?
-            WHERE document_id = ?
-        ");
-
-        $stmt->execute([
-            $remarks !== '' ? $remarks : null,
-            $reviewedBy,
-            $now,
-            $now,
-            $documentId
-        ]);
-
-        /*
-        * Recalculate onboarding status.
-        */
-        $this->updateOnboardingStatus(
-            (int) $document['onboarding_id']
-        );
-
-        return [
-            'success' => true,
-            'message' => 'Document marked as completed successfully.'
-        ];
-    }
-
-    /*
-    |--------------------------------------------------------------------------
     | UPDATE ONBOARDING STATUS
     |--------------------------------------------------------------------------
     */
@@ -1196,7 +1075,7 @@ class Onboarding
          *
          * - Orientation recorded
          * - At least one document exists
-         * - Every document has been accepted (approved or completed)
+         * - Every requested document has been approved
          */
         if (
             !empty($onboarding['orientation_date']) &&

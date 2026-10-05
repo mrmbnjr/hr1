@@ -696,63 +696,6 @@ class OnboardingController
 
     /*
     |--------------------------------------------------------------------------
-    | MARK DOCUMENT COMPLETED
-    |--------------------------------------------------------------------------
-    |
-    | An approved document is finalised here. The request moves from the
-    | confirmation stage (Approved) to Completed, meaning the requirement has
-    | actually been carried out — the final transition in the shared status
-    | model. Only documents currently in the Approved state may be completed.
-    |
-    */
-
-    public function markCompleted()
-    {
-        $this->requireLogin();
-
-        $documentId = filter_input(
-            INPUT_POST,
-            'document_id',
-            FILTER_VALIDATE_INT
-        );
-
-        $remarks = trim(
-            $_POST['remarks'] ?? ''
-        );
-
-        if (!$documentId) {
-
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Invalid document.'
-            ]);
-
-            return;
-        }
-
-        if (mb_strlen($remarks) > 1000) {
-
-            $this->jsonResponse([
-                'success' => false,
-                'message' => 'Remarks must not exceed 1000 characters.'
-            ]);
-
-            return;
-        }
-
-        $model = new Onboarding();
-
-        $result = $model->markCompleted(
-            (int) $documentId,
-            $remarks,
-            (int) $_SESSION['user_id']
-        );
-
-        $this->jsonResponse($result);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
     | AUTH GUARD
     |--------------------------------------------------------------------------
     */

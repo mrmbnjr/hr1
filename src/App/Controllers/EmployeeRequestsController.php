@@ -716,9 +716,8 @@ class EmployeeRequestsController
     | UPDATE PASSWORD RESET REQUEST (HR / Admin)
     |--------------------------------------------------------------------------
     |
-    | Marks a "Contact HR" password reset request as Resolved, or reopens it.
-    | This only tracks the request itself — resetting the person's actual
-    | password is done from User Management.
+    | Completes or rejects a pending "Contact HR" password reset request.
+    | Settled requests cannot be edited or reopened.
     |
     */
 
@@ -791,13 +790,10 @@ class EmployeeRequestsController
 
         /*
         |--------------------------------------------------------------------------
-        | Status — Pending / Completed / Rejected for this queue
+        | Status — Completed / Rejected for this queue
         |--------------------------------------------------------------------------
         |
-        | Password resets share the canonical request statuses but never use
-        | the Approved stage: a reset is either still Pending, Completed once
-        | the password has actually been reset, or Rejected when the request
-        | is not honoured. Reopening returns the row to Pending.
+        | Password resets can only be actioned once while Pending.
         |
         */
 
@@ -810,7 +806,6 @@ class EmployeeRequestsController
         if (!in_array(
             $status,
             [
-                'Pending',
                 'Completed',
                 'Rejected'
             ],
@@ -822,7 +817,7 @@ class EmployeeRequestsController
             echo json_encode([
                 'success' => false,
                 'message' =>
-                    'Please choose Completed, Rejected or Pending before saving.'
+                    'Please choose Completed or Rejected before saving.'
             ]);
 
             return;
@@ -855,6 +850,18 @@ class EmployeeRequestsController
             return;
         }
 
+        if (($existing['status'] ?? '') !== 'Pending') {
+            http_response_code(409);
+
+            echo json_encode([
+                'success' => false,
+                'message' =>
+                    'This password reset request has already been actioned and cannot be changed.'
+            ]);
+
+            return;
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -862,10 +869,7 @@ class EmployeeRequestsController
         |--------------------------------------------------------------------------
         */
 
-        $handledBy =
-            $status !== 'Pending'
-                ? (int) Auth::userId()
-                : null;
+        $handledBy = (int) Auth::userId();
 
         try {
 
@@ -880,12 +884,12 @@ class EmployeeRequestsController
 
             if (!$updated) {
 
-                http_response_code(500);
+                http_response_code(409);
 
                 echo json_encode([
                     'success' => false,
                     'message' =>
-                        'Failed to update the password reset request.'
+                        'This password reset request has already been actioned and cannot be changed.'
                 ]);
 
                 return;
@@ -905,7 +909,6 @@ class EmployeeRequestsController
                     match ($status) {
                         'Completed' => 'Password reset request marked as completed.',
                         'Rejected'  => 'Password reset request rejected.',
-                        default     => 'Password reset request reopened.',
                     },
                 'request' =>
                     $request

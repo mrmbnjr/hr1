@@ -776,22 +776,6 @@ document.addEventListener(
         const rejectDocumentRemarks =
             document.getElementById("rejectDocumentRemarks");
 
-        const completeDocumentModal =
-            document.getElementById("completeDocumentModal");
-
-        const completeDocumentForm =
-            document.getElementById("completeDocumentForm");
-
-        const completeDocumentId =
-            document.getElementById("completeDocumentId");
-
-        const completeDocumentName =
-            document.getElementById("completeDocumentName");
-
-        const completeDocumentRemarks =
-            document.getElementById("completeDocumentRemarks");
-
-
         /*
         |--------------------------------------------------------------------------
         | OPEN VERIFY MODAL
@@ -908,63 +892,6 @@ document.addEventListener(
 
         /*
         |--------------------------------------------------------------------------
-        | OPEN MARK COMPLETED MODAL
-        |--------------------------------------------------------------------------
-        */
-
-        const completeButtons =
-            document.querySelectorAll(".complete-document");
-
-        completeButtons.forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        const documentId =
-                            this.dataset.id;
-
-                        const documentName =
-                            this.dataset.name || "Document";
-
-                        if (!documentId) {
-
-                            alert("Invalid document.");
-                            return;
-
-                        }
-
-                        if (completeDocumentId) {
-                            completeDocumentId.value = documentId;
-                        }
-
-                        if (completeDocumentName) {
-                            completeDocumentName.textContent =
-                                documentName;
-                        }
-
-                        /*
-                        * Clear previous remarks every time
-                        * the modal is opened.
-                        */
-                        if (completeDocumentRemarks) {
-                            completeDocumentRemarks.value = "";
-                        }
-
-                        openModalTarget(
-                            completeDocumentModal
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
         | CLOSE VERIFY MODAL
         |--------------------------------------------------------------------------
         */
@@ -999,28 +926,6 @@ document.addEventListener(
 
                     closeModalTarget(
                         rejectDocumentModal
-                    );
-
-                }
-
-            }
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | CLOSE MARK COMPLETED MODAL
-        |--------------------------------------------------------------------------
-        */
-
-        completeDocumentModal?.addEventListener(
-            "click",
-            function (event) {
-
-                if (event.target === completeDocumentModal) {
-
-                    closeModalTarget(
-                        completeDocumentModal
                     );
 
                 }
@@ -1323,128 +1228,6 @@ document.addEventListener(
 
         /*
         |--------------------------------------------------------------------------
-        | MARK DOCUMENT COMPLETED
-        |--------------------------------------------------------------------------
-        */
-
-        completeDocumentForm?.addEventListener(
-            "submit",
-            async function (event) {
-
-                event.preventDefault();
-
-                const documentId =
-                    completeDocumentId?.value;
-
-                const remarks =
-                    (completeDocumentRemarks?.value || "").trim();
-
-                if (!documentId) {
-
-                    alert("Invalid document.");
-                    return;
-
-                }
-
-                const submitButton =
-                    completeDocumentForm.querySelector(
-                        "button[type='submit']"
-                    );
-
-                const originalHTML =
-                    submitButton?.innerHTML || "";
-
-                submitButton.disabled = true;
-
-                submitButton.innerHTML =
-                    '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-                try {
-
-                    const formData =
-                        new FormData();
-
-                    formData.append(
-                        "document_id",
-                        documentId
-                    );
-
-                    /*
-                    * Optional remarks.
-                    */
-                    formData.append(
-                        "remarks",
-                        remarks
-                    );
-
-                    const response =
-                        await fetch(
-                            "?page=onboarding-complete-document",
-                            {
-                                method: "POST",
-                                body: formData
-                            }
-                        );
-
-                    if (!response.ok) {
-
-                        throw new Error(
-                            `HTTP ${response.status}`
-                        );
-
-                    }
-
-                    const data =
-                        await response.json();
-
-                    if (!data.success) {
-
-                        alert(
-                            data.message ||
-                            "Unable to mark the document as completed."
-                        );
-
-                        submitButton.disabled = false;
-                        submitButton.innerHTML =
-                            originalHTML;
-
-                        return;
-
-                    }
-
-                    closeModalTarget(
-                        completeDocumentModal
-                    );
-
-                    alert(
-                        data.message ||
-                        "Document marked as completed."
-                    );
-
-                    window.location.reload();
-
-                } catch (error) {
-
-                    console.error(
-                        "Document completion error:",
-                        error
-                    );
-
-                    alert(
-                        "Unable to mark the document as completed. Please try again."
-                    );
-
-                    submitButton.disabled = false;
-                    submitButton.innerHTML =
-                        originalHTML;
-
-                }
-
-            }
-        );
-
-        /*
-        |--------------------------------------------------------------------------
         | OPEN EDIT DOCUMENT MODAL
         |--------------------------------------------------------------------------
         */
@@ -1686,7 +1469,6 @@ document.addEventListener(
             const STATUS_BADGE = {
                 Pending: "badge-gray",
                 Approved: "badge-green",
-                Completed: "badge-green",
                 Rejected: "badge-red"
             };
 
@@ -1745,10 +1527,6 @@ document.addEventListener(
 
                     if (data.reviewedAt) {
                         meta.push("Reviewed " + data.reviewedAt);
-                    }
-
-                    if (data.completedAt) {
-                        meta.push("Completed " + data.completedAt);
                     }
 
                     dv.reviewMeta.textContent = meta.join(" · ");

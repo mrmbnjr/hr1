@@ -103,11 +103,11 @@ $statusMeta = [
         'tone' => 'progress'
     ],
 
-    'Completed' => [
-        'label' => 'Completed',
+    'Approved' => [
+        'label' => 'Approved',
         'class' => 'badge-green',
-        'tone' => 'completed'
-    ]
+        'tone' => 'approved'
+    ],
 
 ];
 
@@ -157,8 +157,7 @@ $eventIcon = [
     'assigned' => 'fa-user-check',
     'submitted' => 'fa-paper-plane',
     'uploaded' => 'fa-file-arrow-up',
-    'reviewed' => 'fa-magnifying-glass',
-    'completed' => 'fa-circle-check'
+    'reviewed' => 'fa-magnifying-glass'
 ];
 
 
@@ -255,8 +254,8 @@ $errorMessage =
                 'response-length' =>
                     'Your response is too long. Please keep it under 2000 characters.',
 
-                'already-completed' =>
-                    'This request has already been completed.',
+                'already-approved' =>
+                    'This request has already been approved.',
 
                 'not-found' =>
                     'The request could not be found.',
@@ -321,8 +320,8 @@ $errorMessage =
                         In Progress
                     </option>
 
-                    <option value="completed">
-                        Completed
+                    <option value="approved">
+                        Approved
                     </option>
 
                 </select>
@@ -524,7 +523,6 @@ $errorMessage =
                                             : null
                                     ),
                                     'submittedAt' => $fmt($request['submitted_at'] ?? null, 'F j, Y — g:i A'),
-                                    'completedAt' => $fmt($request['completed_at'] ?? null, 'F j, Y — g:i A'),
                                     'reviewRemarks' => trim((string) ($request['review_remarks'] ?? '')),
 
                                 ];

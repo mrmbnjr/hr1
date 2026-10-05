@@ -764,7 +764,7 @@ INSERT INTO onboarding_documents (
 (1, 1, 'NBI Clearance',                        'Upload your latest NBI clearance.',                             'Approved',  'Submit Missing Requirement',           'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
 (1, 1, 'SSS, PhilHealth, Pag-IBIG Numbers',    'Provide your government contribution numbers.',                 'Approved',  'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
 (1, 1, 'Signed Employment Contract',           'Return the signed copy of your employment contract.',           'Approved',  'Submit Required Document',             'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
-(1, 1, 'Medical Certificate',                  'Upload your pre-employment medical certificate.',               'Completed', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
+(1, 1, 'Medical Certificate',                  'Upload your pre-employment medical certificate.',               'Approved', 'Submit Additional Employment Document', 'Normal', DATE_SUB(CURDATE(), INTERVAL 21 DAY), 6, 'document', DATE_SUB(@now, INTERVAL 35 DAY),  DATE_SUB(@now, INTERVAL 33 DAY)),
 
 -- Ana Bautista (in progress)
 (2, 2, 'Government-Issued ID',                 'Upload a clear scan of your valid government ID.',              'Pending',  'Submit Required Document',             'High',   DATE_SUB(CURDATE(), INTERVAL 7 DAY),  6, 'document', DATE_SUB(@now, INTERVAL 14 DAY),  DATE_SUB(@now, INTERVAL 12 DAY)),
@@ -1062,22 +1062,17 @@ SET
     submission_file_size = 780 + (document_id * 7)
 WHERE submitted_at IS NOT NULL;
 
--- Approved / Completed / Rejected documents were reviewed by HR.
+-- Approved / Rejected documents were reviewed by HR.
 UPDATE onboarding_documents
 SET
     reviewed_by = assigned_by,
     reviewed_at = DATE_ADD(created_at, INTERVAL 4 DAY)
-WHERE status IN ('Approved', 'Completed', 'Rejected');
-
--- Completed documents were carried out after being approved.
-UPDATE onboarding_documents
-SET completed_at = DATE_ADD(created_at, INTERVAL 4 DAY)
-WHERE status = 'Completed';
+WHERE status IN ('Approved', 'Rejected');
 
 -- Response-only requests keep the reviewer/assignee traceable.
 UPDATE onboarding_documents
 SET response_text = 'Noted and verified against the submitted record.'
-WHERE status IN ('Approved', 'Completed')
+WHERE status = 'Approved'
   AND response_text IS NULL;
 
 

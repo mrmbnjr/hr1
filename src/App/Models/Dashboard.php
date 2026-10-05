@@ -473,7 +473,7 @@ class Dashboard
                 SELECT
                     onboarding_id,
                     COUNT(*) AS total,
-                    SUM(status IN ('Approved', 'Completed')) AS accepted,
+                    SUM(status = 'Approved') AS accepted,
                     SUM(status = 'Pending') AS pending
                 FROM onboarding_documents
                 GROUP BY onboarding_id

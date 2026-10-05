@@ -101,44 +101,36 @@ class PasswordResetRequest
     }
 
     /**
-     * Move a request between the canonical request statuses.
-     *
-     * Password resets share the same status vocabulary as every other request
-     * (Pending / Approved / Rejected / Completed); they simply never use the
-     * Approved stage — a reset is either still Pending, Completed once the
-     * password has actually been reset, or Rejected when the request is not
-     * honoured. Reopening returns the row to Pending.
-     *
-     * Any status other than Pending counts as settled, so the handler and the
-     * timestamp are stamped; reopening clears both so the row reflects that
-     * nobody has actioned it yet.
+     * Action a pending reset request once. Settled requests cannot be reopened.
      */
-    public function setStatus(int $requestId, string $status, ?int $handledBy): bool
+    public function setStatus(
+        int $requestId,
+        string $status,
+        ?int $handledBy
+    ): bool
     {
-        if (!in_array($status, ['Pending', 'Approved', 'Rejected', 'Completed'], true)) {
+        if (!in_array($status, ['Rejected', 'Completed'], true)) {
             return false;
         }
-
-        $isSettled = $status !== 'Pending';
 
         $sql = "
             UPDATE password_reset_requests
 
             SET
                 status = :status,
-                resolved_at = :resolved_at,
+                resolved_at = NOW(),
                 resolved_by = :resolved_by
 
             WHERE request_id = :request_id
+                AND status = 'Pending'
         ";
 
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
             ':status'      => $status,
-            ':resolved_at' => $isSettled ? date('Y-m-d H:i:s') : null,
-            ':resolved_by' => $isSettled ? $handledBy : null,
+            ':resolved_by' => $handledBy,
             ':request_id'  => $requestId,
-        ]);
+        ]) && $stmt->rowCount() === 1;
     }
 }

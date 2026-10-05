@@ -176,9 +176,6 @@ $totalDocuments =
 $approvedDocuments =
     (int) ($documentProgress['approved'] ?? 0);
 
-$completedDocuments =
-    (int) ($documentProgress['completed'] ?? 0);
-
 $acceptedDocuments =
     (int) ($documentProgress['accepted'] ?? 0);
 
@@ -377,17 +374,6 @@ $onboardingId =
 
             <div class="onboarding-stat-card">
                 <div class="stat-icon">
-                    <i class="fa-solid fa-circle-check"></i>
-                </div>
-                <div class="stat-content">
-                    <span>Completed</span>
-                    <strong><?= $completedDocuments ?></strong>
-                    <small>Carried out</small>
-                </div>
-            </div>
-
-            <div class="onboarding-stat-card">
-                <div class="stat-icon">
                     <i class="fa-solid fa-hourglass-half"></i>
                 </div>
                 <div class="stat-content">
@@ -569,10 +555,6 @@ $onboardingId =
                                     $statusClass = 'approved';
                                     break;
 
-                                case 'Completed':
-                                    $statusClass = 'completed';
-                                    break;
-
                                 case 'Rejected':
                                     $statusClass = 'rejected';
                                     break;
@@ -633,15 +615,6 @@ $onboardingId =
                                     : '';
                             }
 
-                            $docCompletedAt = '';
-
-                            if (!empty($document['completed_at'])) {
-                                $completedTimestamp = strtotime($document['completed_at']);
-                                $docCompletedAt = $completedTimestamp !== false
-                                    ? date('F j, Y — g:i A', $completedTimestamp)
-                                    : '';
-                            }
-
                             $actionTypeLabels = [
                                 'document' => 'Upload a document',
                                 'response' => 'Provide a written response',
@@ -687,14 +660,6 @@ $onboardingId =
                                 ];
                             }
 
-                            if (!empty($document['completed_at'])) {
-                                $docActivities[] = [
-                                    'icon' => 'fa-circle-check',
-                                    'text' => 'Document marked as completed.',
-                                    'date' => $docCompletedAt !== '' ? $docCompletedAt : 'Date unavailable',
-                                ];
-                            }
-
                             $documentPayload = [
                                 'name' => $document['document_name'] ?? 'Unnamed Document',
                                 'requestType' => $docRequestType,
@@ -709,7 +674,6 @@ $onboardingId =
                                 'response' => trim((string) ($document['response_text'] ?? '')),
                                 'remarks' => $document['remarks'] ?? '',
                                 'reviewedAt' => $docReviewedAt,
-                                'completedAt' => $docCompletedAt,
                                 'activities' => $docActivities,
                             ];
 
@@ -821,23 +785,6 @@ $onboardingId =
                                             title="Reject document">
 
                                             <i class="fa-solid fa-xmark"></i>
-
-                                        </button>
-
-                                    <?php elseif ($documentStatus === 'Approved'): ?>
-
-                                        <!-- Mark completed (carry the request out) -->
-                                        <button
-                                            type="button"
-                                            class="document-action complete-document"
-                                            data-id="<?= (int) ($document['document_id'] ?? 0) ?>"
-                                            data-name="<?= htmlspecialchars(
-                                                $document['document_name'] ?? '',
-                                                ENT_QUOTES
-                                            ) ?>"
-                                            title="Mark as completed">
-
-                                            <i class="fa-solid fa-flag-checkered"></i>
 
                                         </button>
 
@@ -1385,129 +1332,6 @@ $onboardingId =
 
                     <i class="fa-solid fa-xmark"></i>
                     Reject Document
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-<!-- ==============================================================
-    MARK DOCUMENT COMPLETED MODAL
-=============================================================== -->
-
-<div
-    class="document-modal-overlay"
-    id="completeDocumentModal"
-    aria-hidden="true">
-
-    <div
-        class="document-modal document-decision-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="completeDocumentModalTitle">
-
-        <div class="modal-header">
-
-            <div>
-
-                <span class="modal-icon decision-icon-complete">
-                    <i class="fa-solid fa-flag-checkered"></i>
-                </span>
-
-                <div>
-
-                    <h2 id="completeDocumentModalTitle">
-                        Mark Document Completed
-                    </h2>
-
-                    <p>
-                        Record that this approved requirement has been carried out.
-                    </p>
-
-                </div>
-
-            </div>
-
-            <button
-                type="button"
-                class="modal-close"
-                data-close-document-decision="completeDocumentModal"
-                aria-label="Close">
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-        </div>
-
-        <form
-            method="POST"
-            id="completeDocumentForm">
-
-            <input
-                type="hidden"
-                name="document_id"
-                id="completeDocumentId">
-
-            <input
-                type="hidden"
-                name="document_action"
-                value="complete">
-
-            <div class="decision-message">
-
-                <p>
-                    Mark this document as completed? This confirms the request
-                    has actually been carried out.
-                </p>
-
-                <span
-                    class="decision-document-name"
-                    id="completeDocumentName">
-                </span>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="completeDocumentRemarks">
-
-                    Remarks
-
-                    <span>Optional</span>
-
-                </label>
-
-                <textarea
-                    id="completeDocumentRemarks"
-                    name="remarks"
-                    rows="4"
-                    placeholder="Add remarks about the completion, if needed..."></textarea>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="modal-cancel"
-                    data-close-document-decision="completeDocumentModal">
-
-                    Cancel
-
-                </button>
-
-                <button
-                    type="submit"
-                    class="modal-submit decision-complete-btn">
-
-                    <i class="fa-solid fa-flag-checkered"></i>
-                    Mark Completed
 
                 </button>
 

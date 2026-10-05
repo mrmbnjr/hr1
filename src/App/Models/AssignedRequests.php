@@ -14,16 +14,14 @@ use PDO;
  *
  *   HR  requests a document during onboarding  -> onboarding_documents
  *   employee fulfils it on this page           -> stays Pending, submitted_at set
- *   HR  verifies or rejects it in onboarding   -> Approved / Rejected
- *   HR  finalises an approved document         -> Completed
+ *   HR  approves or rejects it in onboarding   -> Approved / Rejected
  *
  * The page therefore has its own vocabulary derived from the canonical
  * request statuses:
  *
  *   Pending (not submitted)  -> Pending Action
  *   Pending (submitted)      -> In Progress
- *   Approved                 -> In Progress
- *   Completed                -> Completed
+ *   Approved                 -> Approved
  *   Rejected                 -> Pending Action (returned to the employee)
  *
  * "Submitted" is derived from submitted_at, since the canonical enum has no
@@ -71,8 +69,7 @@ class AssignedRequests
         od.status AS source_status,
 
         CASE
-            WHEN od.status = 'Completed' THEN 'Completed'
-            WHEN od.status = 'Approved' THEN 'In Progress'
+            WHEN od.status = 'Approved' THEN 'Approved'
             WHEN od.status = 'Pending' AND od.submitted_at IS NOT NULL
                 THEN 'In Progress'
             ELSE 'Pending Action'
@@ -87,7 +84,6 @@ class AssignedRequests
         od.reviewed_by,
         od.remarks AS review_remarks,
         od.reviewed_at,
-        od.completed_at,
 
         od.created_at,
         od.updated_at,
@@ -180,8 +176,6 @@ class AssignedRequests
             WHERE od.employee_id = :employee_id
 
             ORDER BY
-                (od.status = 'Completed') ASC,
-
                 (
                     od.due_date IS NOT NULL
                     AND od.due_date < CURDATE()
@@ -354,15 +348,6 @@ class AssignedRequests
             ];
         }
 
-        if (!empty($request['completed_at'])) {
-
-            $events[] = [
-                'created_at' => $request['completed_at'],
-                'event' => 'completed',
-                'description' => 'This request was completed.'
-            ];
-        }
-
         return $events;
     }
 
@@ -406,7 +391,7 @@ class AssignedRequests
         if (
             in_array(
                 $request['source_status'] ?? '',
-                ['Approved', 'Completed'],
+                ['Approved'],
                 true
             )
         ) {
@@ -500,7 +485,7 @@ class AssignedRequests
             WHERE
                 document_id = :request_id
                 AND employee_id = :employee_id
-                AND status NOT IN ('Approved', 'Completed')
+                AND status != 'Approved'
         ";
 
         $stmt = $this->db->prepare($sql);

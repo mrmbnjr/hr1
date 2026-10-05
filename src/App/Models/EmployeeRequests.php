@@ -268,7 +268,6 @@ class EmployeeRequests
 
                 od.remarks,
                 od.reviewed_at,
-                od.completed_at,
                 od.created_at,
 
                 e.employee_number,
