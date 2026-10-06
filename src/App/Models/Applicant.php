@@ -1737,6 +1737,19 @@ class Applicant
                 }
             }
 
+            if ($applicantCount + 1 >= (int) $posting['max_applicants']) {
+                $closePostingStmt = $this->db->prepare("
+                    UPDATE job_postings
+                    SET status = 'Closed',
+                        closed_at = CURRENT_TIMESTAMP
+                    WHERE posting_id = :posting_id
+                      AND status = 'Open'
+                ");
+
+                $closePostingStmt->execute([
+                    ':posting_id' => $data['posting_id']
+                ]);
+            }
 
             if ($ownsTransaction) {
                 $this->db->commit();

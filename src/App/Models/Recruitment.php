@@ -153,6 +153,9 @@ class Recruitment
     public function createJob(array $data)
     {
         $maxApplicants = (int) ($data['max_applicants'] ?? 0);
+        $vacancies = (int) ($data['vacancies'] ?? 0);
+        $initialStatus = $vacancies > 0 ? 'Open' : 'Closed';
+        $initialClosedAt = $vacancies > 0 ? null : date('Y-m-d H:i:s');
 
         if ($maxApplicants < 1) {
             throw new \InvalidArgumentException(
@@ -206,6 +209,7 @@ class Recruitment
                 vacancies,
                 max_applicants,
                 status,
+                closed_at,
                 application_deadline,
                 created_by,
                 application_token
@@ -220,7 +224,8 @@ class Recruitment
                 :employment_type,
                 :vacancies,
                 :max_applicants,
-                'Open',
+                :status,
+                :closed_at,
                 :application_deadline,
                 :created_by,
                 :application_token
@@ -239,8 +244,10 @@ class Recruitment
                 ':requirements' => $data['requirements'],
                 ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
                 ':employment_type' => $data['employment_type'],
-                ':vacancies' => $data['vacancies'],
+                ':vacancies' => $vacancies,
                 ':max_applicants' => $maxApplicants,
+                ':status' => $initialStatus,
+                ':closed_at' => $initialClosedAt,
                 ':application_deadline' => $data['application_deadline'],
                 ':created_by' => $data['created_by'],
                 ':application_token' => $applicationToken
@@ -345,13 +352,45 @@ class Recruitment
          *   - reopened             -> clear it
          */
         $current = $this->db->prepare("
-            SELECT status, closed_at
-            FROM job_postings
-            WHERE posting_id = ?
+            SELECT
+                jp.status,
+                jp.closed_at,
+                (
+                    SELECT COUNT(*)
+                    FROM applications ap
+                    WHERE ap.posting_id = jp.posting_id
+                      AND (ap.application_status IS NULL
+                           OR ap.application_status <> 'Rejected')
+                ) AS applicant_count,
+                (
+                    SELECT COUNT(*)
+                    FROM applications ap
+                    WHERE ap.posting_id = jp.posting_id
+                      AND ap.application_status = 'Hired'
+                ) AS hired_count
+            FROM job_postings jp
+            WHERE jp.posting_id = ?
             LIMIT 1
         ");
         $current->execute([$data['posting_id']]);
         $existing = $current->fetch(PDO::FETCH_ASSOC);
+
+        if (!$existing) {
+            throw new \InvalidArgumentException(
+                'This job posting could not be found.'
+            );
+        }
+
+        if (
+            $newStatus === 'Open'
+            && (
+                (int) $data['vacancies'] <= 0
+                || (int) $existing['applicant_count'] >= $maxApplicants
+                || (int) $existing['hired_count'] >= (int) $data['vacancies']
+            )
+        ) {
+            $newStatus = 'Closed';
+        }
 
         $closedAt = null;
 
@@ -359,7 +398,7 @@ class Recruitment
 
             $closedAt = $existing['closed_at'] ?? null;
 
-            if (!$existing || $existing['status'] !== 'Closed' || $closedAt === null) {
+            if ($existing['status'] !== 'Closed' || $closedAt === null) {
                 $closedAt = date('Y-m-d H:i:s');
             }
         }
