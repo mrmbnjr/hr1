@@ -465,9 +465,9 @@ $journey = [
                 <span><strong>Head office</strong><small>Quezon City, Metro Manila</small></span>
                 <i class="fa-solid fa-arrow-up-right-from-square lp-contact__go" aria-hidden="true"></i>
             </a>
-            <a class="lp-contact" href="mailto:hello@ramyum.example">
+            <a class="lp-contact" href="mailto:ramyum.store@gmail.com">
                 <span class="lp-ico"><i class="fa-solid fa-envelope" aria-hidden="true"></i></span>
-                <span><strong>Email</strong><small>hello@ramyum.example</small></span>
+                <span><strong>Email</strong><small>ramyum.store@gmail.com</small></span>
                 <i class="fa-solid fa-arrow-right lp-contact__go" aria-hidden="true"></i>
             </a>
             <a class="lp-contact" href="tel:0280000000">
