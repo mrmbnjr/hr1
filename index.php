@@ -47,6 +47,37 @@ switch ($page) {
 
     case 'home':
 
+        $recruitment = new \App\Models\Recruitment();
+        $landingJobs = [];
+        $today = strtotime('today');
+
+        foreach ($recruitment->getAllJobs() as $job) {
+            $deadline = strtotime((string) ($job['application_deadline'] ?? '') . ' 23:59:59');
+            $vacancies = (int) ($job['vacancies'] ?? 0);
+            $hired = (int) ($job['hired'] ?? 0);
+
+            if (
+                ($job['status'] ?? '') !== 'Open'
+                || (int) ($job['applicants'] ?? 0) >= (int) ($job['max_applicants'] ?? 0)
+                || $hired >= $vacancies
+                || $deadline === false
+                || $deadline < $today
+            ) {
+                continue;
+            }
+
+            $landingJobs[] = [
+                'id' => $job['posting_id'],
+                'title' => $job['title'],
+                'department' => $job['department_name'],
+                'type' => $job['employment_type'],
+                'slots' => $vacancies - $hired,
+                'deadline' => $job['application_deadline'],
+                'application_token' => $job['application_token'],
+            ];
+        }
+
+        $landing = ['jobs' => array_slice($landingJobs, 0, 3)];
         require BASE_PATH . '/resources/views/public/landing.php';
 
         break;
