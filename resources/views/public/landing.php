@@ -50,11 +50,11 @@ $jobIcon = static function ($title) {
 };
 
 $portalServices = [
-    ['name' => 'Recruitment & Onboarding', 'description' => 'Hiring, applicants, and new-hire onboarding.', 'icon' => 'fa-user-plus'],
-    ['name' => 'Core HR', 'description' => 'People records, self-service, and company structure.', 'icon' => 'fa-people-group'],
+    ['name' => 'Core HR', 'description' => 'People, hiring, onboarding, records, and company structure.', 'icon' => 'fa-people-group'],
     ['name' => 'Workforce Management', 'description' => 'Time, attendance, schedules, and workforce planning.', 'icon' => 'fa-calendar-days'],
     ['name' => 'Performance & Development', 'description' => 'Performance, learning, training, and career growth.', 'icon' => 'fa-chart-line'],
     ['name' => 'Payroll & Benefits', 'description' => 'Payroll, compensation, claims, and employee benefits.', 'icon' => 'fa-money-check-dollar'],
+    ['name' => 'Financial Management System', 'description' => 'Financial transactions, reporting, and budget oversight.', 'icon' => 'fa-coins'],
     ['name' => 'Supply Chain & Inventory Management', 'description' => 'Warehousing, procurement, purchasing, and inventory.', 'icon' => 'fa-boxes-stacked'],
     ['name' => 'Fleet & Transportation Management', 'description' => 'Fleet, dispatch, routing, and transport operations.', 'icon' => 'fa-truck-fast'],
     ['name' => 'Facilities & Administrative Management', 'description' => 'Facilities, visitors, documents, and compliance.', 'icon' => 'fa-building'],
@@ -135,8 +135,8 @@ $journey = [
             <a href="#gallery" class="lp-nav__link">Gallery</a>
             <a href="#careers" class="lp-nav__link">Careers</a>
             <a href="#contact" class="lp-nav__link">Contact Us</a>
-            <a href="<?= $e($loginUrl) ?>" class="lp-btn lp-btn--dark lp-btn--sm lp-nav__login">
-                <i class="fa-solid fa-lock" aria-hidden="true"></i> Login
+            <a href="#portal" class="lp-btn lp-btn--dark lp-btn--sm lp-nav__login">
+                <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Login Portal
             </a>
         </nav>
     </div>
