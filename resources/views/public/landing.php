@@ -188,35 +188,6 @@ $journey = [
             </div>
         </div>
     </div>
-
-    <a href="#glance" class="lp-scroll" aria-label="Scroll to company highlights">
-        <span class="lp-scroll__mouse" aria-hidden="true"><span></span></span>
-        <span>Scroll</span>
-    </a>
-</section>
-
-<!-- ============ TRUST / STATS STRIP ============ -->
-<section class="lp-strip" id="glance" aria-label="RAM-YUM at a glance">
-    <div class="lp-container lp-strip__inner" data-reveal>
-        <p class="lp-strip__lead"><strong>RAM-YUM at a glance</strong><span>One team, every branch.</span></p>
-        <dl class="lp-strip__stats">
-            <div class="lp-stat">
-                <i class="fa-solid fa-store" aria-hidden="true"></i>
-                <dt class="lp-stat__label">Branches</dt>
-                <dd class="lp-stat__value" data-count="<?= (int) $stats['branches'] ?>"><?= (int) $stats['branches'] ?></dd>
-            </div>
-            <div class="lp-stat">
-                <i class="fa-solid fa-users" aria-hidden="true"></i>
-                <dt class="lp-stat__label">Employees</dt>
-                <dd class="lp-stat__value" data-count="<?= (int) $stats['employees'] ?>"><?= (int) $stats['employees'] ?></dd>
-            </div>
-            <div class="lp-stat">
-                <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
-                <dt class="lp-stat__label">Open positions</dt>
-                <dd class="lp-stat__value" data-count="<?= (int) $stats['open_positions'] ?>"><?= (int) $stats['open_positions'] ?></dd>
-            </div>
-        </dl>
-    </div>
 </section>
 
 <!-- ============ ABOUT ============ -->

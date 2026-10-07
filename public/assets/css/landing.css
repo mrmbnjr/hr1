@@ -161,22 +161,6 @@ html.lp-page::-webkit-scrollbar { width: 0; height: 0; }
 .lp-hero__chip--bottom { bottom: 0; right: 24px; animation-delay: -4s; }
 @keyframes lp-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
-.lp-scroll { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--lp-ink-soft); }
-.lp-scroll__mouse { width: 20px; height: 32px; border: 2px solid var(--lp-ink-soft); border-radius: 12px; display: flex; justify-content: center; padding-top: 6px; }
-.lp-scroll__mouse span { width: 3px; height: 6px; border-radius: 2px; background: var(--lp-maroon); animation: lp-wheel 1.8s ease-in-out infinite; }
-@keyframes lp-wheel { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(10px); } }
-
-/* ---------- Trust / stats strip ---------- */
-.lp-strip { position: relative; z-index: 2; margin-top: calc(-1 * var(--lp-s4)); }
-.lp-strip__inner { display: grid; grid-template-columns: .8fr 2.2fr; align-items: center; gap: var(--lp-s3); padding: var(--lp-s3) var(--lp-s4); background: var(--lp-maroon-dark); color: #fff; border-radius: calc(var(--lp-radius) + 6px); box-shadow: var(--lp-shadow-lg); border-bottom: 4px solid var(--lp-gold); }
-.lp-strip__lead strong { display: block; font: 700 1.1rem 'Baloo 2', sans-serif; color: var(--lp-gold); }
-.lp-strip__lead span { font-size: .9rem; color: rgba(255, 255, 255, .75); }
-.lp-strip__stats { display: grid; grid-template-columns: repeat(3, 1fr); }
-.lp-stat { display: grid; grid-template-columns: auto 1fr; grid-template-areas: 'ic val' 'ic lab'; column-gap: 16px; align-items: center; padding: 0 var(--lp-s3); border-left: 1px solid rgba(255, 255, 255, .16); }
-.lp-stat i { grid-area: ic; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .1); color: var(--lp-gold); }
-.lp-stat__value { grid-area: val; font: 700 2.25rem/1 'Baloo 2', sans-serif; color: #fff; font-variant-numeric: tabular-nums; }
-.lp-stat__label { grid-area: lab; font-size: .85rem; font-weight: 600; color: rgba(255, 255, 255, .75); }
-
 /* ---------- About ---------- */
 .lp-about-section {
     background-color: var(--bg);
