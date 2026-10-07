@@ -214,6 +214,22 @@ $requirements = trim((string)($job['requirements'] ?? ''));
             line-height: 1.5;
         }
 
+        .qualification-warning {
+            margin: 0 0 24px;
+            padding: 16px 18px;
+            background: #fff9e9;
+            border: 1px solid #f2dfaa;
+            border-left: 4px solid #c89b3c;
+            border-radius: 10px;
+            color: #5d1515;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .qualification-warning strong {
+            color: var(--maroon);
+        }
+
         fieldset {
             border: none;
             padding: 0;
@@ -649,6 +665,12 @@ $requirements = trim((string)($job['requirements'] ?? ''));
             your resume.
         </p>
 
+        <div class="qualification-warning" role="note">
+            <strong>Application reminder:</strong>
+            Please review the qualifications and requirements details before submitting
+            your application. Your resume will be reviewed against the requirements
+            of this position to help our recruitment team assess your application.
+        </div>
 
         <?php if ($error !== null): ?>
 
