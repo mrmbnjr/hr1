@@ -44,6 +44,7 @@ $academicRequired = !empty($job['academic_document_required']);
     <style>
         /* ============ Royyan theme tokens (maroon / gold / cream) ============ */
         :root {
+            color-scheme: light;
             --maroon: #800020;
             --maroon-dark: #500014;
             --maroon-soft: #fff0f3;
@@ -77,29 +78,31 @@ $academicRequired = !empty($job['academic_document_required']);
             --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --maroon-soft: #3a1219;
-                --gold-light: #4a3d14;
-                --cream: #241a1c;
-                --ink: #f4ebe6;
-                --ink-soft: #bfaeb2;
-                --ink-faint: #8a7a7e;
-                --page-bg: #170e10;
-                --card-bg: #211618;
-                --field-bg: #2a1c1f;
-                --border: #3a2a2d;
-                --border-strong: #4d3a3e;
-                --shadow: 0 6px 24px -8px rgba(0, 0, 0, 0.5);
-                --shadow-lg: 0 18px 40px -16px rgba(0, 0, 0, 0.6);
-                --ring: rgba(201, 162, 39, 0.28);
-                --danger-bg: #3a1618;
-                --danger-border: #6b2326;
-                --danger-ink: #fecaca;
-            }
-            .brand-name, .card-badge, .job-section h3 i, .required { color: var(--gold) !important; }
-            .submit-button { background: linear-gradient(135deg, #a3112f, var(--maroon)) !important; }
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+            --maroon-soft: #3a1219;
+            --gold-light: #4a3d14;
+            --cream: #241a1c;
+            --ink: #f4ebe6;
+            --ink-soft: #bfaeb2;
+            --ink-faint: #8a7a7e;
+            --page-bg: #170e10;
+            --card-bg: #211618;
+            --field-bg: #2a1c1f;
+            --border: #3a2a2d;
+            --border-strong: #4d3a3e;
+            --shadow: 0 6px 24px -8px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 18px 40px -16px rgba(0, 0, 0, 0.6);
+            --ring: rgba(201, 162, 39, 0.28);
+            --danger-bg: #3a1618;
+            --danger-border: #6b2326;
+            --danger-ink: #fecaca;
         }
+        [data-theme="dark"] .brand-name,
+        [data-theme="dark"] .card-badge,
+        [data-theme="dark"] .job-section h3 i,
+        [data-theme="dark"] .required { color: var(--gold) !important; }
+        [data-theme="dark"] .submit-button { background: linear-gradient(135deg, #a3112f, var(--maroon)) !important; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -136,6 +139,31 @@ $academicRequired = !empty($job['academic_document_required']);
         }
 
         .brand-lockup { display: flex; align-items: center; gap: 14px; }
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+
+        .theme-toggle {
+            width: 42px;
+            height: 42px;
+            flex: none;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: var(--card-bg);
+            color: var(--maroon);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform .18s, background .18s, color .18s;
+        }
+
+        .theme-toggle:hover { transform: translateY(-2px) rotate(8deg); }
+        .theme-toggle:active { transform: translateY(0) scale(.94); }
+        .theme-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+        .theme-toggle .icon { width: 20px; height: 20px; }
+        .theme-toggle .icon-moon { display: none; }
+        [data-theme="dark"] .theme-toggle { color: var(--gold); }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
 
         .brand-logo {
             width: 48px;
@@ -174,7 +202,7 @@ $academicRequired = !empty($job['academic_document_required']);
             letter-spacing: 0.06em;
             text-transform: uppercase;
         }
-        @media (prefers-color-scheme: dark) { .header-badge { color: var(--gold); } }
+        [data-theme="dark"] .header-badge { color: var(--gold); }
 
         /* ============ Layout ============ */
         .content-grid {
@@ -280,7 +308,7 @@ $academicRequired = !empty($job['academic_document_required']);
             font-weight: 700;
         }
         .job-meta-tag i { color: var(--maroon); font-size: 12px; }
-        @media (prefers-color-scheme: dark) { .job-meta-tag i { color: var(--gold); } }
+        [data-theme="dark"] .job-meta-tag i { color: var(--gold); }
 
         .job-section { margin-bottom: 22px; }
         .job-section:last-child { margin-bottom: 0; }
@@ -370,7 +398,7 @@ $academicRequired = !empty($job['academic_document_required']);
             color: var(--maroon);
             font-size: 13px;
         }
-        @media (prefers-color-scheme: dark) { .legend-icon { color: var(--gold); } }
+        [data-theme="dark"] .legend-icon { color: var(--gold); }
 
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -443,7 +471,7 @@ $academicRequired = !empty($job['academic_document_required']);
             font-size: 15px;
             flex-shrink: 0;
         }
-        @media (prefers-color-scheme: dark) { .upload-hint .upload-icon { color: var(--gold); } }
+        [data-theme="dark"] .upload-hint .upload-icon { color: var(--gold); }
 
         input[type="file"] {
             width: 100%;
@@ -505,7 +533,7 @@ $academicRequired = !empty($job['academic_document_required']);
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-        @media (prefers-color-scheme: dark) { .academic-file-icon { color: var(--gold); } }
+        [data-theme="dark"] .academic-file-icon { color: var(--gold); }
 
         .academic-file-name {
             font-size: 13px;
@@ -600,7 +628,24 @@ $academicRequired = !empty($job['academic_document_required']);
                 <div class="brand-kicker">Korean &amp; Japanese Store</div>
             </div>
         </div>
-        <span class="header-badge"><i class="fa-solid fa-briefcase"></i> Careers</span>
+        <div class="header-actions">
+            <span class="header-badge"><i class="fa-solid fa-briefcase"></i> Careers</span>
+            <button
+                type="button"
+                class="theme-toggle"
+                id="themeToggle"
+                aria-label="Toggle light and dark theme"
+                aria-pressed="false"
+            >
+                <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4.2"></circle>
+                    <path d="M12 2.5v2.4M12 19.1v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"></path>
+                </svg>
+                <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.8 14.3A8.5 8.5 0 1 1 9.7 3.2a6.8 6.8 0 0 0 11.1 11.1z"></path>
+                </svg>
+            </button>
+        </div>
     </header>
 
     <div class="content-grid">
@@ -804,6 +849,45 @@ $academicRequired = !empty($job['academic_document_required']);
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const themeToggle = document.getElementById('themeToggle');
+    const themeRoot = document.documentElement;
+    const themeKey = 'ramyum-theme';
+    let savedTheme = null;
+
+    try {
+        savedTheme = localStorage.getItem(themeKey);
+    } catch (error) {
+        // The theme still works for this page when storage is unavailable.
+    }
+
+    function applyTheme(theme) {
+        const isDark = theme === 'dark';
+        if (isDark) {
+            themeRoot.setAttribute('data-theme', 'dark');
+        } else {
+            themeRoot.removeAttribute('data-theme');
+        }
+        themeToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    const initialTheme = savedTheme ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(initialTheme);
+
+    themeToggle.addEventListener('click', function () {
+        const nextTheme = themeRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try {
+            localStorage.setItem(themeKey, nextTheme);
+        } catch (error) {
+            // Keep the selected theme active for this page when storage is unavailable.
+        }
+    });
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
