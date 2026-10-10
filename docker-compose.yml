@@ -1,0 +1,102 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DOCKER_DB_NAME:-hr1_db}
+      MYSQL_USER: ${DOCKER_DB_USER:-hr1}
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in docker/.env}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_MYSQL_ROOT_PASSWORD:?Set DOCKER_MYSQL_ROOT_PASSWORD in docker/.env}
+    volumes:
+      - hr1_mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uroot --password="$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    networks:
+      - hr1-network
+
+  schema-init:
+    image: mysql:8.0
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: ${DOCKER_DB_NAME:-hr1_db}
+      MYSQL_USER: ${DOCKER_DB_USER:-hr1}
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in docker/.env}
+      DOCKER_SEED_DEMO_DATA: ${DOCKER_SEED_DEMO_DATA:-false}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -eu
+        TABLE_COUNT=$$(mysql -h mysql -u"$${MYSQL_USER}" -p"$${MYSQL_PASSWORD}" --skip-column-names --execute="SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$${MYSQL_DATABASE}'")
+        if [ "$${TABLE_COUNT}" = "0" ]; then
+          echo "Initializing empty database from schema.sql";
+          mysql -h mysql -u"$${MYSQL_USER}" -p"$${MYSQL_PASSWORD}" "$${MYSQL_DATABASE}" < /schema.sql;
+        else
+          echo "Database already contains $${TABLE_COUNT} table(s); schema.sql was not rerun.";
+        fi;
+        if [ "$${DOCKER_SEED_DEMO_DATA}" = "true" ]; then
+          USER_COUNT=$$(mysql -h mysql -u"$${MYSQL_USER}" -p"$${MYSQL_PASSWORD}" "$${MYSQL_DATABASE}" --skip-column-names --execute="SELECT COUNT(*) FROM users")
+          if [ "$${USER_COUNT}" = "0" ]; then
+            echo "Loading demo data from seed.sql";
+            mysql -h mysql -u"$${MYSQL_USER}" -p"$${MYSQL_PASSWORD}" "$${MYSQL_DATABASE}" < /seed.sql;
+          else
+            echo "Database already contains $${USER_COUNT} user(s); demo data was not loaded.";
+          fi;
+        fi
+    volumes:
+      - ./database/schema.sql:/schema.sql:ro
+      - ./database/seeds/seed.sql:/seed.sql:ro
+    networks:
+      - hr1-network
+
+  analysis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hr1-analysis
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${DOCKER_APP_ENV:-production}
+      APP_DEBUG: ${DOCKER_APP_DEBUG:-false}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Manila}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DOCKER_DB_NAME:-hr1_db}
+      DB_USER: ${DOCKER_DB_USER:-hr1}
+      DB_PASSWORD: ${DOCKER_DB_PASSWORD:?Set DOCKER_DB_PASSWORD in docker/.env}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      GEMINI_TIMEOUT: ${GEMINI_TIMEOUT:-60}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-RAM-YUM Recruitment}
+      HR_NOTIFICATION_EMAIL: ${HR_NOTIFICATION_EMAIL:-}
+    depends_on:
+      schema-init:
+        condition: service_completed_successfully
+    ports:
+      - "${DOCKER_HTTP_PORT:-8080}:80"
+    volumes:
+      - hr1_uploads:/var/www/html/storage/uploads
+    networks:
+      - hr1-network
+
+volumes:
+  hr1_mysql_data:
+  hr1_uploads:
+
+networks:
+  hr1-network:
+    driver: bridge

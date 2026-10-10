@@ -1,8 +1,3 @@
-CREATE DATABASE IF NOT EXISTS hr1_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-USE hr1_db;
-
 CREATE TABLE roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,
     role_code VARCHAR(30) UNIQUE NOT NULL,

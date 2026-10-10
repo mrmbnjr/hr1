@@ -1,0 +1,26 @@
+# Version-control and local configuration
+.git
+.gitignore
+.env
+.env.*
+docker/.env
+
+# Composer and local runtime artifacts
+vendor/
+storage/uploads/*
+storage/logs/*
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentation and deployment-only files
+README*
+DEPLOYMENT.md
+
+# Temporary files
+*.log
+*.tmp
+*.bak

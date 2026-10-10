@@ -64,6 +64,12 @@
             $value = trim((string) preg_replace('/\s+#.*$/', '', $value));
         }
 
+        // Keep environment variables supplied by Docker, Compose, or the host
+        // ahead of values from the local .env file.
+        if (getenv($name) !== false) {
+            continue;
+        }
+
         putenv($name . '=' . $value);
         $_ENV[$name] = $value;
         $_SERVER[$name] = $value;

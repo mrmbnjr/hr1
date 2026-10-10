@@ -1,5 +1,7 @@
 {
     "name": "mariodejarlomabinijr/hr1",
+    "description": "HR and recruitment portal with applicant workflow and resume analysis",
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
             "App\\": "src/App/",

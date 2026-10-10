@@ -102,6 +102,32 @@ Applicant
 
 Step-by-step Hostinger instructions: see [DEPLOYMENT.md](DEPLOYMENT.md).
 
+### Run with Docker
+
+Install Docker Desktop (or Docker Engine with the Compose plugin), then copy
+`docker/.env.example` to `docker/.env`, replace both database passwords, and run:
+
+```sh
+docker compose --env-file docker/.env up --build -d
+```
+
+Open `http://localhost:8080` (or the configured `DOCKER_HTTP_PORT`). To load
+sample accounts and data into a new database, set `DOCKER_SEED_DEMO_DATA=true`
+in `docker/.env` before the first startup. Demo accounts use the password
+`admin123`; change it immediately and do not enable demo seeding for a real
+deployment. Uploaded documents and MySQL data are stored in Docker volumes.
+Back up those volumes before moving the project; they are not included when you
+share the source folder.
+
+For OTP email and AI analysis, fill in the SMTP settings and `GEMINI_API_KEY`
+in `docker/.env`. When upgrading an existing MySQL volume, keep the exact
+database and root passwords originally used to create it; changing Compose
+environment values alone does not rotate credentials in an existing volume.
+
+If upgrading an older running container that already has uploads, copy those files
+out of that container before recreating it; the new named upload volume cannot
+recover files from the old container's writable layer automatically.
+
 ## 5. Tech stack
 - UI/UX Design: Figma
 - Frontend: html, css, js
