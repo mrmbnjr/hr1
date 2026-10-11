@@ -262,23 +262,66 @@ For step-by-step Hostinger instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### Run with Docker
 
-**Prerequisites:** Docker Desktop, or Docker Engine with the Compose plugin.
+The Compose file uses the published Docker Hub image
+[`mrmbnjr/hr1:latest`](https://hub.docker.com/r/mrmbnjr/hr1).
+The image contains the application; the Compose file and database SQL files
+are provided separately in the deployment bundle. Docker Hub does not store
+the ZIP bundle or your database volume/uploads.
 
-**1. Create the environment file**
+#### Get the deployment bundle
 
-```sh
-cp docker/.env.example docker/.env
+Download [`hr1-docker-share.zip`](./hr1-docker-share.zip) from this
+repository. It contains only the files needed to start the app
+(`docker-compose.yml`, `docker/.env.example`, `database/schema.sql`, and
+`database/seeds/seed.sql`).
+
+**Never add `.env` or `docker\.env` to the ZIP**; those files may contain
+credentials. The example environment file is safe to share.
+
+#### Start it
+
+**Prerequisites:** Docker Desktop on Windows/macOS, or Docker Engine with the
+Compose plugin on Linux. Extract the ZIP, open PowerShell (or a terminal) in
+the extracted folder, and follow these steps:
+
+1. If the Docker Hub repository is private, sign in with an account that has
+   access:
+
+```powershell
+   docker login
 ```
 
-**2. Edit `docker/.env` and replace both database passwords.**
+2. Create a private environment file and edit it:
 
-**3. Build and start the stack**
-
-```sh
-docker compose --env-file docker/.env up --build -d
+```powershell
+   Copy-Item docker\.env.example docker\.env
+   notepad docker\.env
 ```
 
-**4. Open** `http://localhost:8080` (or the port set in `DOCKER_HTTP_PORT`).
+   Set unique values for `DOCKER_DB_PASSWORD` and
+   `DOCKER_MYSQL_ROOT_PASSWORD`. Add your own Gemini and SMTP credentials if
+   AI analysis and email are needed. Do not share this file with anyone.
+
+3. For a disposable demo with sample data, set
+   `DOCKER_SEED_DEMO_DATA=true` in `docker\.env` **before the first startup**.
+   Seeding is off by default. Seeded demo accounts use `admin123`; change that
+   password immediately and never use demo seeding for real data.
+
+4. Pull the application image from
+   [Docker Hub](https://hub.docker.com/r/mrmbnjr/hr1) and start the
+   containers:
+
+```powershell
+   docker compose --env-file docker\.env pull
+   docker compose --env-file docker\.env up -d --no-build
+```
+
+5. Check that the containers are running, then open
+   `http://localhost:8080` (or the port set in `DOCKER_HTTP_PORT`):
+
+```powershell
+   docker compose --env-file docker\.env ps
+```
 
 **Compose services**
 

@@ -58,10 +58,7 @@ services:
       - hr1-network
 
   analysis:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: hr1-analysis
+    image: mrmbnjr/hr1:latest
     restart: unless-stopped
     environment:
       APP_ENV: ${DOCKER_APP_ENV:-production}
