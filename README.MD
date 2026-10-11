@@ -244,7 +244,7 @@ Create a `.env` in the project root and fill in the database, Gemini and mail va
 See [Configuration](#configuration) for the full variable reference.
 
 > [!NOTE]
-> This repository does **not** ship a `.env.example` (`.gitignore` excludes `.env.*`).
+> This repository does **not** ship a `.env` (`.gitignore` excludes `.env.*`).
 > Create `.env` manually using the reference table below.
 
 **3. Import the database**
