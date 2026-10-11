@@ -245,6 +245,17 @@ switch ($page) {
 
         break;
 
+    /*
+     * Applicant Privacy Notice. Opened in a new tab from the consent
+     * checkbox on the job application form.
+     */
+
+    case 'privacy-notice':
+
+        require BASE_PATH . '/resources/views/public/privacy-notice.php';
+
+        break;
+
     case 'careers':
         $recruitment = new \App\Models\Recruitment();
         $jobs = $recruitment->getAllJobs();

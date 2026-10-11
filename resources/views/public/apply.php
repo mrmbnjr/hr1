@@ -559,6 +559,111 @@ $academicRequired = !empty($job['academic_document_required']);
 
         .academic-file-remove:hover { background: var(--danger-bg); color: var(--danger); }
 
+        /* ============ Data privacy consent (inline with footnote text) ============ */
+        .consent-block { margin-top: 16px; margin-bottom: 18px; }
+
+        .consent-option {
+            display: flex;
+            align-items: center;      /* circle lines up with the text block */
+            gap: 12px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .consent-option:focus-within .consent-box {
+            box-shadow: 0 0 0 4px var(--ring);
+            border-color: var(--maroon);
+        }
+
+        /* The checkbox itself is hidden; .consent-box is the visible circle. */
+        .consent-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .consent-box {
+            position: relative;
+            flex: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border-strong);
+            border-radius: 50%;
+            background: var(--card-bg);
+            transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+
+        .consent-option:hover .consent-box { border-color: var(--maroon); }
+
+        .consent-input:checked + .consent-box {
+            border-color: var(--maroon);
+            background: var(--maroon);
+        }
+
+        .consent-input:checked + .consent-box::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 2.5px;
+            width: 5px;
+            height: 10px;
+            border: solid #fff;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg);
+        }
+
+        [data-theme="dark"] .consent-input:checked + .consent-box {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        [data-theme="dark"] .consent-input:checked + .consent-box::after {
+            border-color: var(--maroon-dark);
+        }
+
+        .consent-text {
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: var(--ink-soft);
+            font-weight: 500;
+        }
+
+        .consent-text strong { color: var(--ink); font-weight: 800; }
+        .consent-text i { color: var(--gold); margin-right: 4px; }
+
+        .consent-link {
+            color: var(--maroon);
+            font-weight: 800;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .consent-link:hover { color: var(--maroon-dark); }
+        [data-theme="dark"] .consent-link { color: var(--gold); }
+
+        .consent-error {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--danger-ink);
+        }
+
+        .consent-error.is-visible { display: flex; }
+        .consent-error i { color: var(--danger); }
+
         /* Submit */
         .submit-button {
             width: 100%;
@@ -585,15 +690,6 @@ $academicRequired = !empty($job['academic_document_required']);
         .submit-button:active { transform: translateY(0); }
         .submit-button:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--ring); }
         .submit-button:disabled { opacity: .75; cursor: not-allowed; transform: none; }
-
-        .form-footnote {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--ink-soft);
-        }
-
-        .form-footnote i { color: var(--gold); margin-right: 4px; }
 
         /* ============ Responsive ============ */
         @media (max-width: 640px) {
@@ -832,15 +928,40 @@ $academicRequired = !empty($job['academic_document_required']);
                     </div>
                 </fieldset>
 
+                <!-- Data privacy consent: circle checkbox sits inline with the footnote text -->
+                <div class="consent-block">
+                    <label class="consent-option" for="data_privacy_consent">
+                        <input
+                            type="checkbox"
+                            id="data_privacy_consent"
+                            name="data_privacy_consent"
+                            value="1"
+                            class="consent-input"
+                            required
+                        >
+                        <span class="consent-box" aria-hidden="true"></span>
+                        <span class="consent-text">
+                            <i class="fa-solid fa-lock"></i>
+                            <strong>I agree.</strong> By submitting this application, I allow the hiring team to review my details in accordance with the
+                            <a
+                                class="consent-link"
+                                href="<?= url('?page=privacy-notice') ?>"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >recruitment policy</a>.
+                        </span>
+                    </label>
+
+                    <div class="consent-error" id="consentError" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Please read and agree to the recruitment policy before submitting your application.</span>
+                    </div>
+                </div>
+
                 <button type="submit" class="submit-button">
                     <i class="fa-solid fa-paper-plane"></i>
                     <span class="submit-label">Submit Application</span>
                 </button>
-
-                <p class="form-footnote">
-                    <i class="fa-solid fa-lock"></i>
-                    By submitting this application, you allow our hiring team to review your details in accordance with our recruitment policy.
-                </p>
 
             </form>
 
@@ -998,6 +1119,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form[action="?page=submit-application"]');
     const button = form ? form.querySelector('.submit-button') : null;
     const label = button ? button.querySelector('.submit-label') : null;
+    const consent = document.getElementById('data_privacy_consent');
+    const consentError = document.getElementById('consentError');
 
     if (!form || !button || !label) {
         return;
@@ -1005,10 +1128,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const originalLabel = label.textContent;
 
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (event) {
+        if (consent && !consent.checked) {
+            event.preventDefault();
+            if (consentError) {
+                consentError.classList.add('is-visible');
+            }
+            consent.focus();
+            return;
+        }
+
         button.disabled = true;
         label.textContent = 'Checking your documents… this can take up to a minute';
     });
+
+    if (consent) {
+        consent.addEventListener('invalid', function () {
+            if (consentError) {
+                consentError.classList.add('is-visible');
+            }
+        });
+
+        consent.addEventListener('change', function () {
+            if (consent.checked && consentError) {
+                consentError.classList.remove('is-visible');
+            }
+        });
+    }
 
     window.addEventListener('pageshow', function () {
         button.disabled = false;

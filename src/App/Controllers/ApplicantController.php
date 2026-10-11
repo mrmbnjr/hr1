@@ -171,6 +171,24 @@ class ApplicantController
 
             /*
             |--------------------------------------------------------------------------
+            | 2b. Data privacy consent
+            |--------------------------------------------------------------------------
+            |
+            | The applicant must agree to the Privacy Notice before the
+            | application is accepted. Enforced here because the consent
+            | checkbox is only a client-side control.
+            |
+            */
+
+            if (empty($_POST['data_privacy_consent'])) {
+                throw new \Exception(
+                    'Please read and agree to the Privacy Notice and consent to the collection and processing of your personal information before submitting your application.'
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
             | 3. Basic validation: resume (PDF only, the AI cannot read DOC/DOCX)
             |--------------------------------------------------------------------------
             */
