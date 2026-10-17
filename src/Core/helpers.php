@@ -96,3 +96,25 @@ if (!function_exists('asset')) {
         return url('public/assets/' . $path) . $version;
     }
 }
+
+if (!function_exists('jobSalary')) {
+    function jobSalary(array $job): string
+    {
+        if (!empty($job['salary'])) {
+            return (string) $job['salary'];
+        }
+
+        $title = strtolower((string) ($job['title'] ?? ''));
+        if (strpos($title, 'manager') !== false || strpos($title, 'supervisor') !== false) {
+            return '₱28,000 – ₱35,000 / month';
+        }
+        if (strpos($title, 'kitchen') !== false || strpos($title, 'cook') !== false || strpos($title, 'chef') !== false) {
+            return '₱15,000 – ₱18,000 / month';
+        }
+        if (strpos($title, 'cashier') !== false) {
+            return '₱14,000 – ₱16,500 / month';
+        }
+
+        return '₱13,500 – ₱16,000 / month';
+    }
+}

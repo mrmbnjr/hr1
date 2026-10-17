@@ -44,6 +44,8 @@ class Recruitment
             SELECT
                 jp.posting_id,
                 jp.title,
+                jp.description,
+                jp.requirements,
                 jp.application_token,
                 p.position_name,
                 d.department_name,

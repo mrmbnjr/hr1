@@ -15,8 +15,6 @@ if (!isset($jobs)) {
 
 $h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 
-$h = fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
-
 // Only show jobs that are still open and not past their closing date
 $jobs = array_values(array_filter($jobs, fn($j) => strtotime($j['closing_date'] . ' 23:59:59') >= time()));
 $locations = array_values(array_unique(array_column($jobs, 'location')));
@@ -30,6 +28,7 @@ function timeLeft(string $date): array {
     $hrs = max(1, (int)floor($secs / 3600));
     return [$hrs . ($hrs === 1 ? ' hour left' : ' hours left'), true];
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -119,6 +118,7 @@ function timeLeft(string $date): array {
             $applicantsApplied = (int)$j['applied_count'];
             $pct = min(100, round($applicantsApplied / $applicantLimit * 100));
             $init  = strtoupper(substr(preg_replace('/[^A-Za-z ]/', '', $j['title']), 0, 1) . (strpos($j['title'], ' ') !== false ? substr(strrchr($j['title'], ' '), 1, 1) : ''));
+            $salary = jobSalary($j);
         ?>
         <article class="job" data-text="<?= $h(strtolower($j['title'] . ' ' . $j['department'])) ?>"
                  data-location="<?= $h($j['location']) ?>" data-type="<?= $h($j['employment_type']) ?>">
@@ -134,6 +134,7 @@ function timeLeft(string $date): array {
             <dl class="job__meta">
                 <div><dt>Branch</dt><dd><?= $h($j['location']) ?></dd></div>
                 <div><dt>Type</dt><dd><?= $h($j['employment_type']) ?></dd></div>
+                <div><dt>Expected Salary</dt><dd><?= $h($salary) ?></dd></div>
                 <div><dt>Vacancies</dt><dd><?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?></dd></div>
                 <div><dt>Application Deadline</dt><dd><?= $h(date('M j, Y', strtotime($j['closing_date']))) ?></dd></div>
             </dl>
@@ -153,6 +154,48 @@ function timeLeft(string $date): array {
                 <a class="btn btn--primary" href="index.php?page=apply&amp;token=<?= rawurlencode((string)$j['application_token']) ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
             </div>
         </article>
+
+        <!-- Details shown in the modal for this job -->
+        <template id="jobTpl-<?= (int)$j['id'] ?>">
+            <div class="job-detail-content">
+                <div class="job-detail-heading">
+                    <div class="job-detail-avatar"><?= $h(strtoupper(substr($j['title'], 0, 1))) ?></div>
+                    <div>
+                        <h2><?= $h($j['title']) ?></h2>
+                        <p class="job-detail-department"><?= $h($j['department']) ?></p>
+                        <?php if (!empty($j['position_name']) || !empty($j['role_name'])): ?>
+                            <p class="job-detail-context">
+                                <?= $h($j['position_name'] ?? '') ?>
+                                <?= !empty($j['position_name']) && !empty($j['role_name']) ? ' &middot; ' : '' ?>
+                                <?= $h($j['role_name'] ?? '') ?>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <dl class="job__meta job-detail-meta">
+                    <div><dt>Location</dt><dd><?= $h($j['location']) ?></dd></div>
+                    <div><dt>Type</dt><dd><?= $h($j['employment_type']) ?></dd></div>
+                    <div><dt>Expected Salary</dt><dd><?= $h($salary) ?></dd></div>
+                    <div><dt>Vacancies</dt><dd><?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?></dd></div>
+                    <div><dt>Deadline</dt><dd><?= $h(date('M j, Y', strtotime($j['closing_date']))) ?></dd></div>
+                </dl>
+
+                <div class="job-detail-section">
+                    <h3>Job Description</h3>
+                    <p><?= $h(!empty($j['description']) ? $j['description'] : 'No description provided.') ?></p>
+                </div>
+
+                <div class="job-detail-section">
+                    <h3>Requirements</h3>
+                    <p><?= $h(!empty($j['requirements']) ? $j['requirements'] : 'No specific requirements provided.') ?></p>
+                </div>
+
+                <div class="job-detail-actions">
+                    <a class="btn btn--primary" href="index.php?page=apply&amp;token=<?= rawurlencode((string)$j['application_token']) ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+        </template>
         <?php endforeach; ?>
     </section>
 
@@ -172,12 +215,7 @@ function timeLeft(string $date): array {
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <button class="modal-close" aria-label="Close modal">&times;</button>
-        <div id="modalBody">
-            <!-- Content loaded via AJAX -->
-            <div class="modal-loader">
-                <i class="fa-solid fa-spinner fa-spin"></i> Loading...
-            </div>
-        </div>
+        <div id="modalBody"></div>
     </div>
 </div>
 
@@ -237,32 +275,18 @@ function timeLeft(string $date): array {
         } catch {}
     });
 
-    // Modal Logic
+    // Modal Logic: details come from the <template> rendered with each job
     const modal = document.getElementById('jobModal');
     const modalBody = document.getElementById('modalBody');
     const modalClose = modal.querySelector('.modal-close');
     const viewButtons = document.querySelectorAll('.btn-view-details');
 
-    const openModal = async (id) => {
+    const openModal = (id) => {
+        const tpl = document.getElementById('jobTpl-' + id);
+        if (!tpl) return;
+        modalBody.replaceChildren(tpl.content.cloneNode(true));
         modal.hidden = false;
         document.body.classList.add('modal-open');
-        modalBody.innerHTML = `
-            <div class="modal-loader">
-                <i class="fa-solid fa-spinner fa-spin"></i> Loading details...
-            </div>`;
-
-        try {
-            const res = await fetch(`index.php?page=job-details&id=${id}`);
-            if (!res.ok) throw new Error('Failed to fetch job details');
-            const html = await res.text();
-            modalBody.innerHTML = html;
-        } catch (err) {
-            modalBody.innerHTML = `
-                <div class="modal-loader">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <p>Error loading details. Please try again.</p>
-                </div>`;
-        }
     };
 
     const closeModal = () => {

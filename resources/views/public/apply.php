@@ -19,6 +19,7 @@ $applicationToken =
 $jobTitle = htmlspecialchars($job['title'] ?? 'Open Position', ENT_QUOTES, 'UTF-8');
 $department = htmlspecialchars($job['department_name'] ?? 'Ramyum', ENT_QUOTES, 'UTF-8');
 $employmentType = htmlspecialchars($job['employment_type'] ?? 'Employment', ENT_QUOTES, 'UTF-8');
+$expectedSalary = htmlspecialchars(jobSalary($job), ENT_QUOTES, 'UTF-8');
 $vacancies = (int)($job['vacancies'] ?? 1);
 $deadline = !empty($job['application_deadline'])
     ? date('F j, Y', strtotime($job['application_deadline']))
@@ -309,6 +310,27 @@ $academicRequired = !empty($job['academic_document_required']);
         }
         .job-meta-tag i { color: var(--maroon); font-size: 12px; }
         [data-theme="dark"] .job-meta-tag i { color: var(--gold); }
+
+        .job-salary {
+            margin: -4px 0 22px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--cream);
+        }
+
+        .job-salary-label {
+            display: block;
+            margin-bottom: 2px;
+            color: var(--ink-soft);
+            font-size: 12px;
+        }
+
+        .job-salary-value {
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 800;
+        }
 
         .job-section { margin-bottom: 22px; }
         .job-section:last-child { margin-bottom: 0; }
@@ -762,6 +784,11 @@ $academicRequired = !empty($job['academic_document_required']);
                         <i class="fa-solid fa-user-group"></i>
                         <?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?>
                     </span>
+                </div>
+
+                <div class="job-salary">
+                    <span class="job-salary-label">Expected Salary</span>
+                    <strong class="job-salary-value"><?= $expectedSalary ?></strong>
                 </div>
 
                 <div class="job-section">

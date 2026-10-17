@@ -88,6 +88,18 @@ $journey = [
     ['fa-handshake',      'Hire',          'Receive your offer and confirm your start date.'],
     ['fa-seedling',       'Onboarding',    'Complete requirements and get set up in the employee portal.'],
 ];
+
+$jobSalary = static function ($job) {
+    // Use real data once the jobs query provides it
+    if (!empty($job['salary'])) return (string) $job['salary'];
+
+    // DEMO ONLY: placeholder ranges until salary is stored per job
+    $t = strtolower((string) ($job['title'] ?? ''));
+    if (strpos($t, 'manager') !== false || strpos($t, 'supervisor') !== false) return '₱28,000 – ₱35,000 / month';
+    if (strpos($t, 'kitchen') !== false || strpos($t, 'cook') !== false || strpos($t, 'chef') !== false) return '₱15,000 – ₱18,000 / month';
+    if (strpos($t, 'cashier') !== false) return '₱14,000 – ₱16,500 / month';
+    return '₱13,500 – ₱16,000 / month';
+};
 ?>
 <!DOCTYPE html>
 <html lang="en" class="lp-page">
@@ -365,6 +377,7 @@ $journey = [
                         </div>
                         <ul class="lp-meta">
                             <li><i class="fa-solid fa-building" aria-hidden="true"></i><?= $e($j['department']) ?></li>
+                            <li><i class="fa-solid fa-peso-sign" aria-hidden="true"></i><?= $e($jobSalary($j)) ?></li>
                             <?php if (!empty($j['deadline'])): ?>
                                 <li><i class="fa-regular fa-calendar" aria-hidden="true"></i>Apply by <?= $e(date('M j, Y', strtotime($j['deadline']))) ?></li>
                             <?php endif; ?>
