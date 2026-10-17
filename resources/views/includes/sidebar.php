@@ -330,7 +330,7 @@ $isEmployee =
                 <i class="fa-solid fa-user"></i>
 
                 <span>
-                    Employee Requests
+                    Employee Services
                 </span>
 
             </a>
