@@ -135,7 +135,6 @@ function timeLeft(string $date): array {
                 <div><dt>Branch</dt><dd><?= $h($j['location']) ?></dd></div>
                 <div><dt>Type</dt><dd><?= $h($j['employment_type']) ?></dd></div>
                 <div><dt>Expected Salary</dt><dd><?= $h($salary) ?></dd></div>
-                <div><dt>Vacancies</dt><dd><?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?></dd></div>
                 <div><dt>Application Deadline</dt><dd><?= $h(date('M j, Y', strtotime($j['closing_date']))) ?></dd></div>
             </dl>
 
