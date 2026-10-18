@@ -311,27 +311,6 @@ $academicRequired = !empty($job['academic_document_required']);
         .job-meta-tag i { color: var(--maroon); font-size: 12px; }
         [data-theme="dark"] .job-meta-tag i { color: var(--gold); }
 
-        .job-salary {
-            margin: -4px 0 22px;
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            background: var(--cream);
-        }
-
-        .job-salary-label {
-            display: block;
-            margin-bottom: 2px;
-            color: var(--ink-soft);
-            font-size: 12px;
-        }
-
-        .job-salary-value {
-            color: var(--ink);
-            font-size: 16px;
-            font-weight: 800;
-        }
-
         .job-section { margin-bottom: 22px; }
         .job-section:last-child { margin-bottom: 0; }
 
@@ -351,6 +330,11 @@ $academicRequired = !empty($job['academic_document_required']);
             font-size: 14.5px;
             color: var(--ink);
             line-height: 1.7;
+        }
+
+        .job-section p.job-salary-value {
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .deadline-pill {
@@ -786,11 +770,6 @@ $academicRequired = !empty($job['academic_document_required']);
                     </span>
                 </div>
 
-                <div class="job-salary">
-                    <span class="job-salary-label">Expected Salary</span>
-                    <strong class="job-salary-value"><?= $expectedSalary ?></strong>
-                </div>
-
                 <div class="job-section">
                     <h3><i class="fa-solid fa-circle-info"></i> About the Role</h3>
                     <p><?= $description !== '' ? nl2br(htmlspecialchars($description, ENT_QUOTES, 'UTF-8')) : 'We are looking for a motivated team member to help us create a warm, welcoming experience for every customer.' ?></p>
@@ -800,6 +779,13 @@ $academicRequired = !empty($job['academic_document_required']);
                     <div class="job-section">
                         <h3><i class="fa-solid fa-list-check"></i> What You Bring</h3>
                         <p><?= nl2br(htmlspecialchars($requirements, ENT_QUOTES, 'UTF-8')) ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($expectedSalary !== ''): ?>
+                    <div class="job-section">
+                        <h3><i class="fa-solid fa-peso-sign"></i> Expected Salary</h3>
+                        <p class="job-salary-value"><?= $expectedSalary ?></p>
                     </div>
                 <?php endif; ?>
 
