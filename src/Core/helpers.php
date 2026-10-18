@@ -118,3 +118,40 @@ if (!function_exists('jobSalary')) {
         return '₱13,500 – ₱16,000 / month';
     }
 }
+
+if (!function_exists('jobBenefits')) {
+    /**
+     * Parse the newline-separated benefits text stored on a job posting
+     * into a clean list of individual benefits.
+     *
+     * Returns an empty array when HR has not entered (confirmed) any
+     * benefits. Callers must render nothing in that case — unconfirmed
+     * benefits must never be presented as actual company benefits.
+     */
+    function jobBenefits(array $job): array
+    {
+        $raw = (string) ($job['benefits'] ?? '');
+
+        if (trim($raw) === '') {
+            return [];
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', $raw);
+
+        if (!is_array($lines)) {
+            return [];
+        }
+
+        $benefits = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line !== '') {
+                $benefits[] = $line;
+            }
+        }
+
+        return $benefits;
+    }
+}

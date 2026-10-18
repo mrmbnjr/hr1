@@ -382,6 +382,18 @@ $jobSalary = static function ($job) {
                                 <li><i class="fa-regular fa-calendar" aria-hidden="true"></i>Apply by <?= $e(date('M j, Y', strtotime($j['deadline']))) ?></li>
                             <?php endif; ?>
                         </ul>
+
+                        <?php $benefits = jobBenefits($j); ?>
+                        <?php if ($benefits): ?>
+                        <ul class="lp-job__benefits" aria-label="Benefits">
+                            <?php foreach (array_slice($benefits, 0, 3) as $benefit): ?>
+                                <li><i class="fa-solid fa-check" aria-hidden="true"></i> <?= $e($benefit) ?></li>
+                            <?php endforeach; ?>
+                            <?php if (count($benefits) > 3): ?>
+                                <li class="lp-job__benefits-more">+<?= count($benefits) - 3 ?> more</li>
+                            <?php endif; ?>
+                        </ul>
+                        <?php endif; ?>
                     </div>
                     <div class="lp-job__slots" data-tip="<?= $slots ?> <?= $slots === 1 ? 'opening' : 'openings' ?> for this role" tabindex="0">
                         <strong><?= $slots ?></strong>

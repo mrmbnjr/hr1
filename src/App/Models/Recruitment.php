@@ -46,6 +46,7 @@ class Recruitment
                 jp.title,
                 jp.description,
                 jp.requirements,
+                jp.benefits,
                 jp.application_token,
                 p.position_name,
                 d.department_name,
@@ -111,6 +112,7 @@ class Recruitment
                 jp.vacancies,
                 jp.status,
                 jp.application_deadline,
+                jp.benefits,
                 p.position_name,
                 d.department_name
 
@@ -206,6 +208,7 @@ class Recruitment
                 title,
                 description,
                 requirements,
+                benefits,
                 academic_document_required,
                 employment_type,
                 vacancies,
@@ -222,6 +225,7 @@ class Recruitment
                 :title,
                 :description,
                 :requirements,
+                :benefits,
                 :academic_document_required,
                 :employment_type,
                 :vacancies,
@@ -244,6 +248,7 @@ class Recruitment
                 ':title' => $data['title'],
                 ':description' => $data['description'],
                 ':requirements' => $data['requirements'],
+                ':benefits' => $this->normalizeBenefits($data['benefits'] ?? null),
                 ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
                 ':employment_type' => $data['employment_type'],
                 ':vacancies' => $vacancies,
@@ -411,6 +416,7 @@ class Recruitment
                 title = ?,
                 description = ?,
                 requirements = ?,
+                benefits = ?,
                 academic_document_required = ?,
                 employment_type = ?,
                 vacancies = ?,
@@ -429,6 +435,7 @@ class Recruitment
                 $data['title'],
                 $data['description'],
                 $data['requirements'],
+                $this->normalizeBenefits($data['benefits'] ?? null),
                 !empty($data['academic_document_required']) ? 1 : 0,
                 $data['employment_type'],
                 $data['vacancies'],
@@ -458,6 +465,18 @@ class Recruitment
                 (string) ($exception->errorInfo[2] ?? ''),
                 'uq_job_postings_position'
             ) !== false;
+    }
+
+    /**
+     * Benefits are stored as newline-separated text. An empty or
+     * whitespace-only entry is saved as NULL so public pages never render
+     * unconfirmed benefits.
+     */
+    private function normalizeBenefits(mixed $value): ?string
+    {
+        $benefits = trim((string) $value);
+
+        return $benefits === '' ? null : $benefits;
     }
 
     public function delete(int $id): bool

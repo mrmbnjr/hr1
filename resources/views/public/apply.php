@@ -26,6 +26,7 @@ $deadline = !empty($job['application_deadline'])
     : 'Open until filled';
 $description = trim((string)($job['description'] ?? ''));
 $requirements = trim((string)($job['requirements'] ?? ''));
+$benefits = jobBenefits($job);
 $academicRequired = !empty($job['academic_document_required']);
 ?>
 
@@ -330,6 +331,30 @@ $academicRequired = !empty($job['academic_document_required']);
             font-size: 14.5px;
             color: var(--ink);
             line-height: 1.7;
+        }
+
+        .job-benefits {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .job-benefits li {
+            position: relative;
+            padding-left: 30px;
+            font-size: 14.5px;
+            color: var(--ink);
+            line-height: 1.6;
+        }
+
+        .job-benefits li i {
+            position: absolute;
+            left: 0;
+            top: 3px;
+            color: var(--gold);
+            font-size: 13px;
         }
 
         .job-section p.job-salary-value {
@@ -779,6 +804,17 @@ $academicRequired = !empty($job['academic_document_required']);
                     <div class="job-section">
                         <h3><i class="fa-solid fa-list-check"></i> What You Bring</h3>
                         <p><?= nl2br(htmlspecialchars($requirements, ENT_QUOTES, 'UTF-8')) ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($benefits): ?>
+                    <div class="job-section">
+                        <h3><i class="fa-solid fa-gift"></i> What We Offer</h3>
+                        <ul class="job-benefits">
+                            <?php foreach ($benefits as $benefit): ?>
+                                <li><i class="fa-solid fa-check" aria-hidden="true"></i> <?= htmlspecialchars($benefit, ENT_QUOTES, 'UTF-8') ?></li>
+                            <?php endforeach; ?>
+                        </ul>
                     </div>
                 <?php endif; ?>
 

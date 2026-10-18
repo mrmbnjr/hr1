@@ -74,6 +74,7 @@ switch ($page) {
                 'slots' => $vacancies - $hired,
                 'deadline' => $job['application_deadline'],
                 'application_token' => $job['application_token'],
+                'benefits' => $job['benefits'] ?? '',
             ];
         }
 
@@ -285,6 +286,7 @@ switch ($page) {
                 // Used by the details modal in job-list.php
                 'description' => $job['description'] ?? '',
                 'requirements' => $job['requirements'] ?? '',
+                'benefits' => $job['benefits'] ?? '',
                 'position_name' => $job['position_name'] ?? '',
                 'role_name' => $job['role_name'] ?? '',
                 // Real salary later: 'salary' => $job['salary'] ?? null,

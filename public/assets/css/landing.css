@@ -269,6 +269,12 @@ html.lp-page::-webkit-scrollbar { width: 0; height: 0; }
 .lp-job h3 { font-size: 1.15rem; }
 .lp-meta { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 4px; color: var(--lp-ink-soft); font-size: .9rem; }
 .lp-meta i { color: var(--lp-maroon); margin-right: 8px; }
+
+/* Benefits preview on the landing careers card */
+.lp-job__benefits { display: flex; flex-wrap: wrap; gap: 6px 10px; margin: 10px 0 0; padding: 0; list-style: none; }
+.lp-job__benefits li { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; border: 1px solid var(--lp-border); border-radius: 999px; background: var(--lp-card); color: var(--lp-ink); font-size: .8rem; font-weight: 600; }
+.lp-job__benefits li i { color: var(--lp-gold, #c9a227); font-size: .72rem; }
+.lp-job__benefits .lp-job__benefits-more { border-style: dashed; background: transparent; color: var(--lp-ink-soft); font-weight: 700; }
 .lp-job__slots { text-align: center; padding: 4px 16px; border-inline: 1px solid var(--lp-border); }
 .lp-job__slots strong { display: block; font: 700 1.6rem/1 'Baloo 2', sans-serif; color: var(--lp-maroon); }
 .lp-job__slots span { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--lp-ink-soft); }

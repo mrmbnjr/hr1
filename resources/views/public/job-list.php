@@ -119,6 +119,7 @@ function timeLeft(string $date): array {
             $pct = min(100, round($applicantsApplied / $applicantLimit * 100));
             $init  = strtoupper(substr(preg_replace('/[^A-Za-z ]/', '', $j['title']), 0, 1) . (strpos($j['title'], ' ') !== false ? substr(strrchr($j['title'], ' '), 1, 1) : ''));
             $salary = jobSalary($j);
+            $benefits = jobBenefits($j);
         ?>
         <article class="job" data-text="<?= $h(strtolower($j['title'] . ' ' . $j['department'])) ?>"
                  data-location="<?= $h($j['location']) ?>" data-type="<?= $h($j['employment_type']) ?>">
@@ -135,6 +136,7 @@ function timeLeft(string $date): array {
                 <div><dt>Branch</dt><dd><?= $h($j['location']) ?></dd></div>
                 <div><dt>Type</dt><dd><?= $h($j['employment_type']) ?></dd></div>
                 <div><dt>Expected Salary</dt><dd><?= $h($salary) ?></dd></div>
+                <div><dt>Vacancies</dt><dd><?= $vacancies ?> <?= $vacancies === 1 ? 'opening' : 'openings' ?></dd></div>
                 <div><dt>Application Deadline</dt><dd><?= $h(date('M j, Y', strtotime($j['closing_date']))) ?></dd></div>
             </dl>
 
@@ -145,6 +147,17 @@ function timeLeft(string $date): array {
                 </div>
                 <div class="bar"><span style="width: <?= $pct ?>%"></span></div>
             </div>
+
+            <?php if ($benefits): ?>
+            <ul class="job__benefits" aria-label="Benefits">
+                <?php foreach (array_slice($benefits, 0, 3) as $benefit): ?>
+                    <li><i class="fa-solid fa-check" aria-hidden="true"></i> <?= $h($benefit) ?></li>
+                <?php endforeach; ?>
+                <?php if (count($benefits) > 3): ?>
+                    <li class="job__benefits-more">+<?= count($benefits) - 3 ?> more</li>
+                <?php endif; ?>
+            </ul>
+            <?php endif; ?>
 
             <div class="job__actions">
                 <button class="btn btn--ghost btn-view-details" data-id="<?= (int)$j['id'] ?>">
@@ -189,6 +202,17 @@ function timeLeft(string $date): array {
                     <h3>Requirements</h3>
                     <p><?= $h(!empty($j['requirements']) ? $j['requirements'] : 'No specific requirements provided.') ?></p>
                 </div>
+
+                <?php if ($benefits): ?>
+                <div class="job-detail-section">
+                    <h3>Benefits</h3>
+                    <ul class="job-detail-benefits">
+                        <?php foreach ($benefits as $benefit): ?>
+                            <li><i class="fa-solid fa-check" aria-hidden="true"></i> <?= $h($benefit) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
 
                 <div class="job-detail-actions">
                     <a class="btn btn--primary" href="index.php?page=apply&amp;token=<?= rawurlencode((string)$j['application_token']) ?>">Apply now <i class="fa-solid fa-arrow-up-right-from-square"></i></a>

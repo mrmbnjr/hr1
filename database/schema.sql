@@ -110,6 +110,9 @@ CREATE TABLE job_postings (
     description TEXT,
     requirements TEXT,
 
+    -- Newline-separated benefits entered by HR. NULL until confirmed.
+    benefits TEXT NULL,
+
     academic_document_required BOOLEAN NOT NULL DEFAULT FALSE,
 
     employment_type ENUM(

@@ -270,6 +270,24 @@ $job = isset($job) && is_array($job) ? $job : [];
             </textarea>
         </div>
 
+        <div class="form-group">
+
+            <label>Benefits</label>
+
+            <textarea id="benefits"
+                name="benefits"
+                rows="4"
+                maxlength="1000"
+                placeholder="One benefit per line, e.g.
+Meal allowance
+Flexible scheduling
+Career growth opportunities"
+            ><?= htmlspecialchars($job['benefits'] ?? '') ?></textarea>
+
+            <small class="form-hint">Optional. Enter one benefit per line — they are shown to applicants on the listing and application pages. Leave empty to hide benefits.</small>
+
+        </div>
+
         <hr>
 
         <div class="form-actions">

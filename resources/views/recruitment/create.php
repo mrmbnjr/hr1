@@ -230,6 +230,24 @@ if (!isset($_SESSION['user_id'])) {
 
         </div>
 
+        <div class="form-group">
+
+            <label>Benefits</label>
+
+            <textarea id="benefits"
+                name="benefits"
+                rows="4"
+                maxlength="1000"
+                placeholder="One benefit per line, e.g.
+Meal allowance
+Flexible scheduling
+Career growth opportunities"
+            ><?= htmlspecialchars($_POST['benefits'] ?? '') ?></textarea>
+
+            <small class="form-hint">Optional. Enter one benefit per line — they are shown to applicants on the listing and application pages.</small>
+
+        </div>
+
         <hr>
 
         <div class="form-actions">
