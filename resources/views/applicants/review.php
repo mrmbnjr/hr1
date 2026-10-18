@@ -16,6 +16,17 @@ if (!$applicant) {
     exit;
 }
 
+/*
+ * Applicants still in the screening stages are qualified or rejected
+ * here; the interview stage (and its schedule) only opens once they
+ * are qualified.
+ */
+$isScreeningStage = in_array(
+    $applicant['application_status'],
+    ['Submitted', 'Under Review'],
+    true
+);
+
 $statusMeta = [
     "Submitted"    => ["label" => "Submitted", "class" => "badge-gray"],
     "Under Review" => ["label" => "Under Review", "class" => "badge-blue"],
@@ -505,61 +516,75 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
             </div>
         </section>
 
-        <!-- Interview -->
-        <section class="detail-section">
-            <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
+        <!-- Interview (hidden until the applicant qualifies) -->
+        <?php if (!$isScreeningStage): ?>
+            <section class="detail-section">
+                <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
 
-            <?php if (empty($applicant['interview_id'])): ?>
-                <div class="interview-empty">
-                    <span class="badge badge-gray">Not Scheduled</span>
-                    <button type="button" class="btn-primary" id="openScheduleModal">
-                        <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
-                    </button>
-                </div>
-            <?php else: ?>
-                <?php
-                $resultClass = match ($applicant['result']) {
-                    'Passed' => 'badge-green',
-                    'Failed' => 'badge-red',
-                    default  => 'badge-orange'
-                };
-                $isManagerInterview = ($applicant['interviewer_role'] ?? '') === 'MANAGER';
-                ?>
-                <div class="interview-scheduled">
-                    <div class="info-grid">
-                        <?php
-                        infoField('Interview Date', date('F d, Y', strtotime($applicant['interview_date'])));
-                        infoField('Interview Time', date('g:i A', strtotime($applicant['interview_date'])));
-                        infoField('Interviewer', $applicant['interviewer_name'] . ' (' . $applicant['interviewer_role'] . ')');
-                        infoField('Interview Type', $applicant['interview_type']);
-                        infoField('Location', $applicant['location']);
-                        ?>
-                        <?php if ($isManagerInterview): ?>
-                            <div>
-                                <span class="info-label">Result</span>
-                                <span class="badge <?= $resultClass ?>"><?= htmlspecialchars($applicant['result']) ?></span>
+                <?php if (empty($applicant['interview_id'])): ?>
+                    <div class="interview-empty">
+                        <span class="badge badge-gray">Not Scheduled</span>
+                        <button type="button" class="btn-primary" id="openScheduleModal">
+                            <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <?php
+                    $resultClass = match ($applicant['result']) {
+                        'Passed' => 'badge-green',
+                        'Failed' => 'badge-red',
+                        default  => 'badge-orange'
+                    };
+                    $isManagerInterview = ($applicant['interviewer_role'] ?? '') === 'MANAGER';
+                    ?>
+                    <div class="interview-scheduled">
+                        <div class="info-grid">
+                            <?php
+                            infoField('Interview Date', date('F d, Y', strtotime($applicant['interview_date'])));
+                            infoField('Interview Time', date('g:i A', strtotime($applicant['interview_date'])));
+                            infoField('Interviewer', $applicant['interviewer_name'] . ' (' . $applicant['interviewer_role'] . ')');
+                            infoField('Interview Type', $applicant['interview_type']);
+                            infoField('Location', $applicant['location']);
+                            ?>
+                            <?php if ($isManagerInterview): ?>
+                                <div>
+                                    <span class="info-label">Result</span>
+                                    <span class="badge <?= $resultClass ?>"><?= htmlspecialchars($applicant['result']) ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($isManagerInterview && $applicant['result'] !== 'Pending'): ?>
+                            <div class="remarks-box">
+                                <span class="info-label">Interview Remarks</span>
+                                <p class="remarks-text"><?= nl2br(htmlspecialchars($applicant['remarks'])) ?></p>
                             </div>
                         <?php endif; ?>
+
+                        <?php if ($applicant['result'] === 'Pending'): ?>
+                            <button type="button" class="btn-outline" id="editScheduleBtn">
+                                <i class="fa-solid fa-pen"></i> Edit Schedule
+                            </button>
+                        <?php endif; ?>
                     </div>
-
-                    <?php if ($isManagerInterview && $applicant['result'] !== 'Pending'): ?>
-                        <div class="remarks-box">
-                            <span class="info-label">Interview Remarks</span>
-                            <p class="remarks-text"><?= nl2br(htmlspecialchars($applicant['remarks'])) ?></p>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($applicant['result'] === 'Pending'): ?>
-                        <button type="button" class="btn-outline" id="editScheduleBtn">
-                            <i class="fa-solid fa-pen"></i> Edit Schedule
-                        </button>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        </section>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
 
         <!-- Decision -->
-        <?php if (!in_array($applicant['application_status'], ['Hired', 'Rejected'], true)): ?>
+        <?php if ($isScreeningStage): ?>
+            <section class="detail-section decision-section">
+                <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
+                <div class="decision-buttons">
+                    <button type="button" class="btn-success btn-block" id="qualifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                        <i class="fa-solid fa-user-check"></i> Qualify Applicant
+                    </button>
+                    <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                        <i class="fa-solid fa-user-xmark"></i> Reject Applicant
+                    </button>
+                </div>
+            </section>
+        <?php elseif (!in_array($applicant['application_status'], ['Hired', 'Rejected'], true)): ?>
             <section class="detail-section decision-section">
                 <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
                 <div class="decision-buttons">
@@ -663,6 +688,29 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="hireModal">Cancel</button>
                     <button type="button" class="btn-success" id="confirmHireBtn">Confirm Hire</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Qualify Confirmation Modal -->
+    <div class="modal-overlay" id="qualifyModal">
+        <div class="modal-box modal-small">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-check"></i> Qualify Applicant</h3>
+                <button type="button" class="close-btn" data-close="qualifyModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-text">
+                    You are about to qualify <strong><?= htmlspecialchars($applicant['fullname']) ?></strong> for the next stage. This will:
+                </p>
+                <ul class="confirm-list">
+                    <li><i class="fa-solid fa-check"></i> Change application status to <strong>Interview</strong></li>
+                    <li><i class="fa-solid fa-check"></i> Unlock interview scheduling for this applicant</li>
+                </ul>
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" data-close="qualifyModal">Cancel</button>
+                    <button type="button" class="btn-success" id="confirmQualifyBtn">Confirm Qualification</button>
                 </div>
             </div>
         </div>

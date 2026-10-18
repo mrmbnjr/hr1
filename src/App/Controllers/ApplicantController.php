@@ -1444,6 +1444,84 @@ class ApplicantController
 
     /*
     |--------------------------------------------------------------------------
+    | Qualify Applicant
+    |--------------------------------------------------------------------------
+    */
+
+    public function qualify()
+    {
+        Auth::requireRole([
+            'ADMIN',
+            'HR',
+            'MGR'
+        ]);
+
+
+        header(
+            'Content-Type: application/json'
+        );
+
+
+        try {
+
+            $applicationId =
+                (int) (
+                    $_POST['application_id'] ?? 0
+                );
+
+
+            if ($applicationId <= 0) {
+                throw new \Exception(
+                    'Invalid application ID.'
+                );
+            }
+
+
+            $success =
+                $this->applicant
+                    ->qualifyApplication(
+                        $applicationId
+                    );
+
+
+            if (!$success) {
+                throw new \Exception(
+                    'Unable to qualify this application. It may already be in the interview stage or may not exist.'
+                );
+            }
+
+
+            echo json_encode([
+
+                'success' =>
+                    true,
+
+                'message' =>
+                    'Applicant has been qualified for interview.'
+            ]);
+
+        } catch (\Throwable $e) {
+
+            http_response_code(400);
+
+
+            echo json_encode([
+
+                'success' =>
+                    false,
+
+                'message' =>
+                    $e->getMessage()
+            ]);
+        }
+
+
+        exit;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Helpers
     |--------------------------------------------------------------------------
     */

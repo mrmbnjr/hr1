@@ -251,7 +251,7 @@
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     function closeAllModals() {
-        ['scheduleModal', 'hireModal', 'rejectModal'].forEach(closeModal);
+        ['scheduleModal', 'hireModal', 'rejectModal', 'qualifyModal'].forEach(closeModal);
     }
 
     document.querySelectorAll('[data-close]').forEach(btn => {
@@ -689,6 +689,137 @@
                             'Confirm Rejection';
 
                     }
+
+                }
+
+            }
+        );
+    }
+
+    /* ----------------------------------------------------------
+    QUALIFY
+    ---------------------------------------------------------- */
+
+    const qualifyBtn = document.getElementById('qualifyBtn');
+
+    const confirmQualifyBtn =
+        document.getElementById('confirmQualifyBtn');
+
+    let qualifyRequestInProgress = false;
+
+
+    /* ----------------------------------------------------------
+    OPEN QUALIFY MODAL
+    ---------------------------------------------------------- */
+
+    if (qualifyBtn) {
+
+        qualifyBtn.addEventListener('click', function () {
+
+            const applicationId =
+                this.dataset.applicationId;
+
+            if (!applicationId) {
+                alert('Application ID is missing.');
+                return;
+            }
+
+            openModal('qualifyModal');
+        });
+    }
+
+
+    /* ----------------------------------------------------------
+    CONFIRM QUALIFICATION
+    ---------------------------------------------------------- */
+
+    if (confirmQualifyBtn) {
+
+        confirmQualifyBtn.addEventListener(
+            'click',
+            async function () {
+
+                if (qualifyRequestInProgress) {
+                    return;
+                }
+
+                const applicationId =
+                    qualifyBtn.dataset.applicationId;
+
+                if (!applicationId) {
+                    alert('Application ID is missing.');
+                    return;
+                }
+
+                qualifyRequestInProgress = true;
+                confirmQualifyBtn.disabled = true;
+                confirmQualifyBtn.innerHTML =
+                    '<i class="fa-solid fa-spinner fa-spin"></i> Qualifying...';
+
+                try {
+
+                    const formData =
+                        new FormData();
+
+                    formData.append(
+                        'application_id',
+                        applicationId
+                    );
+
+                    const response =
+                        await fetch(
+                            '?page=qualify-applicant',
+                            {
+                                method: 'POST',
+                                body: formData
+                            }
+                        );
+
+                    const result =
+                        await response.json();
+
+                    console.log(
+                        'Qualify response:',
+                        result
+                    );
+
+                    if (!response.ok || !result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            'Unable to qualify applicant.'
+                        );
+
+                    }
+
+                    closeModal('qualifyModal');
+
+                    alert(
+                        'Applicant has been qualified for interview.'
+                    );
+
+                    window.location.href =
+                        '?page=review&id=' +
+                        applicationId;
+
+                } catch (error) {
+
+                    console.error(
+                        'Qualify error:',
+                        error
+                    );
+
+                    alert(
+                        error.message ||
+                        'An error occurred while qualifying the applicant.'
+                    );
+
+                } finally {
+
+                    qualifyRequestInProgress = false;
+                    confirmQualifyBtn.disabled = false;
+                    confirmQualifyBtn.innerHTML =
+                        '<i class="fa-solid fa-user-check"></i> Confirm Qualification';
 
                 }
 

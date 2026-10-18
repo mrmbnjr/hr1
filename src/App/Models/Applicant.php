@@ -440,6 +440,42 @@ class Applicant
 
     /*
     |--------------------------------------------------------------------------
+    | Qualify Application
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Move a screening-stage application into the interview stage.
+     *
+     * Only applications that are still 'Submitted' or 'Under Review'
+     * can be qualified; anything already further down the pipeline
+     * (or already decided) is left untouched.
+     */
+    public function qualifyApplication(
+        int $applicationId
+    ): bool {
+
+        $stmt = $this->db->prepare("
+            UPDATE applications
+            SET application_status = 'Interview',
+                rejected_at = NULL
+            WHERE application_id = :application_id
+            AND application_status IN ('Submitted', 'Under Review')
+        ");
+
+
+        $stmt->execute([
+            ':application_id' =>
+                $applicationId
+        ]);
+
+
+        return $stmt->rowCount() > 0;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Job Postings
     |--------------------------------------------------------------------------
     */

@@ -349,6 +349,12 @@ switch ($page) {
 
         break;
 
+    case 'qualify-applicant':
+
+        (new ApplicantController())->qualify();
+
+        break;
+
     /*
     |--------------------------------------------------------------------------
     | RECRUITMENT
