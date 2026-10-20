@@ -178,6 +178,8 @@
   --badge-green-bg: var(--green-bg);   --badge-green-fg: var(--green);
   --badge-red-bg: var(--red-bg);       --badge-red-fg: var(--red);
   --badge-gold-bg: rgba(242, 193, 78, 0.18); --badge-gold-fg: var(--maroon-dark);
+  --badge-purple-bg: rgba(139, 92, 246, 0.14); --badge-purple-fg: #6d28d9;
+  --badge-teal-bg: rgba(20, 184, 166, 0.16);   --badge-teal-fg: #0f766e;
 
   /* Status tones (workflow states) */
   --status-pending: #b45309;    --status-pending-bg: #fdf0d9;
@@ -286,6 +288,8 @@
   --badge-green-bg: rgba(34, 197, 94, 0.12);   --badge-green-fg: #4ade80;
   --badge-red-bg: rgba(224, 54, 44, 0.16);     --badge-red-fg: #f87171;
   --badge-gold-bg: rgba(242, 193, 78, 0.12);   --badge-gold-fg: var(--gold);
+  --badge-purple-bg: rgba(139, 92, 246, 0.16); --badge-purple-fg: #c4b5fd;
+  --badge-teal-bg: rgba(20, 184, 166, 0.16);   --badge-teal-fg: #5eead4;
 
   /* Status tones (workflow states) */
   --status-pending: #f0b357;    --status-pending-bg: rgba(217, 119, 6, 0.20);

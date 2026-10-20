@@ -111,4 +111,149 @@ class MailService
 
 		$mailer->send();
 	}
+
+	/**
+	 * Job offer letter. Position, salary, type, start date, terms and
+	 * the expiry date come from the job_offers row.
+	 */
+	public function sendOfferLetter(array $offer): void
+	{
+		$mailer = $this->createMailer();
+		$mailer->addAddress((string) $offer['email'], (string) $offer['fullname']);
+		$mailer->Subject = 'Job offer - ' . $offer['position'];
+
+		$name = htmlspecialchars((string) $offer['fullname'], ENT_QUOTES, 'UTF-8');
+		$position = htmlspecialchars((string) $offer['position'], ENT_QUOTES, 'UTF-8');
+		$salary = htmlspecialchars((string) $offer['salary'], ENT_QUOTES, 'UTF-8');
+		$employmentType = htmlspecialchars((string) $offer['employment_type'], ENT_QUOTES, 'UTF-8');
+		$startDate = htmlspecialchars((string) $offer['start_date'], ENT_QUOTES, 'UTF-8');
+		$terms = nl2br(htmlspecialchars((string) ($offer['terms'] ?? ''), ENT_QUOTES, 'UTF-8'));
+		$expiresOn = !empty($offer['expires_on'])
+			? htmlspecialchars((string) $offer['expires_on'], ENT_QUOTES, 'UTF-8')
+			: null;
+
+		$mailer->Body = <<<HTML
+			<p>Dear {$name},</p>
+			<p>We are pleased to extend an offer for the <strong>{$position}</strong> position.</p>
+			<ul>
+				<li><strong>Position:</strong> {$position}</li>
+				<li><strong>Employment type:</strong> {$employmentType}</li>
+				<li><strong>Offered salary:</strong> {$salary}</li>
+				<li><strong>Proposed start date:</strong> {$startDate}</li>
+			</ul>
+			<p><strong>Terms:</strong><br>{$terms}</p>
+HTML;
+
+		if ($expiresOn !== null) {
+			$mailer->Body .= <<<HTML
+			<p>This offer is valid until <strong>{$expiresOn}</strong>. Please let us know your decision before that date.</p>
+HTML;
+		}
+
+		$mailer->Body .= <<<HTML
+			<p>Regards,<br>RAM-YUM Recruitment</p>
+HTML;
+
+		$mailer->AltBody = "Dear {$offer['fullname']},\n\n"
+			. "We are pleased to extend an offer for the {$offer['position']} position.\n\n"
+			. "Position: {$offer['position']}\n"
+			. "Employment type: {$offer['employment_type']}\n"
+			. "Offered salary: {$offer['salary']}\n"
+			. "Proposed start date: {$offer['start_date']}\n"
+			. "Terms: " . ($offer['terms'] ?? '') . "\n"
+			. ($expiresOn !== null
+				? "This offer is valid until {$expiresOn}.\n\n"
+				: "\n")
+			. "Regards,\nRAM-YUM Recruitment";
+
+		$mailer->send();
+	}
+
+	/**
+	 * Generic, polite rejection notice. The internal reason category
+	 * and any HR note are deliberately kept out of the email - they
+	 * stay HR-internal in the application timeline.
+	 */
+	public function sendRejectionEmail(array $applicant): void
+	{
+		$mailer = $this->createMailer();
+		$mailer->addAddress((string) $applicant['email'], (string) $applicant['fullname']);
+		$mailer->Subject = 'Update on your application';
+
+		$name = htmlspecialchars((string) $applicant['fullname'], ENT_QUOTES, 'UTF-8');
+		$position = htmlspecialchars((string) $applicant['position'], ENT_QUOTES, 'UTF-8');
+
+		$mailer->Body = <<<HTML
+			<p>Dear {$name},</p>
+			<p>Thank you for your interest in the <strong>{$position}</strong> position and for the time you invested in the selection process.</p>
+			<p>After careful consideration, we will not be moving forward with your application at this time. We genuinely appreciate the effort you put into applying and encourage you to apply for future openings that match your qualifications.</p>
+			<p>We wish you every success in your career.</p>
+			<p>Regards,<br>RAM-YUM Recruitment</p>
+		HTML;
+
+		$mailer->AltBody = "Dear {$applicant['fullname']},\n\n"
+			. "Thank you for your interest in the {$applicant['position']} position and for the time you invested in the selection process.\n\n"
+			. "After careful consideration, we will not be moving forward with your application at this time. We genuinely appreciate the effort you put into applying and encourage you to apply for future openings that match your qualifications.\n\n"
+			. "We wish you every success in your career.\n\n"
+			. "Regards,\nRAM-YUM Recruitment";
+
+		$mailer->send();
+	}
+
+	/**
+	 * Confirmation that the application was received, sent on public
+	 * submit.
+	 */
+	public function sendApplicationReceived(array $applicant): void
+	{
+		$mailer = $this->createMailer();
+		$mailer->addAddress((string) $applicant['email'], (string) $applicant['fullname']);
+		$mailer->Subject = 'Application received - ' . $applicant['position'];
+
+		$name = htmlspecialchars((string) $applicant['fullname'], ENT_QUOTES, 'UTF-8');
+		$position = htmlspecialchars((string) $applicant['position'], ENT_QUOTES, 'UTF-8');
+
+		$mailer->Body = <<<HTML
+			<p>Dear {$name},</p>
+			<p>Thank you for applying for the <strong>{$position}</strong> position. We have received your application and it is now in our review queue.</p>
+			<p>Our team reviews every application carefully, and we will be in touch with an update on the next steps.</p>
+			<p>Regards,<br>RAM-YUM Recruitment</p>
+		HTML;
+
+		$mailer->AltBody = "Dear {$applicant['fullname']},\n\n"
+			. "Thank you for applying for the {$applicant['position']} position. We have received your application and it is now in our review queue.\n\n"
+			. "Our team reviews every application carefully, and we will be in touch with an update on the next steps.\n\n"
+			. "Regards,\nRAM-YUM Recruitment";
+
+		$mailer->send();
+	}
+
+	/**
+	 * Generic progress update when an application moves to the next
+	 * stage. Deliberately not a decision message - the candidate is
+	 * told the process is progressing, nothing more.
+	 */
+	public function sendStatusUpdate(array $applicant): void
+	{
+		$mailer = $this->createMailer();
+		$mailer->addAddress((string) $applicant['email'], (string) $applicant['fullname']);
+		$mailer->Subject = 'Update on your application';
+
+		$name = htmlspecialchars((string) $applicant['fullname'], ENT_QUOTES, 'UTF-8');
+		$position = htmlspecialchars((string) $applicant['position'], ENT_QUOTES, 'UTF-8');
+
+		$mailer->Body = <<<HTML
+			<p>Dear {$name},</p>
+			<p>Thank you for your patience. Your application for the <strong>{$position}</strong> position has moved to the next stage of our selection process.</p>
+			<p>We will be in touch with any further updates as the process continues.</p>
+			<p>Regards,<br>RAM-YUM Recruitment</p>
+		HTML;
+
+		$mailer->AltBody = "Dear {$applicant['fullname']},\n\n"
+			. "Thank you for your patience. Your application for the {$applicant['position']} position has moved to the next stage of our selection process.\n\n"
+			. "We will be in touch with any further updates as the process continues.\n\n"
+			. "Regards,\nRAM-YUM Recruitment";
+
+		$mailer->send();
+	}
 }

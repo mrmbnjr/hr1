@@ -1,52 +1,153 @@
 /* ==========================================================
    RAM-YUM — Applicant Management
-   Maroon / Gold / Cream theme
+   Maroon / Gold / Cream theme. Consumes the design tokens from
+   the theme file, so light and dark modes need no overrides here.
    ========================================================== */
 .applicants-page {
     min-height: 84.34vh;
-    padding: 28px 32px 60px;
+    padding: 24px 28px 56px;
     font-family: var(--font-body);
     color: var(--ink);
 }
 
-/* ---------------- Summary cards ----------------
-   Renders the shared summary stat-card contract
-   (.stat-card / .stat-icon / .stat-content) so this page matches
-   the recruitment, statistics and onboarding screens. The extra
-   .summary-card class is the hook applicants.js binds its status
-   filter to, so it must stay on the markup. */
+/* ==========================================================
+   SUMMARY STRIP
+   One card: total on the left, one tinted tile per status.
+   .summary-card is the hook applicants.js binds its status
+   filter to, so it must stay on the markup.
+========================================================== */
 
-.summary-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 12px;
-    margin-bottom: 12px;
+.summary-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 18px;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+
+    background: var(--card-bg);
+    border: 1px solid var(--field-readonly-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card), inset 0 1px 0 var(--tint-neutral);
 }
 
-.summary-grid .stat-card {
+.summary-total {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+    padding: 0 22px 0 6px;
+    border-right: 1px solid var(--border);
     cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.summary-grid .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-    border-top-color: var(--maroon);
-}
-
-.summary-grid .stat-card.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(212, 165, 55, 0.25);
-}
-
-.summary-grid .stat-card:focus-visible {
+.summary-total:focus-visible,
+.summary-tile:focus-visible {
     outline: 2px solid var(--gold-dark);
     outline-offset: 2px;
 }
 
+.summary-total-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    color: var(--maroon);
+    font-size: 34px;
+}
+
+.summary-total-body { display: flex; flex-direction: column; min-width: 0; }
+
+.summary-total-body span {
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.summary-total-body strong {
+    color: var(--ink);
+    font-family: var(--font-heading);
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.summary-total-body small {
+    color: var(--ink-soft);
+    font-size: 12px;
+}
+
+.summary-strip .summary-grid {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    min-width: 0;
+}
+
+.summary-tile {
+    --tile-fg: var(--badge-gray-fg);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px 14px;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.summary-tile:hover {
+    transform: translateY(-1px);
+    background: var(--surface-2);
+    border-color: var(--ink-soft);
+}
+
+.summary-tile.active {
+    border-color: var(--maroon);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.summary-tile .tile-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.summary-tile .tile-dot {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--tile-fg);
+}
+
+.summary-tile strong {
+    color: var(--ink);
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.summary-tile.tone-gray   { --tile-fg: var(--badge-gray-fg); }
+.summary-tile.tone-blue   { --tile-fg: var(--badge-blue-fg); }
+.summary-tile.tone-purple { --tile-fg: var(--badge-purple-fg); }
+.summary-tile.tone-orange { --tile-fg: var(--badge-orange-fg); }
+.summary-tile.tone-teal   { --tile-fg: var(--badge-teal-fg); }
+.summary-tile.tone-green  { --tile-fg: var(--badge-green-fg); }
+.summary-tile.tone-red    { --tile-fg: var(--badge-red-fg); }
+
 /* Stat-card contract — mirrors statistics.css / recruitment.css.
-   Uses --card-bg (not --white) so light and dark themes both stay
-   legible without a separate [data-theme] override. */
+   Kept for any shared markup that still uses it. */
 
 .stat-card {
     display: flex;
@@ -110,14 +211,164 @@
     font-size: 11px;
 }
 
+/* ==========================================================
+   APPLICANT PANEL  (filter bar + table + footer)
+   Base table / badge / pagination styles live in components.css.
+========================================================== */
+
+.applicant-panel {
+    padding: 14px;
+
+    background: var(--card-bg);
+    border: 1px solid var(--field-readonly-border);
+    border-radius: 18px;
+    box-shadow: var(--shadow-card), inset 0 1px 0 var(--tint-neutral);
+}
+
 /* ---------------- Filter bar ---------------- */
 
-/* Filter bar and search styles are defined in components.css */
+.applicants-page .filter-bar {
+    align-items: center;
+    gap: 12px;
+}
 
-.table-card { margin-top: 12px ;}
-.applicant-table { min-width: 760px; }
+.applicants-page .filter-search {
+    flex: 1 1 320px;
+    min-width: 240px;
+    min-height: 44px;
+}
+
+.select-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    min-width: 190px;
+    min-height: 44px;
+    padding: 0 14px;
+
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.select-field:hover,
+.select-field:focus-within {
+    border-color: var(--gold-dark);
+}
+
+.select-field:focus-within {
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.select-icon {
+    flex: none;
+    color: var(--ink);
+    font-size: 14px;
+}
+
+.select-caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-soft);
+    font-size: 11px;
+    pointer-events: none;
+}
+
+.applicants-page .select-field select,
+.applicants-page .select-field select:hover,
+.applicants-page .select-field select:focus {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0 22px 0 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    outline: none;
+
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.applicants-page .select-field select option {
+    background: var(--card-bg);
+    color: var(--ink);
+}
+
+.applicants-page .clear-filters {
+    flex: 0 0 auto;
+    min-width: 0;
+    height: 44px;
+    font-size: 13.5px;
+    white-space: nowrap;
+}
+
+.results-count {
+    margin: 14px 4px 10px;
+    color: var(--ink-soft);
+    font-size: 13px;
+}
+
+/* ---------------- Table ---------------- */
+
+.applicants-page .table-card {
+    margin-top: 0;
+    border-color: var(--field-readonly-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-card), inset 0 1px 0 var(--tint-neutral);
+    transition: box-shadow var(--transition);
+}
+
+.applicants-page .table-card:hover {
+    box-shadow: var(--shadow-hover), inset 0 1px 0 var(--tint-neutral);
+}
+
+.applicant-table thead th {
+    position: relative;
+    box-shadow: 0 2px 6px var(--tint-neutral);
+}
+
+.applicant-row:hover > td {
+    box-shadow: inset 0 1px 0 var(--tint-neutral), inset 0 -1px 0 var(--tint-neutral);
+}
+
+.applicant-table { min-width: 860px; }
+
+.applicant-table thead th:nth-child(1) { width: 30%; }
+.applicant-table thead th:nth-child(2) { width: 22%; }
+.applicant-table thead th:nth-child(3) { width: 17%; }
+.applicant-table thead th:nth-child(4) { width: 15%; }
 
 .col-actions { text-align: right; }
+
+.col-chevron {
+    width: 48px;
+    padding-right: 20px !important;
+    text-align: right;
+    color: var(--ink-soft);
+}
+
+.col-chevron i {
+    font-size: 13px;
+    transition: transform var(--transition), color var(--transition);
+}
+
+.applicant-row:hover .col-chevron i,
+.applicant-row:focus-visible .col-chevron i {
+    color: var(--maroon);
+    transform: translateX(3px);
+}
 
 .applicant-cell {
     display: flex;
@@ -147,16 +398,6 @@
     line-height: 1.3;
 }
 
-.application-time {
-    display: block;
-    margin-top: 25px;
-    color: var(--ink-soft);
-    font-size: 11.5px;
-    line-height: 1.4;
-    text-align: right;
-    white-space: nowrap;
-}
-
 .applicant-cell strong {
     display: block;
     color: var(--accent);
@@ -169,22 +410,41 @@
     color: var(--gold-dark);
 }
 
+.position-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.position-title {
+    color: var(--ink);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .score-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    color: var(--ink);
     font-weight: 800;
-    color: var(--accent);
+}
+
+.score-value {
+    min-width: 36px;
+    font-size: 13.5px;
 }
 
 .score-dot {
     --score: 0;
-    width: 34px;
-    height: 6px;
-    border-radius: 4px;
-    background: var(--border);
     position: relative;
+    width: 72px;
+    height: 6px;
     overflow: hidden;
+    border-radius: 4px;
+    background: var(--track-bg);
 }
 
 .score-dot::before {
@@ -192,9 +452,79 @@
     position: absolute;
     inset: 0;
     width: calc(1% * var(--score));
-    background: linear-gradient(90deg, var(--gold), var(--maroon));
+    background: var(--maroon);
     border-radius: 4px;
 }
+
+.application-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.application-time i {
+    color: var(--ink-soft);
+    font-size: 14px;
+}
+
+/* Score tiers (presentation only) */
+.score-pill.tier-high { --score-a: var(--badge-green-fg); --score-b: var(--badge-green-fg); }
+.score-pill.tier-mid  { --score-a: var(--gold);           --score-b: var(--maroon); }
+.score-pill.tier-low  { --score-a: var(--badge-red-fg);   --score-b: var(--badge-red-fg); }
+
+.score-pill[class*="tier-"] .score-dot::before {
+    background: linear-gradient(90deg, var(--score-a), var(--score-b));
+}
+
+.score-pill.tier-high .score-value { color: var(--badge-green-fg); }
+.score-pill.tier-low  .score-value { color: var(--badge-red-fg); }
+
+.score-empty {
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+/* Applied column: relative time + exact date */
+.application-time { align-items: flex-start; }
+.application-time i { margin-top: 2px; }
+
+.application-time-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.3;
+}
+
+.application-time-text small {
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    opacity: 0.8;
+}
+
+/* Row keyboard focus */
+.applicant-row:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: -2px;
+}
+
+/* Summary tiles with nothing in them */
+.summary-tile[data-empty="true"] { opacity: 0.6; }
+.summary-tile[data-empty="true"].active,
+.summary-tile[data-empty="true"]:hover { opacity: 1; }
+
+/* Disabled clear button */
+.applicants-page .clear-filters:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* No-results state button */
+.empty-state .btn-secondary { margin-top: 6px; }
 
 .btn-block { width: 100%; justify-content: center; }
 
@@ -209,6 +539,39 @@
 }
 
 .empty-state i { font-size: 30px; color: var(--gold-dark); }
+
+/* ---------------- Footer ---------------- */
+
+.applicants-page .table-footer {
+    flex-wrap: wrap;
+    padding: 14px 2px 0;
+    border-top: 0;
+}
+
+.rows-per-page {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.rows-per-page .select-field {
+    min-width: 70px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+}
+
+.rows-per-page .select-caret { right: 10px; font-size: 10px; }
+
+.applicants-page .rows-per-page .select-field select,
+.applicants-page .rows-per-page .select-field select:hover,
+.applicants-page .rows-per-page .select-field select:focus {
+    padding-right: 18px;
+    font-size: 13px;
+}
 
 /* ---------------- Details panel ---------------- */
 
@@ -287,11 +650,10 @@
 .detail-section {
     overflow: hidden;
     background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--ry-gold);
-    border-radius: 20px;
+    border: 1px solid var(--field-readonly-border);
+    border-radius: 14px;
     padding: 0 24px 24px;
-    box-shadow: 0 4px 20px rgba(74, 15, 15, 0.06);
+    box-shadow: var(--shadow-card), inset 0 1px 0 var(--tint-neutral);
     transition: box-shadow 0.25s ease;
 }
 
@@ -309,11 +671,11 @@
     margin: 0;
     padding: 20px 24px 14px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
+    background: transparent;
 }
 
 .detail-section h3 i {
-    color: var(--ry-gold-dark);
+    color: var(--maroon);
     font-size: 15px;
 }
 
@@ -333,7 +695,7 @@
     margin: 0 -24px 18px;
     padding: 20px 24px 14px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
+    background: transparent;
 }
 
 .detail-section > .ai-actions h3 {
@@ -579,9 +941,9 @@
     background: var(--card-bg);
 }
 
-.ai-score-circle span { 
-    position: relative; 
-    z-index: 1; 
+.ai-score-circle span {
+    position: relative;
+    z-index: 1;
     font-weight: 700;
 }
 
@@ -807,7 +1169,27 @@
 .modal-body textarea:focus {
     outline: none;
     border-color: var(--gold-dark);
-    box-shadow: var(--focus-ring);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.verification-options {
+    display: grid;
+    gap: 8px;
+}
+
+.verification-options label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-field);
+}
+
+.verification-options input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }
 
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -834,40 +1216,282 @@
 
 .confirm-list i { color: var(--status-approved); margin-right: 8px; }
 
-/* ---------------- Responsive ---------------- */
+/* ---------------- Pipeline tracker ----------------
+   Five-phase progress strip on the review page. States:
+   completed (checked), current (highlighted), upcoming (dimmed),
+   dimmed / rejected (after a rejection). */
 
-@media (max-width: 1200px) {
-    .summary-grid { grid-template-columns: repeat(3, 1fr); }
+.pipeline-tracker {
+    padding: 18px 24px 20px;
 }
 
-@media (max-width:768px){
+.pipeline-steps {
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-    .table-footer{
-        flex-direction:column;
-        align-items:center;
-        gap:12px;
-    }
+.pipeline-step {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
 
-    .results-count{
-        text-align:center;
-    }
+.pipeline-step::before,
+.pipeline-step::after {
+    content: "";
+    position: absolute;
+    top: 19px;
+    height: 2px;
+    background: var(--border);
+}
 
-    .pagination{
-        width:100%;
-        justify-content:center;
+.pipeline-step::before { left: 0; right: 50%; }
+.pipeline-step::after  { left: 50%; right: 0; }
+
+.pipeline-step:first-child::before,
+.pipeline-step:last-child::after { content: none; }
+
+.pipeline-step.completed::before,
+.pipeline-step.completed::after { background: var(--status-approved); }
+
+.pipeline-step-marker {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: var(--card-bg);
+    color: var(--ink);
+    font-size: 14px;
+}
+
+.pipeline-step-label {
+    max-width: 110px;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+}
+
+.pipeline-step.upcoming .pipeline-step-marker { border-style: dashed; }
+.pipeline-step.upcoming .pipeline-step-label { opacity: 0.55; }
+
+.pipeline-step.completed .pipeline-step-marker {
+    border-color: var(--status-approved);
+    background: var(--status-approved);
+    color: #fff;
+}
+
+.pipeline-step.current .pipeline-step-marker {
+    border-color: var(--maroon);
+    background: var(--maroon);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(122, 30, 30, 0.15);
+}
+
+.pipeline-step.current .pipeline-step-label { color: var(--maroon); }
+
+.pipeline-step.rejected .pipeline-step-marker {
+    border-color: var(--status-rejected);
+    background: var(--status-rejected);
+    color: #fff;
+}
+
+.pipeline-step.rejected .pipeline-step-label { color: var(--status-rejected); }
+
+.pipeline-step.dimmed { opacity: 0.45; }
+
+.pipeline-rejected-note {
+    margin: 12px 0 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--status-rejected);
+}
+
+/* ---------------- Interview evaluations ----------------
+   One card per submitted evaluation; every evaluator stays
+   visible, the latest is marked Current. */
+
+.evaluation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.evaluation-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: var(--surface-2);
+}
+
+.evaluation-card.current {
+    border-color: var(--badge-blue-fg);
+    box-shadow: 0 0 0 3px var(--badge-blue-bg);
+}
+
+.evaluation-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.evaluation-head-left {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.evaluation-evaluator {
+    font-weight: 800;
+    font-size: 14.5px;
+    color: var(--ink);
+}
+
+.evaluation-date {
+    font-size: 12.5px;
+    color: var(--ink);
+    opacity: 0.7;
+}
+
+.evaluation-ratings {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.evaluation-rating {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+}
+
+.evaluation-score {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--maroon);
+}
+
+.evaluation-rec {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+/* ---------------- Selection requirements ----------------
+   Checklist table reuses the shared .applicant-table contract
+   inside .table-card; only page-specific tuning lives here. */
+
+.requirements-table td strong {
+    color: var(--ink);
+    font-size: 13.5px;
+    font-weight: 800;
+}
+
+.requirements-table small {
+    display: block;
+    margin-top: 2px;
+    color: var(--ink);
+    opacity: 0.7;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.requirements-table td:nth-child(4) {
+    max-width: 260px;
+}
+
+/* ---------------- Offer card ----------------
+   Offer-stage details block on the review page. */
+
+.offer-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: var(--surface-2);
+}
+
+.offer-expired-note {
+    margin: 12px 0 0;
+    font-weight: 700;
+    color: var(--status-rejected);
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width: 1280px) {
+    .summary-strip { flex-direction: column; gap: 14px; }
+    .summary-total {
+        padding: 0 0 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
     }
+    .summary-strip .summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
     .applicants-page { padding: 20px; }
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .summary-strip .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .details-panel { width: 100%; }
     .form-row { grid-template-columns: 1fr; }
     .info-grid { grid-template-columns: 1fr; }
+    .evaluation-ratings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+    .applicants-page .table-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .applicants-page .pagination {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 560px) {
-    .summary-grid { grid-template-columns: 1fr; }
-    .filter-bar { flex-direction: column; }
-    .filter-bar select { min-width: 100%; }
+    .applicant-panel { padding: 10px; }
+    .applicants-page .filter-bar { flex-direction: column; align-items: stretch; }
+    .applicants-page .filter-search { flex-basis: auto; min-width: 100%; }
+    .select-field { min-width: 100%; }
+    .applicants-page .clear-filters { width: 100%; }
+    .pipeline-steps { flex-direction: column; gap: 14px; }
+    .pipeline-step { flex-direction: row; gap: 12px; text-align: left; }
+    .pipeline-step::before,
+    .pipeline-step::after { content: none; }
+    .evaluation-ratings { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .summary-tile,
+    .col-chevron i,
+    .details-panel,
+    .overlay { transition: none; }
+
+    .summary-tile:hover { transform: none; }
 }

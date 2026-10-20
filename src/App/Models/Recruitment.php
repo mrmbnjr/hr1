@@ -46,6 +46,7 @@ class Recruitment
                 jp.title,
                 jp.description,
                 jp.requirements,
+                jp.salary_range,
                 jp.benefits,
                 jp.application_token,
                 p.position_name,
@@ -208,6 +209,7 @@ class Recruitment
                 title,
                 description,
                 requirements,
+                salary_range,
                 benefits,
                 academic_document_required,
                 employment_type,
@@ -225,6 +227,7 @@ class Recruitment
                 :title,
                 :description,
                 :requirements,
+                :salary_range,
                 :benefits,
                 :academic_document_required,
                 :employment_type,
@@ -248,6 +251,7 @@ class Recruitment
                 ':title' => $data['title'],
                 ':description' => $data['description'],
                 ':requirements' => $data['requirements'],
+                ':salary_range' => $this->normalizeSalaryRange($data['salary_range'] ?? null),
                 ':benefits' => $this->normalizeBenefits($data['benefits'] ?? null),
                 ':academic_document_required' => !empty($data['academic_document_required']) ? 1 : 0,
                 ':employment_type' => $data['employment_type'],
@@ -416,6 +420,7 @@ class Recruitment
                 title = ?,
                 description = ?,
                 requirements = ?,
+                salary_range = ?,
                 benefits = ?,
                 academic_document_required = ?,
                 employment_type = ?,
@@ -435,6 +440,7 @@ class Recruitment
                 $data['title'],
                 $data['description'],
                 $data['requirements'],
+                $this->normalizeSalaryRange($data['salary_range'] ?? null),
                 $this->normalizeBenefits($data['benefits'] ?? null),
                 !empty($data['academic_document_required']) ? 1 : 0,
                 $data['employment_type'],
@@ -477,6 +483,17 @@ class Recruitment
         $benefits = trim((string) $value);
 
         return $benefits === '' ? null : $benefits;
+    }
+
+    /**
+     * Salary range as entered by HR (e.g. "PHP 20,000 - 25,000").
+     * Optional; stored as-is and shown to applicants on the job page.
+     */
+    private function normalizeSalaryRange(mixed $value): ?string
+    {
+        $salaryRange = trim((string) $value);
+
+        return $salaryRange === '' ? null : mb_substr($salaryRange, 0, 100);
     }
 
     public function delete(int $id): bool

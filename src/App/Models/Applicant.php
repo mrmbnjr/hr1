@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\Auth;
+use App\Services\PipelineService;
 use Core\Database;
 use PDO;
 
@@ -423,18 +425,46 @@ class Applicant
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Move the applicant's Submitted applications into Under Review.
+     *
+     * Runs every time the review page is opened, but the guarded
+     * transition only fires - and only writes a timeline entry - when
+     * an application is genuinely still 'Submitted'.
+     */
     public function markAsUnderReview(int $applicantId)
     {
         $stmt = $this->db->prepare("
-            UPDATE applications
-            SET application_status = 'Under Review'
+            SELECT application_id
+            FROM applications
             WHERE applicant_id = :applicant_id
             AND application_status = 'Submitted'
         ");
 
-        return $stmt->execute([
+        $stmt->execute([
             ':applicant_id' => $applicantId
         ]);
+
+        $applicationIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if ($applicationIds === []) {
+            return true;
+        }
+
+        $pipeline = new PipelineService();
+
+        foreach ($applicationIds as $applicationId) {
+
+            $pipeline->transition(
+                (int) $applicationId,
+                'Submitted',
+                'Under Review',
+                'Moved to Under Review',
+                Auth::userId()
+            );
+        }
+
+        return true;
     }
 
 
@@ -449,28 +479,124 @@ class Applicant
      *
      * Only applications that are still 'Submitted' or 'Under Review'
      * can be qualified; anything already further down the pipeline
-     * (or already decided) is left untouched.
+     * (or already decided) is left untouched. The status change goes
+     * through PipelineService::transition() so the timeline is written
+     * in the same transaction.
      */
     public function qualifyApplication(
-        int $applicationId
+        int $applicationId,
+        ?int $actorUserId = null
     ): bool {
 
-        $stmt = $this->db->prepare("
-            UPDATE applications
-            SET application_status = 'Interview',
-                rejected_at = NULL
+        $current = $this->db->prepare("
+            SELECT application_status
+            FROM applications
             WHERE application_id = :application_id
-            AND application_status IN ('Submitted', 'Under Review')
+            LIMIT 1
         ");
 
-
-        $stmt->execute([
-            ':application_id' =>
-                $applicationId
+        $current->execute([
+            ':application_id' => $applicationId
         ]);
 
+        $fromStatus = $current->fetchColumn();
 
-        return $stmt->rowCount() > 0;
+        if (
+            !$fromStatus ||
+            !in_array($fromStatus, ['Submitted', 'Under Review'], true)
+        ) {
+            return false;
+        }
+
+        try {
+
+            (new PipelineService())->transition(
+                $applicationId,
+                (string) $fromStatus,
+                'Interview',
+                'Qualified',
+                $actorUserId ?? Auth::userId()
+            );
+
+        } catch (\RuntimeException $e) {
+
+            /*
+             * Another user moved the application first; treat as a
+             * no-op so the caller reports it as not qualified.
+             */
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pipeline Context
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Everything the pipeline actions need about one application,
+     * looked up by application_id: current stage, the applicant's
+     * contact details for candidate emails, and the interview when one
+     * exists.
+     */
+    public function getApplicationForPipeline(
+        int $applicationId
+    ): ?array {
+
+        $stmt = $this->db->prepare("
+            SELECT
+                ap.application_id,
+                ap.applicant_id,
+                ap.application_status,
+
+                CONCAT(
+                    a.first_name,
+                    ' ',
+                    COALESCE(a.middle_name, ''),
+                    ' ',
+                    a.last_name
+                ) AS fullname,
+
+                a.email,
+                jp.title AS position,
+
+                i.interview_id,
+                i.interviewer_id,
+                i.result AS interview_result,
+
+                r.role_code AS interviewer_role
+
+            FROM applications ap
+
+            INNER JOIN applicants a
+                ON ap.applicant_id = a.applicant_id
+
+            INNER JOIN job_postings jp
+                ON ap.posting_id = jp.posting_id
+
+            LEFT JOIN interviews i
+                ON ap.application_id = i.application_id
+
+            LEFT JOIN users u
+                ON i.interviewer_id = u.user_id
+
+            LEFT JOIN roles r
+                ON u.role_id = r.role_id
+
+            WHERE ap.application_id = :application_id
+
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            ':application_id' => $applicationId
+        ]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
 
@@ -561,6 +687,22 @@ class Applicant
         $this->db->beginTransaction();
 
         try {
+            $application = $this->db->prepare("
+                SELECT application_status
+                FROM applications
+                WHERE application_id = :application_id
+                FOR UPDATE
+            ");
+
+            $application->execute([
+                ':application_id' => $data['application_id']
+            ]);
+
+            if ($application->fetchColumn() !== 'Interview') {
+                throw new \RuntimeException(
+                    'Qualify the applicant before scheduling an interview.'
+                );
+            }
 
             $interviewDateTime =
                 $data['interview_date'] .
@@ -638,18 +780,16 @@ class Applicant
 
 
             /*
-             * Change application status
+             * Informational timeline entry for history; the status
+             * was advanced to Interview by the qualification decision.
              */
-            $status = $this->db->prepare("
-                UPDATE applications
-                SET application_status = 'Interview',
-                    rejected_at = NULL
-                WHERE application_id = :application_id
-            ");
-
-            $status->execute([
-                ':application_id' => $data['application_id']
-            ]);
+            (new ApplicationTimeline())->add(
+                (int) $data['application_id'],
+                null,
+                null,
+                'Interview scheduled',
+                Auth::userId()
+            );
 
 
             $this->db->commit();
@@ -902,6 +1042,58 @@ class Applicant
 
 
             /*
+             * 2b. Offer gate
+             *
+             * Hiring is confirmed from the Offer stage only: the offer
+             * must have been accepted and every pre-employment
+             * requirement cleared. The offer's start date becomes the
+             * employee's hire date, so employment begins when the
+             * candidate is scheduled to start.
+             */
+            if (
+                $application['application_status'] !== 'Offer'
+            ) {
+                throw new \Exception(
+                    'This applicant must be qualified for an accepted offer before the hire can be confirmed.'
+                );
+            }
+
+
+            $offer =
+                (new JobOffer())->forApplication($applicationId);
+
+
+            if (
+                !$offer ||
+                $offer['status'] !== 'Accepted'
+            ) {
+                throw new \Exception(
+                    'The job offer must be accepted before the hire can be confirmed.'
+                );
+            }
+
+
+            $requirements = new HiringRequirement();
+
+            if (
+                !$requirements->allCleared(
+                    $applicationId,
+                    'Pre-employment'
+                )
+            ) {
+                throw new \Exception(
+                    'All pre-employment requirements must be cleared before the hire can be confirmed.'
+                );
+            }
+
+
+            $hireDate =
+                !empty($offer['start_date'])
+                    ? (string) $offer['start_date']
+                    : date('Y-m-d');
+
+
+            /*
              * 3. Check vacancy
              */
             $vacancies =
@@ -949,7 +1141,7 @@ class Applicant
 
             $employmentStatus =
                 $this->getEmploymentStatus(
-                    $application['employment_type']
+                    $offer['employment_type']
                 );
 
 
@@ -972,7 +1164,7 @@ class Applicant
                     :applicant_id,
                     :employee_number,
                     :position_id,
-                    CURDATE(),
+                    :hire_date,
                     :employment_status
                 )
             ");
@@ -989,6 +1181,9 @@ class Applicant
 
                 ':position_id' =>
                     $application['position_id'],
+
+                ':hire_date' =>
+                    $hireDate,
 
                 ':employment_status' =>
                     $employmentStatus
@@ -1170,7 +1365,8 @@ class Applicant
             $statusStmt = $this->db->prepare("
                 UPDATE applications
                 SET application_status = 'Hired',
-                    rejected_at = NULL
+                    rejected_at = NULL,
+                    status_updated_at = CURRENT_TIMESTAMP
                 WHERE application_id = :application_id
             ");
 
@@ -1179,6 +1375,18 @@ class Applicant
                 ':application_id' =>
                     $applicationId
             ]);
+
+
+            /*
+             * Keep the completed hiring decision in the application audit trail.
+             */
+            (new ApplicationTimeline())->add(
+                $applicationId,
+                'Offer',
+                'Hired',
+                'Hire confirmed',
+                Auth::userId()
+            );
 
 
             /*
@@ -1275,28 +1483,26 @@ class Applicant
     */
 
     public function rejectApplication(
-        int $applicationId
+        int $applicationId,
+        string $reasonCategory,
+        ?string $note = null,
+        ?int $actorUserId = null,
+        bool $notifyCandidate = true
     ): bool {
 
-        $stmt = $this->db->prepare("
-            UPDATE applications
-            SET application_status = 'Rejected',
-                rejected_at = CASE
-                    WHEN application_status <> 'Rejected' THEN CURRENT_TIMESTAMP
-                    ELSE rejected_at
-                END
-            WHERE application_id = :application_id
-            AND application_status <> 'Hired'
-        ");
-
-
-        $stmt->execute([
-            ':application_id' =>
-                $applicationId
-        ]);
-
-
-        return $stmt->rowCount() > 0;
+        /*
+         * The rejection reason is recorded HR-internal in the
+         * timeline by rejectTransition(); candidate notification is
+         * the caller's decision (suppressed for withdrawals and
+         * offer declines).
+         */
+        return (new PipelineService())->rejectTransition(
+            $applicationId,
+            $reasonCategory,
+            $note,
+            $actorUserId ?? Auth::userId(),
+            $notifyCandidate
+        );
     }
 
 
@@ -1316,6 +1522,7 @@ class Applicant
                 jp.title,
                 jp.description,
                 jp.requirements,
+                jp.salary_range,
                 jp.benefits,
                 jp.academic_document_required,
                 jp.employment_type,

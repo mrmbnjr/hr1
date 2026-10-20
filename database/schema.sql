@@ -110,6 +110,9 @@ CREATE TABLE job_postings (
     description TEXT,
     requirements TEXT,
 
+    -- Compensation range shown to applicants, e.g. "PHP 20,000 - 25,000".
+    salary_range VARCHAR(100) NULL,
+
     -- Newline-separated benefits entered by HR. NULL until confirmed.
     benefits TEXT NULL,
 
@@ -181,9 +184,13 @@ CREATE TABLE applications (
         'Submitted',
         'Under Review',
         'Interview',
+        'Selection',
+        'Offer',
         'Hired',
         'Rejected'
     ) DEFAULT 'Submitted',
+
+    status_updated_at DATETIME NULL,
 
     rejected_at DATETIME NULL,
 
@@ -334,6 +341,146 @@ CREATE TABLE interviews (
 
     FOREIGN KEY (interviewer_id)
         REFERENCES users(user_id)
+);
+
+CREATE TABLE interview_evaluations (
+    evaluation_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    interview_id INT NOT NULL,
+    evaluator_id INT NOT NULL,
+
+    evaluator_role VARCHAR(30),
+
+    technical_skills TINYINT NOT NULL,
+    communication TINYINT NOT NULL,
+    problem_solving TINYINT NOT NULL,
+    culture_fit TINYINT NOT NULL,
+
+    strengths TEXT,
+    weaknesses TEXT,
+    remarks TEXT,
+
+    recommendation ENUM(
+        'Recommend',
+        'Further Assessment',
+        'Do Not Recommend'
+    ) NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (interview_id)
+        REFERENCES interviews(interview_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (evaluator_id)
+        REFERENCES users(user_id)
+);
+
+CREATE TABLE hiring_requirements (
+    requirement_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    application_id INT NOT NULL,
+
+    stage ENUM('Selection', 'Pre-employment') NOT NULL,
+    requirement_type ENUM(
+        'Credential',
+        'Reference',
+        'Background Check',
+        'Medical',
+        'Document',
+        'Other'
+    ) NOT NULL,
+
+    status ENUM(
+        'Pending',
+        'Cleared',
+        'Failed'
+    ) DEFAULT 'Pending',
+
+    notes TEXT,
+
+    verified_by INT NULL,
+    verified_at DATETIME NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (application_id)
+        REFERENCES applications(application_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (verified_by)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE job_offers (
+    offer_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    application_id INT NOT NULL UNIQUE,
+
+    offered_position VARCHAR(150) NOT NULL,
+    offered_salary DECIMAL(10, 2) NOT NULL,
+    employment_type ENUM(
+        'Full-Time',
+        'Part-Time',
+        'Contract',
+        'Internship'
+    ) NOT NULL,
+
+    start_date DATE NOT NULL,
+    terms TEXT,
+
+    status ENUM(
+        'Draft',
+        'Sent',
+        'Accepted',
+        'Declined'
+    ) DEFAULT 'Draft',
+
+    offer_expires_on DATE NULL,
+
+    prepared_by INT NULL,
+    sent_at DATETIME NULL,
+    responded_at DATETIME NULL,
+    response_note TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (application_id)
+        REFERENCES applications(application_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (prepared_by)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE application_timeline (
+    event_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    application_id INT NOT NULL,
+
+    from_status VARCHAR(30) NULL,
+    to_status VARCHAR(30) NULL,
+
+    action VARCHAR(150) NOT NULL,
+
+    actor_user_id INT NULL,
+    note TEXT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (application_id)
+        REFERENCES applications(application_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (actor_user_id)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL,
+
+    INDEX idx_application_timeline_application (application_id, created_at)
 );
 
 CREATE TABLE onboarding (

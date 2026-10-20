@@ -1,8 +1,33 @@
 <?php
+
+use App\Services\Auth;
+use App\Services\PipelineService;
+
 $pageTitle       = "Applicant Management";
 $pageCSS         = "applicants.css";
 $pageJS          = "applicants.js";
 $pageDescription = "Review applicants, monitor AI screening, and manage the hiring pipeline.";
+
+/*
+ * Fixed rejection reason categories, shared with the server-side
+ * validation so the form can never offer an invalid value.
+ */
+$rejectionReasons = PipelineService::REJECTION_REASONS;
+
+/*
+ * HR-only actions use $isHrOrAdmin; interview and final-selection
+ * decisions are also available to managers assigned the MGR role.
+ */
+$isHrOrAdmin = in_array(Auth::role(), ['ADMIN', 'HR'], true);
+$isHrOrManager = in_array(Auth::role(), ['ADMIN', 'HR', 'MGR'], true);
+
+/*
+ * Pipeline data loaded by ApplicantController::review(); defaults
+ * keep this view safe if it is ever included without them.
+ */
+$evaluations   = $evaluations ?? [];
+$requirements  = $requirements ?? [];
+$offer         = $offer ?? null;
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: " . url("?page=login"));
@@ -15,6 +40,9 @@ if (!$applicant) {
     header("Location: ?page=applicants");
     exit;
 }
+
+$isAssignedInterviewer =
+    (int) Auth::userId() === (int) ($applicant['interviewer_id'] ?? 0);
 
 /*
  * Applicants still in the screening stages are qualified or rejected
@@ -30,10 +58,19 @@ $isScreeningStage = in_array(
 $statusMeta = [
     "Submitted"    => ["label" => "Submitted", "class" => "badge-gray"],
     "Under Review" => ["label" => "Under Review", "class" => "badge-blue"],
-    "Interview"    => ["label" => "Interview Scheduled", "class" => "badge-orange"],
+    "Interview"    => ["label" => "Interview", "class" => "badge-orange"],
+    "Selection"    => ["label" => "Selection", "class" => "badge-purple"],
+    "Offer"        => ["label" => "Offer", "class" => "badge-teal"],
     "Hired"        => ["label" => "Hired", "class" => "badge-green"],
     "Rejected"     => ["label" => "Rejected", "class" => "badge-red"],
 ];
+
+/*
+ * Resolved once so an unexpected status can never trigger a PHP
+ * warning or render an empty badge.
+ */
+$currentStatusMeta = $statusMeta[$applicant['application_status']]
+    ?? ["label" => (string) $applicant['application_status'], "class" => "badge-gray"];
 
 /** Renders a "label" + "value" pair for the info grids below. */
 function infoField(string $label, string $value, bool $fullWidth = false): void
@@ -175,6 +212,87 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
     echo '</ul>';
     echo '</div>';
 }
+
+/**
+ * Renders a hiring-requirements checklist table for one stage
+ * (Selection or Pre-employment). Mark buttons are HR/ADMIN-only and
+ * feed the shared requirement modal.
+ */
+function requirementsTable(array $stageRequirements, bool $showActions): void
+{
+    if ($stageRequirements === []) {
+        echo '<p class="file-note">No requirements recorded for this stage.</p>';
+        return;
+    }
+
+    $statusClass = [
+        'Pending' => 'badge-orange',
+        'Cleared' => 'badge-green',
+        'Failed'  => 'badge-red'
+    ];
+
+    echo '<section class="table-card"><div class="table-scroll">';
+    echo '<table class="applicant-table requirements-table"><thead><tr>';
+    echo '<th>Requirement</th><th>Status</th><th>Verified by</th><th>Notes</th>';
+    if ($showActions) {
+        echo '<th class="col-actions">Action</th>';
+    }
+    echo '</tr></thead><tbody>';
+
+    foreach ($stageRequirements as $requirement) {
+
+        $status = (string) $requirement['status'];
+
+        $verifiedBy = trim((string) ($requirement['verified_by_name'] ?? ''));
+
+        echo '<tr>';
+
+        echo '<td><strong>'
+            . htmlspecialchars((string) $requirement['requirement_type'])
+            . '</strong></td>';
+
+        echo '<td><span class="badge '
+            . htmlspecialchars($statusClass[$status] ?? 'badge-gray')
+            . '">'
+            . htmlspecialchars($status)
+            . '</span></td>';
+
+        echo '<td>';
+        if (!empty($requirement['verified_at'])) {
+            echo htmlspecialchars($verifiedBy !== '' ? $verifiedBy : 'HR');
+            echo '<small>'
+                . date('M d, Y', strtotime((string) $requirement['verified_at']))
+                . '</small>';
+        } else {
+            echo '&mdash;';
+        }
+        echo '</td>';
+
+        echo '<td>';
+        if (!empty($requirement['notes'])) {
+            echo nl2br(htmlspecialchars((string) $requirement['notes']));
+        } else {
+            echo '&mdash;';
+        }
+        echo '</td>';
+
+        if ($showActions) {
+            echo '<td class="col-actions"><button type="button" '
+                . 'class="btn-outline requirement-mark-btn" '
+                . 'data-requirement-id="' . (int) $requirement['requirement_id'] . '" '
+                . 'data-requirement-type="' . htmlspecialchars((string) $requirement['requirement_type']) . '" '
+                . 'data-requirement-status="' . htmlspecialchars($status) . '" '
+                . 'data-requirement-note="' . htmlspecialchars((string) ($requirement['notes'] ?? '')) . '">'
+                . '<i class="fa-solid fa-pen"></i> '
+                . ($requirement['stage'] === 'Pre-employment' ? 'Mark Cleared' : 'Update')
+                . '</button></td>';
+        }
+
+        echo '</tr>';
+    }
+
+    echo '</tbody></table></div></section>';
+}
 ?>
 
 <?php require BASE_PATH . '/resources/views/includes/header.php'; ?>
@@ -196,6 +314,62 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
         </div>
     <?php endif; ?>
 
+    <?php
+    /*
+     * Pipeline tracker: the five hiring phases, with the applicant's
+     * current phase highlighted and the earlier ones checked.
+     */
+    $pipelineSteps = [
+        1 => ['label' => 'Application Review',  'icon' => 'fa-file-lines'],
+        2 => ['label' => 'Interview',           'icon' => 'fa-calendar-days'],
+        3 => ['label' => 'Selection',           'icon' => 'fa-clipboard-check'],
+        4 => ['label' => 'Offer',               'icon' => 'fa-file-signature'],
+        5 => ['label' => 'Hiring Confirmation', 'icon' => 'fa-user-check'],
+    ];
+
+    $statusStep = [
+        'Submitted'    => 1,
+        'Under Review' => 1,
+        'Interview'    => 2,
+        'Selection'    => 3,
+        'Offer'        => 4,
+        'Hired'        => 5,
+        'Rejected'     => 1,
+    ];
+
+    $currentStep   = $statusStep[$applicant['application_status']] ?? 1;
+    $isRejectedApp = $applicant['application_status'] === 'Rejected';
+    ?>
+    <section class="detail-section pipeline-tracker" aria-label="Hiring pipeline progress">
+        <ol class="pipeline-steps">
+            <?php foreach ($pipelineSteps as $stepNumber => $step): ?>
+                <?php
+                if ($isRejectedApp) {
+                    $stepState = $stepNumber === $currentStep ? 'rejected' : 'dimmed';
+                } elseif (
+                    $stepNumber < $currentStep
+                    || $applicant['application_status'] === 'Hired'
+                ) {
+                    $stepState = 'completed';
+                } elseif ($stepNumber === $currentStep) {
+                    $stepState = 'current';
+                } else {
+                    $stepState = 'upcoming';
+                }
+                ?>
+                <li class="pipeline-step <?= $stepState ?>">
+                    <span class="pipeline-step-marker">
+                        <i class="fa-solid <?= $stepState === 'completed' ? 'fa-check' : $step['icon'] ?>"></i>
+                    </span>
+                    <span class="pipeline-step-label"><?= htmlspecialchars($step['label']) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+        <?php if ($isRejectedApp): ?>
+            <p class="pipeline-rejected-note">This application was rejected.</p>
+        <?php endif; ?>
+    </section>
+
     <div class="details-body">
 
         <!-- Applicant Information -->
@@ -211,8 +385,8 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
                 ?>
                 <div>
                     <span class="info-label">Application Status</span>
-                    <span class="badge <?= htmlspecialchars($statusMeta[$applicant['application_status']]['class']) ?>">
-                        <?= htmlspecialchars($statusMeta[$applicant['application_status']]['label']) ?>
+                    <span class="badge <?= htmlspecialchars($currentStatusMeta['class']) ?>">
+                        <?= htmlspecialchars($currentStatusMeta['label']) ?>
                     </span>
                 </div>
             </div>
@@ -571,29 +745,402 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
             </section>
         <?php endif; ?>
 
+        <!-- Interview Evaluation (visible from the Interview stage onward) -->
+        <?php if (!$isScreeningStage): ?>
+            <section class="detail-section">
+                <div class="ai-actions">
+                    <div class="section-heading-copy">
+                        <h3><i class="fa-solid fa-clipboard-list"></i> Interview Evaluation</h3>
+                        <p>
+                            Every interviewer evaluation is kept in full - the latest is marked
+                            Current, but earlier scores stay visible before HR advances the
+                            applicant.
+                        </p>
+                    </div>
+
+                    <?php if (
+                        $applicant['application_status'] === 'Interview'
+                        && $isAssignedInterviewer
+                    ): ?>
+                        <button type="button" class="btn-primary" id="openEvaluationModal">
+                            <i class="fa-solid fa-plus"></i> Submit Evaluation
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <?php if ($evaluations === []): ?>
+                    <p class="file-note">
+                        No evaluations submitted yet.
+                        <?php if (
+                            $applicant['application_status'] === 'Interview'
+                            && $isAssignedInterviewer
+                        ): ?>
+                            Use <strong>Submit Evaluation</strong> to record ratings, remarks, and a recommendation.
+                        <?php elseif ($applicant['application_status'] === 'Interview'): ?>
+                            The scheduled interviewer has not submitted an evaluation yet.
+                        <?php endif; ?>
+                    </p>
+                <?php else: ?>
+                    <div class="evaluation-list">
+                        <?php foreach ($evaluations as $evaluationIndex => $evaluation): ?>
+                            <?php
+                            $isCurrentEvaluation = $evaluationIndex === 0;
+                            $evaluatorName = trim((string) ($evaluation['evaluator_name'] ?? ''));
+
+                            $recommendationClass = match ($evaluation['recommendation']) {
+                                'Recommend'           => 'rec-high',
+                                'Further Assessment'  => 'rec-review',
+                                'Do Not Recommend'    => 'rec-low',
+                                default               => 'rec-review'
+                            };
+                            ?>
+                            <div class="evaluation-card<?= $isCurrentEvaluation ? ' current' : '' ?>">
+                                <div class="evaluation-head">
+                                    <div class="evaluation-head-left">
+                                        <span class="evaluation-evaluator">
+                                            <?= htmlspecialchars($evaluatorName !== '' ? $evaluatorName : 'System account') ?>
+                                        </span>
+                                        <?php if (!empty($evaluation['evaluator_role_code'])): ?>
+                                            <span class="badge badge-gray"><?= htmlspecialchars($evaluation['evaluator_role_code']) ?></span>
+                                        <?php endif; ?>
+                                        <?php if ($isCurrentEvaluation): ?>
+                                            <span class="badge badge-blue">Current</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <span class="evaluation-date">
+                                        <?= date('F d, Y g:i A', strtotime((string) $evaluation['created_at'])) ?>
+                                    </span>
+                                </div>
+
+                                <div class="evaluation-ratings">
+                                    <?php foreach (PipelineService::RATING_CRITERIA as $criterionKey => $criterionLabel): ?>
+                                        <div class="evaluation-rating">
+                                            <span class="match-label"><?= htmlspecialchars($criterionLabel) ?></span>
+                                            <span class="evaluation-score"><?= (int) $evaluation[$criterionKey] ?> / 5</span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <div class="evaluation-rec">
+                                    <span class="info-label">Recommendation</span>
+                                    <span class="rec-badge <?= $recommendationClass ?>">
+                                        <?= htmlspecialchars($evaluation['recommendation']) ?>
+                                    </span>
+                                </div>
+
+                                <?php if (!empty($evaluation['strengths'])): ?>
+                                    <div class="analysis-card">
+                                        <h4><i class="fa-solid fa-circle-check"></i> Strengths</h4>
+                                        <p><?= nl2br(htmlspecialchars((string) $evaluation['strengths'])) ?></p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($evaluation['weaknesses'])): ?>
+                                    <div class="analysis-card">
+                                        <h4><i class="fa-solid fa-triangle-exclamation"></i> Weaknesses</h4>
+                                        <p><?= nl2br(htmlspecialchars((string) $evaluation['weaknesses'])) ?></p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($evaluation['remarks'])): ?>
+                                    <div class="remarks-box">
+                                        <span class="info-label">Remarks</span>
+                                        <p class="remarks-text"><?= nl2br(htmlspecialchars((string) $evaluation['remarks'])) ?></p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+        <?php endif; ?>
+
+        <!-- Selection: credential, reference, and background checks -->
+        <?php if ($applicant['application_status'] === 'Selection'): ?>
+            <?php
+            $selectionRequirements = array_values(
+                array_filter(
+                    $requirements,
+                    static fn (array $requirement): bool =>
+                        $requirement['stage'] === 'Selection'
+                )
+            );
+            $repeatableSelectionRequirements = array_values(
+                array_filter(
+                    $selectionRequirements,
+                    static fn (array $requirement): bool =>
+                        $requirement['status'] !== 'Pending'
+                )
+            );
+
+            $selectionOutstanding = array_filter(
+                $selectionRequirements,
+                static fn (array $requirement): bool =>
+                    $requirement['status'] !== 'Cleared'
+            );
+
+            $allSelectionCleared =
+                $selectionRequirements !== []
+                && $selectionOutstanding === [];
+            ?>
+            <section class="detail-section">
+                <div class="ai-actions">
+                    <div class="section-heading-copy">
+                        <h3><i class="fa-solid fa-clipboard-check"></i> Selection</h3>
+                        <p>
+                            Credential, reference, and background checks. The AI assessment
+                            supports HR's review but does not clear a required check. Every
+                            check must be cleared before approving for offer.
+                        </p>
+                    </div>
+                </div>
+
+                <?php if ($selectionRequirements === []): ?>
+                    <p class="file-note">No selection requirements were recorded for this application.</p>
+                <?php else: ?>
+                    <?php requirementsTable($selectionRequirements, $isHrOrManager); ?>
+                <?php endif; ?>
+            </section>
+
+            <?php if ($isHrOrManager): ?>
+                <section class="detail-section decision-section">
+                    <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
+
+                    <?php if (!$allSelectionCleared): ?>
+                        <p class="file-note">
+                            Every selection requirement must be cleared before this applicant
+                            can be approved for offer.
+                        </p>
+                    <?php endif; ?>
+
+                    <div class="decision-buttons">
+                        <button type="button" class="btn-success btn-block" id="approveOfferBtn" data-application-id="<?= (int) $applicant['application_id'] ?>"<?= $allSelectionCleared ? '' : ' disabled' ?>>
+                            <i class="fa-solid fa-file-signature"></i> Approve for Offer
+                        </button>
+                        <button type="button" class="btn-outline btn-block" id="requestVerificationBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                            <i class="fa-solid fa-rotate-left"></i> Additional Verification
+                        </button>
+                        <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                            <i class="fa-solid fa-user-xmark"></i> Reject
+                        </button>
+                    </div>
+                </section>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <!-- Offer: job offer details and candidate response -->
+        <?php if ($applicant['application_status'] === 'Offer'): ?>
+            <?php
+            $offerStatusClass = [
+                'Draft'    => 'badge-gray',
+                'Sent'     => 'badge-orange',
+                'Accepted' => 'badge-green',
+                'Declined' => 'badge-red'
+            ];
+
+            $offerIsExpired =
+                $offer !== null
+                && $offer['status'] === 'Sent'
+                && !empty($offer['offer_expires_on'])
+                && strtotime((string) $offer['offer_expires_on']) < strtotime('today');
+
+            $preEmploymentRequirements = array_values(
+                array_filter(
+                    $requirements,
+                    static fn (array $requirement): bool =>
+                        $requirement['stage'] === 'Pre-employment'
+                )
+            );
+
+            $preEmploymentOutstanding = array_filter(
+                $preEmploymentRequirements,
+                static fn (array $requirement): bool =>
+                    $requirement['status'] !== 'Cleared'
+            );
+
+            $allPreEmploymentCleared =
+                $preEmploymentRequirements !== []
+                && $preEmploymentOutstanding === [];
+            ?>
+            <section class="detail-section">
+                <div class="ai-actions">
+                    <div class="section-heading-copy">
+                        <h3><i class="fa-solid fa-file-signature"></i> Offer</h3>
+                        <p>
+                            Prepare and send the job offer, then record the candidate's
+                            response. Pre-employment checks begin after acceptance and must
+                            be cleared before the hire can be confirmed.
+                        </p>
+                    </div>
+                    <?php if ($offer !== null): ?>
+                        <span class="badge <?= $offerStatusClass[$offer['status']] ?? 'badge-gray' ?>">
+                            Offer <?= htmlspecialchars((string) $offer['status']) ?>
+                        </span>
+                    <?php else: ?>
+                        <span class="badge badge-gray">Offer not prepared</span>
+                    <?php endif; ?>
+                </div>
+
+                <?php if ($offer === null): ?>
+                    <p class="file-note">
+                        No offer has been prepared yet.
+                        <?php if ($isHrOrAdmin): ?>
+                            Use <strong>Send Offer</strong> to prepare one.
+                        <?php endif; ?>
+                    </p>
+                <?php else: ?>
+                    <div class="offer-card">
+                        <div class="info-grid">
+                            <?php
+                            infoField('Offered Position', (string) $offer['offered_position']);
+                            infoField(
+                                'Offered Salary',
+                                'PHP ' . number_format((float) $offer['offered_salary'], 2)
+                            );
+                            infoField('Employment Type', (string) $offer['employment_type']);
+                            infoField(
+                                'Proposed Start Date',
+                                date('F d, Y', strtotime((string) $offer['start_date']))
+                            );
+                            if (!empty($offer['offer_expires_on'])) {
+                                infoField(
+                                    'Offer Expires On',
+                                    date('F d, Y', strtotime((string) $offer['offer_expires_on']))
+                                    . ($offerIsExpired ? ' (expired)' : '')
+                                );
+                            }
+                            infoField(
+                                'Sent',
+                                !empty($offer['sent_at'])
+                                    ? date('F d, Y g:i A', strtotime((string) $offer['sent_at']))
+                                    : 'Not sent yet'
+                            );
+                            if (!empty($offer['responded_at'])) {
+                                infoField(
+                                    'Responded',
+                                    date('F d, Y g:i A', strtotime((string) $offer['responded_at']))
+                                );
+                            }
+                            ?>
+                        </div>
+
+                        <?php if ($offerIsExpired): ?>
+                            <p class="file-note offer-expired-note">
+                                This offer has expired. Revise and resend it with a new expiry
+                                date if it is still open.
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($offer['terms'])): ?>
+                            <div class="remarks-box">
+                                <span class="info-label">Terms</span>
+                                <p class="remarks-text"><?= nl2br(htmlspecialchars((string) $offer['terms'])) ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($offer['response_note']) && $offer['status'] === 'Declined'): ?>
+                            <div class="remarks-box">
+                                <span class="info-label">Candidate Response Note</span>
+                                <p class="remarks-text"><?= nl2br(htmlspecialchars((string) $offer['response_note'])) ?></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+            <?php if ($offer !== null && $offer['status'] === 'Accepted'): ?>
+                <!-- Pre-employment requirements -->
+                <section class="detail-section">
+                    <div class="ai-actions">
+                        <div class="section-heading-copy">
+                            <h3><i class="fa-solid fa-clipboard-list"></i> Pre-employment Requirements</h3>
+                            <p>
+                                Clear the outstanding pre-employment requirements before confirming the hire.
+                            </p>
+                        </div>
+                    </div>
+                    <?php requirementsTable($preEmploymentRequirements, $isHrOrAdmin); ?>
+                </section>
+            <?php else: ?>
+                <section class="detail-section">
+                    <h3><i class="fa-solid fa-clipboard-list"></i> Pre-employment Requirements</h3>
+                    <p class="file-note">Pre-employment checks begin after the candidate accepts the offer.</p>
+                </section>
+            <?php endif; ?>
+
+            <?php if ($isHrOrAdmin): ?>
+                <section class="detail-section decision-section">
+                    <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
+
+                    <?php if (!$allPreEmploymentCleared): ?>
+                        <p class="file-note">
+                            Every pre-employment requirement must be cleared before the hire
+                            can be confirmed.
+                        </p>
+                    <?php endif; ?>
+
+                    <div class="decision-buttons">
+                        <?php if ($offer === null || $offer['status'] === 'Draft'): ?>
+                            <button type="button" class="btn-success btn-block" id="sendOfferBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                                <i class="fa-solid fa-paper-plane"></i> Send Offer
+                            </button>
+                        <?php endif; ?>
+
+                        <?php if ($offer !== null && $offer['status'] === 'Sent'): ?>
+                            <button type="button" class="btn-primary btn-block" id="reviseOfferBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                                <i class="fa-solid fa-pen"></i> Revise &amp; Resend Offer
+                            </button>
+                            <button type="button" class="btn-success btn-block" id="recordAcceptBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                                <i class="fa-solid fa-check"></i> Record Acceptance
+                            </button>
+                            <button type="button" class="btn-outline btn-block" id="recordDeclineBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
+                                <i class="fa-solid fa-xmark"></i> Record Decline
+                            </button>
+                        <?php endif; ?>
+
+                        <?php if ($offer !== null && $offer['status'] === 'Accepted'): ?>
+                            <button type="button" class="btn-success btn-block" id="hireBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>"<?= $allPreEmploymentCleared ? '' : ' disabled' ?>>
+                                <i class="fa-solid fa-user-check"></i> Confirm Hire
+                            </button>
+                        <?php endif; ?>
+
+                    </div>
+                </section>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <!-- Decision -->
-        <?php if ($isScreeningStage): ?>
+        <?php if ($isScreeningStage && $isHrOrAdmin): ?>
             <section class="detail-section decision-section">
                 <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
                 <div class="decision-buttons">
-                    <button type="button" class="btn-success btn-block" id="qualifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
-                        <i class="fa-solid fa-user-check"></i> Qualify Applicant
+                    <button type="button" class="btn-success btn-block" id="qualifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                        <i class="fa-solid fa-user-check"></i> Qualify
                     </button>
-                    <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
-                        <i class="fa-solid fa-user-xmark"></i> Reject Applicant
+                    <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                        <i class="fa-solid fa-user-xmark"></i> Reject
                     </button>
                 </div>
             </section>
-        <?php elseif (!in_array($applicant['application_status'], ['Hired', 'Rejected'], true)): ?>
+        <?php elseif ($applicant['application_status'] === 'Interview'): ?>
             <section class="detail-section decision-section">
                 <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
+
+                <?php if ($isHrOrManager && $evaluations === []): ?>
+                    <p class="file-note">
+                        Waiting for the interviewer's evaluation before this applicant can advance.
+                    </p>
+                <?php endif; ?>
+
                 <div class="decision-buttons">
-                    <button type="button" class="btn-success btn-block" id="hireBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
-                        <i class="fa-solid fa-user-check"></i> Hire Applicant
-                    </button>
-                    <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
-                        <i class="fa-solid fa-user-xmark"></i> Reject Applicant
-                    </button>
+                    <?php if ($isHrOrManager): ?>
+                        <button type="button" class="btn-success btn-block" id="advanceBtn" data-application-id="<?= (int) $applicant['application_id'] ?>"<?= $evaluations === [] ? ' disabled' : '' ?>>
+                            <i class="fa-solid fa-forward"></i> Advance to Selection
+                        </button>
+                        <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                            <i class="fa-solid fa-user-xmark"></i> Reject
+                        </button>
+                    <?php endif; ?>
                 </div>
             </section>
         <?php endif; ?>
@@ -679,6 +1226,9 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
                     You are about to hire <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>. This will:
                 </p>
                 <ul class="confirm-list">
+                    <?php if ($offer !== null && !empty($offer['start_date'])): ?>
+                        <li><i class="fa-solid fa-check"></i> Set the employee start date to <strong><?= date('F d, Y', strtotime((string) $offer['start_date'])) ?></strong> (employment begins then)</li>
+                    <?php endif; ?>
                     <li><i class="fa-solid fa-check"></i> Change application status to <strong>Hired</strong></li>
                     <li><i class="fa-solid fa-check"></i> Create an employee record</li>
                     <li><i class="fa-solid fa-check"></i> Create an employee system account</li>
@@ -716,6 +1266,321 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
         </div>
     </div>
 
+    <!-- Interview Evaluation Modal -->
+    <div class="modal-overlay" id="evaluationModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-clipboard-list"></i> Interview Evaluation</h3>
+                <button type="button" class="close-btn" data-close="evaluationModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="evaluationForm" class="modal-body">
+                <input type="hidden" name="application_id" value="<?= (int) $applicant['application_id'] ?>">
+
+                <p class="confirm-text">
+                    One fixed rating form is used for every applicant of a position.
+                    Rate all four criteria from 1 to 5.
+                </p>
+
+                <div class="form-row">
+                    <?php foreach (PipelineService::RATING_CRITERIA as $criterionKey => $criterionLabel): ?>
+                        <label><?= htmlspecialchars($criterionLabel) ?>
+                            <select name="<?= $criterionKey ?>" required>
+                                <option value="" hidden>Select</option>
+                                <?php for ($rating = PipelineService::RATING_MIN; $rating <= PipelineService::RATING_MAX; $rating++): ?>
+                                    <option value="<?= $rating ?>"><?= $rating ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+
+                <label>Strengths
+                    <textarea name="strengths" rows="2" maxlength="2000"
+                              placeholder="Key strengths observed during the interview"></textarea>
+                </label>
+
+                <label>Weaknesses
+                    <textarea name="weaknesses" rows="2" maxlength="2000"
+                              placeholder="Areas for improvement"></textarea>
+                </label>
+
+                <label>Remarks
+                    <textarea name="remarks" rows="2" maxlength="2000"
+                              placeholder="Additional remarks for HR"></textarea>
+                </label>
+
+                <label>Recommendation
+                    <select name="recommendation" required>
+                        <option value="" hidden>Select</option>
+                        <?php foreach (PipelineService::RECOMMENDATIONS as $recommendationOption): ?>
+                            <option value="<?= htmlspecialchars($recommendationOption) ?>">
+                                <?= htmlspecialchars($recommendationOption) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" data-close="evaluationModal">Cancel</button>
+                    <button type="submit" class="btn-primary">Submit Evaluation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Advance to Selection Confirmation Modal -->
+    <div class="modal-overlay" id="advanceModal">
+        <div class="modal-box modal-small">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-forward"></i> Advance to Selection</h3>
+                <button type="button" class="close-btn" data-close="advanceModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-text">
+                    You are about to move <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>
+                    to the selection stage. Every evaluation on file is listed below.
+                </p>
+
+                <?php if ($evaluations !== []): ?>
+                    <ul class="confirm-list">
+                        <?php foreach ($evaluations as $evaluationIndex => $evaluation): ?>
+                            <li>
+                                <i class="fa-solid fa-clipboard-check"></i>
+                                <?= htmlspecialchars(
+                                    trim((string) ($evaluation['evaluator_name'] ?? '')) !== ''
+                                        ? (string) $evaluation['evaluator_name']
+                                        : 'System account'
+                                ) ?>
+                                &mdash; <strong><?= htmlspecialchars($evaluation['recommendation']) ?></strong>
+                                <?= $evaluationIndex === 0 ? '(current)' : '' ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <p class="file-note">
+                    Moving to Selection seeds the credential, reference, and background
+                    checks for this applicant.
+                </p>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" data-close="advanceModal">Cancel</button>
+                    <button type="button" class="btn-success" id="confirmAdvanceBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">Confirm Advance</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php /* The requirement modal serves both the Selection and Offer stage checklists. */ ?>
+    <?php if (in_array($applicant['application_status'], ['Selection', 'Offer'], true)): ?>
+        <!-- Mark Requirement Modal -->
+        <div class="modal-overlay" id="requirementModal">
+            <div class="modal-box modal-small">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-clipboard-check"></i> <span id="requirementModalTitle">Mark Requirement</span></h3>
+                    <button type="button" class="close-btn" data-close="requirementModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="requirementForm" class="modal-body">
+                    <input type="hidden" name="application_id" value="<?= (int) $applicant['application_id'] ?>">
+                    <input type="hidden" name="requirement_id" id="requirementIdField" value="">
+
+                    <label>Requirement
+                        <input type="text" id="requirementTypeField" value="" disabled>
+                    </label>
+
+                    <label>Status
+                        <select name="status" id="requirementStatusField" required>
+                            <option value="Cleared">Cleared</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </label>
+
+                    <label>Note (optional)
+                        <textarea name="note" id="requirementNoteField" rows="2" maxlength="500"
+                                  placeholder="Internal verification note for HR records"></textarea>
+                    </label>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="requirementModal">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Requirement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($applicant['application_status'] === 'Selection'): ?>
+        <!-- Approve for Offer Confirmation Modal -->
+        <div class="modal-overlay" id="approveModal">
+            <div class="modal-box modal-small">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-file-signature"></i> Approve for Offer</h3>
+                    <button type="button" class="close-btn" data-close="approveModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-text">
+                        You are about to approve <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>
+                        for a job offer. This will:
+                    </p>
+                    <ul class="confirm-list">
+                        <li><i class="fa-solid fa-check"></i> Move the application to the <strong>Offer</strong> stage</li>
+                        <li><i class="fa-solid fa-check"></i> Start pre-employment checks after the candidate accepts</li>
+                    </ul>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="approveModal">Cancel</button>
+                        <button type="button" class="btn-success" id="confirmApproveBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">Confirm Approval</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Additional Verification Confirmation Modal -->
+        <div class="modal-overlay" id="verifyModal">
+            <div class="modal-box modal-small">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-rotate-left"></i> Request Additional Verification</h3>
+                    <button type="button" class="close-btn" data-close="verifyModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-text">
+                        Select only the completed checks that need to be repeated for
+                        <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>.
+                    </p>
+                    <?php if ($repeatableSelectionRequirements === []): ?>
+                        <p class="file-note">There are no completed selection checks to request again.</p>
+                    <?php else: ?>
+                        <div class="verification-options">
+                            <?php foreach ($repeatableSelectionRequirements as $requirement): ?>
+                                <label>
+                                    <input type="checkbox" name="requirement_ids[]" value="<?= (int) $requirement['requirement_id'] ?>">
+                                    <?= htmlspecialchars((string) $requirement['requirement_type']) ?>
+                                    (<?= htmlspecialchars((string) $requirement['status']) ?>)
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="verifyModal">Cancel</button>
+                        <button type="button" class="btn-primary" id="confirmVerifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>"<?= $repeatableSelectionRequirements === [] ? ' disabled' : '' ?>>Request Verification</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($applicant['application_status'] === 'Offer'): ?>
+        <!-- Offer Modal: send or revise & resend -->
+        <div class="modal-overlay" id="offerModal">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-file-signature"></i> <span id="offerModalTitle">Send Offer</span></h3>
+                    <button type="button" class="close-btn" data-close="offerModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <form id="offerForm" class="modal-body">
+                    <input type="hidden" name="application_id" value="<?= (int) $applicant['application_id'] ?>">
+
+                    <div class="form-row">
+                        <label>Offered Position
+                            <input type="text" name="offered_position" id="offerPositionField"
+                                   maxlength="150" required
+                                   value="<?= htmlspecialchars((string) ($offer['offered_position'] ?? $applicant['position'])) ?>">
+                        </label>
+                        <label>Offered Salary (PHP)
+                            <input type="number" name="offered_salary" id="offerSalaryField"
+                                   min="0" step="0.01" required
+                                   value="<?= $offer !== null ? htmlspecialchars((string) $offer['offered_salary']) : '' ?>">
+                        </label>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Employment Type
+                            <select name="employment_type" id="offerEmploymentTypeField" required>
+                                <?php
+                                $employmentTypes = ['Full-Time', 'Part-Time', 'Contract', 'Internship'];
+                                $selectedType = $offer['employment_type'] ?? 'Full-Time';
+                                ?>
+                                <?php foreach ($employmentTypes as $employmentType): ?>
+                                    <option value="<?= $employmentType ?>"<?= $selectedType === $employmentType ? ' selected' : '' ?>>
+                                        <?= $employmentType ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>Proposed Start Date
+                            <input type="date" name="start_date" id="offerStartDateField" required
+                                   value="<?= $offer !== null ? htmlspecialchars((string) $offer['start_date']) : '' ?>">
+                        </label>
+                    </div>
+
+                    <label>Offer Expires On (optional)
+                        <input type="date" name="offer_expires_on" id="offerExpiryField"
+                               value="<?= htmlspecialchars((string) ($offer['offer_expires_on'] ?? '')) ?>">
+                    </label>
+
+                    <label>Terms
+                        <textarea name="terms" id="offerTermsField" rows="4" maxlength="5000"
+                                  placeholder="Offer terms shared with the candidate"><?= htmlspecialchars((string) ($offer['terms'] ?? '')) ?></textarea>
+                    </label>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="offerModal">Cancel</button>
+                        <button type="submit" class="btn-primary" id="offerSubmitBtn">Send Offer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Record Acceptance Confirmation Modal -->
+        <div class="modal-overlay" id="acceptModal">
+            <div class="modal-box modal-small">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-check"></i> Record Acceptance</h3>
+                    <button type="button" class="close-btn" data-close="acceptModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-text">
+                        You are about to record that <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>
+                        has accepted the offer. The hire can be confirmed once every
+                        pre-employment requirement is cleared.
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="acceptModal">Cancel</button>
+                        <button type="button" class="btn-success" id="confirmAcceptBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">Confirm Acceptance</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Record Decline Confirmation Modal -->
+        <div class="modal-overlay" id="declineModal">
+            <div class="modal-box modal-small">
+                <div class="modal-header">
+                    <h3><i class="fa-solid fa-xmark"></i> Record Decline</h3>
+                    <button type="button" class="close-btn" data-close="declineModal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-text">
+                        You are about to record that <strong><?= htmlspecialchars($applicant['fullname']) ?></strong>
+                        declined the offer. This will:
+                    </p>
+                    <ul class="confirm-list">
+                        <li><i class="fa-solid fa-check"></i> Mark the offer as <strong>Declined</strong></li>
+                        <li><i class="fa-solid fa-check"></i> Reject the application with the reason <strong>Offer Declined</strong></li>
+                        <li><i class="fa-solid fa-check"></i> Send <strong>no email</strong> - the candidate ended the process</li>
+                    </ul>
+                    <label>Counter-request or note (optional)
+                        <textarea name="note" id="declineNoteField" rows="2" maxlength="1000"
+                                  placeholder="Any counter-request the candidate mentioned"></textarea>
+                    </label>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-outline" data-close="declineModal">Cancel</button>
+                        <button type="button" class="btn-danger" id="confirmDeclineBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">Confirm Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Reject Modal -->
     <div class="modal-overlay" id="rejectModal">
         <div class="modal-box modal-small">
@@ -726,6 +1591,18 @@ function combinedField(string $label, array $entries, bool $fullWidth = false): 
             <form id="rejectForm" class="modal-body">
                 <label>
                     <p>Are you sure you want to reject this applicant?</p>
+                </label>
+                <label>Reason (optional)
+                    <select name="reason_category" id="rejectReason">
+                        <option value="">Select a reason (optional)</option>
+                        <?php foreach ($rejectionReasons as $reason): ?>
+                            <option value="<?= htmlspecialchars($reason) ?>"><?= htmlspecialchars($reason) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>Note (optional, HR-internal)
+                    <textarea name="reason_note" id="rejectNote" rows="2" maxlength="500"
+                              placeholder="Internal note kept out of any candidate email"></textarea>
                 </label>
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="rejectModal">Cancel</button>

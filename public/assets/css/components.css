@@ -171,6 +171,8 @@
 .status-badge.active,
 .badge.status.open { background: var(--badge-green-bg); color: var(--badge-green-fg); }
 .badge-red { background: var(--badge-red-bg); color: var(--badge-red-fg); }
+.badge-purple { background: var(--badge-purple-bg); color: var(--badge-purple-fg); }
+.badge-teal { background: var(--badge-teal-bg); color: var(--badge-teal-fg); }
 .badge.employment {
     background: transparent;
     color: #000;

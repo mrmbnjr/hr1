@@ -272,6 +272,18 @@ $job = isset($job) && is_array($job) ? $job : [];
 
         <div class="form-group">
 
+            <label>Salary Range</label>
+
+            <input type="text"
+                id="salary_range"
+                name="salary_range"
+                maxlength="100"
+                placeholder="e.g. PHP 20,000 - 25,000 per month"
+                value="<?= htmlspecialchars((string) ($job['salary_range'] ?? '')) ?>">
+        </div>
+
+        <div class="form-group">
+
             <label>Benefits</label>
 
             <textarea id="benefits"

@@ -232,6 +232,18 @@ if (!isset($_SESSION['user_id'])) {
 
         <div class="form-group">
 
+            <label>Salary Range</label>
+
+            <input type="text"
+                id="salary_range"
+                name="salary_range"
+                maxlength="100"
+                placeholder="e.g. PHP 20,000 - 25,000 per month">
+
+        </div>
+
+        <div class="form-group">
+
             <label>Benefits</label>
 
             <textarea id="benefits"

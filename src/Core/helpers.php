@@ -100,6 +100,14 @@ if (!function_exists('asset')) {
 if (!function_exists('jobSalary')) {
     function jobSalary(array $job): string
     {
+        /*
+         * HR-entered salary range on the posting wins; the remainder
+         * are the house defaults until every posting is filled in.
+         */
+        if (!empty($job['salary_range'])) {
+            return (string) $job['salary_range'];
+        }
+
         if (!empty($job['salary'])) {
             return (string) $job['salary'];
         }

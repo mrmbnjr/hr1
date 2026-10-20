@@ -5,6 +5,7 @@ use App\Controllers\PasswordResetController;
 use App\Controllers\DashboardController;
 use App\Controllers\RecruitmentController;
 use App\Controllers\ApplicantController;
+use App\Controllers\PipelineController;
 use App\Controllers\OnboardingController;
 use App\Controllers\HumanCapitalController;
 use App\Controllers\EmployeeRecordsController;
@@ -289,7 +290,9 @@ switch ($page) {
                 'benefits' => $job['benefits'] ?? '',
                 'position_name' => $job['position_name'] ?? '',
                 'role_name' => $job['role_name'] ?? '',
-                // Real salary later: 'salary' => $job['salary'] ?? null,
+                // Salary range entered by HR; jobSalary() falls back to
+                // house defaults when it is empty.
+                'salary_range' => $job['salary_range'] ?? null,
             ];
         }
 
@@ -352,6 +355,54 @@ switch ($page) {
     case 'qualify-applicant':
 
         (new ApplicantController())->qualify();
+
+        break;
+
+    case 'submit-interview-evaluation':
+
+        (new PipelineController())->submitEvaluation();
+
+        break;
+
+    case 'advance-to-selection':
+
+        (new PipelineController())->advanceToSelection();
+
+        break;
+
+    case 'update-hiring-requirement':
+
+        (new PipelineController())->updateRequirement();
+
+        break;
+
+    case 'request-additional-verification':
+
+        (new PipelineController())->requestAdditionalVerification();
+
+        break;
+
+    case 'approve-for-offer':
+
+        (new PipelineController())->approveForOffer();
+
+        break;
+
+    case 'send-offer':
+
+        (new PipelineController())->sendOffer();
+
+        break;
+
+    case 'revise-offer':
+
+        (new PipelineController())->reviseOffer();
+
+        break;
+
+    case 'record-offer-response':
+
+        (new PipelineController())->recordOfferResponse();
 
         break;
 

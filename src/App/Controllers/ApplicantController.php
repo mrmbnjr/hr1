@@ -3,8 +3,10 @@
 namespace App\Controllers;
 
 use App\Models\Applicant;
+use App\Models\JobOffer;
 use App\Services\MailService;
 use App\Services\Auth;
+use App\Services\PipelineService;
 use App\Services\ResumeEvaluationService;
 use App\Services\ResumeInputService;
 use App\Services\AcademicDocumentInputService;
@@ -641,6 +643,35 @@ class ApplicantController
 
             /*
             |--------------------------------------------------------------------------
+            | 15b. Application-received email (G2)
+            |
+            | Sent after the commit so a mail failure never undoes the
+            | submission; the applicant still sees the success page
+            | and the failure is logged for HR to notice.
+            |--------------------------------------------------------------------------
+            */
+
+            try {
+
+                (new MailService())->sendApplicationReceived([
+                    'email'    => $email,
+                    'fullname' => trim(
+                        $firstName . ' ' . $middleName . ' ' . $lastName
+                    ),
+                    'position' => (string) $job['title']
+                ]);
+
+            } catch (\Throwable $e) {
+
+                error_log(
+                    'Application-received email failed for application '
+                    . (int) $applicationId . ': ' . $e->getMessage()
+                );
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
             | 16. Success
             |--------------------------------------------------------------------------
             */
@@ -762,6 +793,24 @@ class ApplicantController
                     (int) $applicant['application_id']
                 );
 
+
+        /* Pipeline data shown in the phased review UI. */
+        $pipeline = new PipelineService();
+
+        $evaluations =
+            $pipeline->evaluationsFor(
+                (int) $applicant['application_id']
+            );
+
+        $requirements =
+            $pipeline->requirements()->forApplication(
+                (int) $applicant['application_id']
+            );
+
+        $offer =
+            (new JobOffer())->forApplication(
+                (int) $applicant['application_id']
+            );
 
         require BASE_PATH . '/resources/views/applicants/review.php';
     }
@@ -948,11 +997,32 @@ class ApplicantController
             exit;
         }
 
+        if (($applicant['application_status'] ?? '') !== 'Interview') {
+            $_SESSION['error'] =
+                'Qualify the applicant before scheduling an interview.';
 
-        $this->applicant
-            ->scheduleInterview(
-                $_POST
+            header(
+                'Location:?page=review&id=' . $applicantId
             );
+
+            exit;
+        }
+
+
+        try {
+            $this->applicant
+                ->scheduleInterview(
+                    $_POST
+                );
+        } catch (\Throwable $e) {
+            $_SESSION['error'] = $e->getMessage();
+
+            header(
+                'Location:?page=review&id=' . $applicantId
+            );
+
+            exit;
+        }
 
 
         $emailSent = true;
@@ -1171,7 +1241,6 @@ class ApplicantController
                 );
             }
 
-
             /*
              * Every credential document belonging to the application is
              * assessed together in a single AI pass. The response carries
@@ -1375,7 +1444,8 @@ class ApplicantController
     public function reject()
     {
         Auth::requireRole([
-            'HR'
+            'HR',
+            'MGR'
         ]);
 
 
@@ -1399,10 +1469,79 @@ class ApplicantController
             }
 
 
+            /*
+             * Every rejection carries a reason category (stored
+             * HR-internal in the timeline) plus an optional note.
+             */
+            $context = $this->applicant->getApplicationForPipeline($applicationId);
+
+            if (
+                !$context
+                || !in_array(
+                    $context['application_status'],
+                    ['Submitted', 'Under Review', 'Interview', 'Selection'],
+                    true
+                )
+            ) {
+                throw new \Exception(
+                    'This application cannot be rejected at its current stage.'
+                );
+            }
+
+            if (
+                Auth::role() === 'MGR'
+                && in_array(
+                    $context['application_status'],
+                    ['Submitted', 'Under Review'],
+                    true
+                )
+            ) {
+                throw new \Exception(
+                    'Only HR can reject an application during application review.'
+                );
+            }
+
+            $reasonCategory =
+                trim((string) ($_POST['reason_category'] ?? ''));
+
+            if (
+                $reasonCategory !== ''
+                && !in_array(
+                    $reasonCategory,
+                    PipelineService::REJECTION_REASONS,
+                    true
+                )
+            ) {
+                throw new \Exception(
+                    'Select a rejection reason.'
+                );
+            }
+
+            if ($reasonCategory === '') {
+                $reasonCategory = 'Other';
+            }
+
+
+            $note =
+                trim((string) ($_POST['reason_note'] ?? ''));
+
+
+            /*
+             * A withdrawal ends the process by the applicant's own
+             * choice, so no rejection email is sent.
+             */
+            $notifyCandidate =
+                $reasonCategory !== 'Withdrew';
+
+
             $success =
                 $this->applicant
                     ->rejectApplication(
-                        $applicationId
+                        $applicationId,
+                        $reasonCategory,
+                        $note !== '' ? $note : null,
+                        Auth::userId(),
+                        $notifyCandidate
                     );
 
 
@@ -1413,13 +1552,57 @@ class ApplicantController
             }
 
 
+            /*
+             * The rejection is committed; the email is sent after the
+             * fact and a failure is logged and reported rather than
+             * undoing the rejection. When no notification is expected
+             * (e.g. the applicant withdrew) the flag reports false.
+             */
+            $emailSent = false;
+
+
+            if ($notifyCandidate) {
+
+                $applicant =
+                    $this->applicant
+                        ->getApplicationForPipeline(
+                            $applicationId
+                        );
+
+
+                try {
+
+                    (new MailService())->sendRejectionEmail([
+                        'email'    => $applicant['email'],
+                        'fullname' => $applicant['fullname'],
+                        'position' => $applicant['position']
+                    ]);
+
+                    $emailSent = true;
+
+                } catch (\Throwable $mailError) {
+
+                    error_log(
+                        'Rejection email failed for application '
+                        . $applicationId . ': '
+                        . $mailError->getMessage()
+                    );
+
+                    $emailSent = false;
+                }
+            }
+
+
             echo json_encode([
 
                 'success' =>
                     true,
 
                 'message' =>
-                    'Applicant has been rejected.'
+                    'Applicant has been rejected.',
+
+                'email_sent' =>
+                    $emailSent
             ]);
 
         } catch (\Throwable $e) {
@@ -1452,8 +1635,7 @@ class ApplicantController
     {
         Auth::requireRole([
             'ADMIN',
-            'HR',
-            'MGR'
+            'HR'
         ]);
 
 

@@ -80,9 +80,28 @@ project root is the single front controller.
 
 ### Interviews & Hiring
 
-- Schedule interviews (date, time, type, location/link, interviewer, notes) with an automatic email to the applicant.
-- Hire or reject applicants.
-- Hiring creates the employee account and emails the login credentials.
+- Five-phase applicant pipeline: **Application Review → Interview and Assessment → Final Selection and
+  Verification → Job Offer and Pre-employment → Hiring Confirmation** (statuses:
+  `Submitted → Under Review → Interview → Selection → Offer → Hired`, terminal `Rejected`).
+- Phase 1 — HR reviews the application and screening results, then qualifies or rejects. Qualification only
+  opens the interview stage; it does not hire the applicant.
+- Phase 2 — the scheduled interviewer records ratings, strengths, weaknesses, remarks, and a
+  recommendation. An authorized hiring decision-maker (HR or manager) advances or rejects after review.
+- Phase 3 — HR or a manager reviews the evaluation and verifies required credentials, references, or background checks.
+  AI results support the review but do not clear checks. Additional verification repeats only the checks HR
+  the hiring decision-maker selects; all required checks must be cleared before approving for offer.
+- Phase 4 — HR sends or revises the offer and records acceptance or decline. Pre-employment checks become
+  actionable after acceptance and must be cleared before confirming the hire.
+- Phase 5 — Confirm Hire from an accepted offer with every pre-employment check cleared; the offer's start
+  date becomes the employee's `hire_date`. Hiring creates the employee account and emails the login
+  credentials.
+- Every status change writes an `application_timeline` row in the same transaction as an audit trail. Status
+  changes are compare-and-set so concurrent decision-makers cannot double-advance or send duplicate offers.
+- HR can optionally record an internal rejection reason (defaults to **Other**); candidate emails are
+  generic and never expose the internal note. Withdrawals and offer declines send no email.
+- Candidate emails: application-received on submit, interview schedule, offer letter, and generic status
+  updates. Mail is sent after the database commit and failures are logged and surfaced, never rolling back
+  the pipeline action.
 
 ### Onboarding
 
@@ -429,13 +448,18 @@ Docker/Compose/host take precedence over the local file.
 2. Manage vacancies under `?page=recruitment` (create, edit, close, delete).
 3. Review applicants under `?page=applicants`; open a candidate with `?page=review`.
 4. Run **Evaluate Resume** / **Evaluate Academic Document** to get AI scores and consistency findings.
-5. **Schedule Interview** (emails the applicant) and then **Hire** or **Reject**.
-6. Hiring creates the employee account and emails the credentials.
-7. Continue the hire through `?page=onboarding` (request, verify or reject documents).
+5. Qualify or reject applicants after reviewing their application and AI results.
+6. Schedule interviews; the assigned interviewer submits an evaluation, then HR decides whether to advance.
+7. Complete required selection checks, approve for offer, record the candidate's response, and clear
+   pre-employment requirements after acceptance.
+8. Confirm the hire only after acceptance and clearance. The employee start date is taken from the offer;
+   onboarding begins at hire confirmation.
 
 ### Manager
 
-Same as HR for recruitment, applicants, interviews, hiring decisions and statistics.
+Managers may schedule and conduct interviews when authorized and submit evaluations for interviews assigned
+to them. HR retains qualification, application-review rejection, offer handling, and hire confirmation;
+managers may participate in interview and final-selection decisions.
 
 ### Administrator
 
@@ -520,11 +544,12 @@ hr1/                          # Subdomain document root
 
 ## Database
 
-`schema.sql` defines **21 tables**, including:
+`schema.sql` defines **25 tables**, including:
 
 `roles`, `users`, `login_otps`, `password_reset_codes`, `password_reset_requests`,
 `departments`, `positions`, `job_postings`, `applicants`, `applications`,
-`application_validations`, `ai_screening`, `interviews`, `onboarding`,
+`application_validations`, `ai_screening`, `interviews`, `interview_evaluations`,
+`hiring_requirements`, `job_offers`, `application_timeline`, `onboarding`,
 `onboarding_documents`, `onboarding_phases`, `employees`, `employee_number_sequence`,
 `activity_logs`, `employee_requests`, `academic_document_evaluations`.
 
@@ -551,6 +576,12 @@ generates synthetic candidates so the demo has data to rank.
 - `20261002_extend_ai_validation_for_processing.sql`
 - `20261003_add_password_reset.sql`
 - `20261004_add_department_status.sql`
+- `20261018_extend_application_status.sql` — Selection + Offer statuses, `status_updated_at`
+- `20261018_add_interview_evaluations.sql`
+- `20261018_add_hiring_requirements.sql`
+- `20261018_add_job_offers.sql`
+- `20261018_add_application_timeline.sql`
+- `20261019_add_salary_range_to_job_postings.sql`
 
 ---
 
