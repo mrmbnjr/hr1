@@ -19,6 +19,135 @@
     let currentPage = 1;
     let activeStatusFilter = 'All';
 
+    function setupCustomFilter(select, trigger, label, popup, field) {
+        if (!select || !trigger || !label || !popup || !field) return;
+
+        const options = Array.from(select.options).map((option, index) => {
+            const item = document.createElement('div');
+            item.id = `${select.id}Option${index}`;
+            item.className = 'custom-filter-option';
+            item.setAttribute('role', 'option');
+            item.dataset.value = option.value;
+            item.textContent = option.textContent.trim();
+            popup.appendChild(item);
+            return item;
+        });
+
+        let activeOptionIndex = select.selectedIndex;
+
+        function syncFilterUI() {
+            const selectedOption = select.options[select.selectedIndex];
+            label.textContent = selectedOption.textContent.trim();
+            trigger.setAttribute(
+                'aria-label',
+                `${trigger.dataset.baseLabel}: ${selectedOption.textContent.trim()}`
+            );
+            options.forEach((option, index) => {
+                option.setAttribute('aria-selected', String(index === select.selectedIndex));
+            });
+        }
+
+        function setActiveOption(index) {
+            activeOptionIndex = Math.max(0, Math.min(index, options.length - 1));
+            options.forEach((option, optionIndex) => {
+                option.classList.toggle('is-active', optionIndex === activeOptionIndex);
+            });
+            popup.setAttribute('aria-activedescendant', options[activeOptionIndex].id);
+            options[activeOptionIndex].scrollIntoView({ block: 'nearest' });
+        }
+
+        function setOptionsOpen(isOpen, restoreFocus = false) {
+            popup.hidden = !isOpen;
+            trigger.setAttribute('aria-expanded', String(isOpen));
+
+            if (isOpen) {
+                setActiveOption(select.selectedIndex);
+                popup.focus();
+            } else {
+                popup.removeAttribute('aria-activedescendant');
+                if (restoreFocus) trigger.focus();
+            }
+        }
+
+        function selectOption(index) {
+            select.value = options[index].dataset.value;
+            setOptionsOpen(false, true);
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        select.addEventListener('change', syncFilterUI);
+        trigger.dataset.baseLabel = trigger.getAttribute('aria-label');
+        trigger.addEventListener('click', () => {
+            setOptionsOpen(popup.hidden);
+        });
+        trigger.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp'
+                || event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setOptionsOpen(true);
+            }
+        });
+
+        popup.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                event.preventDefault();
+                setActiveOption(activeOptionIndex + (event.key === 'ArrowDown' ? 1 : -1));
+            } else if (event.key === 'Home' || event.key === 'End') {
+                event.preventDefault();
+                setActiveOption(event.key === 'Home' ? 0 : options.length - 1);
+            } else if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectOption(activeOptionIndex);
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                setOptionsOpen(false, true);
+            } else if (event.key === 'Tab') {
+                setOptionsOpen(false, true);
+            }
+        });
+
+        popup.addEventListener('pointermove', event => {
+            const option = event.target.closest('.custom-filter-option');
+            if (option) setActiveOption(options.indexOf(option));
+        });
+
+        popup.addEventListener('click', event => {
+            const option = event.target.closest('.custom-filter-option');
+            if (option) selectOption(options.indexOf(option));
+        });
+
+        document.addEventListener('pointerdown', event => {
+            if (!field.contains(event.target) && !popup.hidden) {
+                setOptionsOpen(false);
+            }
+        });
+
+        syncFilterUI();
+        return syncFilterUI;
+    }
+
+    const syncPositionFilterUI = setupCustomFilter(
+        positionFilter,
+        document.getElementById('positionFilterTrigger'),
+        document.getElementById('positionFilterLabel'),
+        document.getElementById('positionFilterOptions'),
+        document.getElementById('positionFilter')?.closest('.position-select-field')
+    );
+    const syncStatusFilterUI = setupCustomFilter(
+        statusFilter,
+        document.getElementById('statusFilterTrigger'),
+        document.getElementById('statusFilterLabel'),
+        document.getElementById('statusFilterOptions'),
+        document.getElementById('statusFilter')?.closest('.position-select-field')
+    );
+    const syncSortFilterUI = setupCustomFilter(
+        sortFilter,
+        document.getElementById('sortFilterTrigger'),
+        document.getElementById('sortFilterLabel'),
+        document.getElementById('sortFilterOptions'),
+        document.getElementById('sortFilter')?.closest('.position-select-field')
+    );
+
     /* -------------------- Table filtering + pagination -------------------- */
 
     if (isApplicantListPage) {
@@ -28,6 +157,7 @@
         /* Keep the status dropdown and the summary tiles in step */
         function syncStatusUI() {
             if (statusFilter) statusFilter.value = activeStatusFilter;
+            if (syncStatusFilterUI) syncStatusFilterUI();
 
             summaryCards.forEach(card => {
                 const isActive =
@@ -173,7 +303,9 @@
             clearFiltersBtn.addEventListener('click', () => {
                 searchInput.value = '';
                 positionFilter.value = 'All';
+                positionFilter.dispatchEvent(new Event('change', { bubbles: true }));
                 sortFilter.value = 'priority';
+                if (syncSortFilterUI) syncSortFilterUI();
                 activeStatusFilter = 'All';
                 currentPage = 1;
                 syncStatusUI();

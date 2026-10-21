@@ -162,9 +162,9 @@ foreach ($applicants as $a) {
                     <input type="text" id="applicantSearch" placeholder="Search by name or email...">
                 </div>
 
-                <div class="select-field">
+                <div class="select-field position-select-field">
                     <i class="fa-solid fa-briefcase select-icon"></i>
-                    <select id="positionFilter" aria-label="Filter by position">
+                    <select id="positionFilter" class="custom-filter-native" aria-hidden="true" tabindex="-1">
                         <option value="All">All Positions</option>
                         <?php foreach ($positions as $position): ?>
                             <option value="<?= htmlspecialchars($position['title']) ?>">
@@ -172,12 +172,27 @@ foreach ($applicants as $a) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <i class="fa-solid fa-chevron-down select-caret"></i>
+                    <button type="button"
+                            class="custom-filter-trigger"
+                            id="positionFilterTrigger"
+                            aria-label="Filter by position"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="positionFilterOptions">
+                        <span id="positionFilterLabel">All Positions</span>
+                        <i class="fa-solid fa-chevron-down select-caret" aria-hidden="true"></i>
+                    </button>
+                    <div class="custom-filter-options"
+                         id="positionFilterOptions"
+                         role="listbox"
+                         aria-label="Positions"
+                         tabindex="-1"
+                         hidden></div>
                 </div>
 
-                <div class="select-field">
+                <div class="select-field position-select-field">
                     <i class="fa-solid fa-bullseye select-icon"></i>
-                    <select id="statusFilter" aria-label="Filter by status">
+                    <select id="statusFilter" class="custom-filter-native" aria-hidden="true" tabindex="-1">
                         <option value="All">All Statuses</option>
                         <?php foreach ($statusMeta as $statusKey => $statusInfo): ?>
                             <option value="<?= htmlspecialchars($statusKey) ?>">
@@ -185,12 +200,27 @@ foreach ($applicants as $a) {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <i class="fa-solid fa-chevron-down select-caret"></i>
+                    <button type="button"
+                            class="custom-filter-trigger"
+                            id="statusFilterTrigger"
+                            aria-label="Filter by status"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="statusFilterOptions">
+                        <span id="statusFilterLabel">All Statuses</span>
+                        <i class="fa-solid fa-chevron-down select-caret" aria-hidden="true"></i>
+                    </button>
+                    <div class="custom-filter-options"
+                         id="statusFilterOptions"
+                         role="listbox"
+                         aria-label="Statuses"
+                         tabindex="-1"
+                         hidden></div>
                 </div>
 
-                <div class="select-field">
+                <div class="select-field position-select-field">
                     <i class="fa-solid fa-arrow-down-wide-short select-icon"></i>
-                    <select id="sortFilter" aria-label="Sort applicants">
+                    <select id="sortFilter" class="custom-filter-native" aria-hidden="true" tabindex="-1">
                         <option value="priority">Sort by Priority</option>
                         <option value="highest-score">Highest AI Score</option>
                         <option value="lowest-score">Lowest AI Score</option>
@@ -199,7 +229,22 @@ foreach ($applicants as $a) {
                         <option value="name-az">Applicant Name (A-Z)</option>
                         <option value="name-za">Applicant Name (Z-A)</option>
                     </select>
-                    <i class="fa-solid fa-chevron-down select-caret"></i>
+                    <button type="button"
+                            class="custom-filter-trigger"
+                            id="sortFilterTrigger"
+                            aria-label="Sort applicants"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="sortFilterOptions">
+                        <span id="sortFilterLabel">Sort by Priority</span>
+                        <i class="fa-solid fa-chevron-down select-caret" aria-hidden="true"></i>
+                    </button>
+                    <div class="custom-filter-options"
+                         id="sortFilterOptions"
+                         role="listbox"
+                         aria-label="Sort applicants"
+                         tabindex="-1"
+                         hidden></div>
                 </div>
 
                 <button type="button" class="btn-secondary clear-filters" id="clearFilters">

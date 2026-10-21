@@ -306,6 +306,84 @@
     color: var(--ink);
 }
 
+.applicants-page .custom-filter-native {
+    display: none;
+}
+
+.applicants-page .custom-filter-trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0 22px 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+}
+
+.applicants-page .custom-filter-trigger:focus-visible {
+    outline: 2px solid var(--gold-dark);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.custom-filter-trigger > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-filter-options {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 5px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+}
+
+.custom-filter-option {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: 13.5px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+}
+
+.custom-filter-option:hover,
+.custom-filter-option.is-active {
+    background: var(--surface-muted);
+}
+
+.custom-filter-option[aria-selected="true"] {
+    background: var(--maroon);
+    color: var(--white);
+    font-weight: 700;
+}
+
+.custom-filter-option[aria-selected="true"].is-active,
+.custom-filter-option[aria-selected="true"]:hover {
+    background: var(--maroon-dark);
+}
+
 .applicants-page .clear-filters {
     flex: 0 0 auto;
     min-width: 0;
