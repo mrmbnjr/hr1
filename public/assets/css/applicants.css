@@ -59,9 +59,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    color: var(--maroon);
-    font-size: 34px;
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    color: var(--gold);
+    background: var(--maroon);
+    box-shadow: 0 5px 12px var(--card-shadow);
+    font-size: 26px;
 }
 
 .summary-total-body { display: flex; flex-direction: column; min-width: 0; }
