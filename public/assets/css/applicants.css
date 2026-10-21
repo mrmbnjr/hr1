@@ -30,6 +30,15 @@
     box-shadow: var(--shadow-card), inset 0 1px 0 var(--tint-neutral);
 }
 
+.summary-heading {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--maroon);
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 800;
+}
+
 .summary-total {
     display: flex;
     align-items: center;
@@ -80,7 +89,7 @@
     flex: 1 1 auto;
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 10px;
+    gap: 0 10px;
     min-width: 0;
 }
 

@@ -131,6 +131,7 @@ foreach ($applicants as $a) {
             </div>
 
             <div class="summary-grid">
+                <h2 class="summary-heading">Hiring Pipeline</h2>
                 <?php foreach ($summaryTiles as $tile): ?>
                     <div class="summary-tile tone-<?= htmlspecialchars($tile['tone']) ?> summary-card"
                          data-filter="<?= htmlspecialchars($tile['filter']) ?>"
