@@ -25,9 +25,10 @@ $isHrOrManager = in_array(Auth::role(), ['ADMIN', 'HR', 'MGR'], true);
  * Pipeline data loaded by ApplicantController::review(); defaults
  * keep this view safe if it is ever included without them.
  */
-$evaluations   = $evaluations ?? [];
-$requirements  = $requirements ?? [];
-$offer         = $offer ?? null;
+$evaluations                    = $evaluations ?? [];
+$requirements                   = $requirements ?? [];
+$offer                          = $offer ?? null;
+$repeatableSelectionRequirements = $repeatableSelectionRequirements ?? [];
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: " . url("?page=login"));
