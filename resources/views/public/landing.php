@@ -48,6 +48,8 @@ $resetPasswordUrl = url('?page=reset-password');
 $careersUrl = url('?page=careers');
 $applyUrl   = static fn($token) => 'index.php?page=apply&token=' . rawurlencode((string) $token);
 $logoUrl    = asset('images/logo.png');
+$heroImageUrl = asset('images/hero-team.jpg');
+$journeyImageUrl = asset('images/journey-workspace.jpg');
 $year       = date('Y');
 
 /* ---- presentation helpers ---- */
@@ -155,7 +157,7 @@ $portalServices = [
 
         <div class="lp-hero__visual" aria-hidden="true" data-reveal style="--d:120ms">
             <div class="lp-hero__back"></div>
-            <div class="lp-hero__frame">
+            <div class="lp-hero__frame" style="background-image: url('<?= $e($heroImageUrl) ?>');">
                 <div class="lp-hero__art"><i class="fa-solid fa-people-group"></i></div>
                 <div class="lp-hero__shade"></div>
             </div>
@@ -180,7 +182,7 @@ $portalServices = [
     <div class="lp-container lp-about-card">
       <div class="lp-about">
         <div class="lp-about__media" data-reveal>
-            <div class="lp-about__photo" aria-hidden="true">
+            <div class="lp-about__photo" aria-hidden="true" style="background-image: url('<?= $e($journeyImageUrl) ?>');">
                 <i class="fa-solid fa-clipboard-check"></i>
             </div>
             <div class="lp-about__badge" aria-hidden="true">
