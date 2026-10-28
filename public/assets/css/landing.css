@@ -149,8 +149,9 @@ html.lp-page::-webkit-scrollbar { width: 0; height: 0; }
 .lp-hero__visual { position: relative; padding: 0 0 var(--lp-s3) var(--lp-s3); }
 .lp-hero__back { position: absolute; inset: var(--lp-s3) var(--lp-s3) 0 0; border: 2px solid var(--lp-gold); border-radius: calc(var(--lp-radius) + 8px); }
 .lp-hero__frame { position: relative; aspect-ratio: 4 / 4.2; border-radius: calc(var(--lp-radius) + 8px); background: var(--lp-maroon) center / cover no-repeat; box-shadow: var(--lp-shadow-lg); overflow: hidden; }
+.lp-hero__frame--mirrored::before { content: ''; position: absolute; inset: 0; background: var(--lp-hero-image) center / cover no-repeat; transform: scaleX(-1); }
 .lp-hero__art { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6rem; color: var(--lp-gold); background: radial-gradient(circle at 70% 25%, rgba(255, 255, 255, .14), transparent 55%), linear-gradient(160deg, var(--lp-maroon), var(--lp-maroon-dark)); }
-.lp-hero__frame[style*="url"] .lp-hero__art { display: none; }
+.lp-hero__frame[style*="url"] .lp-hero__art, .lp-hero__frame--mirrored .lp-hero__art { display: none; }
 .lp-hero__shade { position: absolute; inset: auto 0 0 0; height: 40%; background: linear-gradient(0deg, rgba(43, 29, 26, .45), transparent); }
 .lp-hero__chip { position: absolute; display: flex; align-items: center; gap: 12px; background: var(--lp-card); border: 1px solid var(--lp-border); border-radius: var(--lp-radius); box-shadow: var(--lp-shadow-lg); padding: 8px 16px 8px 8px; animation: lp-float 6s ease-in-out infinite; }
 .lp-chip__icon { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 8px; background: var(--lp-maroon); color: var(--lp-gold); font-size: .9rem; }

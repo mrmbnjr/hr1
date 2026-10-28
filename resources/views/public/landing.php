@@ -122,10 +122,10 @@ $portalServices = [
             <a href="#home" class="lp-nav__link is-active">Home</a>
             <a href="#opportunities" class="lp-nav__link">Open roles</a>
             <a href="#careers" class="lp-nav__link">Hiring process</a>
-            <a href="#portal" class="lp-nav__link">Employee portal</a>
+            <a href="#portal" class="lp-nav__link">MMS portal</a>
             <a href="<?= $e($careersUrl) ?>" class="lp-nav__link">All opportunities</a>
             <a href="<?= $e($loginUrl) ?>" class="lp-btn lp-btn--dark lp-btn--sm lp-nav__login">
-                <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Login Portal
+                <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i> Login Now
             </a>
         </nav>
     </div>
@@ -157,7 +157,7 @@ $portalServices = [
 
         <div class="lp-hero__visual" aria-hidden="true" data-reveal style="--d:120ms">
             <div class="lp-hero__back"></div>
-            <div class="lp-hero__frame" style="background-image: url('<?= $e($heroImageUrl) ?>');">
+            <div class="lp-hero__frame lp-hero__frame--mirrored" style="--lp-hero-image: url('<?= $e($heroImageUrl) ?>');">
                 <div class="lp-hero__art"><i class="fa-solid fa-people-group"></i></div>
                 <div class="lp-hero__shade"></div>
             </div>
