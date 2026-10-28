@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    document.documentElement.classList.add('lp-js');
+
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* ---------- Mobile navigation ---------- */
@@ -65,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Sections without a nav link of their own map to the nearest relevant one.
-    var alias = { glance: 'home', why: 'about', portal: 'careers' };
+    var alias = { glance: 'home' };
 
     if ('IntersectionObserver' in window) {
         var spy = new IntersectionObserver(function (entries) {
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }, { rootMargin: '-40% 0px -55% 0px' });
 
-        ['home', 'glance', 'about', 'menu', 'gallery', 'why', 'careers', 'portal', 'contact'].forEach(function (id) {
+        ['home', 'about', 'opportunities', 'careers', 'portal'].forEach(function (id) {
             var s = document.getElementById(id);
             if (s) spy.observe(s);
         });
