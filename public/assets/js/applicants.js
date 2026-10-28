@@ -1,6 +1,50 @@
 // Applicants
 (function () {
 
+    const phaseTabs = Array.from(document.querySelectorAll('.pipeline-step-button[data-phase-target]'));
+    const phasePanels = Array.from(document.querySelectorAll('.pipeline-phase[id^="phase-panel-"]'));
+
+    function activatePhase(tab, focusTab = false) {
+        const targetId = tab.dataset.phaseTarget;
+        if (!phasePanels.some(panel => panel.id === targetId)) return;
+
+        phaseTabs.forEach(item => {
+            const isSelected = item === tab;
+            item.setAttribute('aria-selected', String(isSelected));
+            item.tabIndex = isSelected ? 0 : -1;
+        });
+
+        phasePanels.forEach(panel => {
+            panel.hidden = panel.id !== targetId;
+        });
+
+        if (focusTab) tab.focus();
+    }
+
+    phaseTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            activatePhase(tab);
+        });
+
+        tab.addEventListener('keydown', event => {
+            const currentIndex = phaseTabs.indexOf(tab);
+            let nextIndex = currentIndex;
+            if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                nextIndex = (currentIndex + 1) % phaseTabs.length;
+            } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                nextIndex = (currentIndex - 1 + phaseTabs.length) % phaseTabs.length;
+            } else if (event.key === 'Home') {
+                nextIndex = 0;
+            } else if (event.key === 'End') {
+                nextIndex = phaseTabs.length - 1;
+            } else {
+                return;
+            }
+            event.preventDefault();
+            activatePhase(phaseTabs[nextIndex], true);
+        });
+    });
+
     const rows                = Array.from(document.querySelectorAll('#applicantTable tbody tr.applicant-row'));
     const searchInput         = document.getElementById('applicantSearch');
     const positionFilter      = document.getElementById('positionFilter');
@@ -614,7 +658,7 @@
     ========================================================== */
 
     const hireBtn = document.getElementById('hireBtn');
-    const rejectBtn = document.getElementById('rejectBtn');
+    const rejectBtn = document.querySelector('.rejectBtn');
     const confirmHireBtn = document.getElementById('confirmHireBtn');
     const rejectForm = document.getElementById('rejectForm');
 
@@ -819,11 +863,11 @@
                 const noEmailExpected =
                     reasonSelect && reasonSelect.value === 'Withdrew';
 
-                alert(
-                    !noEmailExpected && result.email_sent === false
-                        ? 'Applicant has been rejected, but the notification email could not be sent.'
-                        : 'Applicant has been rejected.'
-                );
+                alert(noEmailExpected
+                    ? 'Application marked as withdrawn.'
+                    : (result.email_sent === false
+                        ? 'Application rejected, but the notification email could not be sent.'
+                        : 'Application rejected.'));
 
                 window.location.href =
                     '?page=review&id=' +
@@ -839,7 +883,7 @@
 
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Confirm Rejection';
+                    submitBtn.innerHTML = 'Confirm Decision';
                 }
 
             }
@@ -947,13 +991,13 @@
     INTERVIEW EVALUATION
     ---------------------------------------------------------- */
 
-    const openEvaluationBtn = document.getElementById('openEvaluationModal');
-
-    if (openEvaluationBtn) {
-        openEvaluationBtn.addEventListener('click', () => {
+    document.querySelectorAll('.open-round-evaluation').forEach(button => {
+        button.addEventListener('click', () => {
+            const interviewId = document.getElementById('evaluationInterviewId');
+            if (interviewId) interviewId.value = button.dataset.interviewId || '';
             openModal('evaluationModal');
         });
-    }
+    });
 
     const evaluationForm = document.getElementById('evaluationForm');
 

@@ -10,8 +10,8 @@ use PDO;
  *
  * Two rules, both scoped to a *closed* job posting:
  *
- *   Rule A — every rejected application belonging to a closed posting is
- *            removed as soon as the posting is closed.
+ *   Rule A — every rejected or withdrawn application belonging to a closed
+ *            posting is removed as soon as the posting is closed.
  *   Rule B — the remaining applications on a closed posting are removed once
  *            the posting has been closed for the configured retention window
  *            (default 30 days, measured from `job_postings.closed_at`).
@@ -61,7 +61,7 @@ class ApplicationRetentionService
      */
     public function run(): array
     {
-        // Rule A: rejected applications on any closed posting.
+        // Rule A: rejected and withdrawn applications on any closed posting.
         $rejected = $this->purgeApplications(
             $this->rejectedOnClosedPostingsSql()
         );
@@ -135,7 +135,7 @@ class ApplicationRetentionService
             SELECT ap.application_id
             FROM applications ap
             WHERE ap.posting_id = :posting_id
-              AND ap.application_status = 'Rejected'
+              AND ap.application_status IN ('Rejected', 'Withdrawn')
             ",
             [':posting_id' => $postingId]
         );
@@ -255,7 +255,7 @@ class ApplicationRetentionService
             INNER JOIN job_postings jp
                 ON jp.posting_id = ap.posting_id
             WHERE jp.status = 'Closed'
-              AND ap.application_status = 'Rejected'
+              AND ap.application_status IN ('Rejected', 'Withdrawn')
         ";
     }
 

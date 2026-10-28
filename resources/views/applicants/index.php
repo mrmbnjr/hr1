@@ -66,6 +66,7 @@ $statusMeta = [
     "Offer"        => ["label" => "Offer",        "class" => "badge-teal"],
     "Hired"        => ["label" => "Hired",        "class" => "badge-green"],
     "Rejected"     => ["label" => "Rejected",     "class" => "badge-red"],
+    "Withdrawn"    => ["label" => "Withdrawn",    "class" => "badge-gray"],
 ];
 
 /* Summary counts for the dashboard cards */
@@ -78,6 +79,7 @@ $summary = [
     "Offer"        => 0,
     "Hired"        => 0,
     "Rejected"     => 0,
+    "Withdrawn"    => 0,
 ];
 
 foreach ($applicants as $a) {
@@ -114,6 +116,7 @@ foreach ($applicants as $a) {
             ['filter' => 'Offer',        'tone' => 'teal',   'value' => (int) $summary['Offer']],
             ['filter' => 'Hired',        'tone' => 'green',  'value' => (int) $summary['Hired']],
             ['filter' => 'Rejected',     'tone' => 'red',    'value' => (int) $summary['Rejected']],
+            ['filter' => 'Withdrawn',    'tone' => 'gray',   'value' => (int) $summary['Withdrawn']],
         ];
         ?>
 

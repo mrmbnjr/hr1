@@ -757,12 +757,6 @@ class ApplicantController
             (int) $_GET['id'];
 
 
-        $this->applicant
-            ->markAsUnderReview(
-                $applicantId
-            );
-
-
         $applicant =
             $this->applicant
                 ->getApplicantById(
@@ -802,10 +796,18 @@ class ApplicantController
                 (int) $applicant['application_id']
             );
 
+        $allInterviewRoundsEvaluated = $pipeline->allInterviewRoundsEvaluated(
+            (int) $applicant['application_id']
+        );
+
         $requirements =
             $pipeline->requirements()->forApplication(
                 (int) $applicant['application_id']
             );
+
+        $interviews = $this->applicant->getInterviewsForApplication(
+            (int) $applicant['application_id']
+        );
 
         $offer =
             (new JobOffer())->forApplication(
@@ -1067,6 +1069,9 @@ class ApplicantController
 
                     'position' =>
                         $applicant['position'],
+
+                    'round_type' =>
+                        $_POST['round_type'] ?? 'Interview',
 
                     'interview_date' =>
                         date(
@@ -1479,7 +1484,7 @@ class ApplicantController
                 !$context
                 || !in_array(
                     $context['application_status'],
-                    ['Submitted', 'Under Review', 'Interview', 'Selection'],
+                    ['Submitted', 'Under Review', 'Interview', 'Selection', 'Offer'],
                     true
                 )
             ) {
@@ -1521,6 +1526,10 @@ class ApplicantController
                 $reasonCategory = 'Other';
             }
 
+            if ($reasonCategory === 'Withdrew' && !Auth::hasAnyRole(['ADMIN', 'HR'])) {
+                throw new \Exception('Only HR can record an applicant withdrawal.');
+            }
+
 
             $note =
                 trim((string) ($_POST['reason_note'] ?? ''));
@@ -1530,18 +1539,18 @@ class ApplicantController
              * A withdrawal ends the process by the applicant's own
              * choice, so no rejection email is sent.
              */
-            $notifyCandidate =
-                $reasonCategory !== 'Withdrew';
+            $isWithdrawal = $reasonCategory === 'Withdrew';
+            $notifyCandidate = !$isWithdrawal;
 
 
             $success =
                 $this->applicant
-                    ->rejectApplication(
+                    ->closeApplication(
                         $applicationId,
                         $reasonCategory,
                         $note !== '' ? $note : null,
                         Auth::userId(),
-                        $notifyCandidate
+                        $isWithdrawal ? 'Withdrawn' : 'Rejected'
                     );
 
 
@@ -1599,7 +1608,7 @@ class ApplicantController
                     true,
 
                 'message' =>
-                    'Applicant has been rejected.',
+                    $isWithdrawal ? 'Application marked as withdrawn.' : 'Applicant has been rejected.',
 
                 'email_sent' =>
                     $emailSent

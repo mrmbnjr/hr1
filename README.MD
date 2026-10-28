@@ -82,11 +82,13 @@ project root is the single front controller.
 
 - Five-phase applicant pipeline: **Application Review → Interview and Assessment → Final Selection and
   Verification → Job Offer and Pre-employment → Hiring Confirmation** (statuses:
-  `Submitted → Under Review → Interview → Selection → Offer → Hired`, terminal `Rejected`).
-- Phase 1 — HR reviews the application and screening results, then qualifies or rejects. Qualification only
+  `Submitted → Under Review → Interview → Selection → Offer → Hired`, terminal `Rejected` or `Withdrawn`).
+- Opening an applicant record does not change its status. HR reviews the application and screening results,
+  then explicitly qualifies or rejects. Qualification only
   opens the interview stage; it does not hire the applicant.
-- Phase 2 — the scheduled interviewer records ratings, strengths, weaknesses, remarks, and a
-  recommendation. An authorized hiring decision-maker (HR or manager) advances or rejects after review.
+- Phase 2 — HR can schedule multiple interview or assessment rounds. Each assigned interviewer records
+  ratings, strengths, weaknesses, remarks, and a recommendation. An authorized hiring decision-maker (HR or
+  manager) advances or rejects after every scheduled round has an evaluation.
 - Phase 3 — HR or a manager reviews the evaluation and verifies required credentials, references, or background checks.
   AI results support the review but do not clear checks. Additional verification repeats only the checks HR
   the hiring decision-maker selects; all required checks must be cleared before approving for offer.
@@ -97,8 +99,9 @@ project root is the single front controller.
   credentials.
 - Every status change writes an `application_timeline` row in the same transaction as an audit trail. Status
   changes are compare-and-set so concurrent decision-makers cannot double-advance or send duplicate offers.
-- HR can optionally record an internal rejection reason (defaults to **Other**); candidate emails are
-  generic and never expose the internal note. Withdrawals and offer declines send no email.
+- HR can optionally record an internal rejection reason (defaults to **Other**) or record an applicant
+  withdrawal; candidate emails are generic and never expose the internal note. Withdrawals and offer declines
+  send no email.
 - Candidate emails: application-received on submit, interview schedule, offer letter, and generic status
   updates. Mail is sent after the database commit and failures are logged and surfaced, never rolling back
   the pipeline action.
@@ -412,7 +415,7 @@ Docker/Compose/host take precedence over the local file.
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `REJECTED_APPLICANT_RETENTION_DAYS` | `30` | Days a rejected application is kept before it is hidden. |
+| `REJECTED_APPLICANT_RETENTION_DAYS` | `30` | Days rejected or withdrawn applications are kept before they are hidden. |
 | `CLOSED_APPLICATION_RETENTION_DAYS` | `30` | Days after a posting closes before its non-hired applications are removed. |
 | `APPLICATION_CLEANUP_INTERVAL` | `3600` | Minimum seconds between opportunistic cleanup runs (`0` = every load). |
 
@@ -582,6 +585,7 @@ generates synthetic candidates so the demo has data to rank.
 - `20261018_add_job_offers.sql`
 - `20261018_add_application_timeline.sql`
 - `20261019_add_salary_range_to_job_postings.sql`
+- `20261028_align_applicant_workflow.sql` — repeatable interview rounds and the Withdrawn terminal status
 
 ---
 

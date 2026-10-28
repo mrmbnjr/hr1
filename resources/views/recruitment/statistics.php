@@ -286,7 +286,7 @@ foreach ($candidates as $row) {
     $row['_concerns'] = statistics_list($row['concerns'] ?? []);
     $row['_missing'] = statistics_list($row['missing_documents'] ?? []);
     $row['_bucket'] = statistics_interview_bucket($row);
-    $row['_active'] = !in_array($status, ['Hired', 'Rejected'], true);
+    $row['_active'] = !in_array($status, ['Hired', 'Rejected', 'Withdrawn'], true);
     $row['_qualified'] = in_array(
         $recommendation,
         ['Highly Recommended', 'Recommended'],
@@ -314,7 +314,7 @@ $interviewLabels = [
 
 $ranked = array_values(array_filter(
     $candidateRows,
-    fn ($c) => $c['_status'] !== 'Rejected'
+    fn ($c) => !in_array($c['_status'], ['Rejected', 'Withdrawn'], true)
 ));
 
 usort($ranked, function ($a, $b) {
@@ -368,7 +368,7 @@ $aiAverage = $aiScreened > 0
 
 $recommendedCount = count(array_filter(
     $candidateRows,
-    fn ($c) => $c['_qualified'] && $c['_status'] !== 'Rejected'
+    fn ($c) => $c['_qualified'] && !in_array($c['_status'], ['Rejected', 'Withdrawn'], true)
 ));
 
 

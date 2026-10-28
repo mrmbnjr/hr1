@@ -85,6 +85,8 @@ class Applicant
 
                 i.interview_date,
 
+                i.result AS interview_status,
+
                 ap.application_status AS hiring_decision
 
             FROM applicants a
@@ -102,11 +104,14 @@ class Applicant
                 ON av.application_id = ap.application_id
 
             LEFT JOIN interviews i
-                ON ap.application_id = i.application_id
+                ON i.interview_id = (
+                    SELECT MAX(i2.interview_id) FROM interviews i2
+                    WHERE i2.application_id = ap.application_id
+                )
 
             WHERE ap.application_status IS NULL
-                OR ap.application_status <> 'Rejected'
-                OR ap.rejected_at >= DATE_SUB(NOW(), INTERVAL {$retentionDays} DAY)
+            OR ap.application_status NOT IN ('Rejected', 'Withdrawn')
+            OR ap.rejected_at >= DATE_SUB(NOW(), INTERVAL {$retentionDays} DAY)
 
             ORDER BY
                 ap.applied_at DESC
@@ -387,7 +392,10 @@ class Applicant
                 ON av.application_id = ap.application_id
 
             LEFT JOIN interviews i
-                ON ap.application_id = i.application_id
+                ON i.interview_id = (
+                    SELECT MAX(i2.interview_id) FROM interviews i2
+                    WHERE i2.application_id = ap.application_id
+                )
 
             LEFT JOIN users u
                 ON i.interviewer_id = u.user_id
@@ -579,7 +587,10 @@ class Applicant
                 ON ap.posting_id = jp.posting_id
 
             LEFT JOIN interviews i
-                ON ap.application_id = i.application_id
+                ON i.interview_id = (
+                    SELECT MAX(i2.interview_id) FROM interviews i2
+                    WHERE i2.application_id = ap.application_id
+                )
 
             LEFT JOIN users u
                 ON i.interviewer_id = u.user_id
@@ -710,73 +721,29 @@ class Applicant
                 $data['interview_time'] .
                 ':00';
 
-
-            /*
-             * Check if interview already exists
-             */
-            $check = $this->db->prepare("
-                SELECT interview_id
-                FROM interviews
-                WHERE application_id = :application_id
-            ");
-
-            $check->execute([
-                ':application_id' => $data['application_id']
-            ]);
-
-
-            if ($check->fetch()) {
-
-                /*
-                 * Update existing interview
-                 */
-                $stmt = $this->db->prepare("
-                    UPDATE interviews
-                    SET
-                        interviewer_id = :interviewer_id,
-                        interview_type = :interview_type,
-                        interview_date = :interview_date,
-                        location = :location,
-                        remarks = :remarks
-                    WHERE application_id = :application_id
-                ");
-
-            } else {
-
-                /*
-                 * Create new interview
-                 */
-                $stmt = $this->db->prepare("
-                    INSERT INTO interviews
-                    (
-                        application_id,
-                        interviewer_id,
-                        interview_type,
-                        interview_date,
-                        location,
-                        remarks
-                    )
-                    VALUES
-                    (
-                        :application_id,
-                        :interviewer_id,
-                        :interview_type,
-                        :interview_date,
-                        :location,
-                        :remarks
-                    )
-                ");
+            $roundType = (string) ($data['round_type'] ?? 'Interview');
+            if (!in_array($roundType, ['Interview', 'Assessment'], true)) {
+                throw new \RuntimeException('Select a valid interview or assessment round type.');
             }
+
+
+            $stmt = $this->db->prepare("
+                INSERT INTO interviews
+                (application_id, interviewer_id, round_type, interview_type, interview_date, location, remarks)
+                VALUES (:application_id, :interviewer_id, :round_type, :interview_type, :interview_date, :location, :remarks)
+            ");
 
 
             $stmt->execute([
                 ':application_id' => $data['application_id'],
                 ':interviewer_id' => $data['interviewer_id'],
+                ':round_type' => $roundType,
                 ':interview_type' => $data['interview_type'],
                 ':interview_date' => $interviewDateTime,
                 ':location' => $data['location'],
                 ':remarks' => $data['notes'] ?? null
             ]);
+            $interviewId = (int) $this->db->lastInsertId();
 
 
             /*
@@ -787,12 +754,15 @@ class Applicant
                 (int) $data['application_id'],
                 null,
                 null,
-                'Interview scheduled',
-                Auth::userId()
+                'Interview round scheduled',
+                Auth::userId(),
+                $roundType . ' on ' . $interviewDateTime
             );
 
 
             $this->db->commit();
+
+            return $interviewId;
 
         } catch (\Throwable $e) {
 
@@ -1505,6 +1475,60 @@ class Applicant
         );
     }
 
+    public function closeApplication(
+        int $applicationId,
+        string $reasonCategory,
+        ?string $note = null,
+        ?int $actorUserId = null,
+        string $terminalStatus = 'Rejected'
+    ): bool {
+        return (new PipelineService())->rejectTransition(
+            $applicationId,
+            $reasonCategory,
+            $note,
+            $actorUserId ?? Auth::userId(),
+            $terminalStatus !== 'Withdrawn',
+            $terminalStatus
+        );
+    }
+
+    /** Return every interview round for the review workspace. */
+    public function getInterviewsForApplication(int $applicationId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT i.*,
+                CONCAT(a.first_name, ' ', COALESCE(a.middle_name, ''), ' ', a.last_name) AS interviewer_name,
+                r.role_code AS interviewer_role,
+                (SELECT ev.recommendation FROM interview_evaluations ev
+                 WHERE ev.interview_id = i.interview_id
+                 ORDER BY ev.evaluation_id DESC LIMIT 1) AS latest_recommendation
+            FROM interviews i
+            LEFT JOIN users u ON i.interviewer_id = u.user_id
+            LEFT JOIN roles r ON u.role_id = r.role_id
+            LEFT JOIN employees e ON u.employee_id = e.employee_id
+            LEFT JOIN applicants a ON e.applicant_id = a.applicant_id
+            WHERE i.application_id = :application_id
+            ORDER BY i.interview_date, i.interview_id
+        ");
+        $stmt->execute([':application_id' => $applicationId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getInterviewRoundForEvaluation(int $applicationId, int $interviewId): ?array
+    {
+        $stmt = $this->db->prepare("
+            SELECT interview_id, interviewer_id, result
+            FROM interviews
+            WHERE application_id = :application_id AND interview_id = :interview_id
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':application_id' => $applicationId,
+            ':interview_id' => $interviewId,
+        ]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -1547,7 +1571,7 @@ class Applicant
                         WHEN ap.application_id IS NOT NULL
                             AND (
                                 ap.application_status IS NULL
-                                OR ap.application_status <> 'Rejected'
+                                OR ap.application_status NOT IN ('Rejected', 'Withdrawn')
                             )
                         THEN 1
                     END
@@ -1809,7 +1833,7 @@ class Applicant
                 WHERE posting_id = :posting_id
                 AND (
                     application_status IS NULL
-                    OR application_status <> 'Rejected'
+                    OR application_status NOT IN ('Rejected', 'Withdrawn')
                 )
             ");
 

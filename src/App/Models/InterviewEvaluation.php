@@ -99,6 +99,9 @@ class InterviewEvaluation
                 ev.remarks,
                 ev.recommendation,
                 ev.created_at,
+                i.round_type,
+                i.interview_type,
+                i.interview_date,
 
                 CONCAT(
                     evaluator.first_name,
@@ -157,5 +160,21 @@ class InterviewEvaluation
         ]);
 
         return (int) $stmt->fetchColumn();
+    }
+
+    public function allRoundsEvaluated(int $applicationId): bool
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) AS total,
+                SUM(CASE WHEN i.result = 'Pending' OR ev.interview_id IS NULL THEN 1 ELSE 0 END) AS incomplete
+            FROM interviews i
+            LEFT JOIN (
+                SELECT DISTINCT interview_id FROM interview_evaluations
+            ) ev ON ev.interview_id = i.interview_id
+            WHERE i.application_id = :application_id
+        ");
+        $stmt->execute([':application_id' => $applicationId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        return (int) ($result['total'] ?? 0) > 0 && (int) ($result['incomplete'] ?? 0) === 0;
     }
 }

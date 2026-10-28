@@ -187,7 +187,8 @@ CREATE TABLE applications (
         'Selection',
         'Offer',
         'Hired',
-        'Rejected'
+        'Rejected',
+        'Withdrawn'
     ) DEFAULT 'Submitted',
 
     status_updated_at DATETIME NULL,
@@ -313,8 +314,10 @@ CREATE TABLE ai_screening (
 CREATE TABLE interviews (
     interview_id INT AUTO_INCREMENT PRIMARY KEY,
 
-    application_id INT NOT NULL UNIQUE,
+    application_id INT NOT NULL,
     interviewer_id INT NOT NULL,
+
+    round_type ENUM('Interview', 'Assessment') NOT NULL DEFAULT 'Interview',
 
     interview_type ENUM(
         'Phone',
@@ -330,6 +333,7 @@ CREATE TABLE interviews (
 
     result ENUM(
         'Pending',
+        'Completed',
         'Passed',
         'Failed'
     ) DEFAULT 'Pending',

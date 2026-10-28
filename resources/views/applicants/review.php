@@ -42,9 +42,6 @@ if (!$applicant) {
     exit;
 }
 
-$isAssignedInterviewer =
-    (int) Auth::userId() === (int) ($applicant['interviewer_id'] ?? 0);
-
 /*
  * Applicants still in the screening stages are qualified or rejected
  * here; the interview stage (and its schedule) only opens once they
@@ -64,6 +61,7 @@ $statusMeta = [
     "Offer"        => ["label" => "Offer", "class" => "badge-teal"],
     "Hired"        => ["label" => "Hired", "class" => "badge-green"],
     "Rejected"     => ["label" => "Rejected", "class" => "badge-red"],
+    "Withdrawn"    => ["label" => "Withdrawn", "class" => "badge-gray"],
 ];
 
 /*
@@ -336,13 +334,22 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
         'Offer'        => 4,
         'Hired'        => 5,
         'Rejected'     => 1,
+        'Withdrawn'    => 1,
     ];
 
     $currentStep   = $statusStep[$applicant['application_status']] ?? 1;
-    $isRejectedApp = $applicant['application_status'] === 'Rejected';
+    $isRejectedApp = in_array($applicant['application_status'], ['Rejected', 'Withdrawn'], true);
+    $phaseStates = [];
+    foreach ($pipelineSteps as $stepNumber => $step) {
+        $phaseStates[$stepNumber] = $isRejectedApp
+            ? ($stepNumber === $currentStep ? 'rejected' : 'dimmed')
+            : ($stepNumber < $currentStep || $applicant['application_status'] === 'Hired'
+                ? 'completed'
+                : ($stepNumber === $currentStep ? 'current' : 'upcoming'));
+    }
     ?>
     <section class="detail-section pipeline-tracker" aria-label="Hiring pipeline progress">
-        <ol class="pipeline-steps">
+        <ol class="pipeline-steps" role="tablist" aria-label="Recruitment phases">
             <?php foreach ($pipelineSteps as $stepNumber => $step): ?>
                 <?php
                 if ($isRejectedApp) {
@@ -358,20 +365,39 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                     $stepState = 'upcoming';
                 }
                 ?>
-                <li class="pipeline-step <?= $stepState ?>">
-                    <span class="pipeline-step-marker">
-                        <i class="fa-solid <?= $stepState === 'completed' ? 'fa-check' : $step['icon'] ?>"></i>
-                    </span>
-                    <span class="pipeline-step-label"><?= htmlspecialchars($step['label']) ?></span>
+                <li class="pipeline-step <?= $stepState ?>" role="presentation">
+                    <button
+                        type="button"
+                        role="tab"
+                        class="pipeline-step-button"
+                        id="phase-tab-<?= $stepNumber ?>"
+                        data-phase-target="phase-panel-<?= $stepNumber ?>"
+                        aria-controls="phase-panel-<?= $stepNumber ?>"
+                        aria-selected="<?= $stepNumber === $currentStep ? 'true' : 'false' ?>"
+                        tabindex="<?= $stepNumber === $currentStep ? '0' : '-1' ?>"
+                    >
+                        <span class="pipeline-step-marker">
+                            <i class="fa-solid <?= $stepState === 'completed' ? 'fa-check' : $step['icon'] ?>"></i>
+                        </span>
+                        <span class="pipeline-step-label"><?= htmlspecialchars($step['label']) ?></span>
+                    </button>
                 </li>
             <?php endforeach; ?>
         </ol>
         <?php if ($isRejectedApp): ?>
-            <p class="pipeline-rejected-note">This application was rejected.</p>
+            <p class="pipeline-rejected-note">This application is <?= strtolower(htmlspecialchars($applicant['application_status'])) ?>.</p>
         <?php endif; ?>
     </section>
 
     <div class="details-body">
+
+        <section class="pipeline-phase pipeline-phase-1" id="phase-panel-1" role="tabpanel" aria-labelledby="phase-tab-1"<?= $currentStep !== 1 ? ' hidden' : '' ?>>
+        <div class="pipeline-phase-heading <?= $phaseStates[1] ?>">
+            <span>Phase 1</span>
+            <h3>Application Review</h3>
+            <p>Applicant details, submitted documents, and AI screening findings.</p>
+            <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[1])) ?></strong>
+        </div>
 
         <!-- Applicant Information -->
         <section class="detail-section">
@@ -691,95 +717,101 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
             </div>
         </section>
 
-        <!-- Interview (hidden until the applicant qualifies) -->
-        <?php if (!$isScreeningStage): ?>
-            <section class="detail-section">
-                <h3><i class="fa-solid fa-calendar-days"></i> Interview</h3>
-
-                <?php if (empty($applicant['interview_id'])): ?>
-                    <div class="interview-empty">
-                        <span class="badge badge-gray">Not Scheduled</span>
-                        <button type="button" class="btn-primary" id="openScheduleModal">
-                            <i class="fa-solid fa-calendar-plus"></i> Schedule Interview
-                        </button>
-                    </div>
-                <?php else: ?>
-                    <?php
-                    $resultClass = match ($applicant['result']) {
-                        'Passed' => 'badge-green',
-                        'Failed' => 'badge-red',
-                        default  => 'badge-orange'
-                    };
-                    $isManagerInterview = ($applicant['interviewer_role'] ?? '') === 'MANAGER';
-                    ?>
-                    <div class="interview-scheduled">
-                        <div class="info-grid">
-                            <?php
-                            infoField('Interview Date', date('F d, Y', strtotime($applicant['interview_date'])));
-                            infoField('Interview Time', date('g:i A', strtotime($applicant['interview_date'])));
-                            infoField('Interviewer', $applicant['interviewer_name'] . ' (' . $applicant['interviewer_role'] . ')');
-                            infoField('Interview Type', $applicant['interview_type']);
-                            infoField('Location', $applicant['location']);
-                            ?>
-                            <?php if ($isManagerInterview): ?>
-                                <div>
-                                    <span class="info-label">Result</span>
-                                    <span class="badge <?= $resultClass ?>"><?= htmlspecialchars($applicant['result']) ?></span>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <?php if ($isManagerInterview && $applicant['result'] !== 'Pending'): ?>
-                            <div class="remarks-box">
-                                <span class="info-label">Interview Remarks</span>
-                                <p class="remarks-text"><?= nl2br(htmlspecialchars($applicant['remarks'])) ?></p>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($applicant['result'] === 'Pending'): ?>
-                            <button type="button" class="btn-outline" id="editScheduleBtn">
-                                <i class="fa-solid fa-pen"></i> Edit Schedule
-                            </button>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
+        <?php if ($isScreeningStage && $isHrOrAdmin): ?>
+            <section class="detail-section decision-section">
+                <h3><i class="fa-solid fa-gavel"></i> Application Review Decision</h3>
+                <p class="file-note">Review the application and screening evidence, then qualify the applicant for interviews or record a decision.</p>
+                <div class="decision-buttons">
+                    <button type="button" class="btn-success btn-block" id="qualifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                        <i class="fa-solid fa-user-check"></i> Qualify for Interviews
+                    </button>
+                    <button type="button" class="btn-danger btn-block rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                        <i class="fa-solid fa-user-xmark"></i> Reject / Record Withdrawal
+                    </button>
+                </div>
             </section>
         <?php endif; ?>
 
-        <!-- Interview Evaluation (visible from the Interview stage onward) -->
-        <?php if (!$isScreeningStage): ?>
+        </section>
+
+        <section class="pipeline-phase pipeline-phase-2" id="phase-panel-2" role="tabpanel" aria-labelledby="phase-tab-2"<?= $currentStep !== 2 ? ' hidden' : '' ?>>
+        <div class="pipeline-phase-heading <?= $phaseStates[2] ?>">
+            <span>Phase 2</span>
+            <h3>Interview &amp; Assessment</h3>
+            <p>Scheduled rounds, interviewer assignments, outcomes, and evaluations.</p>
+            <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[2])) ?></strong>
+        </div>
+
+        <!-- Round information remains visible throughout the application history. -->
+            <section class="detail-section">
+                <div class="ai-actions">
+                    <h3><i class="fa-solid fa-calendar-days"></i> Interview &amp; Assessment Rounds</h3>
+                    <?php if ($applicant['application_status'] === 'Interview'): ?>
+                        <button type="button" class="btn-primary" id="openScheduleModal">
+                            <i class="fa-solid fa-calendar-plus"></i> Schedule Another Round
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php if (empty($interviews)): ?>
+                    <p class="file-note">
+                        <?= $isScreeningStage
+                            ? 'Interview and assessment rounds will be available after the applicant qualifies.'
+                            : 'No interview or assessment rounds have been scheduled.' ?>
+                    </p>
+                <?php else: ?>
+                <div class="evaluation-list">
+                        <?php foreach ($interviews as $roundNumber => $round): ?>
+                            <?php
+                            $resultClass = match ($round['result']) {
+                                'Passed' => 'badge-green',
+                                'Failed' => 'badge-red',
+                                default => 'badge-orange'
+                            };
+                            ?>
+                            <article class="evaluation-card">
+                                <div class="evaluation-head">
+                                    <strong>Round <?= (int) ($roundNumber + 1) ?> · <?= htmlspecialchars($round['round_type']) ?> (<?= htmlspecialchars($round['interview_type']) ?>)</strong>
+                                    <span class="badge <?= $resultClass ?>"><?= htmlspecialchars($round['result']) ?></span>
+                                </div>
+                                <div class="info-grid">
+                                    <?php
+                                    infoField('Date & Time', date('F d, Y g:i A', strtotime($round['interview_date'])));
+                                    infoField('Interviewer', $round['interviewer_name'] ?? 'Recruitment Team');
+                                    infoField('Location', $round['location'] ?? '');
+                                    if (!empty($round['latest_recommendation'])) infoField('Latest Recommendation', $round['latest_recommendation']);
+                                    if (!empty($round['remarks'])) infoField('Notes', $round['remarks']);
+                                    ?>
+                                </div>
+                                <?php if ($applicant['application_status'] === 'Interview' && $round['result'] === 'Pending' && (int) $round['interviewer_id'] === (int) Auth::userId()): ?>
+                                    <button type="button" class="btn-primary open-round-evaluation" data-interview-id="<?= (int) $round['interview_id'] ?>">
+                                        <i class="fa-solid fa-clipboard-check"></i> Evaluate This Round
+                                    </button>
+                                <?php endif; ?>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+        <!-- Round evaluation history stays visible after the interview phase. -->
             <section class="detail-section">
                 <div class="ai-actions">
                     <div class="section-heading-copy">
-                        <h3><i class="fa-solid fa-clipboard-list"></i> Interview Evaluation</h3>
+                        <h3><i class="fa-solid fa-clipboard-list"></i> Round Evaluations</h3>
                         <p>
-                            Every interviewer evaluation is kept in full - the latest is marked
+                            Every round evaluation is kept in full - the latest is marked
                             Current, but earlier scores stay visible before HR advances the
                             applicant.
                         </p>
                     </div>
 
-                    <?php if (
-                        $applicant['application_status'] === 'Interview'
-                        && $isAssignedInterviewer
-                    ): ?>
-                        <button type="button" class="btn-primary" id="openEvaluationModal">
-                            <i class="fa-solid fa-plus"></i> Submit Evaluation
-                        </button>
-                    <?php endif; ?>
                 </div>
 
                 <?php if ($evaluations === []): ?>
                     <p class="file-note">
-                        No evaluations submitted yet.
-                        <?php if (
-                            $applicant['application_status'] === 'Interview'
-                            && $isAssignedInterviewer
-                        ): ?>
-                            Use <strong>Submit Evaluation</strong> to record ratings, remarks, and a recommendation.
-                        <?php elseif ($applicant['application_status'] === 'Interview'): ?>
-                            The scheduled interviewer has not submitted an evaluation yet.
-                        <?php endif; ?>
+                        <?= $isScreeningStage
+                            ? 'Evaluations will appear here after interview or assessment rounds are completed.'
+                            : 'No round evaluations have been submitted.' ?>
                     </p>
                 <?php else: ?>
                     <div class="evaluation-list">
@@ -798,6 +830,9 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                             <div class="evaluation-card<?= $isCurrentEvaluation ? ' current' : '' ?>">
                                 <div class="evaluation-head">
                                     <div class="evaluation-head-left">
+                                        <span class="evaluation-evaluator">
+                                            <?= htmlspecialchars(($evaluation['round_type'] ?? 'Interview') . ' · ' . ($evaluation['interview_type'] ?? '') . ' · ' . date('M j, Y', strtotime($evaluation['interview_date']))) ?>
+                                        </span>
                                         <span class="evaluation-evaluator">
                                             <?= htmlspecialchars($evaluatorName !== '' ? $evaluatorName : 'System account') ?>
                                         </span>
@@ -854,11 +889,37 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                     </div>
                 <?php endif; ?>
             </section>
+
+        <?php if ($applicant['application_status'] === 'Interview'): ?>
+            <section class="detail-section decision-section">
+                <h3><i class="fa-solid fa-gavel"></i> Interview &amp; Assessment Decision</h3>
+                <?php if ($isHrOrManager && !$allInterviewRoundsEvaluated): ?>
+                    <p class="file-note">Complete and evaluate every scheduled round before advancing this applicant.</p>
+                <?php endif; ?>
+                <?php if ($isHrOrManager): ?>
+                    <div class="decision-buttons">
+                        <button type="button" class="btn-success btn-block" id="advanceBtn" data-application-id="<?= (int) $applicant['application_id'] ?>"<?= !$allInterviewRoundsEvaluated ? ' disabled' : '' ?>>
+                            <i class="fa-solid fa-forward"></i> Advance to Selection
+                        </button>
+                        <button type="button" class="btn-danger btn-block rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                            <i class="fa-solid fa-user-xmark"></i> Reject / Record Withdrawal
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </section>
         <?php endif; ?>
 
-        <!-- Selection: credential, reference, and background checks -->
-        <?php if ($applicant['application_status'] === 'Selection'): ?>
-            <?php
+        </section>
+
+        <section class="pipeline-phase pipeline-phase-3" id="phase-panel-3" role="tabpanel" aria-labelledby="phase-tab-3"<?= $currentStep !== 3 ? ' hidden' : '' ?>>
+        <div class="pipeline-phase-heading <?= $phaseStates[3] ?>">
+            <span>Phase 3</span>
+            <h3>Final Selection &amp; Verification</h3>
+            <p>Finalist credential, reference, and background check records.</p>
+            <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[3])) ?></strong>
+        </div>
+
+        <?php
             $selectionRequirements = array_values(
                 array_filter(
                     $requirements,
@@ -897,13 +958,17 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                 </div>
 
                 <?php if ($selectionRequirements === []): ?>
-                    <p class="file-note">No selection requirements were recorded for this application.</p>
+                    <p class="file-note">
+                        <?= $currentStep >= 3
+                            ? 'No selection requirements were recorded for this application.'
+                            : 'Selection checks will appear here after the interview and assessment decision.' ?>
+                    </p>
                 <?php else: ?>
-                    <?php requirementsTable($selectionRequirements, $isHrOrManager); ?>
+                    <?php requirementsTable($selectionRequirements, $isHrOrManager && $applicant['application_status'] === 'Selection'); ?>
                 <?php endif; ?>
             </section>
 
-            <?php if ($isHrOrManager): ?>
+            <?php if ($isHrOrManager && $applicant['application_status'] === 'Selection'): ?>
                 <section class="detail-section decision-section">
                     <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
 
@@ -921,16 +986,24 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                         <button type="button" class="btn-outline btn-block" id="requestVerificationBtn" data-application-id="<?= (int) $applicant['application_id'] ?>">
                             <i class="fa-solid fa-rotate-left"></i> Additional Verification
                         </button>
-                        <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
-                            <i class="fa-solid fa-user-xmark"></i> Reject
+                        <button type="button" class="btn-danger btn-block rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                            <i class="fa-solid fa-user-xmark"></i> Reject / Record Withdrawal
                         </button>
                     </div>
                 </section>
             <?php endif; ?>
-        <?php endif; ?>
 
-        <!-- Offer: job offer details and candidate response -->
-        <?php if ($applicant['application_status'] === 'Offer'): ?>
+        </section>
+
+        <section class="pipeline-phase pipeline-phase-4" id="phase-panel-4" role="tabpanel" aria-labelledby="phase-tab-4"<?= $currentStep !== 4 ? ' hidden' : '' ?>>
+        <div class="pipeline-phase-heading <?= $phaseStates[4] ?>">
+            <span>Phase 4</span>
+            <h3>Job Offer &amp; Pre-employment</h3>
+            <p>Offer terms and the pre-employment requirements recorded after acceptance.</p>
+            <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[4])) ?></strong>
+        </div>
+
+        <!-- Offer information remains visible after the offer phase. -->
             <?php
             $offerStatusClass = [
                 'Draft'    => 'badge-gray',
@@ -984,9 +1057,10 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
 
                 <?php if ($offer === null): ?>
                     <p class="file-note">
-                        No offer has been prepared yet.
-                        <?php if ($isHrOrAdmin): ?>
-                            Use <strong>Send Offer</strong> to prepare one.
+                        <?php if ($applicant['application_status'] === 'Offer'): ?>
+                            No offer has been prepared yet. HR can prepare one during this phase.
+                        <?php else: ?>
+                            Offer details will appear here when the finalist is approved for an offer.
                         <?php endif; ?>
                     </p>
                 <?php else: ?>
@@ -1049,8 +1123,8 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                 <?php endif; ?>
             </section>
 
-            <?php if ($offer !== null && $offer['status'] === 'Accepted'): ?>
-                <!-- Pre-employment requirements -->
+            <!-- Pre-employment requirements remain visible after acceptance. -->
+            <?php if ($preEmploymentRequirements !== []): ?>
                 <section class="detail-section">
                     <div class="ai-actions">
                         <div class="section-heading-copy">
@@ -1060,16 +1134,26 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                             </p>
                         </div>
                     </div>
-                    <?php requirementsTable($preEmploymentRequirements, $isHrOrAdmin); ?>
+                    <?php requirementsTable(
+                        $preEmploymentRequirements,
+                        $isHrOrAdmin
+                            && $applicant['application_status'] === 'Offer'
+                            && $offer !== null
+                            && $offer['status'] === 'Accepted'
+                    ); ?>
                 </section>
             <?php else: ?>
                 <section class="detail-section">
                     <h3><i class="fa-solid fa-clipboard-list"></i> Pre-employment Requirements</h3>
-                    <p class="file-note">Pre-employment checks begin after the candidate accepts the offer.</p>
+                    <p class="file-note">
+                        <?= $offer !== null && $offer['status'] === 'Accepted'
+                            ? 'No pre-employment requirements were recorded for this application.'
+                            : 'Pre-employment requirements will be recorded after the candidate accepts an offer.' ?>
+                    </p>
                 </section>
             <?php endif; ?>
 
-            <?php if ($isHrOrAdmin): ?>
+            <?php if ($isHrOrAdmin && $applicant['application_status'] === 'Offer'): ?>
                 <section class="detail-section decision-section">
                     <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
 
@@ -1099,52 +1183,57 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                             </button>
                         <?php endif; ?>
 
-                        <?php if ($offer !== null && $offer['status'] === 'Accepted'): ?>
-                            <button type="button" class="btn-success btn-block" id="hireBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>"<?= $allPreEmploymentCleared ? '' : ' disabled' ?>>
-                                <i class="fa-solid fa-user-check"></i> Confirm Hire
-                            </button>
-                        <?php endif; ?>
+                        <button type="button" class="btn-danger btn-block rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
+                            <i class="fa-solid fa-user-xmark"></i> Reject / Record Withdrawal
+                        </button>
 
                     </div>
                 </section>
             <?php endif; ?>
-        <?php endif; ?>
 
-        <!-- Decision -->
-        <?php if ($isScreeningStage && $isHrOrAdmin): ?>
-            <section class="detail-section decision-section">
-                <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
-                <div class="decision-buttons">
-                    <button type="button" class="btn-success btn-block" id="qualifyBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
-                        <i class="fa-solid fa-user-check"></i> Qualify
-                    </button>
-                    <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
-                        <i class="fa-solid fa-user-xmark"></i> Reject
-                    </button>
+        </section>
+
+        <section class="pipeline-phase pipeline-phase-5" id="phase-panel-5" role="tabpanel" aria-labelledby="phase-tab-5"<?= $currentStep !== 5 ? ' hidden' : '' ?>>
+        <div class="pipeline-phase-heading <?= $phaseStates[5] ?>">
+            <span>Phase 5</span>
+            <h3>Hiring Confirmation</h3>
+            <p>Final hire decision and the start date recorded for the employee.</p>
+            <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[5])) ?></strong>
+        </div>
+
+        <section class="detail-section">
+            <h3><i class="fa-solid fa-user-check"></i> Hire Status</h3>
+            <?php if ($applicant['application_status'] === 'Hired'): ?>
+                <div class="info-grid">
+                    <?php
+                    infoField('Status', 'Hired');
+                    if (!empty($offer['start_date'])) {
+                        infoField('Hire Date', date('F d, Y', strtotime((string) $offer['start_date'])));
+                    }
+                    ?>
                 </div>
-            </section>
-        <?php elseif ($applicant['application_status'] === 'Interview'): ?>
-            <section class="detail-section decision-section">
-                <h3><i class="fa-solid fa-gavel"></i> Decision</h3>
-
-                <?php if ($isHrOrManager && $evaluations === []): ?>
-                    <p class="file-note">
-                        Waiting for the interviewer's evaluation before this applicant can advance.
-                    </p>
+                <p class="file-note">The hire is confirmed. Employee account and onboarding information are available in their HR records.</p>
+            <?php elseif ($applicant['application_status'] === 'Offer' && $offer !== null && $offer['status'] === 'Accepted'): ?>
+                <p class="file-note">
+                    <?= $allPreEmploymentCleared
+                        ? 'The accepted offer and required pre-employment checks are complete. The hire can now be confirmed.'
+                        : 'Confirm the hire after every required pre-employment check is cleared.' ?>
+                </p>
+                <?php if ($isHrOrAdmin): ?>
+                    <div class="decision-buttons">
+                        <button type="button" class="btn-success btn-block" id="hireBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>"<?= $allPreEmploymentCleared ? '' : ' disabled' ?>>
+                            <i class="fa-solid fa-user-check"></i> Confirm Hire
+                        </button>
+                    </div>
                 <?php endif; ?>
+            <?php elseif (in_array($applicant['application_status'], ['Rejected', 'Withdrawn'], true)): ?>
+                <p class="file-note">Hiring confirmation is not applicable because this application is <?= strtolower(htmlspecialchars($applicant['application_status'])) ?>.</p>
+            <?php else: ?>
+                <p class="file-note">Hiring confirmation will be available after an offer is accepted and pre-employment requirements are complete.</p>
+            <?php endif; ?>
+        </section>
 
-                <div class="decision-buttons">
-                    <?php if ($isHrOrManager): ?>
-                        <button type="button" class="btn-success btn-block" id="advanceBtn" data-application-id="<?= (int) $applicant['application_id'] ?>"<?= $evaluations === [] ? ' disabled' : '' ?>>
-                            <i class="fa-solid fa-forward"></i> Advance to Selection
-                        </button>
-                        <button type="button" class="btn-danger btn-block" id="rejectBtn" data-application-id="<?= (int) $applicant['application_id'] ?>" data-applicant-id="<?= (int) $applicant['applicant_id'] ?>">
-                            <i class="fa-solid fa-user-xmark"></i> Reject
-                        </button>
-                    <?php endif; ?>
-                </div>
-            </section>
-        <?php endif; ?>
+        </section>
 
     </div>
 
@@ -1152,7 +1241,7 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
     <div class="modal-overlay" id="scheduleModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-calendar-days"></i> Schedule Interview</h3>
+                <h3><i class="fa-solid fa-calendar-days"></i> Schedule Interview or Assessment Round</h3>
                 <button type="button" class="close-btn" data-close="scheduleModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="scheduleForm" class="modal-body" method="POST" action="?page=scheduleInterview">
@@ -1166,7 +1255,7 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                             <option disabled>No Staff Available</option>
                         <?php else: ?>
                             <?php foreach ($managers as $manager): ?>
-                                <option value="<?= (int) $manager['user_id']; ?>" <?= (int) ($applicant['interviewer_id'] ?? 0) === (int) $manager['user_id'] ? 'selected' : ''; ?>>
+                        <option value="<?= (int) $manager['user_id']; ?>">
                                     <?= htmlspecialchars($manager['fullname'] ?? ''); ?> (<?= htmlspecialchars($manager['role_name'] ?? ''); ?>)
                                 </option>
                             <?php endforeach; ?>
@@ -1174,11 +1263,18 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                     </select>
                 </label>
 
+                <label>Round Type
+                    <select name="round_type" required>
+                        <option value="Interview">Interview</option>
+                        <option value="Assessment">Assessment</option>
+                    </select>
+                </label>
+
                 <label>Interview Type
                     <select name="interview_type" id="scheduleType" required>
                         <option value="" hidden>Select Type</option>
                         <?php foreach (['Phone', 'Online', 'Face-to-Face'] as $type): ?>
-                            <option value="<?= $type ?>" <?= ($applicant['interview_type'] ?? '') === $type ? 'selected' : ''; ?>>
+                            <option value="<?= $type ?>">
                                 <?= $type ?>
                             </option>
                         <?php endforeach; ?>
@@ -1188,28 +1284,27 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                 <div class="form-row">
                     <label>Interview Date
                         <input type="date" name="interview_date" id="scheduleDate" min="<?= date('Y-m-d') ?>"
-                               value="<?= !empty($applicant['interview_date']) ? date('Y-m-d', strtotime($applicant['interview_date'])) : ''; ?>" required>
+                               required>
                     </label>
                     <label>Interview Time
                         <input type="time" name="interview_time" id="scheduleTime"
-                               value="<?= !empty($applicant['interview_date']) ? date('H:i', strtotime($applicant['interview_date'])) : ''; ?>" required>
+                               required>
                     </label>
                 </div>
 
                 <label>Location
                     <input type="text" name="location" minlength="3" maxlength="64" id="scheduleLocation"
-                           value="<?= htmlspecialchars($applicant['location'] ?? ''); ?>"
                            placeholder="e.g. HR Conference Room, Google Meet link" required>
                 </label>
 
                 <label>Notes
                     <textarea name="notes" minlength="3" maxlength="500" id="scheduleNotes" rows="3"
-                              placeholder="Additional notes for the interview"><?= htmlspecialchars($applicant['remarks'] ?? ''); ?></textarea>
+                              placeholder="Additional notes for the interview"></textarea>
                 </label>
 
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="scheduleModal">Cancel</button>
-                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="submit" class="btn-primary">Schedule Round</button>
                 </div>
             </form>
         </div>
@@ -1267,15 +1362,16 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
         </div>
     </div>
 
-    <!-- Interview Evaluation Modal -->
+    <!-- Round Evaluation Modal -->
     <div class="modal-overlay" id="evaluationModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-clipboard-list"></i> Interview Evaluation</h3>
+                <h3><i class="fa-solid fa-clipboard-list"></i> Round Evaluation</h3>
                 <button type="button" class="close-btn" data-close="evaluationModal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="evaluationForm" class="modal-body">
                 <input type="hidden" name="application_id" value="<?= (int) $applicant['application_id'] ?>">
+                <input type="hidden" name="interview_id" id="evaluationInterviewId" value="">
 
                 <p class="confirm-text">
                     One fixed rating form is used for every applicant of a position.
@@ -1591,13 +1687,13 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
             </div>
             <form id="rejectForm" class="modal-body">
                 <label>
-                    <p>Are you sure you want to reject this applicant?</p>
+                    <p>Choose whether to reject this application or record the applicant’s withdrawal.</p>
                 </label>
                 <label>Reason (optional)
                     <select name="reason_category" id="rejectReason">
                         <option value="">Select a reason (optional)</option>
                         <?php foreach ($rejectionReasons as $reason): ?>
-                            <option value="<?= htmlspecialchars($reason) ?>"><?= htmlspecialchars($reason) ?></option>
+                            <option value="<?= htmlspecialchars($reason) ?>"><?= $reason === 'Withdrew' ? 'Applicant withdrew' : htmlspecialchars($reason) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -1607,7 +1703,7 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
                 </label>
                 <div class="modal-actions">
                     <button type="button" class="btn-outline" data-close="rejectModal">Cancel</button>
-                    <button type="submit" class="btn-danger">Confirm Rejection</button>
+                    <button type="submit" class="btn-danger">Confirm Decision</button>
                 </div>
             </form>
         </div>

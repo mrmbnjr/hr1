@@ -80,13 +80,14 @@ class MailService
 		$date = htmlspecialchars((string) $schedule['interview_date'], ENT_QUOTES, 'UTF-8');
 		$time = htmlspecialchars((string) $schedule['interview_time'], ENT_QUOTES, 'UTF-8');
 		$type = htmlspecialchars((string) $schedule['interview_type'], ENT_QUOTES, 'UTF-8');
+		$roundType = htmlspecialchars((string) ($schedule['round_type'] ?? 'Interview'), ENT_QUOTES, 'UTF-8');
 		$location = htmlspecialchars((string) $schedule['location'], ENT_QUOTES, 'UTF-8');
 		$interviewer = htmlspecialchars((string) $schedule['interviewer'], ENT_QUOTES, 'UTF-8');
 		$notes = htmlspecialchars((string) ($schedule['notes'] ?? ''), ENT_QUOTES, 'UTF-8');
 
 		$mailer->Body = <<<HTML
 			<p>Dear {$name},</p>
-			<p>Your interview for the <strong>{$position}</strong> position has been scheduled.</p>
+			<p>Your {$roundType} for the <strong>{$position}</strong> position has been scheduled.</p>
 			<ul>
 				<li><strong>Date:</strong> {$date}</li>
 				<li><strong>Time:</strong> {$time}</li>
@@ -100,7 +101,7 @@ class MailService
 		HTML;
 
 		$mailer->AltBody = "Dear {$schedule['fullname']},\n\n"
-			. "Your interview for the {$schedule['position']} position has been scheduled.\n\n"
+			. "Your " . ($schedule['round_type'] ?? 'Interview') . " for the {$schedule['position']} position has been scheduled.\n\n"
 			. "Date: {$schedule['interview_date']}\n"
 			. "Time: {$schedule['interview_time']}\n"
 			. "Type: {$schedule['interview_type']}\n"

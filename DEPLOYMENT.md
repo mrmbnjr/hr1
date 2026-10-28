@@ -30,6 +30,8 @@ For an existing installation, also run `database/migrations/20261003_add_passwor
 once to enable the self-service password reset page (`?page=reset-password`).
 For an existing installation, also run `database/migrations/20261004_add_department_status.sql`
 once to add the department Active/Inactive status used by the Department overview.
+For an existing installation, run `database/migrations/20261028_align_applicant_workflow.sql` once to enable
+multiple interview rounds and the Withdrawn application status.
 
 ## 5. Upload the files
 Upload the **contents** of the `hr1` folder (not the folder itself) into the subdomain folder.

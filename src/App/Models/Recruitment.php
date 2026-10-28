@@ -63,7 +63,7 @@ class Recruitment
                             WHEN a.application_id IS NOT NULL
                                 AND (
                                     a.application_status IS NULL
-                                    OR a.application_status <> 'Rejected'
+                                    OR a.application_status NOT IN ('Rejected', 'Withdrawn')
                                 )
                             THEN 1 ELSE 0
                         END
@@ -371,7 +371,7 @@ class Recruitment
                     FROM applications ap
                     WHERE ap.posting_id = jp.posting_id
                       AND (ap.application_status IS NULL
-                           OR ap.application_status <> 'Rejected')
+                           OR ap.application_status NOT IN ('Rejected', 'Withdrawn'))
                 ) AS applicant_count,
                 (
                     SELECT COUNT(*)
@@ -620,7 +620,15 @@ class Recruitment
                         THEN 1
                         ELSE 0
                     END
-                ) AS rejected
+                ) AS rejected,
+
+                SUM(
+                    CASE
+                        WHEN ap.application_status = 'Withdrawn'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS withdrawn
 
             FROM applications ap
 
@@ -642,7 +650,8 @@ class Recruitment
                 'under_review' => 0,
                 'interview' => 0,
                 'hired' => 0,
-                'rejected' => 0
+                'rejected' => 0,
+                'withdrawn' => 0
             ];
         }
 
@@ -652,7 +661,8 @@ class Recruitment
             'under_review' => (int) ($summary['under_review'] ?? 0),
             'interview' => (int) ($summary['interview'] ?? 0),
             'hired' => (int) ($summary['hired'] ?? 0),
-            'rejected' => (int) ($summary['rejected'] ?? 0)
+            'rejected' => (int) ($summary['rejected'] ?? 0),
+            'withdrawn' => (int) ($summary['withdrawn'] ?? 0)
         ];
     }
 
@@ -712,8 +722,11 @@ class Recruitment
             'Submitted' => 0,
             'Under Review' => 0,
             'Interview' => 0,
+            'Selection' => 0,
+            'Offer' => 0,
             'Hired' => 0,
-            'Rejected' => 0
+            'Rejected' => 0,
+            'Withdrawn' => 0
         ];
 
         foreach ($results as $row) {
@@ -911,7 +924,11 @@ class Recruitment
                 ON ai.application_id = ap.application_id
 
             LEFT JOIN interviews i
-                ON i.application_id = ap.application_id
+                ON i.interview_id = (
+                    SELECT MAX(i2.interview_id)
+                    FROM interviews i2
+                    WHERE i2.application_id = ap.application_id
+                )
 
             WHERE ap.posting_id = :posting_id
 

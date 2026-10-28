@@ -148,20 +148,24 @@ class PipelineService
 
 
     /**
-     * Rejection transition usable from any non-Hired stage.
+     * Terminal rejection or withdrawal transition from any active stage.
      *
      * Unlike transition() there is no single expected status; the
-     * current one is read first and the update is still guarded
-     * against concurrent Hires. Returns false when nothing changed
-     * (already Rejected, or Hired in the meantime).
+     * current one is read first and the update is still guarded against
+     * concurrent terminal decisions. Returns false when nothing changed.
      */
     public function rejectTransition(
         int $applicationId,
         string $reasonCategory,
         ?string $note = null,
         ?int $actorUserId = null,
-        bool $notifyCandidate = true
+        bool $notifyCandidate = true,
+        string $terminalStatus = 'Rejected'
     ): bool {
+
+        if (!in_array($terminalStatus, ['Rejected', 'Withdrawn'], true)) {
+            throw new RuntimeException('Invalid terminal application status.');
+        }
 
         $db = Database::connection();
 
@@ -182,7 +186,7 @@ class PipelineService
 
             $fromStatus = $current->fetchColumn();
 
-            if (!$fromStatus || $fromStatus === 'Hired') {
+            if (!$fromStatus || in_array($fromStatus, ['Hired', 'Rejected', 'Withdrawn'], true)) {
                 $db->rollBack();
                 return false;
             }
@@ -190,12 +194,8 @@ class PipelineService
             $stmt = $db->prepare("
                 UPDATE applications
                 SET
-                    application_status = 'Rejected',
-                    rejected_at = CASE
-                        WHEN application_status <> 'Rejected'
-                            THEN CURRENT_TIMESTAMP
-                        ELSE rejected_at
-                    END,
+                    application_status = :terminal_status,
+                    rejected_at = CURRENT_TIMESTAMP,
                     status_updated_at = CURRENT_TIMESTAMP
                 WHERE application_id = :application_id
                 AND application_status = :from_status
@@ -204,7 +204,8 @@ class PipelineService
 
             $stmt->execute([
                 ':application_id' => $applicationId,
-                ':from_status'    => $fromStatus
+                ':from_status'    => $fromStatus,
+                ':terminal_status' => $terminalStatus
             ]);
 
             if ($stmt->rowCount() === 0) {
@@ -217,7 +218,7 @@ class PipelineService
              * marks it Failed so the view and the HumanCapital
              * dashboard's pending-result lists stay meaningful.
              */
-            if ($fromStatus === 'Interview') {
+            if ($fromStatus === 'Interview' && $terminalStatus === 'Rejected') {
 
                 $interview = $db->prepare("
                     UPDATE interviews
@@ -244,8 +245,8 @@ class PipelineService
             $this->timeline->add(
                 $applicationId,
                 $fromStatus,
-                'Rejected',
-                'Rejected',
+                $terminalStatus,
+                $terminalStatus,
                 $actorUserId,
                 $timelineNote
             );
@@ -336,6 +337,12 @@ class PipelineService
     public function hasEvaluation(int $applicationId): bool
     {
         return $this->evaluations->countForApplication($applicationId) > 0;
+    }
+
+    /** Every scheduled round must have a submitted evaluation before advancing. */
+    public function allInterviewRoundsEvaluated(int $applicationId): bool
+    {
+        return $this->evaluations->allRoundsEvaluated($applicationId);
     }
 
 

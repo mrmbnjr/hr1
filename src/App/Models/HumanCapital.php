@@ -974,7 +974,7 @@ class HumanCapital
                     SELECT COUNT(*)
                     FROM applications ap
                     WHERE ap.posting_id = jp.posting_id
-                      AND ap.application_status IN ('Submitted', 'Under Review', 'Interview')
+                      AND ap.application_status IN ('Submitted', 'Under Review', 'Interview', 'Selection', 'Offer')
                 ) AS active_applicants,
 
                 (
@@ -1493,7 +1493,7 @@ class HumanCapital
         $apps = $row("
             SELECT
                 COUNT(*) AS total,
-                COALESCE(SUM(ap.application_status IN ('Submitted', 'Under Review', 'Interview')), 0) AS active,
+                COALESCE(SUM(ap.application_status IN ('Submitted', 'Under Review', 'Interview', 'Selection', 'Offer')), 0) AS active,
                 COALESCE(SUM(ap.application_status = 'Hired'), 0) AS hired
             FROM applications ap
             INNER JOIN job_postings jp
@@ -1648,7 +1648,7 @@ class HumanCapital
                     SELECT COUNT(*)
                     FROM applications ap
                     WHERE ap.posting_id = jp.posting_id
-                      AND ap.application_status IN ('Submitted', 'Under Review', 'Interview')
+                      AND ap.application_status IN ('Submitted', 'Under Review', 'Interview', 'Selection', 'Offer')
                 ) AS active_applicants,
 
                 (

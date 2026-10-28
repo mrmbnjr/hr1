@@ -57,11 +57,17 @@ class PipelineController
             $this->fail('Only applications in the interview stage can be evaluated.');
         }
 
-        if (empty($context['interview_id'])) {
-            $this->fail('No interview is scheduled for this application yet.');
+        $interviewId = (int) ($_POST['interview_id'] ?? 0);
+        $round = $this->applicant->getInterviewRoundForEvaluation($applicationId, $interviewId);
+        if (!$round) {
+            $this->fail('Interview round not found for this application.');
         }
 
-        if ((int) $context['interviewer_id'] !== (int) Auth::userId()) {
+        if (($round['result'] ?? '') !== 'Pending') {
+            $this->fail('This interview round is already complete.');
+        }
+
+        if ((int) $round['interviewer_id'] !== (int) Auth::userId()) {
             $this->fail('Only the scheduled interviewer can submit this evaluation.', 403);
         }
 
@@ -91,25 +97,48 @@ class PipelineController
             $this->fail('Select a valid recommendation.');
         }
 
-        $this->pipeline->recordEvaluation([
-            'interview_id'     => (int) $context['interview_id'],
-            'evaluator_id'     => (int) Auth::userId(),
-            'evaluator_role'   => Auth::role(),
-            'technical_skills' => $ratings['technical_skills'],
-            'communication'    => $ratings['communication'],
-            'problem_solving'  => $ratings['problem_solving'],
-            'culture_fit'      => $ratings['culture_fit'],
-            'strengths'        => $this->text('strengths', 2000),
-            'weaknesses'       => $this->text('weaknesses', 2000),
-            'remarks'          => $this->text('remarks', 2000),
-            'recommendation'   => $recommendation
-        ]);
+        $db = Database::connection();
+        $db->beginTransaction();
+        try {
+            $roundLock = $db->prepare('SELECT result, interviewer_id FROM interviews WHERE interview_id = :interview_id AND application_id = :application_id FOR UPDATE');
+            $roundLock->execute([':interview_id' => $interviewId, ':application_id' => $applicationId]);
+            $lockedRound = $roundLock->fetch(\PDO::FETCH_ASSOC);
+            if (!$lockedRound || $lockedRound['result'] !== 'Pending' || (int) $lockedRound['interviewer_id'] !== (int) Auth::userId()) {
+                throw new \RuntimeException('This interview round was completed or reassigned by another action. Refresh the application.');
+            }
 
-        $this->pipeline->logAction(
-            $applicationId,
-            'Interview evaluation submitted',
-            $recommendation
-        );
+            $this->pipeline->recordEvaluation([
+                'interview_id'     => $interviewId,
+                'evaluator_id'     => (int) Auth::userId(),
+                'evaluator_role'   => Auth::role(),
+                'technical_skills' => $ratings['technical_skills'],
+                'communication'    => $ratings['communication'],
+                'problem_solving'  => $ratings['problem_solving'],
+                'culture_fit'      => $ratings['culture_fit'],
+                'strengths'        => $this->text('strengths', 2000),
+                'weaknesses'       => $this->text('weaknesses', 2000),
+                'remarks'          => $this->text('remarks', 2000),
+                'recommendation'   => $recommendation
+            ]);
+
+            $completed = $db->prepare("
+                UPDATE interviews SET result = 'Completed'
+                WHERE interview_id = :interview_id AND result = 'Pending'
+            ");
+            $completed->execute([':interview_id' => $interviewId]);
+            if ($completed->rowCount() !== 1) {
+                throw new \RuntimeException('This interview round was completed by another action. Refresh the application.');
+            }
+            $this->pipeline->logAction(
+                $applicationId,
+                'Interview evaluation submitted',
+                $recommendation
+            );
+            $db->commit();
+        } catch (\Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+            $this->fail($e->getMessage());
+        }
 
         $this->ok('Evaluation submitted.');
     }
@@ -135,8 +164,8 @@ class PipelineController
 
         $context = $this->context($applicationId);
 
-        if (!$this->pipeline->hasEvaluation($applicationId)) {
-            $this->fail('At least one interview evaluation is required before advancing.');
+        if (!$this->pipeline->allInterviewRoundsEvaluated($applicationId)) {
+            $this->fail('Every scheduled interview round must be completed and evaluated before advancing.');
         }
 
         $db = Database::connection();
@@ -152,6 +181,10 @@ class PipelineController
                 null,
                 function () use ($applicationId, $db): void {
 
+                    if (!$this->pipeline->allInterviewRoundsEvaluated($applicationId)) {
+                        throw new \RuntimeException('Every scheduled interview round must be completed and evaluated before advancing.');
+                    }
+
                     /* Seed the checks that HR must verify. */
                     $this->pipeline->seedSelectionRequirements($applicationId);
 
@@ -163,7 +196,7 @@ class PipelineController
                         UPDATE interviews
                         SET result = 'Passed'
                         WHERE application_id = :application_id
-                        AND result = 'Pending'
+                        AND result IN ('Pending', 'Completed')
                     ");
 
                     $stmt->execute([
