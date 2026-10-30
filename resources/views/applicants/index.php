@@ -18,8 +18,11 @@ if (!isset($_SESSION['user_id'])) {
    interview + manager-decision fields described below.
    ========================================================== */
 
-$applicants = $applicants ?? [];
-$positions  = $positions  ?? [];
+$applicants = isset($applicants) && is_array($applicants) ? $applicants : [];
+$positions  = isset($positions) && is_array($positions) ? $positions : [];
+
+/** @var array<int, array<string, mixed>> $applicants */
+/** @var array<int, array<string, mixed>> $positions */
 
 $formatRelativeTime = static function (?string $appliedAt): string {
     if (empty($appliedAt)) {

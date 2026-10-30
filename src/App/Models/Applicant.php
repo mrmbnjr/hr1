@@ -23,7 +23,7 @@ class Applicant
     |--------------------------------------------------------------------------
     */
 
-    public function getAllApplicants()
+    public function getAllApplicants(): array
     {
         $retentionDays = max(
             1,
@@ -617,7 +617,7 @@ class Applicant
     |--------------------------------------------------------------------------
     */
 
-    public function getAllJobPostings()
+    public function getAllJobPostings(): array
     {
         $sql = "
             SELECT
