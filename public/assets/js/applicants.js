@@ -298,9 +298,7 @@
                 noMatchRow.hidden = visible.length !== 0;
             }
 
-            resultsCount.textContent = visible.length
-                ? `Showing ${pageRows.length} of ${visible.length} applicants`
-                : 'No applicants found';
+            resultsCount.textContent = `of ${visible.length} applicants`;
 
             renderPagination(totalPages);
         }

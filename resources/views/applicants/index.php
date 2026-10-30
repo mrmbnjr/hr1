@@ -260,8 +260,6 @@ foreach ($applicants as $a) {
 
             </div>
 
-            <p class="results-count" id="resultsCount"></p>
-
             <div class="table-card">
 
                 <div class="table-scroll">
@@ -444,9 +442,9 @@ foreach ($applicants as $a) {
 
             <div class="table-footer">
                 <label class="rows-per-page" for="rowsPerPage">
-                    <span>Rows per page:</span>
+                    <span>Showing</span>
                     <span class="select-field">
-                        <select id="rowsPerPage">
+                        <select id="rowsPerPage" aria-label="Applicants per page">
                             <option value="8" selected>8</option>
                             <option value="16">16</option>
                             <option value="24">24</option>
@@ -454,12 +452,15 @@ foreach ($applicants as $a) {
                         </select>
                         <i class="fa-solid fa-chevron-down select-caret"></i>
                     </span>
+                    <span class="results-count" id="resultsCount"></span>
                 </label>
 
                 <div class="pagination" id="pagination">
-                    <button class="page-btn" id="prevPage" type="button" aria-label="Previous page"><i class="fa-solid fa-chevron-left"></i></button>
-                    <div class="page-numbers" id="pageNumbers"></div>
-                    <button class="page-btn" id="nextPage" type="button" aria-label="Next page"><i class="fa-solid fa-chevron-right"></i></button>
+                    <div class="pagination-controls">
+                        <button class="page-btn" id="prevPage" type="button" aria-label="Previous page"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="page-numbers" id="pageNumbers"></div>
+                        <button class="page-btn" id="nextPage" type="button" aria-label="Next page"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
                 </div>
             </div>
 

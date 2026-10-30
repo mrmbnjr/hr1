@@ -1743,7 +1743,7 @@
 
 .summary-total {
     flex-basis: clamp(205px, 21vw, 300px);
-    min-height: 166px;
+    min-height: 150px;
     padding: 20px;
     border: 2px solid color-mix(in srgb, var(--gold-dark) 55%, transparent);
     border-radius: 18px;
@@ -1780,12 +1780,17 @@
 
 .summary-strip .summary-grid {
     grid-template-rows: auto repeat(2, minmax(66px, 1fr));
-    gap: 10px;
+    column-gap: 10px;
+    row-gap: 0;
     padding: 2px 2px 2px 6px;
 }
 
+.summary-strip .summary-grid > .summary-tile:nth-of-type(n + 5) {
+    margin-top: 5px;
+}
+
 .summary-heading {
-    margin: 0 0 2px;
+    margin: 0;
     color: var(--maroon-dark);
     font-size: 16px;
 }
@@ -1834,7 +1839,34 @@
     font-weight: 700;
 }
 
+.applicants-page .pagination {
+    gap: 8px 14px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.applicants-page .rows-per-page .results-count {
+    margin: 0;
+    white-space: nowrap;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+}
+
+.applicants-page .rows-per-page .select-field {
+    min-width: 56px;
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .applicants-page .table-card {
+    margin-top: 12px;
     border-radius: 18px;
     background: var(--card-bg);
 }
