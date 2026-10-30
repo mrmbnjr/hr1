@@ -102,7 +102,7 @@ foreach ($applicants as $a) {
 
         <!-- ==========================================================
             SUMMARY STRIP
-            One card: the total on the left, one neutral tile per status.
+            Total applicants beside a compact, two-row pipeline summary.
             Every element with .summary-card doubles as a status filter;
             data-filter is read by applicants.js.
         ========================================================== -->
