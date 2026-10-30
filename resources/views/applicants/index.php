@@ -413,7 +413,7 @@ foreach ($applicants as $a) {
 
                                 <td>
                                     <span class="application-time" title="<?= htmlspecialchars($applicant['applied_at'] ?? '') ?>">
-                                        <i class="fa-regular fa-calendar"></i>
+                                        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
                                         <span class="application-time-text">
                                             <span><?= htmlspecialchars($formatRelativeTime($applicant['applied_at'] ?? null)) ?></span>
                                             <?php if ($appliedLabel !== ''): ?>

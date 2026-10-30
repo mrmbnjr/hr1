@@ -1725,3 +1725,164 @@
 
     .summary-tile:hover { transform: none; }
 }
+
+/* Applicant list dashboard styling, following the supplied reference. */
+.applicants-page {
+    padding: 24px clamp(20px, 2.2vw, 44px) 56px;
+}
+
+.summary-strip {
+    gap: 14px;
+    margin-bottom: 20px;
+    padding: 14px;
+    border: 2px solid var(--maroon);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--card-bg) 82%, var(--gold) 18%);
+}
+
+.summary-total {
+    flex-basis: clamp(205px, 21vw, 300px);
+    min-height: 166px;
+    padding: 20px;
+    border: 2px solid var(--gold-dark);
+    border-radius: 18px;
+    background-color: var(--maroon-dark);
+    background-image:
+        radial-gradient(ellipse at 100% 110%, rgba(242, 193, 78, .12), transparent 54%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='32' viewBox='0 0 64 32'%3E%3Cg fill='none' stroke='%23f2c14e' stroke-opacity='.10' stroke-width='1.2'%3E%3Cpath d='M-16 32a16 16 0 0 1 32 0a16 16 0 0 1 32 0a16 16 0 0 1 32 0M0 16a16 16 0 0 1 32 0a16 16 0 0 1 32 0a16 16 0 0 1 32 0'/%3E%3C/g%3E%3C/svg%3E"),
+        linear-gradient(145deg, var(--maroon), var(--maroon-dark));
+    background-size: auto, 64px 32px, auto;
+    background-repeat: no-repeat, repeat, no-repeat;
+}
+
+.summary-total-body span { color: var(--white); font-size: 16px; }
+.summary-total-body strong {
+    color: var(--gold);
+    font-size: clamp(38px, 4vw, 54px);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+.summary-total-body small { color: var(--white); font-size: 14px; opacity: .88; }
+.summary-total-icon {
+    right: 28px;
+    bottom: 24px;
+    font-size: 46px;
+    color: var(--gold);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .2));
+}
+
+.summary-total-icon i {
+    background: linear-gradient(145deg, #ffe89a 8%, var(--gold) 55%, #d99a25 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.summary-strip .summary-grid {
+    grid-template-rows: auto repeat(2, minmax(66px, 1fr));
+    gap: 10px;
+    padding: 2px 2px 2px 6px;
+}
+
+.summary-heading {
+    margin: 0 0 2px;
+    color: var(--maroon-dark);
+    font-size: 16px;
+}
+
+.summary-tile {
+    --tile-color: var(--tile-fg);
+    gap: 5px;
+    padding: 9px 14px;
+    border: 2px solid color-mix(in srgb, var(--tile-color) 55%, var(--border));
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--card-bg) 84%, var(--tile-color) 16%);
+    box-shadow: 0 3px 8px rgba(74, 15, 15, .08);
+}
+
+.summary-tile .tile-dot { background: var(--tile-color); }
+.summary-tile[data-filter="Submitted"] { --tile-color: var(--maroon); }
+.summary-tile[data-filter="Under Review"] { --tile-color: var(--gold-dark); }
+.summary-tile[data-filter="Interview"] { --tile-color: #858957; }
+.summary-tile[data-filter="Selection"] { --tile-color: #d5a36d; }
+.summary-tile[data-filter="Offer"] { --tile-color: #c99761; }
+.summary-tile[data-filter="Hired"] { --tile-color: #8a8b53; }
+.summary-tile[data-filter="Rejected"] { --tile-color: #ad957c; }
+.summary-tile[data-filter="Withdrawn"] { --tile-color: #b8aa8e; }
+
+.summary-tile .tile-label { gap: 8px; font-size: 14px; font-weight: 700; }
+.summary-tile .tile-dot { width: 9px; height: 9px; }
+.summary-tile strong { font-size: 27px; }
+
+.applicant-panel {
+    padding: 18px;
+    border: 2px solid var(--maroon);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--card-bg) 82%, var(--gold) 18%);
+}
+
+.applicants-page .filter-bar { gap: 12px; }
+.applicants-page .filter-search { min-height: 52px; }
+.applicants-page .select-field { min-height: 52px; border-radius: 14px; }
+.applicants-page .custom-filter-trigger { min-height: 50px; }
+.applicants-page .clear-filters { height: 52px; border-radius: 14px; }
+
+.results-count {
+    margin: 14px 2px 10px;
+    color: var(--maroon-dark);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.applicants-page .table-card {
+    border-radius: 18px;
+    background: var(--card-bg);
+}
+
+.applicants-page .applicant-table thead th {
+    background: color-mix(in srgb, var(--card-bg) 72%, var(--gold) 28%);
+}
+
+.applicants-page .applicant-table tbody tr.applicant-row {
+    background: var(--card-bg);
+}
+
+.applicants-page .applicant-table tbody tr.applicant-row:nth-child(odd) {
+    background: color-mix(in srgb, var(--card-bg) 78%, var(--gold) 22%);
+}
+
+.applicants-page .applicant-table tbody tr.applicant-row:hover {
+    background: color-mix(in srgb, var(--card-bg) 76%, var(--gold) 24%);
+}
+
+.applicant-table { min-width: 980px; }
+.applicant-table thead th { padding-top: 16px; padding-bottom: 16px; }
+.applicant-table tbody td { padding-top: 15px; padding-bottom: 15px; }
+.applicant-cell { gap: 14px; }
+.applicant-cell strong, .position-title { font-size: 15px; }
+.applicant-cell .sub-text { font-size: 13px; }
+
+.application-time {
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: var(--badge-gold-bg);
+    color: var(--maroon-dark);
+}
+
+.application-time i { color: var(--maroon); }
+.application-time-text small { color: var(--ink-soft); opacity: 1; }
+
+@media (max-width: 900px) {
+    .summary-total { flex-basis: 190px; min-height: 148px; }
+    .summary-tile { padding: 8px 10px; }
+    .summary-tile .tile-label { font-size: 12px; }
+}
+
+@media (max-width: 560px) {
+    .applicants-page { padding: 16px 12px 36px; }
+    .summary-strip { padding: 10px; }
+    .summary-total { min-height: 120px; }
+    .summary-strip .summary-grid { padding: 0; }
+    .summary-tile strong { font-size: 22px; }
+    .applicant-panel { padding: 10px; }
+}
