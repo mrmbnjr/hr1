@@ -1828,6 +1828,14 @@
 
 .applicants-page .filter-bar { gap: 12px; }
 .applicants-page .filter-search { min-height: 52px; }
+.applicants-page .filter-search:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.applicants-page .filter-search input:focus-visible {
+    outline: none;
+    outline-offset: 0;
+}
 .applicants-page .select-field { min-height: 52px; border-radius: 14px; }
 .applicants-page .custom-filter-trigger { min-height: 50px; }
 .applicants-page .clear-filters { height: 52px; border-radius: 14px; }
@@ -1891,7 +1899,7 @@
 
 .applicant-table { min-width: 980px; }
 .applicant-table thead th { padding-top: 16px; padding-bottom: 16px; }
-.applicant-table tbody td { padding-top: 15px; padding-bottom: 15px; }
+.applicant-table tbody td { padding-top: 11px; padding-bottom: 11px; }
 .applicant-cell { gap: 14px; }
 .applicant-cell strong, .position-title { font-size: 15px; }
 .applicant-cell .sub-text { font-size: 13px; }
