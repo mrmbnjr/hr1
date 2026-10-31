@@ -237,6 +237,10 @@ $statCards = [
             </section>
 
             <script>
+                window.scheduledInterviews = <?= json_encode(
+                    $scheduledInterviews ?? [],
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                ); ?>;
                 window.applicantGrowthData = <?= json_encode([
                     'labels'     => $growthLabels ?? [],
                     'data'       => $growthData ?? [],
@@ -257,33 +261,111 @@ $statCards = [
         <!-- Calendar -->
         <article class="dashboard-card">
             <div class="card-header calendar-header">
-                <button class="calendar-nav" id="prevMonth" type="button">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
                 <div class="calendar-title">
                     <h2 id="calendarTitle"></h2>
+                    <p class="calendar-hint">Select a date to add a note or event</p>
                 </div>
-                <button class="calendar-nav" id="nextMonth" type="button">
-                    <i class="fa-solid fa-chevron-right"></i>
+                <button class="calendar-view-toggle" id="calendarViewToggle" type="button"
+                        aria-expanded="false" aria-controls="calendarSlides">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <span>Notes</span>
                 </button>
             </div>
-            <table class="calendar">
-                <thead>
-                    <tr>
-                        <th>Mon</th>
-                        <th>Tue</th>
-                        <th>Wed</th>
-                        <th>Thu</th>
-                        <th>Fri</th>
-                        <th>Sat</th>
-                        <th>Sun</th>
-                    </tr>
-                </thead>
-                <tbody id="calendarBody"></tbody>
-            </table>
+            <div class="calendar-viewport">
+                <div class="calendar-slides" id="calendarSlides">
+                    <section class="calendar-slide calendar-slide--month" aria-label="Monthly calendar">
+                        <div class="calendar-month-navigation">
+                            <button class="calendar-nav" id="prevMonth" type="button" aria-label="Previous month">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <table class="calendar">
+                                <thead>
+                                    <tr>
+                                        <th>Mon</th>
+                                        <th>Tue</th>
+                                        <th>Wed</th>
+                                        <th>Thu</th>
+                                        <th>Fri</th>
+                                        <th>Sat</th>
+                                        <th>Sun</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="calendarBody"></tbody>
+                            </table>
+                            <button class="calendar-nav" id="nextMonth" type="button" aria-label="Next month">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </section>
+                    <section class="calendar-slide calendar-slide--notes" aria-label="Calendar notes and events">
+                        <div class="calendar-events" aria-live="polite">
+                            <div class="calendar-events__header">
+                                <div>
+                                    <h3><i class="fa-solid fa-list-check"></i> Notes &amp; events</h3>
+                                    <p>Keep track of your upcoming reminders</p>
+                                </div>
+                                <button type="button" class="calendar-add-event" id="addCalendarEvent">
+                                    <i class="fa-solid fa-plus"></i> Add event
+                                </button>
+                            </div>
+                            <div id="calendarEventList" class="calendar-event-list"></div>
+                            <div class="calendar-pagination" id="calendarPagination" hidden>
+                                <button type="button" id="calendarPrevPage" aria-label="Previous notes page">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <span id="calendarPageInfo"></span>
+                                <button type="button" id="calendarNextPage" aria-label="Next notes page">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </article>
 
     </section>
+
+    <div class="calendar-modal" id="calendarModal" hidden>
+        <div class="calendar-modal__backdrop" data-calendar-close></div>
+        <section class="calendar-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="calendarModalTitle">
+            <div class="calendar-modal__header">
+                <div>
+                    <p class="calendar-modal__eyebrow">Personal calendar</p>
+                    <h2 id="calendarModalTitle">Add note or event</h2>
+                </div>
+                <button type="button" class="calendar-modal__close" data-calendar-close aria-label="Close calendar form">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="calendarEventForm">
+                <input type="hidden" id="calendarEventId">
+                <div class="calendar-form-field">
+                    <label for="calendarEventTitle">Title</label>
+                    <input id="calendarEventTitle" name="title" type="text" maxlength="80" required placeholder="e.g. Team meeting">
+                </div>
+                <div class="calendar-form-row">
+                    <div class="calendar-form-field">
+                        <label for="calendarEventDate">Date</label>
+                        <input id="calendarEventDate" name="date" type="date" required>
+                    </div>
+                    <div class="calendar-form-field">
+                        <label for="calendarEventTime">Time <span>(optional)</span></label>
+                        <input id="calendarEventTime" name="time" type="time">
+                    </div>
+                </div>
+                <div class="calendar-form-field">
+                    <label for="calendarEventNotes">Notes <span>(optional)</span></label>
+                    <textarea id="calendarEventNotes" name="notes" rows="3" maxlength="240" placeholder="Add helpful details or a reminder"></textarea>
+                </div>
+                <div class="calendar-modal__actions">
+                    <button type="button" class="calendar-delete-event" id="deleteCalendarEvent" hidden>Delete</button>
+                    <button type="button" class="calendar-cancel-event" data-calendar-close>Cancel</button>
+                    <button type="submit" class="calendar-save-event">Save event</button>
+                </div>
+            </form>
+        </section>
+    </div>
 
     <!-- Second Grid -->
     <section class="dashboard-grid">

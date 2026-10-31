@@ -454,11 +454,125 @@ renderSubmissions(window.applicantGrowthData ?? {});
 // Calendar
 const calendarTitle = document.getElementById("calendarTitle");
 const calendarBody = document.getElementById("calendarBody");
+const calendarModal = document.getElementById("calendarModal");
+const calendarEventForm = document.getElementById("calendarEventForm");
+const calendarEventList = document.getElementById("calendarEventList");
+const addCalendarEvent = document.getElementById("addCalendarEvent");
+const deleteCalendarEvent = document.getElementById("deleteCalendarEvent");
+const calendarViewToggle = document.getElementById("calendarViewToggle");
+const calendarSlides = document.getElementById("calendarSlides");
+const calendarPagination = document.getElementById("calendarPagination");
+const calendarPrevPage = document.getElementById("calendarPrevPage");
+const calendarNextPage = document.getElementById("calendarNextPage");
+const calendarPageInfo = document.getElementById("calendarPageInfo");
 
 const prevBtn = document.getElementById("prevMonth");
 const nextBtn = document.getElementById("nextMonth");
 
 let currentDate = new Date();
+let calendarNotesPage = 1;
+const calendarNotesPerPage = 4;
+const calendarStorageKey = "hr1-calendar-events";
+let calendarEvents = [];
+
+try {
+    calendarEvents = JSON.parse(localStorage.getItem(calendarStorageKey) || "[]");
+    calendarEvents = calendarEvents.filter((event) => event.source !== "interview");
+} catch (error) {
+    console.error("Unable to restore calendar events.", error);
+}
+
+const formatDateKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+
+const scheduledInterviews = (window.scheduledInterviews || []).map((interview) => {
+    const interviewDate = new Date(interview.interview_date.replace(" ", "T"));
+    const date = formatDateKey(interviewDate);
+    const time = `${String(interviewDate.getHours()).padStart(2, "0")}:${String(interviewDate.getMinutes()).padStart(2, "0")}`;
+
+    return {
+        id: `interview-${interview.interview_id}`,
+        source: "interview",
+        title: `${interview.round_type}: ${interview.applicant_name}`,
+        date,
+        time,
+        notes: `${interview.position_title} · ${interview.interview_type}${interview.location ? ` · ${interview.location}` : ""}`,
+        interview
+    };
+});
+
+calendarEvents = [...calendarEvents, ...scheduledInterviews];
+
+const saveCalendarEvents = () => {
+    try {
+        localStorage.setItem(
+            calendarStorageKey,
+            JSON.stringify(calendarEvents.filter((event) => event.source !== "interview"))
+        );
+        window.dispatchEvent(new CustomEvent("calendarEventsChanged"));
+    } catch (error) {
+        console.error("Unable to save calendar events.", error);
+    }
+};
+
+const openCalendarModal = (date = formatDateKey(new Date()), event = null) => {
+    if (!calendarModal || !calendarEventForm) return;
+    document.getElementById("calendarModalTitle").textContent = event ? "Edit note or event" : "Add note or event";
+    document.getElementById("calendarEventId").value = event?.id || "";
+    document.getElementById("calendarEventTitle").value = event?.title || "";
+    document.getElementById("calendarEventDate").value = event?.date || date;
+    document.getElementById("calendarEventTime").value = event?.time || "";
+    document.getElementById("calendarEventNotes").value = event?.notes || "";
+    deleteCalendarEvent.hidden = !event;
+    calendarModal.hidden = false;
+    document.getElementById("calendarEventTitle").focus();
+};
+
+const closeCalendarModal = () => {
+    if (calendarModal) calendarModal.hidden = true;
+};
+
+const renderCalendarEvents = () => {
+    if (!calendarEventList) return;
+    const today = formatDateKey(new Date());
+    const upcoming = calendarEvents
+        .filter((event) => event.date >= today)
+        .sort((a, b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`))
+    const totalPages = Math.max(1, Math.ceil(upcoming.length / calendarNotesPerPage));
+    calendarNotesPage = Math.min(calendarNotesPage, totalPages);
+    const pageStart = (calendarNotesPage - 1) * calendarNotesPerPage;
+    const pageEvents = upcoming.slice(pageStart, pageStart + calendarNotesPerPage);
+
+    calendarEventList.innerHTML = pageEvents.length
+        ? pageEvents.map((event) => `
+            <button type="button" class="calendar-event-item" data-event-id="${event.id}">
+                <span class="calendar-event-date">${new Date(`${event.date}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                <span class="calendar-event-info">
+                    <strong>${escapeHtml(event.title)}</strong>
+                    <small>${escapeHtml(event.time ? `${formatEventTime(event.time)} · ${event.notes || ""}` : event.notes || "No additional details")}</small>
+                </span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>`).join("")
+        : '<p class="calendar-event-empty">No upcoming events. Add a note to stay organized.</p>';
+
+    if (calendarPagination && calendarPageInfo && calendarPrevPage && calendarNextPage) {
+        calendarPagination.hidden = upcoming.length <= calendarNotesPerPage;
+        calendarPageInfo.textContent = `Page ${calendarNotesPage} of ${totalPages}`;
+        calendarPrevPage.disabled = calendarNotesPage === 1;
+        calendarNextPage.disabled = calendarNotesPage === totalPages;
+    }
+};
+
+const formatEventTime = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+};
 
 function renderCalendar() {
 
@@ -502,6 +616,15 @@ function renderCalendar() {
             } else {
 
                 cell.textContent = day;
+                const dateKey = formatDateKey(new Date(year, month, day));
+                const dayEvents = calendarEvents.filter((event) => event.date === dateKey);
+                cell.dataset.date = dateKey;
+                cell.classList.add("calendar-day");
+                if (dayEvents.length) {
+                    cell.classList.add("has-events");
+                    cell.title = dayEvents.map((event) => event.title).join(", ");
+                    cell.insertAdjacentHTML("beforeend", `<span class="calendar-event-dot" aria-hidden="true"></span>`);
+                }
 
                 const today = new Date();
 
@@ -525,6 +648,8 @@ function renderCalendar() {
         if (day > daysInMonth) {
             break;
         }
+
+        renderCalendarEvents();
     }
 }
 
@@ -544,6 +669,87 @@ nextBtn?.addEventListener("click", () => {
 
     renderCalendar();
 
+});
+
+calendarBody?.addEventListener("click", (event) => {
+    const cell = event.target.closest(".calendar-day");
+    if (!cell) return;
+    const eventForDay = calendarEvents.find((item) => item.date === cell.dataset.date);
+    openCalendarModal(cell.dataset.date, eventForDay || null);
+});
+
+calendarEventList?.addEventListener("click", (event) => {
+    const item = event.target.closest(".calendar-event-item");
+    if (!item) return;
+    const calendarEvent = calendarEvents.find((entry) => entry.id === item.dataset.eventId);
+    if (!calendarEvent) return;
+    if (calendarEvent.source === "interview") {
+        calendarViewToggle?.click();
+        return;
+    }
+    openCalendarModal(calendarEvent.date, calendarEvent);
+});
+
+addCalendarEvent?.addEventListener("click", () => openCalendarModal());
+
+calendarViewToggle?.addEventListener("click", () => {
+    const showingNotes = calendarSlides.classList.toggle("show-notes");
+    calendarViewToggle.setAttribute("aria-expanded", String(showingNotes));
+    calendarViewToggle.querySelector("span").textContent = showingNotes ? "Calendar" : "Notes";
+    calendarViewToggle.querySelector("i").className = showingNotes
+        ? "fa-solid fa-calendar-days"
+        : "fa-solid fa-note-sticky";
+});
+
+calendarPrevPage?.addEventListener("click", () => {
+    if (calendarNotesPage > 1) {
+        calendarNotesPage--;
+        renderCalendarEvents();
+    }
+});
+
+calendarNextPage?.addEventListener("click", () => {
+    calendarNotesPage++;
+    renderCalendarEvents();
+});
+
+calendarEventForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = document.getElementById("calendarEventId").value || `event-${Date.now()}`;
+    const nextEvent = {
+        id,
+        title: document.getElementById("calendarEventTitle").value.trim(),
+        date: document.getElementById("calendarEventDate").value,
+        time: document.getElementById("calendarEventTime").value,
+        notes: document.getElementById("calendarEventNotes").value.trim()
+    };
+    calendarEvents = [
+        ...calendarEvents.filter((item) => item.id !== id && item.source !== "interview"),
+        ...scheduledInterviews,
+        nextEvent
+    ];
+    saveCalendarEvents();
+    closeCalendarModal();
+    renderCalendar();
+});
+
+deleteCalendarEvent?.addEventListener("click", () => {
+    const id = document.getElementById("calendarEventId").value;
+    calendarEvents = calendarEvents.filter((item) => item.id !== id && item.source !== "interview");
+    calendarEvents = [...calendarEvents, ...scheduledInterviews];
+    saveCalendarEvents();
+    closeCalendarModal();
+    renderCalendar();
+});
+
+calendarModal?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-calendar-close]")) closeCalendarModal();
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && calendarModal && !calendarModal.hidden) {
+        closeCalendarModal();
+    }
 });
 
 // Bar Graph

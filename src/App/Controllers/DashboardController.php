@@ -138,6 +138,11 @@ class DashboardController
         $onboardingProgress =
             $this->dashboard->getOnboardingProgress(5);
 
+        $scheduledInterviews =
+            $this->dashboard->getUpcomingInterviewsForUser(
+                (int) Auth::userId()
+            );
+
 
         require BASE_PATH . '/resources/views/dashboard/index.php';
     }

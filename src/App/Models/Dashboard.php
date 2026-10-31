@@ -54,6 +54,36 @@ class Dashboard
         ];
     }
 
+    public function getUpcomingInterviewsForUser(int $userId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT
+                i.interview_id,
+                i.interview_date,
+                i.round_type,
+                i.interview_type,
+                i.location,
+                i.remarks,
+                CONCAT(a.first_name, ' ', a.last_name) AS applicant_name,
+                jp.title AS position_title
+            FROM interviews i
+            INNER JOIN applications ap
+                ON ap.application_id = i.application_id
+            INNER JOIN applicants a
+                ON a.applicant_id = ap.applicant_id
+            INNER JOIN job_postings jp
+                ON jp.posting_id = ap.posting_id
+            WHERE i.interviewer_id = :user_id
+              AND i.interview_date >= NOW()
+              AND i.result = 'Pending'
+            ORDER BY i.interview_date ASC
+            LIMIT 50
+        ");
+        $stmt->execute([':user_id' => $userId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
 
     /*

@@ -752,6 +752,38 @@
   color: #288e54;
 }
 
+.shared-toast-container {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 32px));
+}
+
+.shared-toast {
+  padding: 13px 16px;
+  border-left: 4px solid var(--ry-gold);
+  border-radius: 10px;
+  background: var(--navbar-surface);
+  color: var(--navbar-text);
+  box-shadow: 0 12px 28px rgba(20, 6, 6, .2);
+  font: 700 .8rem "Nunito", sans-serif;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.shared-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.shared-toast-info {
+  border-left-color: var(--ry-gold);
+}
+
 /* --- footer --- */
 .site-footer {
   display: flex;

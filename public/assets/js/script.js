@@ -206,6 +206,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Shared notification center. Notification records may be supplied by the
 // server through the navbar; read state is kept locally per browser.
+window.showToast = window.showToast || ((message, type = "info") => {
+    let container = document.getElementById("sharedToastContainer");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "sharedToastContainer";
+        container.className = "shared-toast-container";
+        container.setAttribute("aria-live", "polite");
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `shared-toast shared-toast-${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("is-visible"));
+
+    window.setTimeout(() => {
+        toast.classList.remove("is-visible");
+        window.setTimeout(() => toast.remove(), 220);
+    }, 5000);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
         const menu = document.querySelector(".notification-menu");
         const button = menu?.querySelector(".notification-btn");
@@ -226,6 +248,57 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             console.error("Unable to load notifications.", error);
         }
+
+        const loadCalendarNotifications = () => {
+            let calendarEvents = [];
+            try {
+                calendarEvents = JSON.parse(localStorage.getItem("hr1-calendar-events") || "[]");
+            } catch (error) {
+                console.error("Unable to load calendar reminders.", error);
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endDate = new Date(today);
+            endDate.setDate(endDate.getDate() + 7);
+
+            const personalEvents = calendarEvents.map((event) => ({
+                ...event,
+                notificationType: "personal"
+            }));
+            const scheduledInterviews = (window.scheduledInterviews || []).map((interview) => ({
+                id: `interview-${interview.interview_id}`,
+                date: interview.interview_date.replace(" ", "T"),
+                time: interview.interview_date.slice(11, 16),
+                title: `${interview.round_type}: ${interview.applicant_name}`,
+                notes: `${interview.position_title} · ${interview.interview_type}`,
+                notificationType: "interview"
+            }));
+
+            return [...personalEvents, ...scheduledInterviews]
+                .filter((event) => {
+                    const eventDate = new Date(`${event.date.slice(0, 10)}T00:00:00`);
+                    return eventDate >= today && eventDate <= endDate;
+                })
+                .map((event) => {
+                    const eventDate = new Date(`${event.date}T00:00:00`);
+                    const isToday = eventDate.getTime() === today.getTime();
+                    return {
+                        id: `calendar:${event.id}`,
+                        title: event.notificationType === "interview"
+                            ? (isToday ? "Interview today" : "Upcoming interview")
+                            : (isToday ? "Event today" : "Upcoming event"),
+                        message: event.notificationType === "interview"
+                            ? `${event.title} · ${event.notes}`
+                            : event.title,
+                        time: isToday ? "Today" : eventDate.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                        type: isToday ? "warning" : "info",
+                        url: "?page=dashboard"
+                    };
+                });
+        };
+
+        notifications = [...loadCalendarNotifications(), ...notifications];
 
         const storageKey = "hr1-read-notifications";
         let readIds = [];
@@ -286,6 +359,60 @@ document.addEventListener("DOMContentLoaded", () => {
             empty.hidden = notifications.length !== 0;
         };
 
+        const notifyUpcomingInterviews = () => {
+            const interviewNotifications = notifications.filter(
+                (notification) => notification.id.startsWith("calendar:interview-")
+            );
+
+            if (interviewNotifications.length === 0) {
+                return;
+            }
+
+            const notifiedStorageKey = "hr1-notified-interviews";
+            let notifiedInterviews = [];
+            try {
+                notifiedInterviews = JSON.parse(localStorage.getItem(notifiedStorageKey) || "[]");
+            } catch (error) {
+                console.error("Unable to restore interview reminder state.", error);
+            }
+
+            const newInterviewIds = interviewNotifications
+                .map((notification) => notification.id)
+                .filter((id) => !notifiedInterviews.includes(id));
+
+            if (newInterviewIds.length === 0) {
+                return;
+            }
+
+            try {
+                localStorage.setItem(
+                    notifiedStorageKey,
+                    JSON.stringify([...new Set([...notifiedInterviews, ...newInterviewIds])])
+                );
+            } catch (error) {
+                console.error("Unable to save interview reminder state.", error);
+            }
+
+            const firstReminder = interviewNotifications.find(
+                (notification) => notification.id === newInterviewIds[0]
+            );
+            if (firstReminder && typeof window.showToast === "function") {
+                window.showToast(
+                    `${firstReminder.title}: ${firstReminder.message}`,
+                    "info"
+                );
+            }
+        };
+
+        window.addEventListener("calendarEventsChanged", () => {
+            notifications = [
+                ...loadCalendarNotifications(),
+                ...notifications.filter((notification) => !notification.id.startsWith("calendar:"))
+            ];
+            render();
+            notifyUpcomingInterviews();
+        });
+
         const close = () => {
             panel.hidden = true;
             button.setAttribute("aria-expanded", "false");
@@ -300,6 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
             readIds = [...new Set([...readIds, ...notifications.map((item) => item.id)])];
             saveReadIds();
             render();
+            notifyUpcomingInterviews();
         });
 
         list.addEventListener("click", (event) => {
