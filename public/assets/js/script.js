@@ -38,11 +38,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const pages = sidebarLinks.map((link) => ({
-        label: link.querySelector("span")?.textContent.trim() || link.textContent.trim(),
-        href: link.href,
-        icon: link.querySelector("i")?.className || "fa-solid fa-file"
-    }));
+    const pageDescriptions = {
+        dashboard: "View your HR overview and quick insights",
+        "my-requests": "Submit and track your employee requests",
+        "assigned-requests": "Review requests assigned to you",
+        profile: "Manage your personal and account details",
+        recruitment: "Create and manage job postings",
+        applicants: "Review and manage job applicants",
+        onboarding: "Track new hire onboarding progress",
+        "human-capital": "Manage departments and company positions",
+        "employee-records": "View and manage employee information",
+        "employee-requests": "Manage employee service requests",
+        "user-management": "Manage user accounts and access",
+        "system-settings": "Configure system preferences",
+        reports: "View HR reports and workforce insights"
+    };
+
+    const pages = sidebarLinks.map((link) => {
+        const page = new URL(link.href).searchParams.get("page") || "";
+
+        return {
+            label: link.querySelector("span")?.textContent.trim() || link.textContent.trim(),
+            description: pageDescriptions[page] || "Open this section",
+            href: link.href,
+            icon: link.querySelector("i")?.className || "fa-solid fa-file"
+        };
+    });
     let activeIndex = -1;
     const recentStorageKey = "hr1-recent-page-searches";
     let recentPages = [];
@@ -87,8 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
         result.className = "navbar-search-result";
         result.setAttribute("role", "option");
         result.setAttribute("aria-selected", "false");
-        result.innerHTML = `<i class="${page.icon}" aria-hidden="true"></i><span></span>`;
-        result.querySelector("span").textContent = page.label;
+        result.innerHTML = `<i class="${page.icon}" aria-hidden="true"></i><span class="navbar-search-result__content"><strong></strong><small></small></span>`;
+        result.querySelector("strong").textContent = page.label;
+        result.querySelector("small").textContent = page.description;
+        result.dataset.href = page.href;
         result.addEventListener("click", () => goToPage(page));
         result.dataset.index = String(index);
         return result;
@@ -97,7 +120,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const renderResults = (query, showRecent = false) => {
         const normalizedQuery = query.trim().toLowerCase();
         const matches = normalizedQuery
-            ? pages.filter((page) => page.label.toLowerCase().includes(normalizedQuery)).slice(0, 7)
+            ? pages.filter((page) =>
+                `${page.label} ${page.description}`.toLowerCase().includes(normalizedQuery)
+            ).slice(0, 7)
             : [];
         const recentMatches = recentPages
             .map((href) => pages.find((page) => page.href === href))
@@ -159,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setActiveResult(activeIndex - 1);
         } else if (event.key === "Enter" && activeIndex >= 0) {
             event.preventDefault();
-            goToPage(pages.find((page) => page.label === resultButtons[activeIndex].textContent));
+            goToPage(pages.find((page) => page.href === resultButtons[activeIndex].dataset.href));
         } else if (event.key === "Escape") {
             closeResults();
         }
@@ -168,8 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", (event) => {
         event.preventDefault();
         const resultButtons = [...results.querySelectorAll(".navbar-search-result")];
-        const selected = activeIndex >= 0 ? resultButtons[activeIndex].textContent : resultButtons[0]?.textContent;
-        goToPage(pages.find((page) => page.label === selected));
+        const selectedHref = activeIndex >= 0
+            ? resultButtons[activeIndex].dataset.href
+            : resultButtons[0]?.dataset.href;
+        goToPage(pages.find((page) => page.href === selectedHref));
     });
 
     document.addEventListener("click", (event) => {

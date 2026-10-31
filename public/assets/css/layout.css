@@ -418,6 +418,30 @@
   color: var(--ry-gold);
 }
 
+.navbar-search-result__content {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.navbar-search-result__content strong {
+  overflow: hidden;
+  font-size: .82rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar-search-result__content small {
+  overflow: hidden;
+  color: var(--navbar-text-soft);
+  font-size: .7rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .navbar-search-no-results {
   padding: 14px;
   color: var(--navbar-text-soft);
