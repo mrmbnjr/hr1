@@ -56,6 +56,9 @@ class DashboardController
         $recentActivities =
             $this->dashboard->getRecentActivities(5);
 
+        $activityAnalytics =
+            $this->dashboard->getActivityAnalytics();
+
 
         $jobApplicants =
             $this->dashboard->getApplicantsPerJob();

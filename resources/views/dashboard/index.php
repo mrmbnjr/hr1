@@ -464,27 +464,94 @@ $statCards = [
         <div class="card-header">
             <div>
                 <h2>Total Activities</h2>
-                <p>Recent HR system activities</p>
+                <p>Recent HR system activities and performance</p>
             </div>
         </div>
-        <div class="activity-list">
-            <?php if (!empty($recentActivities)): ?>
-                <?php foreach ($recentActivities as $activity): ?>
-                    <?php $activityType = $activity['activity_type'] ?? null; ?>
-                    <div class="activity-item">
-                        <div class="activity-type <?= htmlspecialchars(activity_icon_class($activityType)) ?>">
-                            <i class="<?= htmlspecialchars(activity_icon_glyph($activityType)) ?>" aria-hidden="true"></i>
+        <div class="activity-content">
+            <div class="activity-list">
+                <?php if (!empty($recentActivities)): ?>
+                    <?php foreach ($recentActivities as $activity): ?>
+                        <?php $activityType = $activity['activity_type'] ?? null; ?>
+                        <div class="activity-item">
+                            <div class="activity-type <?= htmlspecialchars(activity_icon_class($activityType)) ?>">
+                                <i class="<?= htmlspecialchars(activity_icon_glyph($activityType)) ?>" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3><?= htmlspecialchars($activity['activity_title']) ?></h3>
+                                <p><?= htmlspecialchars($activity['activity_description']) ?></p>
+                            </div>
+                            <span><?= date('M d, Y', strtotime($activity['activity_date'])) ?></span>
                         </div>
-                        <div>
-                            <h3><?= htmlspecialchars($activity['activity_title']) ?></h3>
-                            <p><?= htmlspecialchars($activity['activity_description']) ?></p>
-                        </div>
-                        <span><?= date('M d, Y', strtotime($activity['activity_date'])) ?></span>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No recent activities found.</p>
+                <?php endif; ?>
+            </div>
+
+            <?php
+            $activityAnalytics = $activityAnalytics ?? [
+                'total' => 0,
+                'today' => 0,
+                'logged_in_users' => 0,
+                'applications_month' => 0,
+                'requests_total' => 0,
+                'pending_requests' => 0,
+                'categories' => [],
+            ];
+            ?>
+            <aside class="activity-analytics" aria-label="Activity analytics for the last seven days">
+                <div class="analytics-panel-heading">
+                    <div>
+                        <span class="analytics-eyebrow">Performance overview</span>
+                        <h3>Activity snapshot</h3>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No recent activities found.</p>
-            <?php endif; ?>
+                    <span class="analytics-period">This period</span>
+                </div>
+                <div class="analytics-tiles">
+                    <div class="analytics-tile">
+                        <div class="analytics-tile-top">
+                            <span class="analytics-tile-icon"><i class="fa-solid fa-briefcase" aria-hidden="true"></i></span>
+                            <span class="analytics-change">Open</span>
+                        </div>
+                        <span class="analytics-tile-label">Job posts</span>
+                        <strong><?= number_format((int) ($stats['postings'] ?? 0)) ?></strong>
+                        <div class="analytics-spark bars" aria-hidden="true">
+                            <i style="height: 34%"></i><i style="height: 58%"></i><i style="height: 44%"></i><i style="height: 76%"></i><i style="height: 68%"></i><i style="height: 88%"></i>
+                        </div>
+                    </div>
+                    <div class="analytics-tile">
+                        <div class="analytics-tile-top">
+                            <span class="analytics-tile-icon"><i class="fa-solid fa-wifi" aria-hidden="true"></i></span>
+                            <span class="analytics-change positive">Active</span>
+                        </div>
+                        <span class="analytics-tile-label">Users logged in</span>
+                        <strong><?= number_format((int) $activityAnalytics['logged_in_users']) ?></strong>
+                        <div class="analytics-spark line" aria-hidden="true">
+                            <svg viewBox="0 0 120 30" preserveAspectRatio="none"><polyline points="0,23 18,17 35,21 53,10 71,17 88,8 104,13 120,4"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="analytics-tile">
+                        <div class="analytics-tile-top">
+                            <span class="analytics-tile-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span>
+                            <span class="analytics-change positive">This month</span>
+                        </div>
+                        <span class="analytics-tile-label">Applications</span>
+                        <strong><?= number_format((int) $activityAnalytics['applications_month']) ?></strong>
+                        <div class="analytics-spark line" aria-hidden="true">
+                            <svg viewBox="0 0 120 30" preserveAspectRatio="none"><polyline points="0,25 17,20 34,23 52,13 68,16 84,8 101,12 120,3"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="analytics-tile request-tile">
+                        <div class="analytics-tile-top">
+                            <span class="analytics-tile-icon"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i></span>
+                            <span class="analytics-change"><?= number_format((int) $activityAnalytics['pending_requests']) ?> pending</span>
+                        </div>
+                        <span class="analytics-tile-label">Requests</span>
+                        <strong><?= number_format((int) $activityAnalytics['requests_total']) ?></strong>
+                        <div class="analytics-request-bar" aria-hidden="true"><span style="width: <?= min(100, (int) ($activityAnalytics['requests_total'] > 0 ? round(($activityAnalytics['pending_requests'] / $activityAnalytics['requests_total']) * 100) : 0)) ?>%"></span></div>
+                    </div>
+                </div>
+            </aside>
         </div>
     </section>
 

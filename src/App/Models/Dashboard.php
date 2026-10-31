@@ -722,6 +722,121 @@ class Dashboard
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getActivityAnalytics(): array
+    {
+        $sql = "
+            SELECT activity_category, COUNT(*) AS total
+            FROM (
+                SELECT 'Applications' AS activity_category, applied_at AS activity_date
+                FROM applications
+                WHERE applied_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+
+                UNION ALL
+
+                SELECT 'Requests', requested_at
+                FROM employee_requests
+                WHERE requested_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+
+                UNION ALL
+
+                SELECT 'Requests', created_at
+                FROM password_reset_requests
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+
+                UNION ALL
+
+                SELECT 'Recruitment', created_at
+                FROM job_postings
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+
+                UNION ALL
+
+                SELECT 'Hiring & onboarding', hire_date
+                FROM employees
+                WHERE hire_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+
+                UNION ALL
+
+                SELECT
+                    CASE
+                        WHEN page IN ('login', 'logout') THEN 'Logins'
+                        ELSE 'System actions'
+                    END,
+                    created_at
+                FROM activity_logs
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                  AND (request_method <> 'GET' OR page IN ('login', 'logout'))
+            ) activity_events
+            GROUP BY activity_category
+            ORDER BY total DESC, activity_category
+        ";
+
+        $rows = $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+        $categories = [];
+        $total = 0;
+
+        foreach ($rows as $row) {
+            $count = (int) $row['total'];
+            $categories[] = [
+                'label' => $row['activity_category'],
+                'total' => $count,
+            ];
+            $total += $count;
+        }
+
+        $todayStmt = $this->db->query("
+            SELECT COUNT(*)
+            FROM (
+                SELECT applied_at AS activity_date FROM applications
+                UNION ALL
+                SELECT requested_at FROM employee_requests
+                UNION ALL
+                SELECT created_at FROM password_reset_requests
+                UNION ALL
+                SELECT created_at FROM job_postings
+                UNION ALL
+                SELECT hire_date FROM employees
+                UNION ALL
+                SELECT created_at
+                FROM activity_logs
+                WHERE request_method <> 'GET' OR page IN ('login', 'logout')
+            ) activity_events
+            WHERE activity_date >= CURDATE()
+        ");
+
+        $loginStmt = $this->db->query("
+            SELECT COUNT(DISTINCT user_id)
+            FROM activity_logs
+            WHERE page = 'login'
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+              AND user_id IS NOT NULL
+        ");
+
+        $applicationsStmt = $this->db->query("
+            SELECT COUNT(*)
+            FROM applications
+            WHERE applied_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+        ");
+
+        $requestsStmt = $this->db->query("
+            SELECT
+                COUNT(*) AS total,
+                SUM(status = 'Pending') AS pending
+            FROM employee_requests
+        ");
+        $requestCounts = $requestsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return [
+            'total' => $total,
+            'today' => (int) $todayStmt->fetchColumn(),
+            'logged_in_users' => (int) $loginStmt->fetchColumn(),
+            'applications_month' => (int) $applicationsStmt->fetchColumn(),
+            'requests_total' => (int) ($requestCounts['total'] ?? 0),
+            'pending_requests' => (int) ($requestCounts['pending'] ?? 0),
+            'categories' => $categories,
+        ];
+    }
+
     public function getApplicantsPerJob()
     {
         $sql = "
