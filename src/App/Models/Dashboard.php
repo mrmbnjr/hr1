@@ -562,6 +562,8 @@ class Dashboard
 
     public function getRecentActivities($limit = 10)
     {
+        $limit = max(1, min((int) $limit, 50));
+
         $sql = "
             (
                 SELECT
@@ -634,6 +636,71 @@ class Dashboard
                     ON app.applicant_id = a.applicant_id
             )
 
+            UNION ALL
+
+            (
+                SELECT
+                    'request',
+                    'New employee request',
+                    CONCAT(
+                        CONCAT(a.first_name, ' ', a.last_name),
+                        ' submitted a ',
+                        er.request_type,
+                        ': ',
+                        er.subject
+                    ),
+                    er.requested_at
+
+                FROM employee_requests er
+
+                INNER JOIN employees e
+                    ON er.employee_id = e.employee_id
+
+                INNER JOIN applicants a
+                    ON e.applicant_id = a.applicant_id
+            )
+
+            UNION ALL
+
+            (
+                SELECT
+                    'request',
+                    'Password reset requested',
+                    CONCAT(prr.full_name, ' requested a password reset.'),
+                    prr.created_at
+
+                FROM password_reset_requests prr
+            )
+
+            UNION ALL
+
+            (
+                SELECT
+                    CASE
+                        WHEN al.page IN ('login', 'logout') THEN 'auth'
+                        ELSE 'system'
+                    END,
+                    CASE
+                        WHEN al.page = 'login' THEN 'User login'
+                        WHEN al.page = 'logout' THEN 'User logout'
+                        ELSE al.action
+                    END,
+                    CONCAT(
+                        COALESCE(u.username, CONCAT('User #', al.user_id), 'System'),
+                        ' performed: ',
+                        al.action
+                    ),
+                    al.created_at
+
+                FROM activity_logs al
+
+                LEFT JOIN users u
+                    ON al.user_id = u.user_id
+
+                WHERE al.request_method <> 'GET'
+                   OR al.page IN ('login', 'logout')
+            )
+
 
             ORDER BY activity_date DESC
 
@@ -645,7 +712,7 @@ class Dashboard
 
         $stmt->bindValue(
             1,
-            (int)$limit,
+            $limit,
             PDO::PARAM_INT
         );
 

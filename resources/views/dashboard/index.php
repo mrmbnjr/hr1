@@ -61,6 +61,7 @@ function activity_icon_class(?string $type): string
         'applicant' => 'applicant',
         'employee'  => 'employee',
         'request'   => 'request',
+        'auth'      => 'system',
         'system'    => 'system',
         default     => 'default',
     };
@@ -72,6 +73,7 @@ function activity_icon_glyph(?string $type): string
         'applicant' => 'fa-solid fa-user-plus',
         'employee'  => 'fa-solid fa-user-tie',
         'request'   => 'fa-solid fa-file-circle-check',
+        'auth'      => 'fa-solid fa-right-to-bracket',
         'system'    => 'fa-solid fa-gear',
         default     => 'fa-solid fa-circle-info',
     };

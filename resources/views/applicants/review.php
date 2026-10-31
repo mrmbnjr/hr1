@@ -391,6 +391,26 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
         <?php endif; ?>
     </section>
 
+    <!-- Application Information -->
+    <section class="detail-section">
+        <h3><i class="fa-solid fa-id-card"></i> Application Information</h3>
+        <div class="info-grid">
+            <?php
+            infoField('Applicant Name', $applicant['fullname']);
+            infoField('Email Address', $applicant['email']);
+            infoField('Phone Number', $applicant['phone']);
+            infoField('Applied Position', $applicant['position']);
+            infoField('Date Applied', date('F d, Y', strtotime($applicant['applied_at'])));
+            ?>
+            <div>
+                <span class="info-label">Application Status</span>
+                <span class="badge <?= htmlspecialchars($currentStatusMeta['class']) ?>">
+                    <?= htmlspecialchars($currentStatusMeta['label']) ?>
+                </span>
+            </div>
+        </div>
+    </section>
+
     <div class="details-body">
 
         <section class="pipeline-phase pipeline-phase-1" id="phase-panel-1" role="tabpanel" aria-labelledby="phase-tab-1"<?= $currentStep !== 1 ? ' hidden' : '' ?>>
@@ -400,26 +420,6 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
             <p>Applicant details, submitted documents, and AI screening findings.</p>
             <strong class="pipeline-phase-status"><?= htmlspecialchars(ucfirst($phaseStates[1])) ?></strong>
         </div>
-
-        <!-- Applicant Information -->
-        <section class="detail-section">
-            <h3><i class="fa-solid fa-id-card"></i> Applicant Information</h3>
-            <div class="info-grid">
-                <?php
-                infoField('Applicant Name', $applicant['fullname']);
-                infoField('Email Address', $applicant['email']);
-                infoField('Phone Number', $applicant['phone']);
-                infoField('Applied Position', $applicant['position']);
-                infoField('Date Applied', date('F d, Y', strtotime($applicant['applied_at'])));
-                ?>
-                <div>
-                    <span class="info-label">Application Status</span>
-                    <span class="badge <?= htmlspecialchars($currentStatusMeta['class']) ?>">
-                        <?= htmlspecialchars($currentStatusMeta['label']) ?>
-                    </span>
-                </div>
-            </div>
-        </section>
 
         <!-- Applicant Achievements & Credentials -->
         <section class="detail-section credential-section">
