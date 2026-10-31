@@ -447,6 +447,15 @@
 
 /* ---------- Notification ---------- */
 
+.notification-menu {
+  position: relative;
+}
+
+.notification-btn[aria-expanded="true"] {
+  background: var(--ry-gold);
+  color: var(--ry-maroon-dark);
+}
+
 .notification-badge {
   position: absolute;
 
@@ -470,6 +479,178 @@
   font-weight: 700;
 
   border:2px solid var(--navbar-bg);
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 60;
+  width: min(390px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid var(--navbar-border);
+  border-radius: 16px;
+  background: var(--navbar-surface);
+  color: var(--navbar-text);
+  box-shadow: 0 16px 36px rgba(20, 6, 6, .22);
+}
+
+.notification-panel[hidden] {
+  display: none;
+}
+
+.notification-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--navbar-border);
+}
+
+.notification-panel__header h3 {
+  margin: 0;
+  color: var(--navbar-text);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+}
+
+.notification-panel__header p {
+  margin: 3px 0 0;
+  color: var(--navbar-text-soft);
+  font-size: .75rem;
+}
+
+.notification-mark-read {
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ry-maroon);
+  cursor: pointer;
+  font: 700 .72rem "Nunito", sans-serif;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .notification-mark-read {
+  color: var(--ry-gold);
+}
+
+.notification-mark-read:hover {
+  text-decoration: underline;
+}
+
+.notification-list {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px 1fr 22px;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--navbar-border);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-item:hover,
+.notification-item.unread {
+  background: rgba(242, 193, 78, .1);
+}
+
+.notification-item.unread::before {
+  position: absolute;
+  top: 19px;
+  left: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ry-red);
+  content: "";
+}
+
+.notification-item__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(181, 130, 47, .16);
+  color: var(--ry-maroon);
+}
+
+[data-theme="dark"] .notification-item__icon {
+  color: var(--ry-gold);
+}
+
+.notification-item__title,
+.notification-item__message,
+.notification-item__time {
+  display: block;
+}
+
+.notification-item__title {
+  margin-bottom: 2px;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.notification-item__message {
+  color: var(--navbar-text-soft);
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+.notification-item__time {
+  margin-top: 5px;
+  color: var(--navbar-text-soft);
+  font-size: .68rem;
+}
+
+.notification-item__dismiss {
+  align-self: start;
+  border: 0;
+  background: transparent;
+  color: var(--navbar-text-soft);
+  cursor: pointer;
+  opacity: .7;
+}
+
+.notification-item__dismiss:hover {
+  color: var(--ry-red);
+  opacity: 1;
+}
+
+.notification-empty {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 34px 18px;
+  color: var(--navbar-text-soft);
+  text-align: center;
+  font-size: .78rem;
+}
+
+.notification-empty strong {
+  color: var(--navbar-text);
+  font-size: .9rem;
+}
+
+.notification-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: rgba(40, 146, 84, .14);
+  color: #288e54;
 }
 
 /* --- footer --- */
@@ -567,6 +748,11 @@ body.sidebar-hidden .main-content {
 }
 
 @media (max-width:640px){
+  .notification-panel {
+    position: fixed;
+    top: 79px;
+    right: 16px;
+  }
 
 .navbar{
 

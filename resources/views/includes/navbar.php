@@ -36,13 +36,69 @@
                 autocomplete="off">
         </form>
 
-        <!-- Notification -->
-        <button class="navbar-icon-btn notification-btn">
-            <i class="fa-solid fa-bell"></i>
-            <span class="notification-badge">
-                3
-            </span>
-        </button>
+        <?php
+        $navbarNotifications = [];
+        if (!empty($_SESSION['notifications']) && is_array($_SESSION['notifications'])) {
+            foreach ($_SESSION['notifications'] as $notification) {
+                if (!is_array($notification) || empty($notification['message'])) {
+                    continue;
+                }
+
+                $navbarNotifications[] = [
+                    'id' => (string) ($notification['id'] ?? sha1((string) $notification['message'])),
+                    'title' => (string) ($notification['title'] ?? 'Notification'),
+                    'message' => (string) $notification['message'],
+                    'time' => (string) ($notification['time'] ?? 'Just now'),
+                    'type' => in_array(($notification['type'] ?? 'info'), ['info', 'success', 'warning'], true)
+                        ? $notification['type']
+                        : 'info',
+                    'url' => (string) ($notification['url'] ?? ''),
+                ];
+            }
+        }
+        ?>
+
+        <!-- Notification center -->
+        <div class="notification-menu">
+            <button type="button"
+                    class="navbar-icon-btn notification-btn"
+                    aria-label="Open notifications"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notificationPanel">
+                <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                <span class="notification-badge" id="notificationBadge" hidden></span>
+            </button>
+
+            <section class="notification-panel"
+                     id="notificationPanel"
+                     aria-labelledby="notificationTitle"
+                     hidden>
+                <header class="notification-panel__header">
+                    <div>
+                        <h3 id="notificationTitle">Notifications</h3>
+                        <p id="notificationSummary">You are all caught up</p>
+                    </div>
+                    <button type="button" class="notification-mark-read" id="markNotificationsRead">
+                        Mark all read
+                    </button>
+                </header>
+
+                <div class="notification-list" id="notificationList"
+                     data-notifications="<?= htmlspecialchars(
+                         json_encode($navbarNotifications, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT),
+                         ENT_QUOTES,
+                         'UTF-8'
+                     ) ?>">
+                </div>
+
+                <div class="notification-empty" id="notificationEmpty" hidden>
+                    <span class="notification-empty__icon"><i class="fa-solid fa-check" aria-hidden="true"></i></span>
+                    <strong>You’re all caught up</strong>
+                    <span>New updates will appear here.</span>
+                </div>
+            </section>
+        </div>
 
         <!-- Theme Toggle -->
         <button type="button"

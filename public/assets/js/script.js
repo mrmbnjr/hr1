@@ -25,7 +25,150 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
     });
+});
 
+// Shared notification center. Notification records may be supplied by the
+// server through the navbar; read state is kept locally per browser.
+document.addEventListener("DOMContentLoaded", () => {
+        const menu = document.querySelector(".notification-menu");
+        const button = menu?.querySelector(".notification-btn");
+        const panel = document.getElementById("notificationPanel");
+        const list = document.getElementById("notificationList");
+        const empty = document.getElementById("notificationEmpty");
+        const badge = document.getElementById("notificationBadge");
+        const summary = document.getElementById("notificationSummary");
+        const markRead = document.getElementById("markNotificationsRead");
+
+        if (!menu || !button || !panel || !list || !empty || !badge || !summary || !markRead) {
+            return;
+        }
+
+        let notifications = [];
+        try {
+            notifications = JSON.parse(list.dataset.notifications || "[]");
+        } catch (error) {
+            console.error("Unable to load notifications.", error);
+        }
+
+        const storageKey = "hr1-read-notifications";
+        let readIds = [];
+        try {
+            readIds = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        } catch (error) {
+            console.error("Unable to restore notification state.", error);
+        }
+
+        const saveReadIds = () => {
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(readIds));
+            } catch (error) {
+                console.error("Unable to save notification state.", error);
+            }
+        };
+
+        const iconFor = (type) => ({
+            success: "fa-circle-check",
+            warning: "fa-triangle-exclamation",
+            info: "fa-circle-info"
+        }[type] || "fa-circle-info");
+
+        const render = () => {
+            list.innerHTML = "";
+            let unreadCount = 0;
+
+            notifications.forEach((notification) => {
+                const isRead = readIds.includes(notification.id);
+                if (!isRead) unreadCount++;
+
+                const item = document.createElement("article");
+                item.className = `notification-item${isRead ? "" : " unread"}`;
+                item.dataset.id = notification.id;
+                item.tabIndex = 0;
+                item.setAttribute("role", "button");
+                item.innerHTML = `
+                    <span class="notification-item__icon"><i class="fa-solid ${iconFor(notification.type)}" aria-hidden="true"></i></span>
+                    <span>
+                        <strong class="notification-item__title"></strong>
+                        <span class="notification-item__message"></span>
+                        <small class="notification-item__time"></small>
+                    </span>
+                    <button type="button" class="notification-item__dismiss" aria-label="Dismiss notification">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                `;
+                item.querySelector(".notification-item__title").textContent = notification.title;
+                item.querySelector(".notification-item__message").textContent = notification.message;
+                item.querySelector(".notification-item__time").textContent = notification.time;
+                list.appendChild(item);
+            });
+
+            badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+            badge.hidden = unreadCount === 0;
+            summary.textContent = unreadCount ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}` : "You are all caught up";
+            markRead.disabled = unreadCount === 0;
+            empty.hidden = notifications.length !== 0;
+        };
+
+        const close = () => {
+            panel.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+        };
+
+        button.addEventListener("click", () => {
+            panel.hidden = !panel.hidden;
+            button.setAttribute("aria-expanded", String(!panel.hidden));
+        });
+
+        markRead.addEventListener("click", () => {
+            readIds = [...new Set([...readIds, ...notifications.map((item) => item.id)])];
+            saveReadIds();
+            render();
+        });
+
+        list.addEventListener("click", (event) => {
+            const item = event.target.closest(".notification-item");
+            if (!item) return;
+
+            const notification = notifications.find((entry) => entry.id === item.dataset.id);
+            if (event.target.closest(".notification-item__dismiss")) {
+                notifications = notifications.filter((entry) => entry.id !== item.dataset.id);
+                render();
+                return;
+            }
+
+            if (!readIds.includes(item.dataset.id)) {
+                readIds.push(item.dataset.id);
+                saveReadIds();
+                render();
+            }
+
+            if (notification?.url) {
+                window.location.href = notification.url;
+            }
+        });
+
+        list.addEventListener("keydown", (event) => {
+            if ((event.key === "Enter" || event.key === " ") && event.target.classList.contains("notification-item")) {
+                event.preventDefault();
+                event.target.click();
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!menu.contains(event.target)) close();
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !panel.hidden) {
+                close();
+                button.focus();
+            }
+        });
+
+        render();
+    });
+
+document.addEventListener("DOMContentLoaded", () => {
     sidebarClose?.addEventListener("click", () => {
         sidebar.classList.remove("is-open");
         sidebarOverlay?.classList.remove("is-visible");
