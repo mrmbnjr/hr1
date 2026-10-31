@@ -301,6 +301,8 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
 
     <?php require BASE_PATH . '/resources/views/includes/navbar.php'; ?>
 
+    <div class="applicant-review-page">
+
     <?php if (!empty($_SESSION['success'])): ?>
         <div class="alert alert-success" role="status">
             <?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
@@ -1234,6 +1236,8 @@ function requirementsTable(array $stageRequirements, bool $showActions): void
         </section>
 
         </section>
+
+    </div>
 
     </div>
 
