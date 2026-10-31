@@ -26,14 +26,24 @@
 
     <!-- Right -->
     <div class="navbar-right">
-        <form class="navbar-search" action="#" method="GET">
+        <form class="navbar-search" action="" method="GET" role="search">
             <i class="fa-solid fa-magnifying-glass"></i>
 
             <input
                 type="search"
                 name="search"
-                placeholder="Search employees, applicants..."
-                autocomplete="off">
+                id="navbarPageSearch"
+                placeholder="Search pages..."
+                autocomplete="off"
+                aria-label="Search pages"
+                aria-controls="navbarSearchResults"
+                aria-expanded="false">
+
+            <div class="navbar-search-results"
+                 id="navbarSearchResults"
+                 role="listbox"
+                 aria-label="Page search results"
+                 hidden></div>
         </form>
 
         <?php

@@ -27,6 +27,156 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Search only pages currently available in the role-filtered sidebar.
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector(".navbar-search");
+    const input = document.getElementById("navbarPageSearch");
+    const results = document.getElementById("navbarSearchResults");
+    const sidebarLinks = [...document.querySelectorAll(".sidebar-menu a[href*='?page=']")];
+
+    if (!form || !input || !results || sidebarLinks.length === 0) {
+        return;
+    }
+
+    const pages = sidebarLinks.map((link) => ({
+        label: link.querySelector("span")?.textContent.trim() || link.textContent.trim(),
+        href: link.href,
+        icon: link.querySelector("i")?.className || "fa-solid fa-file"
+    }));
+    let activeIndex = -1;
+    const recentStorageKey = "hr1-recent-page-searches";
+    let recentPages = [];
+
+    try {
+        recentPages = JSON.parse(localStorage.getItem(recentStorageKey) || "[]");
+    } catch (error) {
+        console.error("Unable to restore recent page searches.", error);
+    }
+
+    const saveRecentPage = (page) => {
+        recentPages = [
+            page.href,
+            ...recentPages.filter((href) => href !== page.href)
+        ].slice(0, 3);
+
+        try {
+            localStorage.setItem(recentStorageKey, JSON.stringify(recentPages));
+        } catch (error) {
+            console.error("Unable to save recent page searches.", error);
+        }
+    };
+
+    const closeResults = () => {
+        results.hidden = true;
+        input.setAttribute("aria-expanded", "false");
+        activeIndex = -1;
+    };
+
+    const goToPage = (page, remember = true) => {
+        if (page) {
+            if (remember) {
+                saveRecentPage(page);
+            }
+            window.location.href = page.href;
+        }
+    };
+
+    const createResult = (page, index) => {
+        const result = document.createElement("button");
+        result.type = "button";
+        result.className = "navbar-search-result";
+        result.setAttribute("role", "option");
+        result.setAttribute("aria-selected", "false");
+        result.innerHTML = `<i class="${page.icon}" aria-hidden="true"></i><span></span>`;
+        result.querySelector("span").textContent = page.label;
+        result.addEventListener("click", () => goToPage(page));
+        result.dataset.index = String(index);
+        return result;
+    };
+
+    const renderResults = (query, showRecent = false) => {
+        const normalizedQuery = query.trim().toLowerCase();
+        const matches = normalizedQuery
+            ? pages.filter((page) => page.label.toLowerCase().includes(normalizedQuery)).slice(0, 7)
+            : [];
+        const recentMatches = recentPages
+            .map((href) => pages.find((page) => page.href === href))
+            .filter(Boolean)
+            .slice(0, 3);
+
+        results.innerHTML = "";
+        activeIndex = -1;
+
+        if (!normalizedQuery) {
+            if (!showRecent || recentMatches.length === 0) {
+                closeResults();
+                return;
+            }
+
+            const title = document.createElement("div");
+            title.className = "navbar-search-recent-title";
+            title.textContent = "Recent searches";
+            results.appendChild(title);
+            recentMatches.forEach((page, index) => results.appendChild(createResult(page, index)));
+            results.hidden = false;
+            input.setAttribute("aria-expanded", "true");
+            return;
+        }
+
+        if (matches.length === 0) {
+            results.innerHTML = '<div class="navbar-search-no-results">No matching pages found</div>';
+            results.hidden = false;
+            input.setAttribute("aria-expanded", "true");
+            return;
+        }
+
+        matches.forEach((page, index) => results.appendChild(createResult(page, index)));
+
+        results.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+    };
+
+    const setActiveResult = (index) => {
+        const resultButtons = [...results.querySelectorAll(".navbar-search-result")];
+        if (resultButtons.length === 0) return;
+
+        activeIndex = (index + resultButtons.length) % resultButtons.length;
+        resultButtons.forEach((result, resultIndex) => {
+            result.setAttribute("aria-selected", String(resultIndex === activeIndex));
+        });
+    };
+
+    input.addEventListener("focus", () => renderResults(input.value, true));
+    input.addEventListener("input", () => renderResults(input.value));
+    input.addEventListener("keydown", (event) => {
+        const resultButtons = [...results.querySelectorAll(".navbar-search-result")];
+
+        if (event.key === "ArrowDown" && resultButtons.length) {
+            event.preventDefault();
+            setActiveResult(activeIndex + 1);
+        } else if (event.key === "ArrowUp" && resultButtons.length) {
+            event.preventDefault();
+            setActiveResult(activeIndex - 1);
+        } else if (event.key === "Enter" && activeIndex >= 0) {
+            event.preventDefault();
+            goToPage(pages.find((page) => page.label === resultButtons[activeIndex].textContent));
+        } else if (event.key === "Escape") {
+            closeResults();
+        }
+    });
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const resultButtons = [...results.querySelectorAll(".navbar-search-result")];
+        const selected = activeIndex >= 0 ? resultButtons[activeIndex].textContent : resultButtons[0]?.textContent;
+        goToPage(pages.find((page) => page.label === selected));
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!form.contains(event.target)) closeResults();
+    });
+});
+
 // Shared notification center. Notification records may be supplied by the
 // server through the navbar; read state is kept locally per browser.
 document.addEventListener("DOMContentLoaded", () => {

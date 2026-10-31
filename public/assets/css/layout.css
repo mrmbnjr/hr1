@@ -350,6 +350,81 @@
   top: 8px;
 }
 
+.navbar-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 55;
+  overflow: hidden;
+  border: 1px solid var(--navbar-border);
+  border-radius: 14px;
+  background: var(--navbar-surface);
+  box-shadow: 0 14px 30px rgba(20, 6, 6, .2);
+}
+
+.navbar-search-results[hidden] {
+  display: none;
+}
+
+.navbar-search-recent-title {
+  padding: 12px 14px 7px;
+  color: var(--navbar-text-soft);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.navbar-search-result {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--navbar-border);
+  background: transparent;
+  color: var(--navbar-text);
+  cursor: pointer;
+  font: 600 .82rem "Nunito", sans-serif;
+  text-align: left;
+}
+
+.navbar-search-result:last-child {
+  border-bottom: 0;
+}
+
+.navbar-search-result:hover,
+.navbar-search-result[aria-selected="true"] {
+  background: rgba(242, 193, 78, .14);
+  color: var(--ry-maroon-dark);
+}
+
+[data-theme="dark"] .navbar-search-result:hover,
+[data-theme="dark"] .navbar-search-result[aria-selected="true"] {
+  color: var(--ry-gold);
+}
+
+.navbar-search .navbar-search-result i {
+  position: static;
+  width: 18px;
+  transform: none;
+  color: var(--ry-maroon);
+  font-size: .85rem;
+}
+
+[data-theme="dark"] .navbar-search-result i {
+  color: var(--ry-gold);
+}
+
+.navbar-search-no-results {
+  padding: 14px;
+  color: var(--navbar-text-soft);
+  font-size: .78rem;
+  text-align: center;
+}
+
 .navbar-search i {
   position: absolute;
   left: 15px;
