@@ -170,18 +170,31 @@ $pageDescription = "Login to your RAM-YUM Store account — Korean and Japanese 
             >
 
                 <div class="field">
-                    <label for="otp">Verification Code</label>
+                    <span id="otpLabel" class="field-label">Verification Code</span>
+
+                    <div
+                        class="otp-inputs"
+                        role="group"
+                        aria-labelledby="otpLabel"
+                    >
+                        <?php for ($index = 1; $index <= 6; $index++): ?>
+                            <input
+                                type="text"
+                                class="otp-digit"
+                                id="otp-<?= $index ?>"
+                                inputmode="numeric"
+                                maxlength="1"
+                                aria-label="Verification code digit <?= $index ?> of 6"
+                                autocomplete="<?= $index === 1 ? 'one-time-code' : 'off' ?>"
+                                required
+                            >
+                        <?php endfor; ?>
+                    </div>
 
                     <input
-                        type="text"
+                        type="hidden"
                         id="otp"
                         name="otp"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        pattern="[0-9]{6}"
-                        minlength="6"
-                        maxlength="6"
-                        placeholder="000000"
                         required
                     >
                 </div>

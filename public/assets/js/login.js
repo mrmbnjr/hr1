@@ -53,6 +53,9 @@
 
     var otpForm = document.getElementById("otpForm");
     var otpField = document.getElementById("otp");
+    var otpDigits = Array.prototype.slice.call(
+        document.querySelectorAll(".otp-digit")
+    );
     var otpMessage = document.getElementById("otpMessage");
     var otpEmail = document.getElementById("otpEmail");
     var verifyOtpBtn = document.getElementById("verifyOtpBtn");
@@ -314,7 +317,7 @@
 
         setOtpMessage("");
 
-        otpField.value = "";
+        clearOtpDigits();
 
         /*
          * Display the email returned by the controller.
@@ -337,7 +340,7 @@
          */
         window.setTimeout(
             function () {
-                otpField.focus();
+                focusFirstOtpDigit();
             },
             100
         );
@@ -348,24 +351,82 @@
        OTP INPUT
     ===================================================== */
 
-    otpField.addEventListener(
-        "input",
-        function () {
+    function syncOtpValue() {
+        otpField.value = otpDigits.map(function (input) {
+            return input.value;
+        }).join("");
+    }
 
-            /*
-             * Numbers only.
-             */
-            otpField.value =
-                otpField.value
-                    .replace(/\D/g, "")
-                    .slice(0, 6);
+    function clearOtpDigits() {
+        otpDigits.forEach(function (input) {
+            input.value = "";
+        });
 
+        syncOtpValue();
+    }
+
+    function focusFirstOtpDigit() {
+        if (otpDigits[0]) {
+            otpDigits[0].focus();
+        }
+    }
+
+    otpDigits.forEach(function (input, index) {
+        input.addEventListener("input", function () {
+            var value = input.value.replace(/\D/g, "");
+
+            if (value.length > 1) {
+                value.split("").slice(0, otpDigits.length - index).forEach(function (digit, offset) {
+                    otpDigits[index + offset].value = digit;
+                });
+            } else {
+                input.value = value;
+            }
+
+            syncOtpValue();
             clearFieldError(otpField);
-
             setOtpMessage("");
 
-        }
-    );
+            if (input.value && otpDigits[index + 1]) {
+                otpDigits[index + 1].focus();
+            }
+        });
+
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Backspace" && !input.value && otpDigits[index - 1]) {
+                otpDigits[index - 1].focus();
+            }
+
+            if (event.key === "ArrowLeft" && otpDigits[index - 1]) {
+                event.preventDefault();
+                otpDigits[index - 1].focus();
+            }
+
+            if (event.key === "ArrowRight" && otpDigits[index + 1]) {
+                event.preventDefault();
+                otpDigits[index + 1].focus();
+            }
+        });
+
+        input.addEventListener("paste", function (event) {
+            var pasted = (event.clipboardData || window.clipboardData)
+                .getData("text")
+                .replace(/\D/g, "")
+                .slice(0, otpDigits.length);
+
+            if (!pasted) {
+                return;
+            }
+
+            event.preventDefault();
+            clearOtpDigits();
+            pasted.split("").forEach(function (digit, digitIndex) {
+                otpDigits[digitIndex].value = digit;
+            });
+            syncOtpValue();
+            otpDigits[Math.min(pasted.length, otpDigits.length) - 1].focus();
+        });
+    });
 
 
     /* =====================================================
@@ -399,7 +460,7 @@
                     "is-error"
                 );
 
-                otpField.focus();
+                focusFirstOtpDigit();
 
                 return;
             }
@@ -482,8 +543,7 @@
                     "is-error"
                 );
 
-                otpField.focus();
-                otpField.select();
+                focusFirstOtpDigit();
 
             })
             .catch(function (error) {
@@ -559,9 +619,9 @@
                         "is-success"
                     );
 
-                    otpField.value = "";
+                    clearOtpDigits();
 
-                    otpField.focus();
+                    focusFirstOtpDigit();
 
                     startOtpCooldown(60);
 
@@ -671,7 +731,7 @@
             loginStep.hidden = false;
             otpStep.hidden = true;
 
-            otpField.value = "";
+            clearOtpDigits();
 
             setOtpMessage("");
 
