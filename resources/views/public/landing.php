@@ -89,6 +89,7 @@ $portalServices = [
     <title><?= $e($pageTitle) ?></title>
     <meta name="description" content="Explore career opportunities at RAM-YUM and learn about the recruitment, onboarding, and Core HR systems that support our team.">
     <meta name="theme-color" content="#7b1e2b">
+    <link rel="icon" type="image/png" href="<?= $e(asset('images/logo.png')) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
