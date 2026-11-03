@@ -55,6 +55,8 @@
 
   --palette-red-400: #ff5c50;
   --palette-red-500: #e0362c;
+  --palette-red-800: #8f241e;
+  --palette-green-600: #1a7d4c;
   --palette-green-700: #246b45;
 
   /* ========================================================
@@ -159,6 +161,8 @@
   --radius-md: 14px;           /* buttons, generic */
   --radius-card: 26px;
   --radius-pill: 999px;
+  --radius-xs: 6px;            /* tags */
+  --radius-sm: 8px;            /* small controls (pagination) */
 
   /* Typography */
   --font-display: "Luckiest Guy", "Baloo 2", cursive;
@@ -179,6 +183,7 @@
   /* Motion */
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  --duration-slow: 260ms;
   --ease-standard: cubic-bezier(.4, 0, .2, 1);
   --transition: var(--duration-base) var(--ease-standard);
 
@@ -200,6 +205,21 @@
   --btn-bg-hover: linear-gradient(180deg, var(--palette-gold-300) 0%, var(--palette-gold-400) 100%);
   --btn-bg-active: var(--palette-gold-600);
   --btn-bevel: var(--palette-gold-800);   /* fixed bevel under gold button */
+
+  /* Solid-fill buttons (primary / success / danger) */
+  --on-solid: #fff;            /* text on solid fills: white in BOTH themes */
+  --btn-edge: rgba(0, 0, 0, 0.30);
+  --btn-shadow-rest: 0 6px 14px rgba(0, 0, 0, 0.20);
+  --btn-shadow-hover: 0 9px 18px rgba(0, 0, 0, 0.25);
+  --btn-shadow-press: 0 3px 8px rgba(0, 0, 0, 0.18);
+  --btn-success-bg: var(--palette-green-600);
+  --btn-success-bevel: var(--palette-green-700);
+  --btn-danger-bg: var(--palette-red-500);
+  --btn-danger-bevel: var(--palette-red-800);
+
+  /* Focus & avatar */
+  --focus-outline: color-mix(in srgb, var(--palette-gold-500) 65%, transparent);
+  --avatar-border: color-mix(in srgb, var(--gold-strong) 55%, transparent);
 
   /* Misc */
   --avatar-fg: var(--palette-maroon-900);

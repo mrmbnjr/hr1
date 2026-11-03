@@ -1,12 +1,27 @@
-/* Shared UI components */
+/* ==========================================================
+   COMPONENTS — shared UI used on 2+ pages
+   ----------------------------------------------------------
+   RULES
+   - Only var(--token) values. No #hex, rgb(), rgba().
+   - Never write [data-theme]. Dark mode comes from tokens.
+   - Each component is defined ONCE, here. Do not redefine
+     buttons/badges/tables in style.css or page CSS.
+   - Uses CSS nesting (Chrome 120+, Safari 17.2+, Firefox 117+).
+========================================================== */
+
+/* ==========================================================
+   TABLES
+   One shared rule set for every table type. To add a new table,
+   add its class to the :is() list (or just use .data-table).
+========================================================== */
 
 .table-card {
     width: 100%;
     overflow: hidden;
-    background: var(--card-bg);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .table-scroll,
@@ -16,89 +31,77 @@
     overflow-x: auto;
 }
 
-.applicant-table,
-.onboarding-table,
-.employee-records-table,
-.employee-request-table,
-.data-table,
-.cs-table {
+:is(.applicant-table,
+    .onboarding-table,
+    .employee-records-table,
+    .employee-request-table,
+    .data-table,
+    .cs-table) {
     width: 100%;
     border-collapse: collapse;
     font-size: 13.5px;
+
+    thead th {
+        padding: 13px 18px;
+        background: var(--tint-gold);
+        border-bottom: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 11.5px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-align: left;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    tbody td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 13.5px;
+        vertical-align: middle;
+    }
+
+    tbody tr {
+        transition: background var(--transition);
+
+        &:hover { background: var(--tint-gold-weak); }
+        &:last-child td { border-bottom: 0; }
+
+        /* clickable rows */
+        &:is([data-row-href], .request-row) { cursor: pointer; }
+        &:is([data-row-href], .request-row):focus-visible {
+            outline: 2px solid var(--gold-strong);
+            outline-offset: -2px;
+        }
+    }
 }
 
-.applicant-table thead th,
-.onboarding-table thead th,
-.employee-records-table thead th,
-.employee-request-table thead th,
-.data-table thead th,
-.cs-table thead th {
-    padding: 13px 18px;
-    background: var(--table-head-bg);
-    border-bottom: 1px solid var(--border);
-    color: var(--ink-soft);
+.sub-text {
+    display: block;
+    margin-top: 2px;
+    overflow: hidden;
+    color: var(--text-muted);
     font-size: 11.5px;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    text-align: left;
-    text-transform: uppercase;
+    line-height: 1.4;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.applicant-table tbody td,
-.onboarding-table tbody td,
-.employee-records-table tbody td,
-.employee-request-table tbody td,
-.data-table tbody td,
-.cs-table tbody td {
+.table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
     padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    color: var(--ink);
-    font-size: 13.5px;
-    vertical-align: middle;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12.5px;
 }
 
-.applicant-table tbody tr,
-.onboarding-table tbody tr,
-.employee-records-table tbody tr,
-.employee-request-table tbody tr,
-.data-table tbody tr,
-.cs-table tbody tr {
-    transition: background var(--transition);
-}
-
-.applicant-table tbody tr[data-row-href],
-.onboarding-table tbody tr[data-row-href],
-.employee-records-table tbody tr[data-row-href],
-.employee-request-table tbody tr.request-row {
-    cursor: pointer;
-}
-
-.applicant-table tbody tr[data-row-href]:focus-visible,
-.onboarding-table tbody tr[data-row-href]:focus-visible,
-.employee-records-table tbody tr[data-row-href]:focus-visible,
-.employee-request-table tbody tr.request-row:focus-visible {
-    outline: 2px solid var(--gold-dark);
-    outline-offset: -2px;
-}
-
-.applicant-table tbody tr:hover,
-.onboarding-table tbody tr:hover,
-.employee-records-table tbody tr:hover,
-.employee-request-table tbody tr:hover,
-.data-table tbody tr:hover,
-.cs-table tbody tr:hover {
-    background: var(--row-hover-bg);
-}
-
-.applicant-table tbody tr:last-child td,
-.onboarding-table tbody tr:last-child td,
-.employee-records-table tbody tr:last-child td,
-.employee-request-table tbody tr:last-child td,
-.data-table tbody tr:last-child td,
-.cs-table tbody tr:last-child td {
-    border-bottom: 0;
-}
+/* ==========================================================
+   AVATARS
+========================================================== */
 
 .avatar-circle,
 .avatar-large {
@@ -106,126 +109,257 @@
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    border: 1px solid rgba(207, 154, 44, 0.55);
+    border: 1px solid var(--avatar-border);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
     color: var(--avatar-fg);
     font-family: var(--font-heading);
     font-weight: 800;
 }
 
-.avatar-circle {
-    width: 40px;
-    height: 40px;
-    font-size: 15px;
-}
+.avatar-circle { width: 40px; height: 40px; font-size: 15px; }
+.avatar-large  { width: 56px; height: 56px; font-size: 20px; }
 
-.avatar-large {
-    width: 56px;
-    height: 56px;
-    font-size: 20px;
-}
-
-.sub-text {
-    display: block;
-    margin-top: 2px;
-    overflow: hidden;
-    color: var(--ink-soft);
-    font-size: 11.5px;
-    line-height: 1.4;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+/* ==========================================================
+   BADGES / STATUS PILLS
+   .badge, .status-badge and .status-pill are one component.
+   A tone class only sets two variables: --tone-bg / --tone-fg.
+========================================================== */
 
 .badge,
-.status-badge {
+.status-badge,
+.status-pill {
+    --tone-bg: var(--neutral-bg);
+    --tone-fg: var(--neutral);
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 3px;
     width: fit-content;
     padding: 5px 10px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
+    background: var(--tone-bg);
+    color: var(--tone-fg);
     font-size: 11.5px;
     font-weight: 800;
     line-height: 1.2;
     white-space: nowrap;
-    gap: 3px;
 }
 
-.badge-gray,
-.status-badge,
-.status-badge.closed,
-.status-badge.inactive,
-.badge.status.closed {
-    background: var(--badge-gray-bg);
-    color: var(--badge-gray-fg);
+.status-pill { gap: 6px; }
+
+/* neutral is the default: .badge-gray, .closed, .inactive, .is-inactive */
+
+.badge-blue,
+.badge-info {
+    --tone-bg: var(--info-bg);
+    --tone-fg: var(--info);
 }
 
-.badge-blue { background: var(--badge-blue-bg); color: var(--badge-blue-fg); }
 .badge-orange,
 .status-badge.pending,
 .status-badge.draft,
-.badge.status.draft { background: var(--badge-orange-bg); color: var(--badge-orange-fg); }
+.badge.status.draft,
+.status-pill.is-pending {
+    --tone-bg: var(--warning-bg);
+    --tone-fg: var(--warning);
+}
+
 .badge-green,
 .status-badge.open,
 .status-badge.active,
-.badge.status.open { background: var(--badge-green-bg); color: var(--badge-green-fg); }
-.badge-red { background: var(--badge-red-bg); color: var(--badge-red-fg); }
-.badge-purple { background: var(--badge-purple-bg); color: var(--badge-purple-fg); }
-.badge-teal { background: var(--badge-teal-bg); color: var(--badge-teal-fg); }
+.badge.status.open,
+.status-pill.is-active {
+    --tone-bg: var(--success-bg);
+    --tone-fg: var(--success);
+}
+
+.badge-red {
+    --tone-bg: var(--danger-bg);
+    --tone-fg: var(--danger);
+}
+
+.badge-purple {
+    --tone-bg: var(--purple-bg);
+    --tone-fg: var(--purple);
+}
+
+.badge-teal {
+    --tone-bg: var(--teal-bg);
+    --tone-fg: var(--teal);
+}
+
+.badge-gold {
+    --tone-bg: var(--gold-bg);
+    --tone-fg: var(--accent);
+}
+
 .badge.employment {
     background: transparent;
-    color: #000;
-    border: none;
+    color: var(--text);
     padding-left: 0;
     padding-right: 0;
 }
 
-.btn-review,
-.btn-outline,
+.status-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.role-tag {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--surface-inset);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ==========================================================
+   BUTTONS
+   ONE definition. Variants only change --btn-* variables.
+   .btn-sm (or .btn-review / .btn-outline) = compact size.
+========================================================== */
+
 .btn-primary,
+.btn-review,
+.btn-secondary,
+.btn-outline,
 .btn-success,
-.btn-danger,
-.btn-secondary {
+.btn-danger {
+    /* defaults = primary (maroon) */
+    --btn-bg: var(--brand);
+    --btn-bg-hover: var(--brand-strong);
+    --btn-fg: var(--on-solid);
+    --btn-bevel: var(--brand-strong);
+
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    min-height: 34px;
-    padding: 8px 14px;
-    border: 1px solid transparent;
-    border-radius: var(--radius-btn);
-    font-family: inherit;
-    font-size: 13.5px;
+    gap: 8px;
+    min-width: 110px;
+    height: 42px;
+    padding: 0 18px;
+    border: 1px solid var(--btn-edge);
+    border-radius: var(--radius-field);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font-family: var(--font-heading);
+    font-size: 14px;
     font-weight: 800;
     line-height: 1;
     text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
-    transition: transform var(--transition), background var(--transition), box-shadow var(--transition), border-color var(--transition);
+    box-shadow: 0 2px 0 var(--btn-bevel), var(--btn-shadow-rest);
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        filter var(--transition),
+        background var(--transition),
+        border-color var(--transition),
+        color var(--transition);
+
+    i { font-size: 13px; line-height: 1; }
+
+    &:hover {
+        background: var(--btn-bg-hover);
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow: 0 3px 0 var(--btn-bevel), var(--btn-shadow-hover);
+    }
+
+    &:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 var(--btn-bevel), var(--btn-shadow-press);
+    }
+
+    &:focus-visible {
+        outline: 3px solid var(--focus-outline);
+        outline-offset: 3px;
+    }
+
+    &:disabled,
+    &[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        filter: none;
+        box-shadow: 0 2px 0 var(--btn-bevel), var(--btn-shadow-rest);
+    }
 }
 
-.btn-review:hover,
-.btn-outline:hover,
-.btn-primary:hover,
-.btn-success:hover,
-.btn-danger:hover,
-.btn-secondary:hover { transform: translateY(-1px); }
+/* Variants */
 
+.btn-success {
+    --btn-bg: var(--btn-success-bg);
+    --btn-bg-hover: var(--btn-success-bevel);
+    --btn-bevel: var(--btn-success-bevel);
+}
+
+.btn-danger {
+    --btn-bg: var(--btn-danger-bg);
+    --btn-bg-hover: var(--btn-danger-bg);   /* brightness filter handles hover */
+    --btn-bevel: var(--btn-danger-bevel);
+}
+
+/* Flat variants: no bevel */
+.btn-secondary,
+.btn-outline {
+    --btn-bg: var(--surface);
+    --btn-bg-hover: var(--tint-gold);
+    --btn-fg: var(--text-muted);
+
+    border-color: var(--border);
+    box-shadow: none;
+
+    &:hover {
+        border-color: var(--gold-strong);
+        color: var(--accent);
+        filter: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    &:active { transform: translateY(1px); box-shadow: none; }
+    &:disabled,
+    &[disabled] { box-shadow: none; }
+}
+
+.btn-outline {
+    --btn-bg: transparent;
+    --btn-fg: var(--accent);
+}
+
+/* Sizes */
+.btn-sm,
 .btn-review,
-.btn-primary { background: var(--maroon); color: var(--white); }
-.btn-outline,
-.btn-secondary { background: transparent; color: var(--accent); border-color: var(--border); }
-.btn-success { background: var(--green); color: var(--white); }
-.btn-danger { background: var(--red); color: var(--white); }
-.btn-block { width: 100%; }
+.btn-outline {
+    min-width: 0;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13.5px;
+}
+
+.btn-block { width: 100%; min-width: 0; }
+
+/* ==========================================================
+   FILTERS & FORM FIELDS
+========================================================== */
 
 .filter-bar,
 .toolbar-filters {
     display: flex;
     align-items: center;
-    gap: 12px;
-    width: 100%;
     flex-wrap: wrap;
+    gap: var(--space-3);
+    width: 100%;
 }
 
 .filter-bar select,
@@ -236,14 +370,16 @@
 .form-group textarea {
     border: 1px solid var(--border);
     border-radius: var(--radius-field);
-    background: var(--card-bg);
-    color: var(--ink);
+    background: var(--surface);
+    color: var(--text);
     font-family: inherit;
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .filter-bar select,
 .toolbar-filters select {
+    flex: 0 0 auto;
+    min-width: 160px;
     min-height: 42px;
     padding: 0 14px;
     font-size: 13.5px;
@@ -258,31 +394,22 @@
     min-width: 280px;
     min-height: 42px;
     padding: 0 14px;
+
+    input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 13.5px;
+        outline: none;
+
+        &::placeholder { color: var(--text-muted); }
+    }
+
+    i { color: var(--text-muted); }
 }
 
-.filter-search input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 13.5px;
-    outline: none;
-}
-
-.filter-search input::placeholder {
-    color: var(--ink-soft);
-}
-
-.filter-search i {
-    color: var(--ink-soft);
-}
-
-.filter-bar select,
-.toolbar-filters select {
-    flex: 0 0 auto;
-    min-width: 160px;
-}
 .filter-bar select:hover,
 .toolbar-filters select:hover,
 .filter-search:focus-within,
@@ -292,8 +419,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--gold-dark);
-    box-shadow: var(--focus-ring);
+    border-color: var(--gold-strong);
+    box-shadow: 0 0 0 3px var(--focus-ring);   /* was invalid: colour alone is not a box-shadow */
 }
 
 .form-group input,
@@ -305,23 +432,27 @@
 }
 
 .form-group textarea { resize: vertical; }
-.form-group input::placeholder,
-.form-group textarea::placeholder { color: var(--ink-soft); }
 
-.table-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 18px;
-    border-top: 1px solid var(--border);
-    color: var(--ink-soft);
-    font-size: 12.5px;
-}
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--text-muted); }
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
 
 .pagination,
-.page-numbers { display: flex; align-items: center; gap: 6px; }
-.page-numbers > span { min-width: 24px; color: var(--ink-soft); font-size: 12px; text-align: center; }
+.page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-numbers > span {
+    min-width: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+}
 
 .page-btn,
 .page-num {
@@ -332,62 +463,25 @@
     height: 32px;
     padding: 0;
     border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card-bg);
-    color: var(--ink);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
     font-family: inherit;
     font-size: 12px;
     cursor: pointer;
 }
 
 .page-btn:hover:not(:disabled),
-.page-num:hover { border-color: var(--gold-dark); background: var(--tint-gold-12); }
+.page-num:hover {
+    border-color: var(--gold-strong);
+    background: var(--tint-gold);
+}
+
 .page-num.active,
-.page-btn.active { border-color: var(--maroon); background: var(--maroon); color: var(--white); }
+.page-btn.active {
+    border-color: var(--brand);
+    background: var(--brand);
+    color: var(--on-solid);
+}
+
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ---------- Status pill / role tag ----------
-   Both the profile page and user management render these, but only user
-   management used to define them — the profile page loaded nothing that
-   did. They live in shared components now. */
-
-.role-tag {
-    display: inline-block;
-    padding: 3px 9px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--cream);
-    color: var(--ink);
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.status-pill {
-    --pill-bg: var(--badge-gray-bg);
-    --pill-fg: var(--badge-gray-fg);
-
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    width: fit-content;
-    padding: 5px 10px;
-    border-radius: 999px;
-    background: var(--pill-bg);
-    color: var(--pill-fg);
-    font-size: 11.5px;
-    font-weight: 800;
-    line-height: 1.2;
-    white-space: nowrap;
-}
-
-.status-pill.is-active   { --pill-bg: var(--badge-green-bg);  --pill-fg: var(--badge-green-fg); }
-.status-pill.is-pending  { --pill-bg: var(--badge-orange-bg); --pill-fg: var(--badge-orange-fg); }
-.status-pill.is-inactive { --pill-bg: var(--badge-gray-bg);   --pill-fg: var(--badge-gray-fg); }
-
-.status-dot {
-    flex: none;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-}
