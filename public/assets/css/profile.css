@@ -10,23 +10,14 @@
 .profile-page {
     --pf-gutter: 24px;
     --pf-surface: var(--card-bg);
-    --pf-muted: rgba(107, 74, 68, 0.05);
-    --pf-hover: rgba(242, 193, 78, 0.10);
-    --field-readonly-bg: rgba(107, 74, 68, 0.06);
-    --field-readonly-border: rgba(107, 74, 68, 0.16);
+    --pf-muted: var(--surface-muted);
+    --pf-hover: var(--tint-gold-10);
 
     max-width: 1200px;
     min-height: 84vh;
     margin-inline: auto;
     padding: 28px 32px 60px;
     color: var(--ink);
-}
-
-[data-theme="dark"] .profile-page {
-    --pf-muted: rgba(255, 250, 243, 0.04);
-    --pf-hover: rgba(242, 193, 78, 0.08);
-    --field-readonly-bg: rgba(255, 250, 243, 0.06);
-    --field-readonly-border: rgba(255, 250, 243, 0.14);
 }
 
 .profile-page :is(button, a, input, textarea):focus-visible {
@@ -87,14 +78,13 @@
     border: 1px solid rgba(207, 154, 44, 0.55);
     border-radius: 50%;
     background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    color: var(--maroon-dark);
+    color: var(--avatar-fg);
     font-family: var(--font-heading);
     font-size: 26px;
     font-weight: 800;
     letter-spacing: 0.5px;
     user-select: none;
 }
-[data-theme="dark"] .hero-avatar { color: var(--maroon-dark-white); }
 
 .hero-id { display: grid; gap: 6px; min-width: 0; }
 
@@ -182,14 +172,11 @@
     transition: color var(--transition), border-color var(--transition);
 }
 .profile-tab i { font-size: 13px; }
-.profile-tab:hover { color: var(--maroon-dark); }
+.profile-tab:hover { color: var(--accent); }
 .profile-tab.active {
-    border-bottom-color: var(--gold-dark);
-    color: var(--maroon-dark);
+    border-bottom-color: var(--gold);
+    color: var(--ink);
 }
-[data-theme="dark"] .profile-tab:hover,
-[data-theme="dark"] .profile-tab.active { color: var(--ink); }
-[data-theme="dark"] .profile-tab.active { border-bottom-color: var(--gold); }
 
 /* ==========================================================
    PANELS
@@ -214,12 +201,11 @@
 .panel-head.is-compact { margin-bottom: 16px; }
 .panel-head h2 {
     margin: 0 0 3px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 18px;
     font-weight: 700;
 }
-[data-theme="dark"] .panel-head h2 { color: var(--ink); }
 .panel-head p { color: var(--ink-soft); font-size: 13.5px; line-height: 1.5; }
 
 .panel-badge {
@@ -271,11 +257,10 @@
 .form-group { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .form-group.is-wide { grid-column: 1 / -1; }
 .form-group label {
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-size: 13px;
     font-weight: 700;
 }
-[data-theme="dark"] .form-group label { color: var(--ink); }
 .form-group label span { color: var(--red); }
 
 .form-group input,
@@ -345,13 +330,12 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--maroon);
+    color: var(--accent);
     font: inherit;
     font-weight: 800;
     text-decoration: underline;
     cursor: pointer;
 }
-[data-theme="dark"] .link-btn { color: var(--gold); }
 
 /* Copy button */
 .copy-btn {
@@ -437,12 +421,11 @@
     padding: 3px 10px;
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: var(--cream);
-    color: var(--maroon-dark);
+    background: var(--surface-muted);
+    color: var(--accent);
     font-size: 12px;
     font-weight: 700;
 }
-[data-theme="dark"] .soft-chip { background: var(--pf-muted); color: var(--ink); }
 
 /* ==========================================================
    ACTIVITY
@@ -513,12 +496,11 @@
 }
 .side-card-title {
     margin: 0 0 14px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 15px;
     font-weight: 700;
 }
-[data-theme="dark"] .side-card-title { color: var(--ink); }
 
 .progress { display: grid; gap: 7px; margin-bottom: 16px; }
 .progress-track {
@@ -606,14 +588,12 @@
 .profile-panel .empty-state i { color: var(--gold-dark); font-size: 26px; }
 .profile-panel .empty-state h3 {
     margin: 10px 0 5px;
-    color: var(--maroon-dark);
+    color: var(--accent);
     font-family: var(--font-heading);
     font-size: 16px;
 }
-[data-theme="dark"] .profile-panel .empty-state h3 { color: var(--ink); }
 .profile-panel .empty-state p { margin: 0; font-size: 13.5px; line-height: 1.6; }
-.profile-panel .empty-state a { color: var(--maroon); font-weight: 800; }
-[data-theme="dark"] .profile-panel .empty-state a { color: var(--gold); }
+.profile-panel .empty-state a { color: var(--accent); font-weight: 800; }
 
 /* ==========================================================
    TOAST

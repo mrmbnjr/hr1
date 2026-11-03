@@ -804,7 +804,7 @@
 
 .pipeline-phase-heading h3 {
     margin: 0;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: var(--font-heading);
     font-size: 18px;
 }
@@ -864,7 +864,7 @@
 .detail-section h3 {
     font-family: var(--font-heading);
     font-size: 17px;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     display: flex;
     align-items: center;
     gap: 8px;

@@ -805,16 +805,6 @@ body.ar-modal-open { overflow: hidden; }
 }
 
 /* ==========================================================
-   DARK THEME TOUCH-UPS
-   (--gray-bg / --cream are not redefined for dark mode)
-========================================================== */
-
-[data-theme="dark"] .ar-priority--normal {
-    background: rgba(255, 250, 243, 0.12);
-    color: var(--ink-soft);
-}
-
-/* ==========================================================
    RESPONSIVE
 ========================================================== */
 

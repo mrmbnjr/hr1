@@ -79,7 +79,7 @@
     font-size: 38px;
     font-weight: 800;
     line-height: 1;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
 }
 
@@ -139,7 +139,7 @@
     margin: 0;
     font-size: 17px;
     font-weight: 700;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
     letter-spacing: -0.01em;
 }
@@ -278,7 +278,7 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
     letter-spacing: 0.01em;
 }
@@ -457,7 +457,7 @@
     margin: 0;
     font-size: 17px;
     font-weight: 700;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
 }
 
@@ -610,7 +610,7 @@
 
 .calendar-events__header h3 {
     margin: 0;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-size: 13px;
 }
 
@@ -792,7 +792,7 @@
 
 .calendar-modal__header h2 {
     margin: 0;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-size: 20px;
 }
 
@@ -972,7 +972,7 @@
     display: block;
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1099,7 +1099,7 @@
 
 .analytics-panel-heading h3 {
     margin: 3px 0 0;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
     font-size: 18px;
 }
@@ -1160,7 +1160,7 @@
 .analytics-tile > strong {
     display: block;
     margin-top: 2px;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
     font-size: 30px;
     line-height: 1;
@@ -1256,7 +1256,7 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: "Baloo 2", sans-serif;
     white-space: nowrap;
     overflow: hidden;
@@ -1299,7 +1299,7 @@
     --emp-surface: var(--card-bg);
     --emp-surface-2: var(--surface-2);
     --emp-tint: rgba(242, 193, 78, 0.15);
-    --emp-heading: var(--maroon-dark-white);
+    --emp-heading: var(--maroon-light);
     --emp-shadow: var(--shadow-card);
 
     /* Status tones — shared by the tiles, the pills and the legend.
@@ -1551,7 +1551,7 @@
 .emp-tile-value {
     display: block;
     margin: 0 0 5px;
-    color: var(--maroon-dark-white);
+    color: var(--maroon-light);
     font-family: var(--font-heading);
     font-size: 38px;
     font-weight: 800;

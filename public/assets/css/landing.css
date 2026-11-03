@@ -8,6 +8,7 @@
     --lp-maroon: var(--maroon, #7b1e2b);
     --lp-maroon-dark: var(--maroon-dark, #5a1420);
     --lp-gold: var(--gold, #c9a227);
+    --lp-gold-dark: var(--gold-dark, var(--lp-gold));
     --lp-gold-light: var(--gold-light, #f6ecd0);
     --lp-ink: var(--ink, #2b1d1a);
     --lp-ink-soft: var(--ink-soft, #6b5a55);

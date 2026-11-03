@@ -59,15 +59,15 @@
 }
 
 .alert-success {
-    background: var(--accent-tint);
-    color: var(--accent-dark);
-    border: 1px solid #C6DED4;
+    background: var(--success-bg);
+    color: var(--success);
+    border: 1px solid var(--green);
 }
 
 .alert-error {
-    background: var(--rejected-tint);
-    color: #7C3A2B;
-    border: 1px solid #E4C3B8;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--red);
 }
 
 /* ---------- employee strip ---------- */
@@ -144,7 +144,7 @@
 }
 
 .employee-request-page .request-view-btn:focus-visible {
-    outline: 2px solid var(--primary-color, #7b1e2b);
+    outline: 2px solid var(--maroon);
     outline-offset: 3px;
 }
 
