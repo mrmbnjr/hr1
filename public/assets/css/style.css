@@ -26,3 +26,26 @@ body {
   font-family: var(--font-body);
   color: var(--text);
 }
+
+/* Opt-in calm canvas for pages that adopted the Warm Cozy system.
+   Add class="page-cozy" to <body>. When every page is migrated,
+   move these two lines into the body rule above and delete this one. */
+body.page-cozy {
+  background-color: var(--canvas);
+  background-image: none;
+}
+
+/* --- Accessibility (global) --- */
+:focus-visible {
+  outline: 3px solid var(--focus-outline);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -21,12 +21,13 @@
      otherwise derived tokens will not re-resolve.
 
    WHICH TOKEN DO I USE?
-     Page background ........ --bg
+     Page background ........ --canvas (calm) / --bg (featured areas)
      Card / panel ........... --surface   (+ --border)
      Navbar ................. --surface-nav
      Sub-panel inside card .. --surface-inset
      Hover / zebra row ...... --tint-gold-weak
      Primary text ........... --text      (secondary: --text-muted)
+     Section / card headings  --heading
      Links, ids, active tab . --accent
      Brand fill (headers) ... --brand / --brand-strong
      CTA gold ............... --gold / --gold-strong
@@ -69,27 +70,34 @@
   --bg-wave-opacity-1: 0.30;
   --bg-wave-opacity-2: 0.16;
 
+  --canvas: #faf6ee;           /* calm page background for work/reading pages */
+
   --surface: #fbf3e6;          /* cards, panels */
   --surface-raised: var(--surface);
   --surface-nav: #fff;
   --surface-inset: #faf6ee;    /* rank numbers, sub-panels inside cards */
   --paper: #fff;               /* "white" that becomes soft cream in dark */
+  --overlay: rgba(26, 10, 10, 0.5);   /* modal backdrop */
 
   /* Tint strength knob: dark mode lowers it, tints adapt for free */
   --tint-scale: 1;
   --tint-gold: color-mix(in srgb, var(--palette-gold-500) calc(12% * var(--tint-scale)), transparent);
   --tint-gold-weak: color-mix(in srgb, var(--palette-gold-500) calc(8% * var(--tint-scale)), transparent);
+  --tint-gold-strong: color-mix(in srgb, var(--palette-gold-500) calc(20% * var(--tint-scale)), transparent);
+  --tint-brand: color-mix(in srgb, var(--palette-maroon-700) 10%, transparent);   /* icon chips */
   --surface-muted: color-mix(in srgb, var(--text-muted) 5%, transparent);
 
   /* ---- Borders ---- */
   --border: #e6d5bd;
   --border-strong: #ecd8bc;    /* navbar, dividers needing more weight */
   --border-card: var(--palette-maroon-700);
+  --border-gold: color-mix(in srgb, var(--palette-gold-600) 40%, transparent);   /* gold hairline / ring */
 
   /* ---- Text ---- */
   --text: #241311;
   --text-muted: #6b4a44;
   --accent: var(--palette-maroon-900);   /* links, ids, active tabs */
+  --heading: var(--brand);     /* card & section headings (dark overrides) */
 
   /* ---- Brand ---- */
   --brand: var(--palette-maroon-700);
@@ -139,6 +147,9 @@
   --shadow-soft: 0 10px 30px rgba(74, 15, 15, 0.16);
   --shadow-lg: 0 16px 48px rgba(74, 14, 24, 0.18);
   --shadow-color-card: rgba(74, 15, 15, 0.28);
+  --shadow-brand: 0 4px 14px color-mix(in srgb, var(--palette-maroon-700) 28%, transparent);
+  --shadow-icon: 0 4px 14px rgba(74, 15, 15, 0.18);
+  --shadow-modal: 0 24px 60px rgba(20, 6, 6, 0.28);
 
   /* ========================================================
      3. SCALES  (theme independent)
@@ -160,6 +171,7 @@
   --radius-field: 12px;
   --radius-md: 14px;           /* buttons, generic */
   --radius-card: 26px;
+  --radius-lg: 20px;           /* dashboard cards */
   --radius-pill: 999px;
   --radius-xs: 6px;            /* tags */
   --radius-sm: 8px;            /* small controls (pagination) */
@@ -220,6 +232,16 @@
   /* Focus & avatar */
   --focus-outline: color-mix(in srgb, var(--palette-gold-500) 65%, transparent);
   --avatar-border: color-mix(in srgb, var(--gold-strong) 55%, transparent);
+
+  /* Progress bar fills */
+  --grad-progress-gold: linear-gradient(90deg, var(--palette-gold-500), var(--palette-gold-600));
+  --grad-progress-success: linear-gradient(90deg, #4caf50, #2e7d32);
+  --grad-progress-info: linear-gradient(90deg, #42a5f5, #1565c0);
+  --grad-progress-warning: linear-gradient(90deg, #ffa726, #e65100);
+
+  /* Hero banner glows (they sit on the maroon banner in both themes) */
+  --hero-glow-gold: color-mix(in srgb, var(--palette-gold-500) 34%, transparent);
+  --hero-glow-red: color-mix(in srgb, var(--palette-red-400) 26%, transparent);
 
   /* Misc */
   --avatar-fg: var(--palette-maroon-900);
@@ -355,12 +377,14 @@
   --bg-wave-color: #4a2f1e;
   --bg-wave-opacity-1: 0.55;
   --bg-wave-opacity-2: 0.35;
+  --canvas: #241511;
 
   --surface: #2f1c17;
   --surface-raised: #3a241d;
   --surface-nav: #2f1c17;
   --surface-inset: rgba(0, 0, 0, 0.18);
   --paper: rgba(255, 250, 243, 0.75);
+  --overlay: rgba(0, 0, 0, 0.65);
 
   --tint-scale: 0.75;
 
@@ -373,6 +397,7 @@
   --text: #f6e9e2;
   --text-muted: #d8b9ae;
   --accent: var(--palette-gold-500);
+  --heading: var(--brand-soft);
 
   /* Brand */
   --brand: #4a1212;
@@ -402,6 +427,8 @@
   --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.50);
   --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
   --shadow-color-card: rgba(0, 0, 0, 0.45);
+  --shadow-icon: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.60);
 
   /* Component tokens */
   --avatar-fg: var(--brand-soft);

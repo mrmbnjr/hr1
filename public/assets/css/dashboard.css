@@ -1,6 +1,12 @@
 /* ==========================================================
-   RAM-YUM HRMS Dashboard — Professional UI v2
-   All class names unchanged. CSS-only improvements.
+   RAM-YUM HRMS Dashboard  —  page styles
+   ----------------------------------------------------------
+   - Class names, IDs and markup are unchanged.
+   - Colours, fonts and shadows come from variables.css tokens
+     only: no #hex / rgba() and no [data-theme] in this file.
+   - Reusable parts (buttons, badges, tables, forms, pagination)
+     live in components.css. This file only lays out the
+     dashboard and styles its unique widgets.
 ========================================================== */
 
 /* ==========================================================
@@ -110,10 +116,10 @@
 }
 
 .dashboard-card {
-    background: var(--card-bg);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(74, 15, 15, 0.06);
+    box-shadow: var(--shadow-card);
     overflow: hidden;
     transition: box-shadow 0.25s ease;
 }
@@ -132,21 +138,21 @@
     align-items: center;
     padding: 20px 24px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
+    background: linear-gradient(180deg, var(--tint-gold-weak) 0%, transparent 100%);
 }
 
 .card-header h2 {
     margin: 0;
     font-size: 17px;
     font-weight: 700;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
     letter-spacing: -0.01em;
 }
 
 .card-header p {
     margin: 4px 0 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12.5px;
     font-weight: 500;
 }
@@ -160,7 +166,7 @@
 }
 
 .card-header a:hover {
-    color: var(--ry-gold-dark);
+    color: var(--gold-strong);
 }
 
 /* ==========================================================
@@ -178,7 +184,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--card-bg);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 4px 6px;
@@ -189,9 +195,9 @@
     text-align: center;
     font-weight: 700;
     font-size: 13px;
-    color: var(--ink);
+    color: var(--text);
     white-space: nowrap;
-    font-family: "Baloo 2", sans-serif;
+    font-family: var(--font-heading);
 }
 
 .nav-btn {
@@ -234,10 +240,10 @@
     padding: 0 10px;
     border: 1px solid var(--border);
     border-radius: 9px;
-    background: var(--card-bg);
-    color: var(--ink);
+    background: var(--surface);
+    color: var(--text);
     font-size: 13px;
-    font-family: "Nunito", sans-serif;
+    font-family: var(--font-body);
     font-weight: 600;
     cursor: pointer;
     transition: border-color 0.16s;
@@ -245,7 +251,7 @@
 
 #growthFilter:focus {
     outline: none;
-    border-color: var(--ry-gold);
+    border-color: var(--gold);
 }
 
 /* ==========================================================
@@ -278,8 +284,8 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
     letter-spacing: 0.01em;
 }
 
@@ -294,12 +300,7 @@
 }
 
 .submissions-header a:hover {
-    color: var(--gold-dark);
-}
-
-.table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    color: var(--gold-strong);
 }
 
 .submissions-table {
@@ -317,8 +318,8 @@
     font-weight: 800;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--ink-soft);
-    background: var(--table-head-bg);
+    color: var(--text-muted);
+    background: var(--tint-gold);
     white-space: nowrap;
     border-bottom: 1px solid var(--border);
 }
@@ -328,7 +329,7 @@
     text-align: left;
     vertical-align: middle;
     border-bottom: 1px solid var(--border);
-    color: var(--ink);
+    color: var(--text);
 }
 
 .submissions-table tbody tr:last-child td {
@@ -336,14 +337,14 @@
 }
 
 .submissions-table tbody tr:hover td {
-    background: var(--row-hover-bg);
+    background: var(--tint-gold-weak);
 }
 
 .submission-applicant {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: var(--ink);
+    color: var(--text);
     text-decoration: none;
     white-space: nowrap;
     font-weight: 600;
@@ -360,9 +361,9 @@
     width: 30px;
     height: 30px;
     flex-shrink: 0;
-    border: 1px solid rgba(207, 154, 44, 0.55);
+    border: 1px solid var(--avatar-border);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
     color: var(--avatar-fg);
     font-family: var(--font-heading);
     font-size: 12px;
@@ -371,7 +372,7 @@
 
 .submission-date {
     white-space: nowrap;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12px;
 }
 
@@ -387,14 +388,14 @@
     letter-spacing: 0.02em;
 }
 
-.submission-status.submitted   { background: var(--badge-gray-bg);   color: var(--badge-gray-fg);   }
-.submission-status.under-review{ background: var(--badge-orange-bg); color: var(--badge-orange-fg); }
-.submission-status.interview   { background: var(--badge-blue-bg);   color: var(--badge-blue-fg);   }
-.submission-status.hired       { background: var(--badge-green-bg);  color: var(--badge-green-fg);  }
-.submission-status.rejected    { background: var(--badge-red-bg);    color: var(--badge-red-fg);    }
+.submission-status.submitted   { background: var(--neutral-bg);   color: var(--neutral);   }
+.submission-status.under-review{ background: var(--warning-bg); color: var(--warning); }
+.submission-status.interview   { background: var(--info-bg);   color: var(--info);   }
+.submission-status.hired       { background: var(--success-bg);  color: var(--success);  }
+.submission-status.rejected    { background: var(--danger-bg);    color: var(--danger);    }
 
 .submissions-empty {
-    color: var(--ink-soft) !important;
+    color: var(--text-muted) !important;
     text-align: center !important;
     padding: 32px !important;
 }
@@ -405,7 +406,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 12px 22px 16px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12px;
     font-weight: 700;
 }
@@ -420,7 +421,7 @@
     height: 30px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--card-bg);
+    background: var(--surface);
     color: var(--accent);
     cursor: pointer;
     display: flex;
@@ -430,7 +431,7 @@
 }
 
 .submissions-pagination button:hover:not(:disabled) {
-    background: rgba(242, 193, 78, 0.18);
+    background: var(--gold-bg);
 }
 
 .submissions-pagination button:disabled {
@@ -457,13 +458,13 @@
     margin: 0;
     font-size: 17px;
     font-weight: 700;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
 }
 
 .calendar-hint {
     margin: 2px 0 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 600;
 }
@@ -477,16 +478,16 @@
     align-items: center;
     gap: 6px;
     padding: 8px 11px;
-    border: 1px solid rgba(181, 130, 47, .35);
+    border: 1px solid var(--border-gold);
     border-radius: 9px;
-    background: rgba(242, 193, 78, .14);
+    background: var(--tint-gold);
     color: var(--accent);
     cursor: pointer;
-    font: 800 11px "Nunito", sans-serif;
+    font: 800 11px var(--font-body);
 }
 
 .calendar-view-toggle:hover {
-    background: rgba(242, 193, 78, .25);
+    background: var(--tint-gold-strong);
 }
 
 .calendar-viewport {
@@ -534,8 +535,8 @@
 }
 
 .calendar-nav:hover {
-    background: rgba(242, 193, 78, 0.15);
-    border-color: var(--ry-gold);
+    background: var(--tint-gold-strong);
+    border-color: var(--gold);
 }
 
 .calendar-nav i {
@@ -571,17 +572,17 @@
     border-radius: 10px;
     cursor: pointer;
     transition: background 0.18s, color 0.18s;
-    color: var(--ink);
+    color: var(--text);
     font-size: 13px;
     font-weight: 600;
 }
 
 .calendar td.has-events {
-    box-shadow: inset 0 0 0 2px rgba(181, 130, 47, .45);
+    box-shadow: inset 0 0 0 2px var(--border-gold);
 }
 
 .calendar td.today.has-events {
-    box-shadow: inset 0 0 0 2px var(--ry-gold), 0 4px 14px rgba(111, 20, 20, .28);
+    box-shadow: inset 0 0 0 2px var(--gold), var(--shadow-brand);
 }
 
 .calendar-event-dot {
@@ -591,7 +592,7 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--ry-gold);
+    background: var(--gold);
     transform: translateX(-50%);
 }
 
@@ -610,13 +611,13 @@
 
 .calendar-events__header h3 {
     margin: 0;
-    color: var(--maroon-light);
+    color: var(--heading);
     font-size: 13px;
 }
 
 .calendar-events__header p {
     margin: 3px 0 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
 }
 
@@ -632,12 +633,12 @@
     border: 0;
     border-radius: 8px;
     cursor: pointer;
-    font: 700 11px "Nunito", sans-serif;
+    font: 700 11px var(--font-body);
 }
 
 .calendar-add-event {
     padding: 7px 10px;
-    background: rgba(242, 193, 78, .16);
+    background: var(--tint-gold);
     color: var(--accent);
 }
 
@@ -656,14 +657,14 @@
     border: 1px solid var(--border);
     border-radius: 9px;
     background: transparent;
-    color: var(--ink);
+    color: var(--text);
     cursor: pointer;
     text-align: left;
 }
 
 .calendar-event-item:hover {
-    border-color: var(--ry-gold);
-    background: rgba(242, 193, 78, .08);
+    border-color: var(--gold);
+    background: var(--tint-gold-weak);
 }
 
 .calendar-event-date {
@@ -690,18 +691,18 @@
 }
 
 .calendar-event-info small {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
 }
 
 .calendar-event-item > i {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
 }
 
 .calendar-event-empty {
     margin: 70px 0 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11px;
     text-align: center;
 }
@@ -736,7 +737,7 @@
 }
 
 .calendar-pagination span {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 700;
 }
@@ -757,7 +758,7 @@
 .calendar-modal__backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(26, 10, 10, .5);
+    background: var(--overlay);
 }
 
 .calendar-modal__dialog {
@@ -765,8 +766,8 @@
     width: min(460px, 100%);
     padding: 24px;
     border-radius: 18px;
-    background: var(--card-bg);
-    box-shadow: 0 24px 60px rgba(20, 6, 6, .28);
+    background: var(--surface);
+    box-shadow: var(--shadow-modal);
 }
 
 .calendar-modal__header,
@@ -792,7 +793,7 @@
 
 .calendar-modal__header h2 {
     margin: 0;
-    color: var(--maroon-light);
+    color: var(--heading);
     font-size: 20px;
 }
 
@@ -802,7 +803,7 @@
     border: 1px solid var(--border);
     border-radius: 9px;
     background: transparent;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     cursor: pointer;
 }
 
@@ -819,13 +820,13 @@
 }
 
 .calendar-form-field label {
-    color: var(--ink);
+    color: var(--text);
     font-size: 12px;
     font-weight: 800;
 }
 
 .calendar-form-field label span {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-weight: 500;
 }
 
@@ -836,15 +837,15 @@
     border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--surface);
-    color: var(--ink);
-    font: 500 12px "Nunito", sans-serif;
+    color: var(--text);
+    font: 500 12px var(--font-body);
     box-sizing: border-box;
 }
 
 .calendar-form-field input:focus,
 .calendar-form-field textarea:focus {
-    outline: 2px solid rgba(181, 130, 47, .35);
-    border-color: var(--ry-gold);
+    outline: 2px solid var(--border-gold);
+    border-color: var(--gold);
 }
 
 .calendar-modal__actions {
@@ -854,24 +855,24 @@
 
 .calendar-delete-event {
     margin-right: auto;
-    color: #a52b2b;
+    color: var(--danger-strong);
     background: transparent;
 }
 
 .calendar-cancel-event {
     padding: 9px 13px;
     background: var(--surface-muted);
-    color: var(--ink);
+    color: var(--text);
 }
 
 .calendar-save-event {
     padding: 9px 14px;
-    background: var(--ry-maroon);
-    color: var(--white);
+    background: var(--brand);
+    color: var(--on-solid);
 }
 
 .calendar td:not(.empty):hover {
-    background: rgba(242, 193, 78, 0.2);
+    background: var(--tint-gold-strong);
     color: var(--accent);
 }
 
@@ -881,14 +882,14 @@
 }
 
 .calendar td.today {
-    background: var(--ry-maroon);
-    color: var(--white);
+    background: var(--brand);
+    color: var(--on-solid);
     font-weight: 800;
-    box-shadow: 0 4px 14px rgba(111, 20, 20, 0.28);
+    box-shadow: var(--shadow-brand);
 }
 
 .calendar td.weekend {
-    color: #a5a5a5;
+    color: var(--neutral);
 }
 
 /* ==========================================================
@@ -921,7 +922,7 @@
     font-weight: 700;
     white-space: nowrap;
     transition: all 0.22s ease;
-    font-family: "Nunito", sans-serif;
+    font-family: var(--font-body);
 }
 
 .view-all-btn i {
@@ -930,10 +931,10 @@
 }
 
 .view-all-btn:hover {
-    background: var(--ry-maroon);
-    color: var(--ry-gold);
-    border-color: var(--ry-maroon);
-    box-shadow: 0 4px 14px rgba(111, 20, 20, 0.2);
+    background: var(--brand);
+    color: var(--gold);
+    border-color: var(--brand);
+    box-shadow: var(--shadow-brand);
 }
 
 .view-all-btn:hover i {
@@ -972,17 +973,17 @@
     display: block;
     font-size: 13.5px;
     font-weight: 700;
-    color: var(--maroon-light);
+    color: var(--heading);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-family: "Baloo 2", sans-serif;
+    font-family: var(--font-heading);
 }
 
 .onboarding-role {
     display: block;
     margin-top: 3px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11.5px;
     white-space: nowrap;
     overflow: hidden;
@@ -1006,19 +1007,19 @@
     height: 100%;
     border-radius: 999px;
     transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(90deg, var(--ry-gold), var(--ry-gold-dark));
+    background: var(--grad-progress-gold);
 }
 
 .onboarding-bar-fill.completed {
-    background: linear-gradient(90deg, #4caf50, #2e7d32);
+    background: var(--grad-progress-success);
 }
 
 .onboarding-bar-fill.onboarding {
-    background: linear-gradient(90deg, #42a5f5, #1565c0);
+    background: var(--grad-progress-info);
 }
 
 .onboarding-bar-fill.pending {
-    background: linear-gradient(90deg, #ffa726, #e65100);
+    background: var(--grad-progress-warning);
 }
 
 .onboarding-progress-label {
@@ -1026,7 +1027,7 @@
     font-size: 12px;
     font-weight: 800;
     color: var(--accent);
-    font-family: "Baloo 2", sans-serif;
+    font-family: var(--font-heading);
 }
 
 .onboarding-info {
@@ -1035,7 +1036,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11.5px;
     margin-top: -6px;
 }
@@ -1043,7 +1044,7 @@
 .no-onboarding {
     padding: 28px;
     text-align: center;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 14px;
 }
 
@@ -1076,7 +1077,7 @@
     padding: 18px;
     border: 1px solid var(--border);
     border-radius: 16px;
-    background: linear-gradient(145deg, rgba(242, 193, 78, 0.13), rgba(255, 255, 255, 0.02));
+    background: linear-gradient(145deg, var(--tint-gold), transparent);
 }
 
 .analytics-panel-heading,
@@ -1090,7 +1091,7 @@
 .analytics-eyebrow,
 .analytics-tile-label {
     display: block;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -1099,8 +1100,8 @@
 
 .analytics-panel-heading h3 {
     margin: 3px 0 0;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
     font-size: 18px;
 }
 
@@ -1108,7 +1109,7 @@
     padding: 6px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 700;
 }
@@ -1127,7 +1128,7 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: 13px;
-    background: var(--card-bg);
+    background: var(--surface);
 }
 
 .analytics-tile-icon {
@@ -1137,19 +1138,19 @@
     width: 25px;
     height: 25px;
     border-radius: 8px;
-    background: rgba(111, 20, 20, 0.1);
+    background: var(--tint-brand);
     color: var(--accent);
     font-size: 12px;
 }
 
 .analytics-change {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 9px;
     font-weight: 800;
 }
 
 .analytics-change.positive {
-    color: var(--status-approved);
+    color: var(--success);
 }
 
 .analytics-tile-label {
@@ -1160,8 +1161,8 @@
 .analytics-tile > strong {
     display: block;
     margin-top: 2px;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
     font-size: 30px;
     line-height: 1;
 }
@@ -1183,7 +1184,7 @@
 .analytics-spark.bars i {
     flex: 1;
     border-radius: 3px 3px 0 0;
-    background: linear-gradient(180deg, var(--ry-gold), var(--ry-maroon));
+    background: linear-gradient(180deg, var(--gold), var(--brand));
 }
 
 .analytics-spark.line svg {
@@ -1193,7 +1194,7 @@
 
 .analytics-spark.line polyline {
     fill: none;
-    stroke: var(--ry-maroon);
+    stroke: var(--brand);
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.5;
@@ -1214,7 +1215,7 @@
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, var(--ry-maroon), var(--ry-gold));
+    background: linear-gradient(90deg, var(--brand), var(--gold));
 }
 
 .activity-item {
@@ -1243,9 +1244,9 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: linear-gradient(145deg, var(--ry-maroon), var(--ry-maroon-dark));
-    color: var(--ry-gold);
-    box-shadow: 0 4px 14px rgba(74, 15, 15, 0.18);
+    background: linear-gradient(145deg, var(--brand), var(--brand-strong));
+    color: var(--gold);
+    box-shadow: var(--shadow-icon);
 }
 
 .activity-type i {
@@ -1256,8 +1257,8 @@
     margin: 0;
     font-size: 14px;
     font-weight: 700;
-    color: var(--maroon-light);
-    font-family: "Baloo 2", sans-serif;
+    color: var(--heading);
+    font-family: var(--font-heading);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1266,7 +1267,7 @@
 .activity-item p {
     margin: 3px 0 0;
     font-size: 12.5px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1276,7 +1277,7 @@
     flex-shrink: 0;
     font-size: 11.5px;
     font-weight: 600;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     white-space: nowrap;
     margin-left: auto;
 }
@@ -1288,37 +1289,20 @@
    shared tokens (maroon / gold / cream, Baloo 2 + Nunito) and the
    card rhythm of the profile page so both roles see one product.
 
-   Rule of thumb for anything added here: a colour that has to
-   survive dark mode goes through a local token below. Never use a
-   hard-coded white surface or --gray-bg, which is not redefined
-   for the dark theme.
+   Rule of thumb: use shared tokens from variables.css only.
+   No page-local colour aliases and no raw colours; dark mode
+   then works without any extra rules here.
 ========================================================== */
 
 .emp-dash {
     --emp-gutter: 24px;
-    --emp-surface: var(--card-bg);
-    --emp-surface-2: var(--surface-2);
-    --emp-tint: rgba(242, 193, 78, 0.15);
-    --emp-heading: var(--maroon-light);
-    --emp-shadow: var(--shadow-card);
-
-    /* Status tones — shared by the tiles, the pills and the legend.
-       Light/dark values live in variables.css. */
-    --emp-pending: var(--status-pending);
-    --emp-pending-bg: var(--status-pending-bg);
-    --emp-approved: var(--status-approved);
-    --emp-approved-bg: var(--status-approved-bg);
-    --emp-completed: var(--status-completed);
-    --emp-completed-bg: var(--status-completed-bg);
-    --emp-rejected: var(--status-rejected);
-    --emp-rejected-bg: var(--status-rejected-bg);
 
     display: grid;
     gap: 22px;
     max-width: 1400px;
     margin-inline: auto;
     padding: 28px 32px 60px;
-    color: var(--ink);
+    color: var(--text);
 }
 
 /* ---------- Welcome hero ---------- */
@@ -1328,8 +1312,8 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    background: var(--emp-surface);
-    box-shadow: var(--emp-shadow);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
 }
 
 .emp-hero-banner {
@@ -1337,9 +1321,9 @@
     height: 96px;
     border-bottom: 3px solid var(--gold);
     background:
-        radial-gradient(120% 170% at 8% -20%, rgba(242, 193, 78, 0.34) 0%, transparent 58%),
-        radial-gradient(90% 150% at 96% 0%, rgba(255, 92, 80, 0.26) 0%, transparent 60%),
-        linear-gradient(190deg, var(--ry-maroon) 0%, var(--ry-maroon-dark) 100%);
+        radial-gradient(120% 170% at 8% -20%, var(--hero-glow-gold) 0%, transparent 58%),
+        radial-gradient(90% 150% at 96% 0%, var(--hero-glow-red) 0%, transparent 60%),
+        linear-gradient(190deg, var(--brand) 0%, var(--brand-strong) 100%);
 }
 
 .emp-hero-banner::after {
@@ -1347,6 +1331,8 @@
     position: absolute;
     inset: 0;
     opacity: 0.22;
+    /* Exception: an SVG data URI cannot read CSS variables, so its gold
+       stroke is fixed (same value as --gold, which is theme independent). */
     background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='200'%20height='100'%20viewBox='0%200%20200%20100'%3E%3Cg%20fill='none'%20stroke='%23f2c14e'%20stroke-opacity='0.55'%20stroke-width='2.2'%20stroke-linecap='round'%3E%3Cpath%20d='M-10,30%20C15,10%2065,10%2090,30%20C115,50%20165,50%20190,30%20C215,10%20240,10%20240,10'/%3E%3Cpath%20d='M-10,80%20C15,100%2065,100%2090,80%20C115,60%20165,60%20190,80%20C215,100%20240,100%20240,100'/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: repeat;
 }
@@ -1371,10 +1357,10 @@
     place-items: center;
     width: 92px;
     height: 92px;
-    border: 4px solid var(--emp-surface);
+    border: 4px solid var(--surface);
     border-radius: 26px;
-    background: linear-gradient(135deg, var(--gold-light), var(--gold));
-    box-shadow: 0 12px 26px rgba(74, 15, 15, 0.28);
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+    box-shadow: var(--shadow-soft);
     color: var(--avatar-fg);
     font-family: var(--font-heading);
     font-size: 32px;
@@ -1391,10 +1377,10 @@
     place-items: center;
     width: 26px;
     height: 26px;
-    border: 3px solid var(--emp-surface);
+    border: 3px solid var(--surface);
     border-radius: 50%;
-    background: var(--green);
-    color: #fff;
+    background: var(--success);
+    color: var(--on-solid);
     font-size: 11px;
 }
 
@@ -1407,14 +1393,14 @@
 
 .emp-greeting {
     margin: 0 0 2px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 13px;
     font-weight: 800;
 }
 
 .emp-hero-id h1 {
     margin: 0 0 11px;
-    color: var(--emp-heading);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: clamp(1.3rem, 2.4vw, 1.75rem);
     font-weight: 800;
@@ -1436,31 +1422,31 @@
     padding: 5px 11px;
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: var(--cream);
-    color: var(--emp-heading);
+    background: var(--surface-inset);
+    color: var(--heading);
     font-size: 12.5px;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .emp-chip i {
-    color: var(--gold-dark);
+    color: var(--gold-strong);
     font-size: 12px;
 }
 
 /* Employment status reads as state, not as one more fact chip. */
 .emp-chip.is-status {
     border-color: transparent;
-    background: var(--emp-approved-bg);
-    color: var(--emp-approved);
+    background: var(--success-bg);
+    color: var(--success);
     font-size: 11.5px;
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
 
 .emp-chip.is-status.is-hold {
-    background: var(--emp-pending-bg);
-    color: var(--emp-pending);
+    background: var(--warning-bg);
+    color: var(--warning);
 }
 
 .emp-chip.is-status .emp-dot {
@@ -1493,11 +1479,11 @@
     align-items: center;
     gap: 20px;
     padding: 22px 24px;
-    background: var(--card-bg);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-top: 3px solid var(--gold);
     border-radius: var(--radius-card);
-    box-shadow: 0 2px 12px rgba(74, 15, 15, 0.07);
+    box-shadow: var(--shadow-card);
     cursor: pointer;
     color: inherit;
     text-decoration: none;
@@ -1510,13 +1496,13 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(242, 193, 78, 0.04) 0%, transparent 60%);
+    background: linear-gradient(135deg, var(--tint-gold-weak) 0%, transparent 60%);
     pointer-events: none;
 }
 
 .emp-tile:hover {
     transform: translateY(-3px);
-    border-top-color: var(--ry-maroon);
+    border-top-color: var(--brand);
     box-shadow: var(--shadow-hover);
 }
 
@@ -1528,10 +1514,10 @@
     height: 56px;
     flex-shrink: 0;
     border-radius: 16px;
-    background: linear-gradient(145deg, var(--ry-maroon), var(--ry-maroon-dark));
-    color: var(--ry-gold);
+    background: linear-gradient(145deg, var(--brand), var(--brand-strong));
+    color: var(--gold);
     font-size: 22px;
-    box-shadow: 0 4px 14px rgba(74, 15, 15, 0.22);
+    box-shadow: var(--shadow-icon);
 }
 
 .emp-tile-body {
@@ -1541,7 +1527,7 @@
 .emp-tile-label {
     display: block;
     margin-bottom: 4px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.07em;
@@ -1551,7 +1537,7 @@
 .emp-tile-value {
     display: block;
     margin: 0 0 5px;
-    color: var(--maroon-light);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: 38px;
     font-weight: 800;
@@ -1561,7 +1547,7 @@
 /* Wraps rather than truncating: a clipped caption reads as a bug. */
 .emp-tile-caption {
     display: block;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12px;
     font-weight: 600;
     line-height: 1.3;
@@ -1569,7 +1555,7 @@
 
 .emp-tile-go {
     margin-left: auto;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12px;
     opacity: 0.35;
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -1590,8 +1576,8 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--emp-pending);
-    box-shadow: 0 0 0 4px var(--emp-pending-bg);
+    background: var(--warning);
+    box-shadow: 0 0 0 4px var(--warning-bg);
 }
 
 /* ---------- Content grid ---------- */
@@ -1620,8 +1606,8 @@
     overflow: hidden;
     border: 1px solid var(--border);
     border-radius: var(--radius-card);
-    background: var(--emp-surface);
-    box-shadow: var(--emp-shadow);
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
 }
 
 .emp-card-head {
@@ -1631,7 +1617,7 @@
     gap: 16px;
     padding: 20px var(--emp-gutter) 16px;
     border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(242, 193, 78, 0.07) 0%, transparent 100%);
+    background: linear-gradient(180deg, var(--tint-gold-weak) 0%, transparent 100%);
 }
 
 /* Without this the title block refuses to shrink and pushes the header
@@ -1640,7 +1626,7 @@
 
 .emp-card-head h2 {
     margin: 0 0 3px;
-    color: var(--emp-heading);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: 17px;
     font-weight: 700;
@@ -1648,7 +1634,7 @@
 
 .emp-card-head p {
     margin: 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12.5px;
 }
 
@@ -1670,7 +1656,7 @@
     transition: color 0.16s ease;
 }
 
-.emp-link:hover { color: var(--gold-dark); }
+.emp-link:hover { color: var(--gold-strong); }
 
 .emp-link i {
     font-size: 11px;
@@ -1698,7 +1684,7 @@
 }
 
 .emp-row:last-child { border-bottom: 0; }
-.emp-row:hover { background: var(--emp-surface-2); }
+.emp-row:hover { background: var(--tint-gold-weak); }
 
 .emp-row-icon {
     display: grid;
@@ -1706,8 +1692,8 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: var(--emp-surface-2);
-    color: var(--gold-dark);
+    background: var(--tint-gold-weak);
+    color: var(--gold-strong);
     font-size: 15px;
 }
 
@@ -1716,7 +1702,7 @@
 .emp-row-title {
     margin: 0;
     overflow: hidden;
-    color: var(--emp-heading);
+    color: var(--heading);
     font-size: 13.5px;
     font-weight: 800;
     text-overflow: ellipsis;
@@ -1728,7 +1714,7 @@
     flex-wrap: wrap;
     gap: 12px;
     margin: 4px 0 0;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12px;
 }
 
@@ -1756,10 +1742,10 @@
 
 .emp-pill i { font-size: 10.5px; }
 
-.emp-pill.is-pending   { background: var(--emp-pending-bg);   color: var(--emp-pending); }
-.emp-pill.is-approved  { background: var(--emp-approved-bg);  color: var(--emp-approved); }
-.emp-pill.is-completed { background: var(--emp-completed-bg); color: var(--emp-completed); }
-.emp-pill.is-rejected  { background: var(--emp-rejected-bg);  color: var(--emp-rejected); }
+.emp-pill.is-pending   { background: var(--warning-bg);   color: var(--warning); }
+.emp-pill.is-approved  { background: var(--success-bg);  color: var(--success); }
+.emp-pill.is-completed { background: var(--info-bg); color: var(--info); }
+.emp-pill.is-rejected  { background: var(--danger-bg);  color: var(--danger); }
 
 /* ---------- Request overview ---------- */
 
@@ -1786,7 +1772,7 @@
 }
 
 .emp-chart-center strong {
-    color: var(--emp-heading);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: 30px;
     font-weight: 800;
@@ -1795,7 +1781,7 @@
 
 .emp-chart-center span {
     margin-top: 4px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.07em;
@@ -1817,7 +1803,7 @@
     gap: 10px;
     padding: 9px 0;
     border-top: 1px solid var(--border);
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12.5px;
     font-weight: 700;
 }
@@ -1825,14 +1811,14 @@
 .emp-legend li:first-child { border-top: 0; }
 
 .emp-legend strong {
-    color: var(--emp-heading);
+    color: var(--heading);
     font-size: 13px;
     font-weight: 800;
 }
 
 .emp-legend em {
     min-width: 38px;
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11.5px;
     font-style: normal;
     font-weight: 700;
@@ -1844,7 +1830,7 @@
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: var(--ink-soft);
+    background: var(--text-muted);
 }
 
 /* ---------- Employment record ---------- */
@@ -1868,14 +1854,14 @@
 .emp-info > div:last-child { border-bottom: 0; }
 
 .emp-info dt {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 12.5px;
     font-weight: 700;
 }
 
 .emp-info dd {
     margin: 0;
-    color: var(--emp-heading);
+    color: var(--heading);
     font-size: 13px;
     font-weight: 800;
     text-align: right;
@@ -1889,7 +1875,7 @@
     margin: 0;
     padding: 12px var(--emp-gutter) 18px;
     border-top: 1px solid var(--border);
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11.5px;
     font-weight: 600;
     line-height: 1.55;
@@ -1897,7 +1883,7 @@
 
 .emp-note i {
     margin-top: 2px;
-    color: var(--gold-dark);
+    color: var(--gold-strong);
 }
 
 .emp-note a {
@@ -1915,18 +1901,18 @@
     justify-items: center;
     gap: 8px;
     padding: 44px var(--emp-gutter);
-    color: var(--ink-soft);
+    color: var(--text-muted);
     text-align: center;
 }
 
 .emp-empty > i {
-    color: var(--gold-dark);
+    color: var(--gold-strong);
     font-size: 28px;
 }
 
 .emp-empty h3 {
     margin: 4px 0 0;
-    color: var(--emp-heading);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: 16.5px;
     font-weight: 700;
@@ -1966,7 +1952,7 @@
     padding: 14px 15px;
     border: 1px solid var(--border);
     border-radius: var(--radius-field);
-    background: var(--cream);
+    background: var(--surface-inset);
     color: inherit;
     text-decoration: none;
     transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
@@ -1974,8 +1960,8 @@
 
 .emp-launch:hover {
     transform: translateY(-2px);
-    border-color: var(--gold-dark);
-    background: var(--emp-tint);
+    border-color: var(--gold-strong);
+    background: var(--tint-gold);
     box-shadow: var(--shadow-hover);
 }
 
@@ -1985,7 +1971,7 @@
     width: 38px;
     height: 38px;
     border-radius: 11px;
-    background: var(--emp-surface);
+    background: var(--surface);
     color: var(--accent);
     font-size: 15px;
 }
@@ -1997,20 +1983,20 @@
 }
 
 .emp-launch-body strong {
-    color: var(--emp-heading);
+    color: var(--heading);
     font-size: 13px;
     font-weight: 800;
 }
 
 .emp-launch-body small {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11.5px;
     font-weight: 600;
     line-height: 1.4;
 }
 
 .emp-launch-go {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 11px;
     opacity: 0.35;
     transition: opacity 0.18s ease, transform 0.18s ease;
@@ -2272,9 +2258,9 @@
 
 /* ---------- status pills ---------- */
 
-.emp-pill.is-progress { background: var(--emp-completed-bg); color: var(--emp-completed); }
-.emp-pill.is-done     { background: var(--emp-approved-bg);  color: var(--emp-approved); }
-.emp-pill.is-overdue  { background: var(--emp-rejected-bg);  color: var(--emp-rejected); }
+.emp-pill.is-progress { background: var(--info-bg); color: var(--info); }
+.emp-pill.is-done     { background: var(--success-bg);  color: var(--success); }
+.emp-pill.is-overdue  { background: var(--danger-bg);  color: var(--danger); }
 
 /* ---------- at-a-glance counters ---------- */
 
@@ -2294,11 +2280,11 @@
     padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-field);
-    background: var(--emp-surface-2);
+    background: var(--tint-gold-weak);
 }
 
 .emp-assigned-stats strong {
-    color: var(--emp-heading);
+    color: var(--heading);
     font-family: var(--font-heading);
     font-size: 22px;
     font-weight: 800;
@@ -2306,17 +2292,17 @@
 }
 
 .emp-assigned-stats span {
-    color: var(--ink-soft);
+    color: var(--text-muted);
     font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
-.emp-assigned-stats li.is-pending strong  { color: var(--emp-pending); }
-.emp-assigned-stats li.is-progress strong { color: var(--emp-completed); }
-.emp-assigned-stats li.is-done strong     { color: var(--emp-approved); }
-.emp-assigned-stats li.is-overdue strong  { color: var(--emp-rejected); }
+.emp-assigned-stats li.is-pending strong  { color: var(--warning); }
+.emp-assigned-stats li.is-progress strong { color: var(--info); }
+.emp-assigned-stats li.is-done strong     { color: var(--success); }
+.emp-assigned-stats li.is-overdue strong  { color: var(--danger); }
 
 /* ---------- whole-row link ----------
    The anchor is an invisible overlay, so the row keeps the shared
@@ -2334,18 +2320,18 @@
 }
 
 .emp-row.is-link:focus-within {
-    background: var(--emp-surface-2);
+    background: var(--tint-gold-weak);
 }
 
 .emp-row-hit:focus-visible {
-    outline: 2px solid var(--gold-dark);
+    outline: 2px solid var(--gold-strong);
     outline-offset: -2px;
 }
 
 /* ---------- overdue marker inside the row meta ---------- */
 
 .emp-row-meta .is-overdue {
-    color: var(--emp-rejected);
+    color: var(--danger);
     font-weight: 800;
 }
 
