@@ -1,382 +1,392 @@
 /* ==========================================================
    DESIGN TOKENS  —  single source of truth for theming
    ----------------------------------------------------------
-   Light values  ->  :root
-   Dark values   ->  [data-theme="dark"]
+   Layers (top to bottom):
+     1. PRIMITIVES   raw values. Never theme-dependent.
+                     Components must NOT use these directly.
+     2. SEMANTIC     roles (surface, text, success...). Themed.
+                     <- this is what components consume.
+     3. SCALES       spacing, radius, type, motion, z-index.
+     4. COMPONENT    tokens for specific widgets (button, navbar).
+     5. LEGACY       old names -> new names. DELETE when unused.
 
-   RULE: this is the ONLY file that may contain a
-   [data-theme="dark"] selector. Components and pages must
-   consume the tokens below (var(--token)) and never hard-code
-   a theme colour themselves. That is what keeps every page on
-   the same design.
+   RULES
+   - This is the ONLY file allowed to contain [data-theme].
+   - Light values live in :root, dark overrides in
+     [data-theme="dark"]. Only layer 2 (and a few component
+     tokens) ever need a dark override.
+   - A token defined as var(--other) or color-mix(...) is NOT
+     repeated in the dark block; it re-resolves automatically.
+   - data-theme MUST be set on <html> (same element as :root),
+     otherwise derived tokens will not re-resolve.
+
+   WHICH TOKEN DO I USE?
+     Page background ........ --bg
+     Card / panel ........... --surface   (+ --border)
+     Navbar ................. --surface-nav
+     Sub-panel inside card .. --surface-inset
+     Hover / zebra row ...... --tint-gold-weak
+     Primary text ........... --text      (secondary: --text-muted)
+     Links, ids, active tab . --accent
+     Brand fill (headers) ... --brand / --brand-strong
+     CTA gold ............... --gold / --gold-strong
+     Status ................. --success / --warning / --danger /
+                              --info / --neutral   (+ -bg)
+     Elevation .............. --shadow-sm / -card / -hover / -lg
 ========================================================== */
 
 :root {
   color-scheme: light;
 
-  /* ==========================
-     Color Palette
-  ========================== */
+  /* ========================================================
+     1. PRIMITIVES  (raw palette — theme independent)
+  ======================================================== */
 
+  --palette-maroon-900: #4a0d0d;
+  --palette-maroon-700: #6f1414;
+  --palette-maroon-100: #ecd8bc;
+
+  --palette-gold-200: #f0d78c;
+  --palette-gold-300: #ffd978;
+  --palette-gold-400: #f5c84d;
+  --palette-gold-500: #f2c14e;
+  --palette-gold-600: #cf9a2c;
+  --palette-gold-800: #9a6915;
+
+  --palette-red-400: #ff5c50;
+  --palette-red-500: #e0362c;
+  --palette-green-700: #246b45;
+
+  /* ========================================================
+     2. SEMANTIC TOKENS  (light values; dark overrides below)
+  ======================================================== */
+
+  /* ---- Page & surfaces ---- */
   --bg: #f2dd9c;
   --bg-wave-color: #b5822f;
   --bg-wave-opacity-1: 0.30;
   --bg-wave-opacity-2: 0.16;
 
-  --card-bg: #fbf3e6;
-  --card-border: #6f1414;
-  --card-shadow: rgba(74, 15, 15, 0.28);
+  --surface: #fbf3e6;          /* cards, panels */
+  --surface-raised: var(--surface);
+  --surface-nav: #fff;
+  --surface-inset: #faf6ee;    /* rank numbers, sub-panels inside cards */
+  --paper: #fff;               /* "white" that becomes soft cream in dark */
 
+  /* Tint strength knob: dark mode lowers it, tints adapt for free */
+  --tint-scale: 1;
+  --tint-gold: color-mix(in srgb, var(--palette-gold-500) calc(12% * var(--tint-scale)), transparent);
+  --tint-gold-weak: color-mix(in srgb, var(--palette-gold-500) calc(8% * var(--tint-scale)), transparent);
+  --surface-muted: color-mix(in srgb, var(--text-muted) 5%, transparent);
+
+  /* ---- Borders ---- */
   --border: #e6d5bd;
+  --border-strong: #ecd8bc;    /* navbar, dividers needing more weight */
+  --border-card: var(--palette-maroon-700);
 
-  --maroon: #6f1414;
-  --maroon-dark: #4a0d0d;
-  --maroon-light: #ecd8bc;
-  --red-bright: #ff5c50;
+  /* ---- Text ---- */
+  --text: #241311;
+  --text-muted: #6b4a44;
+  --accent: var(--palette-maroon-900);   /* links, ids, active tabs */
 
-  --gold: #f2c14e;
-  --gold-dark: #cf9a2c;
-  --gold-light: #f0d78c;
-  --cream: #faf6ee;
+  /* ---- Brand ---- */
+  --brand: var(--palette-maroon-700);
+  --brand-strong: var(--palette-maroon-900);
+  --brand-soft: var(--palette-maroon-100);
+  --gold: var(--palette-gold-500);
+  --gold-strong: var(--palette-gold-600);
+  --gold-soft: var(--palette-gold-200);
 
-  --pink: #f8d9de;
-  --pink-border: #f0c0c7;
-  --pink-border-focus: var(--red);
+  /* ---- Form fields ---- */
+  --field-bg: #f8d9de;
+  --field-border: #f0c0c7;
+  --field-border-focus: var(--palette-red-500);
+  --field-readonly-bg: color-mix(in srgb, var(--text-muted) 6%, transparent);
+  --field-readonly-border: color-mix(in srgb, var(--text-muted) 16%, transparent);
+  --focus-ring: color-mix(in srgb, var(--palette-gold-500) 20%, transparent);
 
-  --ink: #241311;
-  --ink-soft: #6b4a44;
-  --white: #fff;
+  /* ---- Status tones: ONE colour per tone, backgrounds derived ----
+     Used by badges, alerts, workflow states, job listing status. */
+  --tone-bg-strength: 14%;
 
-  --gray: #6b7280;
-  --gray-bg: #eef0f2;
-  --blue: #2563eb;
-  --blue-bg: #e5edff;
-  --orange: #c2660d;
-  --orange-bg: #feebd3;
-  --green: #1a7d4c;
-  --green-bg: #e2f6ea;
-  --green-dark: #246b45;
-  --red: #e0362c;
-  --red-bg: #f3dbdb;
-  --red-dark: #8f241e;
+  --success: #1a7d4c;
+  --warning: #c2660d;
+  --danger: #c2413b;
+  --danger-strong: #8f241e;    /* alert text on tinted background */
+  --info: #2563eb;
+  --neutral: #6b7280;
+  --purple: #6d28d9;
+  --teal: #0f766e;
 
-  /* Job listing status colours */
-  --ok-bg: #d9f2dd;
-  --ok-ink: #1f6b33;
-  --soon-bg: #fbe8b5;
-  --soon-ink: #8a5a00;
+  --success-bg: color-mix(in srgb, var(--success) var(--tone-bg-strength), transparent);
+  --warning-bg: color-mix(in srgb, var(--warning) var(--tone-bg-strength), transparent);
+  --danger-bg:  color-mix(in srgb, var(--danger)  var(--tone-bg-strength), transparent);
+  --info-bg:    color-mix(in srgb, var(--info)    var(--tone-bg-strength), transparent);
+  --neutral-bg: color-mix(in srgb, var(--neutral) var(--tone-bg-strength), transparent);
+  --purple-bg:  color-mix(in srgb, var(--purple)  var(--tone-bg-strength), transparent);
+  --teal-bg:    color-mix(in srgb, var(--teal)    var(--tone-bg-strength), transparent);
+  --gold-bg:    color-mix(in srgb, var(--palette-gold-500) 18%, transparent);
 
-  /* ==========================
-     Spacing
-  ========================== */
+  /* Progress track, skeletons */
+  --track-bg: color-mix(in srgb, var(--text) 8%, transparent);
 
+  /* ---- Elevation ---- */
+  --shadow-sm: 0 4px 16px rgba(74, 14, 24, 0.08);
+  --shadow-card: 0 6px 22px rgba(74, 15, 15, 0.07);
+  --shadow-hover: 0 14px 32px rgba(74, 15, 15, 0.14);
+  --shadow-soft: 0 10px 30px rgba(74, 15, 15, 0.16);
+  --shadow-lg: 0 16px 48px rgba(74, 14, 24, 0.18);
+  --shadow-color-card: rgba(74, 15, 15, 0.28);
+
+  /* ========================================================
+     3. SCALES  (theme independent)
+  ======================================================== */
+
+  /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
   --space-12: 48px;
+  --space-16: 64px;
 
-  /* ==========================
-     Radius
-  ========================== */
-
-  --radius: 14px;
-  --radius-card: 26px;
+  /* Radius */
   --radius-field: 12px;
-  --radius-btn: 14px;
+  --radius-md: 14px;           /* buttons, generic */
+  --radius-card: 26px;
+  --radius-pill: 999px;
 
-  /* ==========================
-     Shadows
-  ========================== */
-
-  --shadow: 0 4px 16px rgba(74, 14, 24, 0.08);
-  --shadow-lg: 0 16px 48px rgba(74, 14, 24, 0.18);
-  --shadow-soft: 0 10px 30px rgba(74, 15, 15, 0.16);
-  --shadow-card: 0 6px 22px rgba(74, 15, 15, 0.07);
-  --shadow-hover: 0 14px 32px rgba(74, 15, 15, 0.14);
-
-  --transition: 180ms cubic-bezier(.4, 0, .2, 1);
-
-  --badge-seal: var(--maroon);
-
-  /* ==========================
-     Royyan Theme Aliases
-     (Keep — actively referenced by component CSS)
-  ========================== */
-
-  --ry-maroon: var(--maroon);
-  --ry-maroon-dark: var(--maroon-dark);
-  --ry-red: var(--red);
-  --ry-gold: var(--gold);
-  --ry-gold-dark: var(--gold-dark);
-  --ry-white: var(--white);
-
-  /* ==========================
-     Layout
-  ========================== */
-
-  --sidebar-width: 264px;
-
-  /* ==========================
-     Navbar
-  ========================== */
-
-  --navbar-bg: var(--white);
-  --navbar-surface: var(--card-bg);
-  --navbar-border: #ecd8bc;
-  --navbar-text: var(--ink);
-  --navbar-text-soft: var(--ink-soft);
-
-  /* ==========================
-     Buttons
-  ========================== */
-
-  --button-bg-hover: linear-gradient(180deg, #ffd978 0%, #f5c84d 100%);
-  --button-bg-active: #cf9a2c;
-
-  /* Fixed bevel colour under the gold button (theme-independent) */
-  --button-shadow-color: #9a6915;
-
-  /* ==========================
-     Typography
-  ========================== */
-
+  /* Typography */
   --font-display: "Luckiest Guy", "Baloo 2", cursive;
   --font-heading: "Baloo 2", "Nunito", sans-serif;
   --font-body: "Nunito", "Baloo 2", sans-serif;
 
-  /* ==========================
-     Semantic surfaces & tints
-     (shared by every page so dark mode looks identical)
-  ========================== */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-stat: 38px;
 
-  /* Table surfaces */
-  --table-head-bg: rgba(242, 193, 78, 0.12);
-  --row-hover-bg: rgba(242, 193, 78, 0.08);
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
 
-  /* Translucent overlays */
-  --tint-gold-10: rgba(242, 193, 78, 0.10);
-  --tint-gold-12: rgba(242, 193, 78, 0.12);
-  --tint-neutral: rgba(107, 74, 68, 0.05);
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --transition: var(--duration-base) var(--ease-standard);
 
-  /* Muted / read-only fields */
-  --surface-muted: rgba(107, 74, 68, 0.05);
-  --field-readonly-bg: rgba(107, 74, 68, 0.06);
-  --field-readonly-border: rgba(107, 74, 68, 0.16);
+  /* Layering */
+  --z-sticky: 50;
+  --z-nav: 100;
+  --z-dropdown: 500;
+  --z-modal: 1000;
+  --z-toast: 1100;
 
-  /* Inset surface (rank numbers, sub-panels inside cards) */
-  --surface-inset: var(--cream);
+  /* Layout */
+  --sidebar-width: 264px;
 
-  /* Emphasised text (links, ids, active tabs) */
-  --accent: var(--maroon-dark);
+  /* ========================================================
+     4. COMPONENT TOKENS
+  ======================================================== */
 
-  /* Feedback text */
-  --success-text: #2f8f4e;
-  --success: var(--green);
+  /* Buttons */
+  --btn-bg-hover: linear-gradient(180deg, var(--palette-gold-300) 0%, var(--palette-gold-400) 100%);
+  --btn-bg-active: var(--palette-gold-600);
+  --btn-bevel: var(--palette-gold-800);   /* fixed bevel under gold button */
 
-  /* Alert backgrounds */
-  --success-bg: var(--green-bg);
-  --error-bg: var(--red-bg);
-  --error-text: var(--red-dark);
+  /* Misc */
+  --avatar-fg: var(--palette-maroon-900);
+  --seal: var(--brand);
 
-  /* Avatar text */
-  --avatar-fg: var(--maroon-dark);
-
-  /* Generic surface alias */
-  --surface: var(--card-bg);
-
-  /* Divider / muted line */
-  --line: var(--border);
-
-  /* Badge / pill tokens (soft bg + readable fg) */
-  --badge-gray-bg: var(--gray-bg);
-  --badge-gray-fg: var(--gray);
-  --badge-blue-bg: var(--blue-bg);
-  --badge-blue-fg: var(--blue);
-  --badge-orange-bg: var(--orange-bg);
-  --badge-orange-fg: var(--orange);
-  --badge-green-bg: var(--green-bg);
-  --badge-green-fg: var(--green);
-  --badge-red-bg: var(--red-bg);
-  --badge-red-fg: var(--red);
-  --badge-gold-bg: rgba(242, 193, 78, 0.18);
-  --badge-gold-fg: var(--maroon-dark);
-  --badge-purple-bg: rgba(139, 92, 246, 0.14);
-  --badge-purple-fg: #6d28d9;
-  --badge-teal-bg: rgba(20, 184, 166, 0.16);
-  --badge-teal-fg: #0f766e;
-
-  /* Status tones (workflow states) */
-  --status-pending: #b45309;
-  --status-pending-bg: #fdf0d9;
-  --status-approved: #1a7d4c;
-  --status-approved-bg: #e2f6ea;
-  --status-completed: #2563eb;
-  --status-completed-bg: #e5edff;
-  --status-rejected: #c2413b;
-  --status-rejected-bg: #f7e0de;
-
-  /* Secondary surface & progress track */
-  --surface-2: rgba(242, 193, 78, 0.08);
-  --track-bg: rgba(111, 20, 20, 0.07);
-
-  /* Focus ring */
-  --focus-ring: rgba(242, 193, 78, 0.18);
-
-  /* Theme icon visibility (avoids a [data-theme] selector) */
+  /* Theme toggle icons (avoids a [data-theme] selector in components) */
   --icon-sun-display: block;
   --icon-moon-display: none;
+
+  /* ========================================================
+     5. LEGACY ALIASES  —  TEMPORARY MIGRATION LAYER
+     Old name -> new token. Do not use in new code.
+     Find & replace usages, then delete lines from this block.
+     (All are var() aliases, so they follow the theme for free.)
+  ======================================================== */
+
+  /* Surfaces / borders / text */
+  --card-bg: var(--surface);
+  --navbar-bg: var(--surface-nav);
+  --navbar-surface: var(--surface-raised);
+  --navbar-border: var(--border-strong);
+  --navbar-text: var(--text);
+  --navbar-text-soft: var(--text-muted);
+  --card-border: var(--border-card);
+  --card-shadow: var(--shadow-color-card);
+  --line: var(--border);
+  --ink: var(--text);
+  --ink-soft: var(--text-muted);
+  --white: var(--paper);
+  --cream: var(--surface-inset);
+  --surface-2: var(--tint-gold-weak);
+  --tint-gold-10: var(--tint-gold-weak);
+  --tint-gold-12: var(--tint-gold);
+  --tint-neutral: var(--surface-muted);
+  --table-head-bg: var(--tint-gold);
+  --row-hover-bg: var(--tint-gold-weak);
+
+  /* Brand */
+  --maroon: var(--brand);
+  --maroon-dark: var(--brand-strong);
+  --maroon-light: var(--brand-soft);
+  --gold-dark: var(--gold-strong);
+  --gold-light: var(--gold-soft);
+  --red-bright: var(--palette-red-400);
+  --ry-maroon: var(--brand);
+  --ry-maroon-dark: var(--brand-strong);
+  --ry-red: var(--palette-red-500);
+  --ry-gold: var(--gold);
+  --ry-gold-dark: var(--gold-strong);
+  --ry-white: var(--paper);
+  --badge-seal: var(--seal);
+
+  /* Fields */
+  --pink: var(--field-bg);
+  --pink-border: var(--field-border);
+  --pink-border-focus: var(--field-border-focus);
+
+  /* Raw colour names -> tones */
+  --gray: var(--neutral);
+  --gray-bg: var(--neutral-bg);
+  --blue: var(--info);
+  --blue-bg: var(--info-bg);
+  --orange: var(--warning);
+  --orange-bg: var(--warning-bg);
+  --green: var(--success);
+  --green-bg: var(--success-bg);
+  --green-dark: var(--palette-green-700);
+  --red: var(--palette-red-500);
+  --red-bg: var(--danger-bg);
+  --red-dark: var(--danger-strong);
+
+  /* Feedback */
+  --success-text: var(--success);
+  --error-bg: var(--danger-bg);
+  --error-text: var(--danger-strong);
+
+  /* Job listing status */
+  --ok-bg: var(--success-bg);
+  --ok-ink: var(--success);
+  --soon-bg: var(--warning-bg);
+  --soon-ink: var(--warning);
+
+  /* Workflow status */
+  --status-pending: var(--warning);
+  --status-pending-bg: var(--warning-bg);
+  --status-approved: var(--success);
+  --status-approved-bg: var(--success-bg);
+  --status-completed: var(--info);
+  --status-completed-bg: var(--info-bg);
+  --status-rejected: var(--danger);
+  --status-rejected-bg: var(--danger-bg);
+
+  /* Badges */
+  --badge-gray-bg: var(--neutral-bg);
+  --badge-gray-fg: var(--neutral);
+  --badge-blue-bg: var(--info-bg);
+  --badge-blue-fg: var(--info);
+  --badge-orange-bg: var(--warning-bg);
+  --badge-orange-fg: var(--warning);
+  --badge-green-bg: var(--success-bg);
+  --badge-green-fg: var(--success);
+  --badge-red-bg: var(--danger-bg);
+  --badge-red-fg: var(--danger);
+  --badge-gold-bg: var(--gold-bg);
+  --badge-gold-fg: var(--accent);
+  --badge-purple-bg: var(--purple-bg);
+  --badge-purple-fg: var(--purple);
+  --badge-teal-bg: var(--teal-bg);
+  --badge-teal-fg: var(--teal);
+
+  /* Scales & components */
+  --radius: var(--radius-md);
+  --radius-btn: var(--radius-md);
+  --shadow: var(--shadow-sm);
+  --font-size-stat-value: var(--text-stat);
+  --button-bg-hover: var(--btn-bg-hover);
+  --button-bg-active: var(--btn-bg-active);
+  --button-shadow-color: var(--btn-bevel);
 }
 
 /* ==========================================================
    DARK THEME
-   Every token that needs a dark value is overridden here.
-   Components/pages never branch on the theme themselves.
+   Only tokens whose VALUE changes are listed here.
+   Derived tokens (-bg tones, tints, track, focus ring,
+   readonly fields, legacy aliases) re-resolve automatically.
 ========================================================== */
 
 [data-theme="dark"] {
   color-scheme: dark;
 
+  /* Page & surfaces */
   --bg: #241511;
   --bg-wave-color: #4a2f1e;
   --bg-wave-opacity-1: 0.55;
   --bg-wave-opacity-2: 0.35;
 
-  --card-bg: #2f1c17;
-  --card-border: #e0362c;
-  --card-shadow: rgba(0, 0, 0, 0.45);
+  --surface: #2f1c17;
+  --surface-raised: #3a241d;
+  --surface-nav: #2f1c17;
+  --surface-inset: rgba(0, 0, 0, 0.18);
+  --paper: rgba(255, 250, 243, 0.75);
 
+  --tint-scale: 0.75;
+
+  /* Borders */
   --border: #4a3129;
+  --border-strong: #5a3a2d;
+  --border-card: var(--palette-red-500);
 
-  --maroon: #4a1212;
-  --maroon-dark: #2a0a0a;
-  --maroon-light: #ecd8bc;
-  --red-bright: #ff5c50;
+  /* Text */
+  --text: #f6e9e2;
+  --text-muted: #d8b9ae;
+  --accent: var(--palette-gold-500);
 
-  --gold: #f2c14e;
-  --gold-dark: #cf9a2c;
-  --gold-light: #3a2f1a;
-  --cream: #241715;
+  /* Brand */
+  --brand: #4a1212;
+  --brand-strong: #2a0a0a;
+  --gold-soft: #3a2f1a;
 
-  --pink: #4a2a2c;
-  --pink-border: #6b3338;
-  --pink-border-focus: var(--red);
+  /* Form fields */
+  --field-bg: #4a2a2c;
+  --field-border: #6b3338;
+  --focus-ring: color-mix(in srgb, var(--palette-gold-500) 22%, transparent);
 
-  --ink: #f6e9e2;
-  --ink-soft: #d8b9ae;
-  --white: rgba(255, 250, 243, .75);
+  /* Status tones (lighter hues for contrast on dark) */
+  --success: #4ade80;
+  --warning: #fb923c;
+  --danger: #f87171;
+  --danger-strong: #f87171;
+  --info: #60a5fa;
+  --neutral: #94a3b8;
+  --purple: #c4b5fd;
+  --teal: #5eead4;
+  --tone-bg-strength: 14%;
 
-  --gray: #94a3b8;
-  --gray-bg: rgba(148, 163, 184, 0.12);
-  --blue: #60a5fa;
-  --blue-bg: rgba(59, 130, 246, 0.12);
-  --orange: #fb923c;
-  --orange-bg: rgba(249, 115, 22, 0.12);
-  --green: #4ade80;
-  --green-bg: rgba(34, 197, 94, 0.12);
-  --green-dark: #246b45;
-  --red: #e0362c;
-  --red-bg: rgba(224, 54, 44, 0.16);
-  --red-dark: #f87171;
-
-  /* Job listing status colours */
-  --ok-bg: #1f3d27;
-  --ok-ink: #8fe3a4;
-  --soon-bg: #4a3a14;
-  --soon-ink: #f2cf72;
-
-  /* Shadows: cards flatten, overlays stay deep */
-  --shadow: none;
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.5);
+  /* Elevation: cards darken, small shadow flattens */
+  --shadow-sm: none;
   --shadow-card: 0 6px 22px rgba(0, 0, 0, 0.40);
   --shadow-hover: 0 14px 32px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.50);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --shadow-color-card: rgba(0, 0, 0, 0.45);
 
-  --badge-seal: var(--red);
+  /* Component tokens */
+  --avatar-fg: var(--brand-soft);
+  --seal: var(--palette-red-500);
 
-  /* Navbar */
-  --navbar-bg: #2f1c17;
-  --navbar-surface: #3a241d;
-  --navbar-border: #5a3a2d;
-  --navbar-text: var(--ink);
-  --navbar-text-soft: var(--ink-soft);
-
-  /* Table surfaces */
-  --table-head-bg: rgba(242, 193, 78, 0.08);
-  --row-hover-bg: rgba(242, 193, 78, 0.05);
-
-  /* Translucent overlays */
-  --tint-gold-10: rgba(242, 193, 78, 0.08);
-  --tint-gold-12: rgba(242, 193, 78, 0.10);
-  --tint-neutral: rgba(255, 250, 243, 0.06);
-
-  /* Muted / read-only fields */
-  --surface-muted: rgba(255, 250, 243, 0.04);
-  --field-readonly-bg: rgba(255, 250, 243, 0.06);
-  --field-readonly-border: rgba(255, 250, 243, 0.14);
-
-  /* Inset surface */
-  --surface-inset: rgba(0, 0, 0, 0.18);
-
-  /* Emphasised text */
-  --accent: var(--gold);
-
-  /* Feedback text */
-  --success-text: #4ade80;
-  --success: var(--green);
-
-  /* Alert backgrounds */
-  --success-bg: rgba(34, 197, 94, 0.12);
-  --error-bg: rgba(224, 54, 44, 0.16);
-  --error-text: #f87171;
-
-  /* Avatar text */
-  --avatar-fg: var(--maroon-light);
-
-  /* Generic surface alias */
-  --surface: var(--card-bg);
-
-  /* Divider / muted line */
-  --line: var(--border);
-
-  /* Badge / pill tokens */
-  --badge-gray-bg: rgba(148, 163, 184, 0.12);
-  --badge-gray-fg: #94a3b8;
-  --badge-blue-bg: rgba(59, 130, 246, 0.12);
-  --badge-blue-fg: #60a5fa;
-  --badge-orange-bg: rgba(249, 115, 22, 0.12);
-  --badge-orange-fg: #fb923c;
-  --badge-green-bg: rgba(34, 197, 94, 0.12);
-  --badge-green-fg: #4ade80;
-  --badge-red-bg: rgba(224, 54, 44, 0.16);
-  --badge-red-fg: #f87171;
-  --badge-gold-bg: rgba(242, 193, 78, 0.12);
-  --badge-gold-fg: var(--gold);
-  --badge-purple-bg: rgba(139, 92, 246, 0.16);
-  --badge-purple-fg: #c4b5fd;
-  --badge-teal-bg: rgba(20, 184, 166, 0.16);
-  --badge-teal-fg: #5eead4;
-
-  /* Status tones (workflow states) */
-  --status-pending: #f0b357;
-  --status-pending-bg: rgba(217, 119, 6, 0.20);
-  --status-approved: #6fd39b;
-  --status-approved-bg: rgba(26, 125, 76, 0.24);
-  --status-completed: #93b4ff;
-  --status-completed-bg: rgba(37, 99, 235, 0.22);
-  --status-rejected: #ff9086;
-  --status-rejected-bg: rgba(224, 54, 44, 0.22);
-
-  /* Secondary surface & progress track */
-  --surface-2: rgba(242, 193, 78, 0.06);
-  --track-bg: rgba(255, 250, 243, 0.10);
-
-  /* Focus ring */
-  --focus-ring: rgba(242, 193, 78, 0.22);
-
-  /* Theme icon visibility */
   --icon-sun-display: none;
   --icon-moon-display: block;
 }
