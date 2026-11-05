@@ -821,7 +821,10 @@ class Dashboard
         $requestsStmt = $this->db->query("
             SELECT
                 COUNT(*) AS total,
-                SUM(status = 'Pending') AS pending
+                SUM(status = 'Pending') AS pending,
+                SUM(status = 'Approved') AS approved,
+                SUM(status = 'Rejected') AS rejected,
+                SUM(status = 'Completed') AS completed
             FROM employee_requests
         ");
         $requestCounts = $requestsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -833,6 +836,12 @@ class Dashboard
             'applications_month' => (int) $applicationsStmt->fetchColumn(),
             'requests_total' => (int) ($requestCounts['total'] ?? 0),
             'pending_requests' => (int) ($requestCounts['pending'] ?? 0),
+            'request_status_counts' => [
+                'Pending' => (int) ($requestCounts['pending'] ?? 0),
+                'Approved' => (int) ($requestCounts['approved'] ?? 0),
+                'Rejected' => (int) ($requestCounts['rejected'] ?? 0),
+                'Completed' => (int) ($requestCounts['completed'] ?? 0),
+            ],
             'categories' => $categories,
         ];
     }

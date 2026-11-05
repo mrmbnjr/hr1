@@ -1218,6 +1218,75 @@
     background: linear-gradient(90deg, var(--brand), var(--gold));
 }
 
+.analytics-tile.request-tile {
+    min-height: 158px;
+}
+
+.request-tile .analytics-tile-label,
+.request-tile > strong {
+    position: relative;
+    z-index: 1;
+    width: 48%;
+}
+
+.analytics-request-breakdown {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.analytics-request-donut {
+    position: absolute;
+    top: 42px;
+    right: 12px;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+}
+
+.analytics-request-donut::after {
+    position: absolute;
+    inset: 25%;
+    border-radius: 50%;
+    background: var(--surface);
+    content: "";
+}
+
+.analytics-request-legend {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    left: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 10px;
+    row-gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.analytics-request-legend li {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 9px;
+    line-height: 1.2;
+}
+
+.analytics-request-legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+.analytics-request-legend strong {
+    color: var(--heading);
+    font-size: 9px;
+}
+
 .activity-item {
     display: flex;
     align-items: center;

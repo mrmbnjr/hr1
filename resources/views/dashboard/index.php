@@ -496,8 +496,34 @@ $statCards = [
                 'applications_month' => 0,
                 'requests_total' => 0,
                 'pending_requests' => 0,
+                'request_status_counts' => [
+                    'Pending' => 0,
+                    'Approved' => 0,
+                    'Rejected' => 0,
+                    'Completed' => 0,
+                ],
                 'categories' => [],
             ];
+            $requestStatusCounts = $activityAnalytics['request_status_counts'] ?? [];
+            $requestStatusColors = [
+                'Pending' => '#7f1d1d',
+                'Approved' => '#d8a12e',
+                'Rejected' => '#c9823b',
+                'Completed' => '#a66a2c',
+            ];
+            $requestDonutTotal = array_sum($requestStatusCounts);
+            $requestDonutStops = [];
+            $requestDonutOffset = 0;
+            foreach ($requestStatusColors as $status => $color) {
+                $segment = $requestDonutTotal > 0
+                    ? (($requestStatusCounts[$status] ?? 0) / $requestDonutTotal) * 100
+                    : 0;
+                $requestDonutStops[] = $color . ' ' . $requestDonutOffset . '% ' . ($requestDonutOffset + $segment) . '%';
+                $requestDonutOffset += $segment;
+            }
+            $requestDonutBackground = $requestDonutTotal > 0
+                ? 'conic-gradient(' . implode(', ', $requestDonutStops) . ')'
+                : 'conic-gradient(var(--surface-muted) 0% 100%)';
             ?>
             <aside class="activity-analytics" aria-label="Activity analytics for the last seven days">
                 <div class="analytics-panel-heading">
@@ -526,9 +552,7 @@ $statCards = [
                         </div>
                         <span class="analytics-tile-label">Users logged in</span>
                         <strong><?= number_format((int) $activityAnalytics['logged_in_users']) ?></strong>
-                        <div class="analytics-spark line" aria-hidden="true">
-                            <svg viewBox="0 0 120 30" preserveAspectRatio="none"><polyline points="0,23 18,17 35,21 53,10 71,17 88,8 104,13 120,4"></polyline></svg>
-                        </div>
+                        <div class="analytics-request-bar" aria-hidden="true"><span style="width: <?= min(100, (int) ($activityAnalytics['requests_total'] > 0 ? round(($activityAnalytics['pending_requests'] / $activityAnalytics['requests_total']) * 100) : 0)) ?>%"></span></div>
                     </div>
                     <div class="analytics-tile">
                         <div class="analytics-tile-top">
@@ -548,7 +572,18 @@ $statCards = [
                         </div>
                         <span class="analytics-tile-label">Requests</span>
                         <strong><?= number_format((int) $activityAnalytics['requests_total']) ?></strong>
-                        <div class="analytics-request-bar" aria-hidden="true"><span style="width: <?= min(100, (int) ($activityAnalytics['requests_total'] > 0 ? round(($activityAnalytics['pending_requests'] / $activityAnalytics['requests_total']) * 100) : 0)) ?>%"></span></div>
+                        <div class="analytics-request-breakdown">
+                            <div class="analytics-request-donut" role="img" aria-label="Request status distribution" style="background: <?= htmlspecialchars($requestDonutBackground, ENT_QUOTES, 'UTF-8') ?>"></div>
+                            <ul class="analytics-request-legend">
+                                <?php foreach ($requestStatusColors as $status => $color): ?>
+                                    <li>
+                                        <span class="analytics-request-legend-dot" style="background: <?= htmlspecialchars($color, ENT_QUOTES, 'UTF-8') ?>"></span>
+                                        <span><?= htmlspecialchars($status) ?></span>
+                                        <strong><?= number_format((int) ($requestStatusCounts[$status] ?? 0)) ?></strong>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </aside>
