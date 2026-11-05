@@ -125,7 +125,7 @@ $isEmployee =
             </a>
 
             <p class="sidebar-title">
-                Employee
+                Self-Service
             </p>
 
             <a
@@ -154,7 +154,7 @@ $isEmployee =
                 <i class="fa-solid fa-clipboard-check"></i>
 
                 <span>
-                    Assigned Requests
+                    Task Approvals
                 </span>
 
             </a>
@@ -170,7 +170,7 @@ $isEmployee =
                 <i class="fa-solid fa-circle-user"></i>
 
                 <span>
-                    My Profile
+                    Profile
                 </span>
 
             </a>
@@ -268,7 +268,7 @@ $isEmployee =
         ): ?>
 
             <p class="sidebar-title">
-                Core HR
+                Employee Management
             </p>
 
         <?php endif; ?>
@@ -289,7 +289,7 @@ $isEmployee =
                 <i class="fa-solid fa-id-card"></i>
 
                 <span>
-                    Company Structure
+                    Organization
                 </span>
 
             </a>
@@ -329,7 +329,7 @@ $isEmployee =
                 <i class="fa-solid fa-user"></i>
 
                 <span>
-                    Employee Services
+                    Request Management
                 </span>
 
             </a>
@@ -349,7 +349,7 @@ $isEmployee =
 
             <a href="?page=user-management" class="<?= $currentPage == 'user-management' ? 'active' : '' ?>">
                 <i class="fa-solid fa-users"></i>
-                <span>User Management</span>
+                <span>User Accounts</span>
             </a>
 
             <a href="?page=system-settings" class="<?= $currentPage == 'system-settings' ? 'active' : '' ?>">
@@ -359,7 +359,7 @@ $isEmployee =
 
             <a href="?page=reports" class="<?= $currentPage == 'reports' ? 'active' : '' ?>">
                 <i class="fa-solid fa-chart-column"></i>
-                <span>Reports</span>
+                <span>Reports &amp; Analytics</span>
             </a>
 
             <a href="?page=profile" class="<?= $currentPage == 'profile' ? 'active' : '' ?>">
@@ -380,7 +380,7 @@ $isEmployee =
         ): ?>
 
             <p class="sidebar-title">
-                My Account
+                Account
             </p>
 
             <a
@@ -393,7 +393,7 @@ $isEmployee =
                 <i class="fa-solid fa-circle-user"></i>
 
                 <span>
-                    My Profile
+                    Profile
                 </span>
 
             </a>
