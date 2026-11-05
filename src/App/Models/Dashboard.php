@@ -808,7 +808,8 @@ class Dashboard
             SELECT COUNT(DISTINCT user_id)
             FROM activity_logs
             WHERE page = 'login'
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+              AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+              AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
               AND user_id IS NOT NULL
         ");
 
@@ -816,7 +817,51 @@ class Dashboard
             SELECT COUNT(*)
             FROM applications
             WHERE applied_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+              AND applied_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
         ");
+
+        $applicationTrendStmt = $this->db->query("
+            SELECT DAY(applied_at) AS period, COUNT(*) AS total
+            FROM applications
+            WHERE applied_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
+              AND applied_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY DAY(applied_at)
+            ORDER BY period
+        ");
+        $applicationTrendRows = $applicationTrendStmt->fetchAll(PDO::FETCH_ASSOC);
+        $applicationTrendByDay = [];
+        foreach ($applicationTrendRows as $row) {
+            $applicationTrendByDay[(int) $row['period']] = (int) $row['total'];
+        }
+        $applicationTrend = [];
+        $daysElapsed = (int) (new DateTime('today'))->format('j');
+        for ($day = 1; $day <= $daysElapsed; $day++) {
+            $applicationTrend[] = $applicationTrendByDay[$day] ?? 0;
+        }
+
+        $activeUsersStmt = $this->db->query("SELECT COUNT(*) FROM users WHERE status = 'Active'");
+
+        $postingTrendStmt = $this->db->query("
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS period, COUNT(*) AS total
+            FROM job_postings
+            WHERE status = 'Open'
+              AND created_at >= DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m-01')
+              AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+            ORDER BY period
+        ");
+        $postingTrendRows = $postingTrendStmt->fetchAll(PDO::FETCH_ASSOC);
+        $postingTrendByMonth = [];
+        foreach ($postingTrendRows as $row) {
+            $postingTrendByMonth[$row['period']] = (int) $row['total'];
+        }
+        $postingTrend = [];
+        $postingTrendStart = new DateTime('first day of this month');
+        $postingTrendStart->modify('-5 months');
+        for ($month = 0; $month < 6; $month++) {
+            $postingTrend[] = $postingTrendByMonth[$postingTrendStart->format('Y-m')] ?? 0;
+            $postingTrendStart->modify('+1 month');
+        }
 
         $requestsStmt = $this->db->query("
             SELECT
@@ -833,7 +878,10 @@ class Dashboard
             'total' => $total,
             'today' => (int) $todayStmt->fetchColumn(),
             'logged_in_users' => (int) $loginStmt->fetchColumn(),
+            'active_users' => (int) $activeUsersStmt->fetchColumn(),
             'applications_month' => (int) $applicationsStmt->fetchColumn(),
+            'application_trend' => $applicationTrend,
+            'posting_trend' => $postingTrend,
             'requests_total' => (int) ($requestCounts['total'] ?? 0),
             'pending_requests' => (int) ($requestCounts['pending'] ?? 0),
             'request_status_counts' => [

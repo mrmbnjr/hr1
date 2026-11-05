@@ -524,6 +524,22 @@ $statCards = [
             $requestDonutBackground = $requestDonutTotal > 0
                 ? 'conic-gradient(' . implode(', ', $requestDonutStops) . ')'
                 : 'conic-gradient(var(--surface-muted) 0% 100%)';
+            $postingTrend = array_map('intval', $activityAnalytics['posting_trend'] ?? array_fill(0, 6, 0));
+            $applicationTrend = array_map('intval', $activityAnalytics['application_trend'] ?? [0]);
+            $sparklinePoints = static function (array $values): string {
+                $values = $values ?: [0];
+                $maximum = max($values);
+                $lastIndex = count($values) - 1;
+                $points = [];
+
+                foreach ($values as $index => $value) {
+                    $x = $lastIndex > 0 ? ($index / $lastIndex) * 120 : 60;
+                    $y = $maximum > 0 ? 26 - (((int) $value / $maximum) * 22) : 26;
+                    $points[] = round($x, 1) . ',' . round($y, 1);
+                }
+
+                return implode(' ', $points);
+            };
             ?>
             <aside class="activity-analytics" aria-label="Activity analytics for the last seven days">
                 <div class="analytics-panel-heading">
@@ -541,8 +557,11 @@ $statCards = [
                         </div>
                         <span class="analytics-tile-label">Job posts</span>
                         <strong><?= number_format((int) ($stats['postings'] ?? 0)) ?></strong>
+                        <?php $postingMaximum = $postingTrend ? max($postingTrend) : 0; ?>
                         <div class="analytics-spark bars" aria-hidden="true">
-                            <i style="height: 34%"></i><i style="height: 58%"></i><i style="height: 44%"></i><i style="height: 76%"></i><i style="height: 68%"></i><i style="height: 88%"></i>
+                            <?php foreach ($postingTrend as $count): ?>
+                                <i style="height: <?= $postingMaximum > 0 ? max(4, (int) round(($count / $postingMaximum) * 100)) : 2 ?>%"></i>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     <div class="analytics-tile">
@@ -552,7 +571,13 @@ $statCards = [
                         </div>
                         <span class="analytics-tile-label">Users logged in</span>
                         <strong><?= number_format((int) $activityAnalytics['logged_in_users']) ?></strong>
-                        <div class="analytics-request-bar" aria-hidden="true"><span style="width: <?= min(100, (int) ($activityAnalytics['requests_total'] > 0 ? round(($activityAnalytics['pending_requests'] / $activityAnalytics['requests_total']) * 100) : 0)) ?>%"></span></div>
+                        <?php
+                        $activeUsers = (int) ($activityAnalytics['active_users'] ?? 0);
+                        $loggedInShare = $activeUsers > 0
+                            ? min(100, (int) round(((int) $activityAnalytics['logged_in_users'] / $activeUsers) * 100))
+                            : 0;
+                        ?>
+                        <div class="analytics-request-bar" aria-hidden="true"><span style="width: <?= $loggedInShare ?>%"></span></div>
                     </div>
                     <div class="analytics-tile">
                         <div class="analytics-tile-top">
@@ -562,7 +587,7 @@ $statCards = [
                         <span class="analytics-tile-label">Applications</span>
                         <strong><?= number_format((int) $activityAnalytics['applications_month']) ?></strong>
                         <div class="analytics-spark line" aria-hidden="true">
-                            <svg viewBox="0 0 120 30" preserveAspectRatio="none"><polyline points="0,25 17,20 34,23 52,13 68,16 84,8 101,12 120,3"></polyline></svg>
+                            <svg viewBox="0 0 120 30" preserveAspectRatio="none"><polyline points="<?= htmlspecialchars($sparklinePoints($applicationTrend), ENT_QUOTES, 'UTF-8') ?>"></polyline></svg>
                         </div>
                     </div>
                     <div class="analytics-tile request-tile">
